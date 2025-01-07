@@ -1,11 +1,19 @@
-<h2>Detalle de la Orden</h2>
-<mat-list>
-  <mat-list-item *ngFor="let order of table.orders">
-    {{ order.name }} - {{ order.price | currency }}
-  </mat-list-item>
-</mat-list>
-<p><strong>Total:</strong> {{ total | currency }}</p>
-<div mat-dialog-actions>
-  <button mat-button color="warn" (click)="liberarMesa()">Liberar Mesa</button>
+<h2 mat-dialog-title>Detalle de la Orden</h2>
+<mat-dialog-content>
+  <mat-list>
+    <mat-list-item *ngFor="let order of table.orders">
+      <div class="order-info">
+        <span>{{ order.name }}</span>
+        <span>{{ order.price | currency }}</span>
+      </div>
+    </mat-list-item>
+  </mat-list>
+
+  <p class="total-amount">
+    <strong>Total:</strong> {{ total | currency }}
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cerrar</button>
-</div>
+  <button mat-button color="warn" (click)="liberarMesa()">Liberar Mesa</button>
+</mat-dialog-actions>

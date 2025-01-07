@@ -7,9 +7,5 @@ import { CoffeService, Table } from './models/coffe.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  tables: Table[];
-
-  constructor(private coffeService: CoffeService) {
-    this.tables = this.coffeService.getTables();
-  }
+  
 }

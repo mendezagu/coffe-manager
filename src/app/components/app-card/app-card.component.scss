@@ -1,0 +1,13 @@
+.available-card {
+  background-color: #74e2a3; /* Verde claro */
+  border: 1px solid #66bb6a; /* Verde medio */
+}
+
+.occupied-card {
+  background-color: #e93434; /* Rojo claro */
+  border: 1px solid #ef5350; /* Rojo medio */
+}
+
+mat-card {
+  transition: background-color 0.3s, border-color 0.3s; /* Transición suave */
+}

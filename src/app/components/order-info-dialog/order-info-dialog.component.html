@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Órdenes Asignadas</h2>
+<mat-dialog-content>
+  <!-- Lista de órdenes agrupadas -->
+  <mat-selection-list #orders>
+    <mat-list-option *ngFor="let order of groupedOrders" [value]="order">
+      <div class="order-info">
+        <span>{{ order.name }} X ({{ order.quantity }})</span>
+      </div>
+    </mat-list-option>
+  </mat-selection-list>
+
+  <p>
+    Total de ítems seleccionados: {{ orders.selectedOptions.selected.length }}
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button  color="warn"  mat-raised-button (click)="removeSelectedOrders(orders.selectedOptions.selected)">Eliminar Seleccionados</button>
+  <button  mat-raised-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

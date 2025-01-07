@@ -22,6 +22,6 @@ export class TotalDialogComponent {
   }
 
   liberarMesa() {
-    this.dialogRef.close('liberar');
+    this.dialogRef.close('liberar'); // Notifica al componente padre
   }
 }

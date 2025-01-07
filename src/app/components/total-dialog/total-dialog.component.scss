@@ -1,8 +1,29 @@
-mat-list {
-    margin-bottom: 16px;
-  }
-  
-  mat-dialog-actions {
-    display: flex;
-    justify-content: space-between;
-  }
+mat-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.order-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.total-amount {
+  margin-top: 16px;
+  text-align: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+mat-dialog-content {
+  max-height: 400px;
+  overflow: auto;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+}

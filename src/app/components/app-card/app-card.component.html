@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <mat-card 
+      class="example-card"
+      [ngClass]="{ 'available-card': available, 'occupied-card': !available }"
+      >
+        <mat-card-header>
+          <mat-card-title>{{ name }}</mat-card-title>
+          <mat-card-subtitle>{{
+            available ? "Disponible" : "Ocupado"}}
+             <span *ngIf="linkedTables.length > 0">
+              - Vinculada con: {{ linkedTablesNames }}
+            </span>
+          </mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image src="../../../assets/nuovo-cafe.jpg" alt="table" />
+        <mat-card-content>
+          <div [class.disabled]="controlledBy">
+            <!-- Botón para agregar ordenes -->
+            <button
+              style="width: 100%; margin-top: 0.5rem;"
+              mat-raised-button
+              color="primary"
+              (click)="onAddOrder()"
+              [disabled]="controlledBy"
+            >
+              Ordenar
+              <mat-icon fontIcon="restaurant"></mat-icon>
+            </button>
+        
+            <!-- Botón para ver órdenes -->
+            <button
+              style="width: 100%; margin-top: 0.5rem;"
+              mat-raised-button
+              color="warn"
+              *ngIf="orders.length > 0"
+              (click)="onViewOrders()"
+              [disabled]="controlledBy"
+            >
+              Ver Órdenes
+              <mat-icon fontIcon="table_restaurant"></mat-icon>
+            </button>
+        
+            <!-- Botón para total -->
+            <button
+              style="width: 100%; margin-top: 0.5rem;"
+              mat-raised-button
+              color="accent"
+              *ngIf="orders.length > 0"
+              (click)="onGetTotal()"
+              [disabled]="controlledBy"
+            >
+              Total
+              <mat-icon fontIcon="currency_exchange"></mat-icon>
+            </button>
+        
+            <!-- Botón para vincular mesas -->
+            <button
+              style="width: 100%; margin-top: 0.5rem;"
+              mat-raised-button
+              color="primary"
+              (click)="onLinkTable()"
+              [disabled]="controlledBy"
+            >
+              Vincular Mesas
+              <mat-icon fontIcon="link"></mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
