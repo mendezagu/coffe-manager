@@ -6,18 +6,36 @@
       [ngClass]="{ 'available-card': available, 'occupied-card': !available }"
       >
         <mat-card-header>
-          <mat-card-title>{{ name }}</mat-card-title>
-          <mat-card-subtitle>{{
-            available ? "Disponible" : "Ocupado"}}
-             <span *ngIf="linkedTables.length > 0">
+          <mat-card-title>
+            <h3 style="font-size: larger; color: white; font-weight: 500;">
+              {{ name }}
+            </h3>
+          
+          </mat-card-title>
+          <mat-card-subtitle>
+            <small style="font-size: larger; color: white; font-weight: 500;">
+              {{available ? "Disponible" : "Ocupado"}}
+            </small>
+         
+
+             <span style="font-size: larger; color: white; font-weight: 500;" *ngIf="linkedTables.length > 0">
               - Vinculada con: {{ linkedTablesNames }}
             </span>
+            
           </mat-card-subtitle>
         </mat-card-header>
-        <img mat-card-image src="../../../assets/nuovo-cafe.jpg" alt="table" />
-        <mat-card-content>
-          <div [class.disabled]="controlledBy">
-            <!-- Botón para agregar ordenes -->
+  
+        <mat-card-content style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <img
+            style="width: 150px; height: 150px;"
+            mat-card-image
+            src="../../../assets/nuovo-cafe.jpg"
+            alt="table"
+          />
+          <div [class.disabled]="controlledBy" style="width: 100%; text-align: center;">
+            <p *ngIf="waiterId" style="color: white;">
+              Mesa gestionada por mozo: {{ waiterId }}
+            </p>
             <button
               style="width: 100%; margin-top: 0.5rem;"
               mat-raised-button
@@ -33,26 +51,13 @@
             <button
               style="width: 100%; margin-top: 0.5rem;"
               mat-raised-button
-              color="warn"
+              color="primary"
               *ngIf="orders.length > 0"
               (click)="onViewOrders()"
               [disabled]="controlledBy"
             >
               Ver Órdenes
               <mat-icon fontIcon="table_restaurant"></mat-icon>
-            </button>
-        
-            <!-- Botón para total -->
-            <button
-              style="width: 100%; margin-top: 0.5rem;"
-              mat-raised-button
-              color="accent"
-              *ngIf="orders.length > 0"
-              (click)="onGetTotal()"
-              [disabled]="controlledBy"
-            >
-              Total
-              <mat-icon fontIcon="currency_exchange"></mat-icon>
             </button>
         
             <!-- Botón para vincular mesas -->
@@ -65,6 +70,19 @@
             >
               Vincular Mesas
               <mat-icon fontIcon="link"></mat-icon>
+            </button>
+        
+            <!-- Botón para total -->
+            <button
+              style="width: 100%; margin-top: 0.5rem;"
+              mat-raised-button
+              color="warn"
+              *ngIf="orders.length > 0"
+              (click)="onGetTotal()"
+              [disabled]="controlledBy"
+            >
+              Total
+              <mat-icon fontIcon="currency_exchange"></mat-icon>
             </button>
           </div>
         </mat-card-content>

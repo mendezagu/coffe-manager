@@ -17,11 +17,14 @@ export class CardComponent implements OnInit, OnChanges{
   @Input() available: boolean = false;
   @Input() orders: MenuItem[] = [];
   @Input() refreshLinkedTables: boolean = false;
-  @Input() controlledBy?: number;
+  //@Input() controlledBy?: number;
   @Output() addOrder = new EventEmitter<{ tableId: number; menuItem: MenuItem }>();
   @Output() removeOrder = new EventEmitter<{ tableId: number; orderId: number }>();
+
+  waiterId?: string; // ID del mozo asignado
   linkedTables: Table[] = [];
   linkedTablesNames: string = '';
+  controlledBy?: number; 
 
   constructor(
     public dialog: MatDialog,
@@ -37,14 +40,21 @@ export class CardComponent implements OnInit, OnChanges{
     this.loadLinkedTables(); // Recargar al detectar cambios
   }
 
-  loadLinkedTables(): void {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-    if (table) {
-      this.linkedTables = this.coffeService.getTables().filter(t => table.linkedTables.includes(t.id));
-      this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
-      this.controlledBy = table.controlledBy; // Actualizar el controlador
-    }
+ // Cargar mesas vinculadas y controlador
+ loadLinkedTables(): void {
+  const table = this.coffeService.getTables().find(t => t.id === this.id);
+  if (table) {
+    // Obtener las mesas vinculadas
+    this.linkedTables = this.coffeService.getLinkedTables(this.id);
+    
+    // Obtener los nombres de las mesas vinculadas
+    this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
+    
+    // Obtener otros detalles de la mesa
+    this.waiterId = table.waiterId; // Mozo asignado
+    this.controlledBy = table.controlledBy; // Controlador de la mesa
   }
+}
 
   linkTable(): void {
     const dialogRef = this.dialog.open(LinkTableDialogComponent, {
@@ -60,21 +70,37 @@ export class CardComponent implements OnInit, OnChanges{
     });
   }
 
-  releaseTable() {
-    this.coffeService.releaseTable(this.id);
+  releaseTable(): void {
+    this.coffeService.releaseTable(this.id); // Liberar y desvincular
+    this.loadLinkedTables();
   }
 
-  onAddOrder() {
-    const dialogRef = this.dialog.open(MenuDialogComponent, {
-      width: '400px',
-      data: { menu: this.coffeService.getMenu() },
-    });
-  
-    dialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
-      if (selectedMenuItems && selectedMenuItems.length > 0) {
-        selectedMenuItems.forEach(menuItem => this.addOrder.emit({ tableId: this.id, menuItem }));
-      }
-    });
+  onAddOrder(): void {
+    if (this.controlledBy) {
+      alert(`Esta mesa está siendo administrada por la mesa ${this.controlledBy}`);
+      return;
+    }
+
+    const waiterId = prompt('Ingrese su ID de mozo:'); // Solicitar ID del mozo
+    if (waiterId && this.coffeService.waiters.includes(waiterId)) {
+      this.coffeService.assignWaiterToTable(this.id, waiterId); // Asignar mozo
+      const dialogRef = this.dialog.open(MenuDialogComponent, {
+        width: '400px',
+        data: { menu: this.coffeService.getMenu() },
+      });
+
+      dialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
+        if (selectedMenuItems && selectedMenuItems.length > 0) {
+          selectedMenuItems.forEach(menuItem =>
+            this.addOrder.emit({ tableId: this.id, menuItem })
+          );
+        }
+      });
+
+      this.loadLinkedTables();
+    } else {
+      alert('ID de mozo inválido. Inténtelo nuevamente.');
+    }
   }
 
   onViewOrders() {

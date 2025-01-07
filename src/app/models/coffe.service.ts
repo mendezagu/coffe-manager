@@ -15,12 +15,15 @@ export interface Table {
   orders: MenuItem[];
   linkedTables: number[];
   controlledBy?: number;
+  waiterId?: string; 
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoffeService {
+  waiters = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'];
+
   tables: Table[] = [
     { id: 1, name: 'Mesa 1', available: true, orders: [], linkedTables: []  },
     { id: 2, name: 'Mesa 2', available: true, orders: [], linkedTables: []  },
@@ -75,6 +78,36 @@ export class CoffeService {
     return this.menu;
   }
 
+   // Asignar mozo a una mesa y las vinculadas
+   assignWaiterToTable(tableId: number, waiterId: string): void {
+    const table = this.tables.find(t => t.id === tableId);
+    if (table) {
+      table.waiterId = waiterId;
+
+      // Asignar mozo a las mesas vinculadas
+      this.getLinkedTables(tableId).forEach(linkedTable => {
+        linkedTable.waiterId = waiterId;
+      });
+
+      this.notifyTablesChange();
+    }
+  }
+
+ // Liberar y desasignar mozos
+ unassignWaiterFromTable(tableId: number): void {
+  const table = this.tables.find(t => t.id === tableId);
+  if (table) {
+    table.waiterId = undefined;
+
+    // Liberar las vinculadas
+    this.getLinkedTables(tableId).forEach(linkedTable => {
+      linkedTable.waiterId = undefined;
+    });
+
+    this.notifyTablesChange();
+  }
+}
+
 
   assignOrderToTable(tableId: number, order: MenuItem) {
     const table = this.tables.find((t) => t.id === tableId);
@@ -87,22 +120,22 @@ export class CoffeService {
   releaseTable(tableId: number): void {
     const table = this.tables.find(t => t.id === tableId);
     if (table) {
-      // Liberar la mesa principal
+      // Liberar pedidos y disponibilidad
       table.orders = [];
       table.available = true;
   
-      // Obtener todas las mesas vinculadas
-      const linkedTables = this.getLinkedTables(tableId);
+      // Desasignar mozo de la mesa principal y vinculadas
+      this.unassignWaiterFromTable(tableId);
   
-      // Desvincular y liberar las mesas vinculadas
+      // Liberar y desvincular mesas vinculadas
+      const linkedTables = this.getLinkedTables(tableId);
       linkedTables.forEach(linkedTable => {
         linkedTable.orders = [];
         linkedTable.available = true;
-        linkedTable.controlledBy = undefined; // Eliminar la referencia de control
-        linkedTable.linkedTables = linkedTable.linkedTables.filter(id => id !== tableId); // Desvincular
+        linkedTable.controlledBy = undefined;
+        linkedTable.linkedTables = linkedTable.linkedTables.filter(id => id !== tableId);
       });
   
-      // Limpiar las vinculaciones en la mesa principal
       table.linkedTables = [];
       table.controlledBy = undefined;
   
@@ -112,16 +145,13 @@ export class CoffeService {
 
 
 
-
   //ASIGNAR MENUSSS-------------------------------------------------
-   // Obtener las mesas vinculadas
+   // Obtener mesas vinculadas
    getLinkedTables(tableId: number): Table[] {
     const table = this.tables.find(t => t.id === tableId);
-    if (table) {
-      return this.tables.filter(t => table.linkedTables.includes(t.id));
-    }
-    return [];
+    return table ? this.tables.filter(t => table.linkedTables.includes(t.id)) : [];
   }
+
 
   // Vincular dos mesas
   linkTables(tableId1: number, tableId2: number): void {
