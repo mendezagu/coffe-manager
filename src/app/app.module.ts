@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {MatExpansionModule} from '@angular/material/expansion';
 import { AppComponent } from './app.component';
 import { MenuDialogComponent } from './components/menu-dialog/menu-dialog.component';
 import { CardComponent } from './components/app-card/app-cardcomponent';
@@ -41,6 +42,7 @@ import { LinkTableDialogComponent } from './components/link-table-dialog/link-ta
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatExpansionModule,
     MatSnackBarModule,
     MatInputModule,
     MatListModule,

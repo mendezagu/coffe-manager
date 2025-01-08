@@ -12,6 +12,32 @@
   <p class="total-amount">
     <strong>Total:</strong> {{ total | currency }}
   </p>
+
+  <!-- Panel de descuento -->
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Aplicar Descuento
+        </mat-panel-title>
+     
+      </mat-expansion-panel-header>
+      <div>
+        <button mat-button color="primary" (click)="applyDiscount(0)">0%</button>
+        <button mat-button color="primary" (click)="applyDiscount(5)">5%</button>
+        <button mat-button color="primary" (click)="applyDiscount(10)">10%</button>
+        <button mat-button color="primary" (click)="applyDiscount(15)">15%</button>
+        <button mat-button color="primary" (click)="applyDiscount(20)">20%</button>
+        <button mat-button color="primary" (click)="applyDiscount(25)">25%</button>
+        <button mat-button color="primary" (click)="applyDiscount(30)">30%</button>
+        <button mat-button color="primary" (click)="applyDiscount(35)">35%</button>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <p class="total-amount">
+    <strong>Total con Descuento:</strong> {{ discountedTotal | currency }}
+  </p>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cerrar</button>

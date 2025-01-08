@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatListOption } from '@angular/material/list';
+import { ChangeDetectorRef } from '@angular/core'; // Importar ChangeDetectorRef
 import { CoffeService, MenuItem, Table } from 'src/app/models/coffe.service';
 
 interface GroupedOrder {
@@ -19,8 +20,9 @@ export class OrderInfoDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<OrderInfoDialogComponent>,
-     public coffeService: CoffeService,
-    @Inject(MAT_DIALOG_DATA) public table: Table
+    public coffeService: CoffeService,
+    @Inject(MAT_DIALOG_DATA) public table: Table,
+    private cdr: ChangeDetectorRef // Inyección del ChangeDetectorRef
   ) {
     this.groupOrders();
   }
@@ -40,17 +42,18 @@ export class OrderInfoDialogComponent {
 
   removeSelectedOrders(selectedOptions: MatListOption[]): void {
     const selectedOrders = selectedOptions.map(option => option.value as GroupedOrder);
-  
+
     selectedOrders.forEach(selectedOrder => {
-      // Eliminar una instancia del ítem en la mesa principal
       const orderIndex = this.table.orders.findIndex(order => order.name === selectedOrder.name);
       if (orderIndex > -1) {
         const orderId = this.table.orders[orderIndex].id;
         this.coffeService.removeOrderFromTable(this.table.id, orderId); // Usar el servicio
+        this.table.orders.splice(orderIndex, 1); // Eliminar de la lista local
       }
     });
-  
-    this.groupOrders(); // Actualizar la lista agrupada después de eliminar
+
+    this.groupOrders(); // Actualizar la lista agrupada
+    this.cdr.detectChanges(); // Forzar la detección de cambios
   }
 
   closeDialog(): void {

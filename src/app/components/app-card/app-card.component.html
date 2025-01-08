@@ -26,12 +26,23 @@
         </mat-card-header>
   
         <mat-card-content style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <img
+          <div style="margin-top: 1rem; margin-bottom: 1rem;">
+            <img
+            *ngIf="available"
             style="width: 150px; height: 150px;"
             mat-card-image
-            src="../../../assets/nuovo-cafe.jpg"
+            src="../../../assets/table-free.png"
             alt="table"
           />
+          <img
+          *ngIf="!available"
+          style="width: 150px; height: 150px;"
+          mat-card-image
+          src="../../../assets/table-busy.png"
+          alt="table"
+        />
+          </div>
+         
           <div [class.disabled]="controlledBy" style="width: 100%; text-align: center;">
             <p *ngIf="waiterId" style="color: white;">
               Mesa gestionada por mozo: {{ waiterId }}
