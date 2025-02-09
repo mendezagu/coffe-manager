@@ -2,9 +2,6 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Table } from 'src/app/models/coffe.service';
 
-import jsPDF from 'jspdf';
-// Importa el plugin de tablas
-import 'jspdf-autotable';
 
 @Component({
   selector: 'app-total-dialog',
