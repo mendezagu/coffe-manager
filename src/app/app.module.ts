@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module'; 
 
@@ -13,6 +13,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatSidenavModule} from '@angular/material/sidenav';
 import { AppComponent } from './app.component';
 import { MenuDialogComponent } from './components/menu-dialog/menu-dialog.component';
 import { CardComponent } from './components/app-card/app-cardcomponent';
@@ -20,6 +22,10 @@ import { TotalDialogComponent } from './components/total-dialog/total-dialog.com
 import { HomeComponent } from './pages/home/home.component';
 import { OrderInfoDialogComponent } from './components/order-info-dialog/order-info-dialog.component';
 import { LinkTableDialogComponent } from './components/link-table-dialog/link-table-dialog.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { HttpClientModule } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
+import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +35,8 @@ import { LinkTableDialogComponent } from './components/link-table-dialog/link-ta
     TotalDialogComponent,
     HomeComponent,
     OrderInfoDialogComponent,
-    LinkTableDialogComponent
+    LinkTableDialogComponent,
+    WaiterDialogComponent
 
   ],
   imports: [
@@ -45,10 +52,19 @@ import { LinkTableDialogComponent } from './components/link-table-dialog/link-ta
     MatExpansionModule,
     MatSnackBarModule,
     MatInputModule,
+    MatSidenavModule,
     MatListModule,
-    MatIconModule
+    MatIconModule,
+    MatToolbarModule,
+    HttpClientModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
-  providers: [],
+  providers: [DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

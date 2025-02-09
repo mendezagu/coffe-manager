@@ -5,6 +5,7 @@ import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
 import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
 import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog.component';
 import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog.component';
+import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
 
 @Component({
   selector: 'app-card',
@@ -80,27 +81,33 @@ export class CardComponent implements OnInit, OnChanges{
       alert(`Esta mesa está siendo administrada por la mesa ${this.controlledBy}`);
       return;
     }
-
-    const waiterId = prompt('Ingrese su ID de mozo:'); // Solicitar ID del mozo
-    if (waiterId && this.coffeService.waiters.includes(waiterId)) {
-      this.coffeService.assignWaiterToTable(this.id, waiterId); // Asignar mozo
-      const dialogRef = this.dialog.open(MenuDialogComponent, {
-        width: '400px',
-        data: { menu: this.coffeService.getMenu() },
-      });
-
-      dialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
-        if (selectedMenuItems && selectedMenuItems.length > 0) {
-          selectedMenuItems.forEach(menuItem =>
-            this.addOrder.emit({ tableId: this.id, menuItem })
-          );
-        }
-      });
-
-      this.loadLinkedTables();
-    } else {
-      alert('ID de mozo inválido. Inténtelo nuevamente.');
-    }
+  
+    const dialogRef = this.dialog.open(WaiterDialogComponent, {
+      width: '300px'
+    });
+  
+    dialogRef.afterClosed().subscribe((waiterId: string | null) => {
+      if (waiterId && this.coffeService.waiters.includes(waiterId)) {
+        this.coffeService.assignWaiterToTable(this.id, waiterId);
+  
+        const menuDialogRef = this.dialog.open(MenuDialogComponent, {
+          width: '400px',
+          data: { menu: this.coffeService.getMenu() },
+        });
+  
+        menuDialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
+          if (selectedMenuItems && selectedMenuItems.length > 0) {
+            selectedMenuItems.forEach(menuItem =>
+              this.addOrder.emit({ tableId: this.id, menuItem })
+            );
+          }
+        });
+  
+        this.loadLinkedTables();
+      } else {
+        alert('ID de mozo inválido. Inténtelo nuevamente.');
+      }
+    });
   }
 
   onViewOrders() {

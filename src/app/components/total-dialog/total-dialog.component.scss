@@ -27,3 +27,15 @@ mat-dialog-content {
 mat-dialog-actions {
   margin-top: 16px;
 }
+
+.header-row, .data-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  font-weight: normal;
+  padding: 8px 0;
+}
+
+.header-row {
+  font-weight: bold;
+  border-bottom: 2px solid #ccc;
+}

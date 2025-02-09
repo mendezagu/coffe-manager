@@ -1,13 +1,22 @@
 <h2 mat-dialog-title>Detalle de la Orden</h2>
 <mat-dialog-content>
-  <mat-list>
-    <mat-list-item *ngFor="let order of table.orders">
-      <div class="order-info">
-        <span>{{ order.name }}</span>
-        <span>{{ order.price | currency }}</span>
-      </div>
-    </mat-list-item>
-  </mat-list>
+ <!-- Encabezado -->
+ <div class="header-row">
+  <span>Producto</span>
+  <span>Unit</span>
+  <span>Subtotal</span>
+</div>
+
+<!-- Lista de items -->
+<mat-list>
+  <mat-list-item *ngFor="let order of table.orders">
+    <div class="data-row">
+      <span>{{ order.name }} (x{{ order.quantity || 1 }})</span>
+      <span>{{ order.price | currency }}</span>
+      <span>{{ (order.price * (order.quantity || 1)) | currency }}</span>
+    </div>
+  </mat-list-item>
+</mat-list>
 
   <p class="total-amount">
     <strong>Total:</strong> {{ total | currency }}
@@ -41,5 +50,6 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cerrar</button>
+  <button mat-button (click)="printTicket()">Imprimir</button>
   <button mat-button color="warn" (click)="liberarMesa()">Liberar Mesa</button>
 </mat-dialog-actions>

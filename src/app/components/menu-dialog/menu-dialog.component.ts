@@ -52,9 +52,53 @@ filterMenu(): void {
   }
 
   printComanda(selectedOptions: { value: MenuItem }[]): void {
-    //this.addSelectedItems(selectedOptions); // Asegúrate de agregar los ítems seleccionados
-    console.log('Imprimiendo comanda:', this.selectedItems);
-    this.dialogRef.close(this.selectedItems); // Cierra el diálogo y envía los datos seleccionados
+    const selectedItems = selectedOptions.map(option => option.value);
+  
+    if (selectedItems.length === 0) {
+      this.snackBar.open('No hay ítems seleccionados', 'Cerrar', { duration: 2000 });
+      return;
+    }
+  
+    let printContent = `
+      <html>
+        <head>
+          <title>Comanda</title>
+          <style>
+            body { font-family: "Courier New", monospace; text-align: center; width: 58mm; margin: 0; }
+            .ticket { padding: 10px; }
+            .title { font-size: 16px; font-weight: bold; }
+            .item { display: flex; justify-content: space-between; font-size: 12px; border-bottom: 1px dashed black; padding: 5px 0; }
+            .footer { margin-top: 10px; font-size: 10px; border-top: 1px solid black; padding-top: 5px; }
+            @media print { body { margin: 0; padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="ticket">
+          <br>
+            <div class="title">COMANDA</div>
+            <hr />
+    `;
+  
+    selectedItems.forEach(item => {
+      printContent += `<div class="item"><span>${item.name}--------</span><span>x${item.quantity || 1}</span></div>`;
+    });
+  
+    printContent += `
+            <hr />
+            <div class="footer">Gracias por su pedido</div>
+          </div>
+        </body>
+      </html>
+    `;
+  
+    const printWindow = window.open('', '', 'width=800,height=900');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  
+    this.dialogRef.close(selectedItems); // Cierra el diálogo y envía los datos seleccionados
   }
 
 }
