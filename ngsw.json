@@ -1,0 +1,73 @@
+{
+  "configVersion": 1,
+  "timestamp": 1739150433197,
+  "index": "/coffe-manager/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/coffe-manager/favicon.ico",
+        "/coffe-manager/index.html",
+        "/coffe-manager/main.fb531849fd7499ba.js",
+        "/coffe-manager/manifest.webmanifest",
+        "/coffe-manager/polyfills.c1d09ce1b7230b82.js",
+        "/coffe-manager/runtime.65e112acbd4b1ae2.js",
+        "/coffe-manager/scripts.1ac6d0d02f230370.js",
+        "/coffe-manager/styles.5c4b11f073d924e3.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/coffe-manager/assets/nuovo-cafe.jpg",
+        "/coffe-manager/assets/table-busy.png",
+        "/coffe-manager/assets/table-free.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/coffe-manager/assets/nuovo-cafe.jpg": "05e8ee9f206a83dbf8c7ef976263bd008da7c51d",
+    "/coffe-manager/assets/table-busy.png": "2e0323299f6ec02fd9d0e61e3b53740f6f5e7296",
+    "/coffe-manager/assets/table-free.png": "05600d1660c10da0c3c4aa36f5077672492ce9b3",
+    "/coffe-manager/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
+    "/coffe-manager/index.html": "45650301989f116e7f94d76ed7b60cd0a4da266c",
+    "/coffe-manager/main.fb531849fd7499ba.js": "2f5dce7176b96c02b1884c9bf7946ec616031a60",
+    "/coffe-manager/manifest.webmanifest": "4d4066dac405ffe8668e43ffd465c84c39671911",
+    "/coffe-manager/polyfills.c1d09ce1b7230b82.js": "35be750de46882f1377f4814e5a48873648e10bb",
+    "/coffe-manager/runtime.65e112acbd4b1ae2.js": "c2192b1f1e648fd5fd0bcb6d9f756f5c950cdbe3",
+    "/coffe-manager/scripts.1ac6d0d02f230370.js": "3e03c7963828ff9539f82dcd788ff3ac916212d2",
+    "/coffe-manager/styles.5c4b11f073d924e3.css": "24237769f1c3ddde6821a47afd6a21db6c772421"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
