@@ -26,6 +26,13 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.component';
+import { LoginComponent } from './pages/login/login.component';
+
+import { environment } from 'src/environmets/environment';
+import {getAuth, provideAuth} from '@angular/fire/auth'
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { RegisterComponent } from './pages/register/register.component';
+
 
 @NgModule({
   declarations: [
@@ -36,7 +43,9 @@ import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.
     HomeComponent,
     OrderInfoDialogComponent,
     LinkTableDialogComponent,
-    WaiterDialogComponent
+    WaiterDialogComponent,
+    LoginComponent,
+    RegisterComponent
 
   ],
   imports: [
@@ -57,6 +66,9 @@ import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.
     MatIconModule,
     MatToolbarModule,
     HttpClientModule,
+
+    provideFirebaseApp(()=> initializeApp(environment.firebase)),
+    provideAuth(()=> getAuth()),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable

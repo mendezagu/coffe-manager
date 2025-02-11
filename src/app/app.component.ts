@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CoffeService, Table } from './models/coffe.service';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
+import { UserService } from './services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -11,14 +13,26 @@ import { DatePipe } from '@angular/common';
 export class AppComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   showFiller = false;
+  isLoggedIn: boolean = false;
 
   // Variables para fecha y turno
   currentDate: string;
   shift: string;
 
-  constructor(private datePipe: DatePipe) {
+  constructor(
+    private datePipe: DatePipe,
+    private userService: UserService,
+    private router: Router
+  ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.getShift();
+  }
+
+  ngOnInit() {
+    // Suscribirse a cambios en la autenticación
+    this.userService.getAuthState().subscribe(user => {
+      this.isLoggedIn = !!user; // Si hay usuario, true; si no, false
+    });
   }
 
   toggleSidenav() {
@@ -42,5 +56,13 @@ export class AppComponent {
     } else {
       return 'Turno Noche';
     }
+  }
+
+  logout(){
+    this.userService.logout()
+    .then(()=>{
+      this.router.navigate(['/login'])
+    })
+    .catch(error=> console.log(error))
   }
 }
