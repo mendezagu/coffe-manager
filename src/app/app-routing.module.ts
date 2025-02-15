@@ -3,14 +3,19 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
-import { canActivate,  redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
+import { canActivate, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/auth-guard';
+import { AdminGuard } from './guards/adminGuard';
 
+const redirectUnauthorized = () => redirectUnauthorizedTo(['/login']);
+const redirectLoggedIn = () => redirectLoggedInTo(['/home']);
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: '/home' },
-  { path: 'home', component: HomeComponent, ...canActivate(()=> redirectUnauthorizedTo(['/login']))},
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'home', component: HomeComponent, ...canActivate(redirectUnauthorized) },
+  { path: 'login', component: LoginComponent, ...canActivate(redirectLoggedIn) },
+  { path: 'register', component: RegisterComponent, ...canActivate(redirectLoggedIn) },
+  { path: 'admin', component: AdminPanelComponent }, // Ruta protegida para admins
 ];
 
 @NgModule({

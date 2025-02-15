@@ -1,11 +1,17 @@
 <mat-drawer-container class="example-container" autosize>
   
   <!-- Sidebar (solo visible si está autenticado) -->
-  <mat-drawer #sidenav class="example-sidenav" mode="side" *ngIf="isLoggedIn">
+  <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
     <p>Bienvenido</p>
-    <button mat-button routerLink="/inicio">Inicio</button>
-    <button mat-button routerLink="/pedidos">Pedidos</button>
-    <button mat-button routerLink="/configuracion">Configuración</button>
+    <button mat-button routerLink="/home">Inicio</button>
+    <button mat-button routerLink="/home">Planta baja</button>
+    <button mat-button routerLink="/home">Planta alta</button>
+    
+    <!-- ✅ Botón Administrar solo para Admin -->
+    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'">
+      Administrar
+    </button>
+  
     <button mat-flat-button color="warn" *ngIf="isLoggedIn" (click)="logout()">Cerrar sesión</button>
   </mat-drawer>
 

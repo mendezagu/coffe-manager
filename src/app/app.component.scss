@@ -28,3 +28,10 @@
   .example-spacer {
     flex: 1;
   }
+
+  .example-sidenav button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 10px; /* Espacio entre botones */
+  }

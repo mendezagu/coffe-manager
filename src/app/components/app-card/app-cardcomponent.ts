@@ -86,8 +86,8 @@ export class CardComponent implements OnInit, OnChanges{
       width: '300px'
     });
   
-    dialogRef.afterClosed().subscribe((waiterId: string | null) => {
-      if (waiterId && this.coffeService.waiters.includes(waiterId)) {
+    dialogRef.afterClosed().subscribe((waiterId: any | null) => {
+      if (waiterId && this.coffeService.waiters.some(w => w.id === Number(waiterId))) {
         this.coffeService.assignWaiterToTable(this.id, waiterId);
   
         const menuDialogRef = this.dialog.open(MenuDialogComponent, {
@@ -158,6 +158,12 @@ export class CardComponent implements OnInit, OnChanges{
         this.loadLinkedTables(); // Actualizar las vinculaciones locales
       }
     });
+  }
+
+  getWaiterName(): string {
+    if (!this.waiterId) return 'Sin asignar'; // Si no hay mozo asignado
+    const waiter = this.coffeService.getWaiters().find(w => w.id === Number(this.waiterId));
+    return waiter ? waiter.name : 'Mozo no encontrado';
   }
 
 }

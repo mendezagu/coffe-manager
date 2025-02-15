@@ -16,12 +16,12 @@ export class HomeComponent implements OnInit{
 
 
   ngOnInit(): void {
-    this.getTables();
+    this.coffeService.tables$.subscribe((tables) => {
+      this.tables = tables;
+    });
   }
 
-  getTables(){
-    this.tables = this.coffeService.getTables();
-  }
+
 
   addOrder(tableId: number, menuItem: MenuItem): void {
     this.coffeService.addOrderToTable(tableId, menuItem);

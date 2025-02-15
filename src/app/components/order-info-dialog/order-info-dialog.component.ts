@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatListOption } from '@angular/material/list';
 import { ChangeDetectorRef } from '@angular/core'; // Importar ChangeDetectorRef
 import { CoffeService, MenuItem, Table } from 'src/app/models/coffe.service';
+import { Observable } from 'rxjs';
+import { UserService } from 'src/app/services/user.service';
 
 interface GroupedOrder {
   name: string;
@@ -18,14 +20,16 @@ interface GroupedOrder {
 export class OrderInfoDialogComponent {
   groupedOrders: GroupedOrder[] = [];
   allOrdersRemoved: boolean = false; // Nuevo indicador
+  role$: Observable<string | null>;
 
   constructor(
     public dialogRef: MatDialogRef<OrderInfoDialogComponent>,
     public coffeService: CoffeService,
     @Inject(MAT_DIALOG_DATA) public table: Table,
-    private cdr: ChangeDetectorRef // Inyección del ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private userService: UserService
   ) {
-  
+    this.role$ = this.userService.getRoleState();
     this.groupOrders();
   }
 

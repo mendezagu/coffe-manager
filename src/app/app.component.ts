@@ -4,6 +4,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
 import { UserService } from './services/user.service';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ export class AppComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   showFiller = false;
   isLoggedIn: boolean = false;
+  role$: Observable<string | null>;
 
   // Variables para fecha y turno
   currentDate: string;
@@ -26,6 +28,7 @@ export class AppComponent {
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.getShift();
+    this.role$ = this.userService.getRoleState();
   }
 
   ngOnInit() {

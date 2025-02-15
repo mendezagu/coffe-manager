@@ -32,6 +32,8 @@ import { environment } from 'src/environmets/environment';
 import {getAuth, provideAuth} from '@angular/fire/auth'
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { RegisterComponent } from './pages/register/register.component';
+import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
 
 @NgModule({
@@ -45,7 +47,8 @@ import { RegisterComponent } from './pages/register/register.component';
     LinkTableDialogComponent,
     WaiterDialogComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    AdminPanelComponent
 
   ],
   imports: [
@@ -69,6 +72,7 @@ import { RegisterComponent } from './pages/register/register.component';
 
     provideFirebaseApp(()=> initializeApp(environment.firebase)),
     provideAuth(()=> getAuth()),
+    provideFirestore(() => getFirestore()),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable

@@ -18,43 +18,30 @@ export interface Table {
   waiterId?: string;
 }
 
+export interface Waiter {
+  id: number;
+  name: string;
+}
+
+
+
 @Injectable({
   providedIn: 'root'
 })
 export class CoffeService {
-  waiters = ['1', '2', '3', '4', '5', '6'];
+ 
 
   private localStorageKey = 'tablesState';
-  
-  tables: Table[] = this.loadTablesFromStorage(); // Cargar estado desde localStorage
 
-  menu: MenuItem[] = [
-    { id: 1, name: 'Café Americano', price: 2, quantity: 1 },
-    { id: 2, name: 'Latte', price: 3, quantity: 1 },
-    { id: 3, name: 'Cappuccino', price: 3.5, quantity: 1 },
-    { id: 4, name: 'Espresso', price: 2.5, quantity: 1 },
-    { id: 5, name: 'Flat White', price: 3.2, quantity: 1 },
-    { id: 6, name: 'Mocha', price: 3.7, quantity: 1 },
-    { id: 7, name: 'Macchiato', price: 3, quantity: 1 },
-    { id: 8, name: 'Café con Leche', price: 2.8, quantity: 1 },
-    { id: 9, name: 'Affogato', price: 4, quantity: 1 },
-    { id: 10, name: 'Iced Coffee', price: 3.5, quantity: 1 }
-  ];
+  private localStorageWaitersKey = 'waitersState';
 
-  constructor() {}
+  private localStorageMenuKey = 'menuState';
 
-  private tablesSubject = new BehaviorSubject<Table[]>(this.tables);
-  tables$ = this.tablesSubject.asObservable();
+  private broadcastChannel = new BroadcastChannel('cafe_sync');
 
-  getTables() {
-    return this.tables;
-  }
-
-  getMenu() {
-    return this.menu;
-  }
-
-   // Asignar mozo a una mesa y las vinculadas
+  waiters: Waiter[] = this.loadWaitersFromStorage();
+  menu: MenuItem[] = this.loadMenuFromStorage();
+  tables: Table[] = this.loadTablesFromStorage();
 
 
   private loadTablesFromStorage(): Table[] {
@@ -91,8 +78,71 @@ export class CoffeService {
     ];
   }
 
+  private loadWaitersFromStorage(): Waiter[] {
+    const storedData = localStorage.getItem(this.localStorageWaitersKey);
+    return storedData ? JSON.parse(storedData) : [
+      { id: 1, name: 'Juan Pérez' },
+      { id: 2, name: 'María López' },
+      { id: 3, name: 'Carlos Ramírez' },
+      { id: 4, name: 'Ana González' },
+      { id: 5, name: 'Pedro Martínez' },
+      { id: 6, name: 'Sofía Torres' }
+    ];
+  }
+  
+
+
+  private loadMenuFromStorage(): MenuItem[] {
+    const storedData = localStorage.getItem(this.localStorageMenuKey);
+    return storedData ? JSON.parse(storedData) : [
+      { id: 1, name: 'Café Americano', price: 2, quantity: 1 },
+      { id: 2, name: 'Latte', price: 3, quantity: 1 },
+      { id: 3, name: 'Cappuccino', price: 3.5, quantity: 1 },
+      { id: 4, name: 'Espresso', price: 2.5, quantity: 1 },
+      { id: 5, name: 'Flat White', price: 3.2, quantity: 1 },
+      { id: 6, name: 'Mocha', price: 3.7, quantity: 1 },
+      { id: 7, name: 'Macchiato', price: 3, quantity: 1 },
+      { id: 8, name: 'Café con Leche', price: 2.8, quantity: 1 },
+      { id: 9, name: 'Affogato', price: 4, quantity: 1 },
+      { id: 10, name: 'Iced Coffee', price: 3.5, quantity: 1 }
+    ];
+  }
+
+  
+
+  constructor() {
+    // 🔄 Escuchar mensajes para sincronización
+    this.broadcastChannel.onmessage = (event) => {
+      if (event.data.type === 'update') {
+        this.tables = this.loadTablesFromStorage();
+        this.menu = this.loadMenuFromStorage();
+        this.waiters = this.loadWaitersFromStorage();
+        this.tablesSubject.next([...this.tables]);
+      }
+    };
+  }
+
+  private tablesSubject = new BehaviorSubject<Table[]>(this.tables);
+  tables$ = this.tablesSubject.asObservable();
+
+    // 🔄 Enviar actualización a otros dispositivos
+    private notifyUpdate(): void {
+      this.broadcastChannel.postMessage({ type: 'update' });
+    }
+  
+
+  getTables() {
+    return this.tables;
+  }
+
+  getMenu() {
+    return this.menu;
+  }
+
+
   private saveTablesToStorage(): void {
     localStorage.setItem(this.localStorageKey, JSON.stringify(this.tables));
+    this.notifyUpdate();
   }
 
   private notifyTablesChange(): void {
@@ -108,6 +158,7 @@ export class CoffeService {
         linkedTable.waiterId = waiterId;
       });
       this.notifyTablesChange();
+      this.notifyUpdate();
     }
   }
 
@@ -119,6 +170,7 @@ export class CoffeService {
         linkedTable.waiterId = undefined;
       });
       this.notifyTablesChange();
+      this.notifyUpdate();
     }
   }
 
@@ -140,6 +192,7 @@ export class CoffeService {
       table.linkedTables = [];
       table.controlledBy = undefined;
       this.notifyTablesChange();
+      this.notifyUpdate();
     }
   }
 
@@ -233,4 +286,111 @@ export class CoffeService {
       this.notifyTablesChange();
     }
   }
+
+  addTable(name: string): void {
+    const newTable: Table = {
+      id: this.tables.length > 0 ? Math.max(...this.tables.map(t => t.id)) + 1 : 1,
+      name,
+      available: true,
+      orders: [],
+      linkedTables: []
+    };
+    this.tables.push(newTable);
+    this.notifyUpdate();
+    this.notifyTablesChange();
+  }
+  
+  editTable(tableId: number, newName: string, newAvailability: boolean): void {
+    const table = this.tables.find(t => t.id === tableId);
+    if (table) {
+      table.name = newName;
+      table.available = newAvailability;
+      this.notifyUpdate();
+      this.notifyTablesChange();
+    }
+  }
+  
+  deleteTable(tableId: number): void {
+    this.tables = this.tables.filter(t => t.id !== tableId);
+    this.notifyUpdate();
+    this.notifyTablesChange();
+  }
+
+  //MENU
+
+  private saveMenuToStorage(): void {
+    localStorage.setItem(this.localStorageMenuKey, JSON.stringify(this.menu));
+    this.notifyUpdate();
+  }
+
+  addMenuItem(name: string, price: number): void {
+    const newItem: MenuItem = {
+      id: this.menu.length > 0 ? Math.max(...this.menu.map(m => m.id)) + 1 : 1,
+      name,
+      price,
+      quantity: 1
+    };
+    this.menu.push(newItem);
+    this.notifyUpdate();
+    this.notifyMenuChange();
+  }
+  
+  editMenuItem(itemId: number, newName: string, newPrice: number): void {
+    const item = this.menu.find(m => m.id === itemId);
+    if (item) {
+      item.name = newName;
+      item.price = newPrice;
+      this.notifyUpdate();
+      this.notifyMenuChange();
+    }
+  }
+  
+  deleteMenuItem(itemId: number): void {
+    this.menu = this.menu.filter(m => m.id !== itemId);
+    this.notifyUpdate();
+    this.notifyMenuChange();
+  }
+  
+  // Notificar cambios en el menú
+  private notifyMenuChange(): void {
+   localStorage.setItem(this.localStorageMenuKey, JSON.stringify(this.menu));
+  }
+
+  //WAITERS
+  private saveWaitersToStorage(): void {
+    localStorage.setItem(this.localStorageWaitersKey, JSON.stringify(this.waiters));
+    this.notifyUpdate();
+  }
+
+  private notifyWaitersChange(): void {
+    this.saveWaitersToStorage();
+  }
+
+  addWaiter(name: string): void {
+    const newId = this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w.id)) + 1 : 1;
+    const newWaiter: Waiter = { id: newId, name };
+    this.waiters.push(newWaiter);
+     this.notifyUpdate();
+    this.notifyWaitersChange();
+  }
+
+  editWaiter(waiterId: number, newName: string): void {
+    const waiter = this.waiters.find(w => w.id === waiterId);
+    if (waiter) {
+      waiter.name = newName;
+      this.notifyUpdate();
+      this.notifyWaitersChange();
+    }
+  }
+
+  deleteWaiter(waiterId: number): void {
+    this.waiters = this.waiters.filter(w => w.id !== waiterId);
+    this.notifyUpdate();
+    this.notifyWaitersChange();
+  }
+
+  getWaiters(): Waiter[] {
+    return this.waiters;
+  }
+  
 }
