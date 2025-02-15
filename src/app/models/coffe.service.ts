@@ -353,7 +353,7 @@ export class CoffeService {
   
   // Notificar cambios en el menú
   private notifyMenuChange(): void {
-   localStorage.setItem(this.localStorageMenuKey, JSON.stringify(this.menu));
+    this.saveMenuToStorage();
   }
 
   //WAITERS
@@ -365,6 +365,8 @@ export class CoffeService {
   private notifyWaitersChange(): void {
     this.saveWaitersToStorage();
   }
+
+ 
 
   addWaiter(name: string): void {
     const newId = this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w.id)) + 1 : 1;
