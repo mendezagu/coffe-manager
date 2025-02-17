@@ -15,11 +15,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button *ngIf="(role$ | async) === 'admin'" mat-raised-button color="warn" (click)="removeSelectedOrders(orders.selectedOptions.selected)">
+  <button mat-raised-button color="warn" (click)="removeSelectedOrders(orders.selectedOptions.selected)">
     Eliminar Seleccionados
   </button>
   <button mat-raised-button mat-dialog-close>Cerrar</button>
-  <button  *ngIf="allOrdersRemoved" mat-raised-button color="primary" (click)="releaseTable()">
+  <button *ngIf="allOrdersRemoved" mat-raised-button color="primary" (click)="releaseTable()">
     Liberar Mesa
   </button>
 </mat-dialog-actions>|

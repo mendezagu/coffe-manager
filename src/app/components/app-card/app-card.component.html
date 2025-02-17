@@ -3,7 +3,10 @@
     <div class="col">
       <mat-card 
       class="example-card"
-      [ngClass]="{ 'available-card': available, 'occupied-card': !available }"
+      [ngClass]="{ 
+        'available-card': !hasOrders, 
+        'occupied-card': hasOrders 
+      }"
       >
       <mat-card-header>
       <mat-card-title class="d-flex flex-column align-items-start w-100">
@@ -63,7 +66,7 @@
             </div>
           
             <div class="col-6">
-              <button class="btn btn-primary w-100" style="color: white; font-size: 10px;" mat-raised-button (click)="onLinkTable()" [disabled]="controlledBy">
+              <button class="btn btn-primary w-100" style="color: white; font-size: 10px;" mat-raised-button (click)="linkTable()" [disabled]="controlledBy">
                 Vincular Mesas
                 <mat-icon fontIcon="link"></mat-icon>
               </button>

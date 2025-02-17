@@ -1,61 +1,68 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CoffeService, MenuItem, Table } from 'src/app/models/coffe.service';
+import { CoffeService, Table, MenuItem } from 'src/app/models/coffe.service';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
 import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
 import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog.component';
 import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog.component';
 import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-card',
   templateUrl: './app-card.component.html',
   styleUrls: ['./app-card.component.scss']
 })
-export class CardComponent implements OnInit, OnChanges{ 
-  @Input() id: number = 0;
+export class CardComponent implements OnInit, OnChanges {
+  @Input() id: any = '';
   @Input() name: string = '';
   @Input() available: boolean = false;
   @Input() orders: MenuItem[] = [];
   @Input() refreshLinkedTables: boolean = false;
-  //@Input() controlledBy?: number;
-  @Output() addOrder = new EventEmitter<{ tableId: number; menuItem: MenuItem }>();
-  @Output() removeOrder = new EventEmitter<{ tableId: number; orderId: number }>();
+  @Output() addOrder = new EventEmitter<{ tableId: string; menuItem: MenuItem }>();
+  @Output() removeOrder = new EventEmitter<{ tableId: string; orderId: number }>();
 
-  waiterId?: string; // ID del mozo asignado
+  waiterId?: any;
   linkedTables: Table[] = [];
   linkedTablesNames: string = '';
-  controlledBy?: number; 
+  controlledBy?: any;
+  hasOrders: boolean = false;
 
   constructor(
     public dialog: MatDialog,
-    public coffeService: CoffeService
-
+    public coffeService: CoffeService,
+    private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
     this.loadLinkedTables();
+    this.updateOrderStatus();
   }
 
   ngOnChanges(): void {
-    this.loadLinkedTables(); // Recargar al detectar cambios
+    this.loadLinkedTables();
+    this.updateOrderStatus();
   }
 
- // Cargar mesas vinculadas y controlador
- loadLinkedTables(): void {
-  const table = this.coffeService.getTables().find(t => t.id === this.id);
-  if (table) {
-    // Obtener las mesas vinculadas
-    this.linkedTables = this.coffeService.getLinkedTables(this.id);
-    
-    // Obtener los nombres de las mesas vinculadas
-    this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
-    
-    // Obtener otros detalles de la mesa
-    this.waiterId = table.waiterId; // Mozo asignado
-    this.controlledBy = table.controlledBy; // Controlador de la mesa
+  loadLinkedTables(): void {
+    const table = this.coffeService.getTables().find(t => t.id === this.id);
+    if (table) {
+      this.linkedTables = table.linkedTables.map(id => this.coffeService.getTables().find(t => t.id === id)!).filter(t => t);
+      this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
+      this.waiterId = table.waiterId;
+      this.controlledBy = table.controlledBy;
+  
+      // Si la mesa está controlada, copia el estado de la mesa administradora
+      if (this.controlledBy) {
+        const adminTable = this.coffeService.getTables().find(t => t.id === this.controlledBy);
+        if (adminTable) {
+          this.hasOrders = adminTable.orders.length > 0; // Copia el estado de la mesa administradora
+        }
+      } else {
+        this.hasOrders = table.orders.length > 0 || this.linkedTables.some(t => t.orders.length > 0);
+      }
+    }
   }
-}
 
   linkTable(): void {
     const dialogRef = this.dialog.open(LinkTableDialogComponent, {
@@ -63,17 +70,53 @@ export class CardComponent implements OnInit, OnChanges{
       data: { tables: this.coffeService.getTables(), currentTableId: this.id }
     });
 
-    dialogRef.afterClosed().subscribe((linkedTableId: number | null) => {
-      if (linkedTableId) {
-        this.coffeService.linkTables(this.id, linkedTableId);
+    dialogRef.afterClosed().subscribe((linkedTableIds: string[] | null) => {
+      if (linkedTableIds && linkedTableIds.length > 0) {
+        this.coffeService.linkMultipleTables(this.id, linkedTableIds);
         this.loadLinkedTables();
       }
     });
   }
 
   releaseTable(): void {
-    this.coffeService.releaseTable(this.id); // Liberar y desvincular
+    this.coffeService.releaseTable(this.id);
     this.loadLinkedTables();
+    this.updateOrderStatus();
+  }
+
+  updateOrderStatus(): void {
+    const table = this.coffeService.getTables().find(t => t.id === this.id);
+  
+    if (table) {
+      if (this.controlledBy) {
+        const adminTable = this.coffeService.getTables().find(t => t.id === this.controlledBy);
+        if (adminTable) {
+          this.hasOrders = adminTable.orders.length > 0;
+          this.available = !this.hasOrders;
+  
+          // **Actualizar Firestore para reflejar el estado**
+          this.coffeService.updateFirestore('tables', this.id, {
+            available: !this.hasOrders
+          });
+        }
+      } else {
+        this.hasOrders = table.orders.length > 0 || this.linkedTables.some(t => t.orders.length > 0);
+        this.available = !this.hasOrders;
+  
+        // **Si la mesa está ocupada, marcar todas las vinculadas como ocupadas**
+        if (this.hasOrders) {
+          this.linkedTables.forEach(linkedTable => {
+            linkedTable.available = false;
+  
+            this.coffeService.updateFirestore('tables', linkedTable.id, {
+              available: false
+            });
+          });
+        }
+      }
+    }
+  
+    this.cdr.detectChanges(); // Forzar actualización en la vista
   }
 
   onAddOrder(): void {
@@ -82,88 +125,110 @@ export class CardComponent implements OnInit, OnChanges{
       return;
     }
   
-    const dialogRef = this.dialog.open(WaiterDialogComponent, {
-      width: '300px'
+    const menuDialogRef = this.dialog.open(MenuDialogComponent, {
+      width: '800px',
+      data: { menu: this.coffeService.getMenu() },
     });
   
-    dialogRef.afterClosed().subscribe((waiterId: any | null) => {
-      if (waiterId && this.coffeService.waiters.some(w => w.id === Number(waiterId))) {
-        this.coffeService.assignWaiterToTable(this.id, waiterId);
-  
-        const menuDialogRef = this.dialog.open(MenuDialogComponent, {
-          width: '400px',
-          data: { menu: this.coffeService.getMenu() },
-        });
-  
-        menuDialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
-          if (selectedMenuItems && selectedMenuItems.length > 0) {
-            selectedMenuItems.forEach(menuItem =>
-              this.addOrder.emit({ tableId: this.id, menuItem })
-            );
-          }
-        });
-  
-        this.loadLinkedTables();
-      } else {
-        alert('ID de mozo inválido. Inténtelo nuevamente.');
-      }
-    });
-  }
-
-  onViewOrders() {
-    const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
-      width: '400px',
-      data: { ...this.coffeService.tables.find(t => t.id === this.id) },
-    });
-  
-    dialogRef.afterClosed().subscribe((updatedOrders: MenuItem[] | undefined) => {
-      if (updatedOrders) {
-        // Encuentra la mesa en el servicio y sincroniza las órdenes
-        const table = this.coffeService.tables.find(t => t.id === this.id);
+    menuDialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
+      if (selectedMenuItems && selectedMenuItems.length > 0) {
+        const table = this.coffeService.getTables().find(t => t.id === this.id);
         if (table) {
-          table.orders = updatedOrders; // Actualiza el estado global
+          selectedMenuItems.forEach(menuItem => {
+            table.orders.push(menuItem);
+          });
+  
+          this.hasOrders = table.orders.length > 0;
+          this.available = false; // La mesa ahora está ocupada
+  
+          // **Actualizar Firestore**
+          this.coffeService.updateFirestore('tables', this.id, {
+            orders: table.orders,
+            available: false // La mesa se marca como ocupada en la base de datos
+          });
+  
+          this.cdr.detectChanges();
         }
       }
     });
   }
 
-  onRemoveOrder(orderId: number) {
-    this.removeOrder.emit({ tableId: this.id, orderId });
-  }
-
-  onGetTotal(): void {
-    const dialogRef = this.dialog.open(TotalDialogComponent, {
-      width: '400px',
-      data: { ...this.coffeService.tables.find(t => t.id === this.id) },
+  onViewOrders() {
+    const table = this.coffeService.getTables().find(t => t.id === this.id);
+    
+    if (!table) {
+      console.error('No se encontró la mesa');
+      return;
+    }
+  
+    const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
+      width: '800px',
+      data: table, // Pasar directamente el objeto table
     });
   
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'liberar') {
-        this.coffeService.releaseTable(this.id); // Llamar al servicio para liberar la mesa y las vinculadas
-        this.loadLinkedTables(); // Actualizar el estado de la mesa
+    dialogRef.afterClosed().subscribe((updatedOrders: MenuItem[] | undefined) => {
+      if (updatedOrders) {
+        this.coffeService.getTables().find(t => t.id === this.id)!.orders = updatedOrders;
+        this.updateOrderStatus();
       }
     });
   }
+  
 
+  onRemoveOrder(orderId: number): void {
+    const table = this.coffeService.getTables().find(t => t.id === this.id);
+    if (table) {
+      table.orders = table.orders.filter(order => order.id !== orderId);
+  
+      this.hasOrders = table.orders.length > 0;
+      this.available = !this.hasOrders; // Si no hay órdenes, la mesa se libera
+  
+      // **Actualizar Firestore**
+      this.coffeService.updateFirestore('tables', this.id, {
+        orders: table.orders,
+        available: !this.hasOrders // La mesa se libera si ya no tiene órdenes
+      });
+  
+      this.cdr.detectChanges();
+    }
+  }
 
-  onLinkTable(): void {
-    const dialogRef = this.dialog.open(LinkTableDialogComponent, {
+  onGetTotal(): void {
+    const table = this.coffeService.getTables().find(t => t.id === this.id);
+    
+    if (!table) {
+      console.error('No se encontró la mesa');
+      return;
+    }
+  
+    const dialogRef = this.dialog.open(TotalDialogComponent, {
       width: '400px',
-      data: { tables: this.coffeService.getTables(), currentTableId: this.id }
+      data: table,
     });
   
-    dialogRef.afterClosed().subscribe((linkedTableIds: number[] | null) => {
-      if (linkedTableIds && linkedTableIds.length > 0) {
-        this.coffeService.linkMultipleTables(this.id, linkedTableIds);
-        this.loadLinkedTables(); // Actualizar las vinculaciones locales
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'mesa_liberada') {
+        this.available = true; // Marcar la mesa como disponible
+        this.hasOrders = false;
+        this.controlledBy = undefined;
+        this.linkedTables = [];
+  
+        // Forzar actualización en Firestore
+        this.coffeService.updateFirestore('tables', this.id, {
+          available: true,
+          hasOrders: false,
+          controlledBy: null,
+          linkedTables: []
+        });
+  
+        this.cdr.detectChanges(); // Forzar actualización en la vista
       }
     });
   }
 
   getWaiterName(): string {
-    if (!this.waiterId) return 'Sin asignar'; // Si no hay mozo asignado
-    const waiter = this.coffeService.getWaiters().find(w => w.id === Number(this.waiterId));
+    if (!this.waiterId) return 'Sin asignar';
+    const waiter = this.coffeService.getWaiters().find(w => w.id === this.waiterId);
     return waiter ? waiter.name : 'Mozo no encontrado';
   }
-
 }

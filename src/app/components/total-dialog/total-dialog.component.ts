@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Table } from 'src/app/models/coffe.service';
+import { CoffeService, Table } from 'src/app/models/coffe.service';
 
 
 @Component({
@@ -14,17 +14,25 @@ export class TotalDialogComponent {
   discountPercentage: number = 0; // Porcentaje de descuento aplicado
 
   constructor(
+    private coffeService: CoffeService,
     @Inject(MAT_DIALOG_DATA) public table: Table,
     private dialogRef: MatDialogRef<TotalDialogComponent>
   ) {
     this.calculateTotal();
   }
-
   calculateTotal() {
+    if (!this.table || !this.table.orders) {
+      console.warn('No hay órdenes disponibles.');
+      this.total = 0;
+      this.discountedTotal = 0;
+      return;
+    }
+  
     this.total = this.table.orders.reduce((sum, item) => {
       const qty = item.quantity ?? 1; // usa 1 como predeterminado si quantity está indefinido
       return sum + (item.price * qty);
     }, 0);
+    
     this.calculateDiscountedTotal(); // Actualiza el total con descuento
   }
 
@@ -38,7 +46,13 @@ export class TotalDialogComponent {
   }
 
   liberarMesa() {
-    this.dialogRef.close('liberar'); // Notifica al componente padre
+    if (!this.table || !this.table.id) {
+      console.error('No se pudo liberar la mesa: ID de la mesa no encontrado.');
+      return;
+    }
+  
+    this.coffeService.releaseTable(this.table.id); // Llamamos a releaseTable() que ahora actualiza Firestore
+    this.dialogRef.close('mesa_liberada'); // Notificar al componente padre
   }
 
   printTicket() {

@@ -34,22 +34,26 @@ export class OrderInfoDialogComponent {
   }
 
   private groupOrders(): void {
+    if (!this.table || !this.table.orders) {
+      console.warn('No hay órdenes disponibles para agrupar.');
+      this.groupedOrders = [];
+      return;
+    }
+  
     const orderMap: { [key: string]: GroupedOrder } = {};
+  
     this.table.orders.forEach(order => {
-      // Asegúrate de usar `order.quantity || 1` por si viene undefined
       const qty = order.quantity ?? 1;
   
       if (orderMap[order.name]) {
-        // Suma la cantidad
-        orderMap[order.name].quantity += qty; 
+        orderMap[order.name].quantity += qty;
       } else {
-        // Inicia con la cantidad de este item
         orderMap[order.name] = { ...order, quantity: qty };
       }
     });
-
+  
     this.groupedOrders = Object.values(orderMap);
-    this.allOrdersRemoved = this.groupedOrders.length === 0; // Actualizar el indicador
+    this.allOrdersRemoved = this.groupedOrders.length === 0;
   }
 
   removeSelectedOrders(selectedOptions: MatListOption[]): void {

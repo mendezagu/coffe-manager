@@ -34,6 +34,8 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { RegisterComponent } from './pages/register/register.component';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireModule } from '@angular/fire/compat';
 
 
 @NgModule({
@@ -69,6 +71,8 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
     MatIconModule,
     MatToolbarModule,
     HttpClientModule,
+    AngularFirestoreModule,
+    AngularFireModule.initializeApp(environment.firebase),
 
     provideFirebaseApp(()=> initializeApp(environment.firebase)),
     provideAuth(()=> getAuth()),
