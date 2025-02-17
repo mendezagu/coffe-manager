@@ -23,6 +23,7 @@ export class CardComponent implements OnInit, OnChanges {
   @Output() removeOrder = new EventEmitter<{ tableId: string; orderId: number }>();
 
   waiterId?: any;
+  waiterName?: any
   linkedTables: Table[] = [];
   linkedTablesNames: string = '';
   controlledBy?: any;
@@ -44,19 +45,29 @@ export class CardComponent implements OnInit, OnChanges {
     this.updateOrderStatus();
   }
 
+  getWaiterNameFromService(waiterId: string | null): string {
+    if (!waiterId) return 'Sin asignar';
+    const waiter = this.coffeService.getWaiters().find(w => w.id === waiterId);
+    return waiter ? waiter.name : 'Mozo no encontrado';
+  }
+
   loadLinkedTables(): void {
     const table = this.coffeService.getTables().find(t => t.id === this.id);
     if (table) {
-      this.linkedTables = table.linkedTables.map(id => this.coffeService.getTables().find(t => t.id === id)!).filter(t => t);
+      this.linkedTables = table.linkedTables
+        .map(id => this.coffeService.getTables().find(t => t.id === id)!)
+        .filter(t => t);
+      
       this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
       this.waiterId = table.waiterId;
+      this.waiterName = table.waiterName || this.getWaiterNameFromService(table.waiterId); // ✅ Asignar nombre
       this.controlledBy = table.controlledBy;
   
       // Si la mesa está controlada, copia el estado de la mesa administradora
       if (this.controlledBy) {
         const adminTable = this.coffeService.getTables().find(t => t.id === this.controlledBy);
         if (adminTable) {
-          this.hasOrders = adminTable.orders.length > 0; // Copia el estado de la mesa administradora
+          this.hasOrders = adminTable.orders.length > 0;
         }
       } else {
         this.hasOrders = table.orders.length > 0 || this.linkedTables.some(t => t.orders.length > 0);
@@ -125,6 +136,48 @@ export class CardComponent implements OnInit, OnChanges {
       return;
     }
   
+    // Si la mesa ya tiene un mozo asignado, abrir directamente el menú
+    if (this.waiterId) {
+      this.openMenuDialog();
+      return;
+    }
+  
+    // Abrir el diálogo de selección de mozo
+    const waiterDialogRef = this.dialog.open(WaiterDialogComponent, {
+      width: '400px',
+      data: { waiters: this.coffeService.getWaiters() }
+    });
+  
+    waiterDialogRef.afterClosed().subscribe((waiterId: string | null) => {
+      if (waiterId) {
+        const waiter = this.coffeService.getWaiters().find(w => w.id === waiterId);
+        if (waiter) {
+          this.waiterId = waiterId;
+          this.waiterName = waiter.name; // ✅ Asignar nombre del mozo
+  
+          const table = this.coffeService.getTables().find(t => t.id === this.id);
+          if (table) {
+            table.waiterId = waiterId;
+            table.waiterName = waiter.name; // ✅ Guardar también en la mesa
+  
+            // **Actualizar Firestore con el nombre del mozo**
+            this.coffeService.updateFirestore('tables', this.id, {
+              waiterId: waiterId,
+              waiterName: waiter.name // ✅ Guardar nombre en Firestore
+            });
+  
+            this.cdr.detectChanges();
+          }
+  
+          // Abrir el menú después de seleccionar el mozo
+          this.openMenuDialog();
+        }
+      }
+    });
+  }
+  
+  // Función para abrir el menú de órdenes
+  openMenuDialog(): void {
     const menuDialogRef = this.dialog.open(MenuDialogComponent, {
       width: '800px',
       data: { menu: this.coffeService.getMenu() },
@@ -139,12 +192,12 @@ export class CardComponent implements OnInit, OnChanges {
           });
   
           this.hasOrders = table.orders.length > 0;
-          this.available = false; // La mesa ahora está ocupada
+          this.available = false; // Marcar la mesa como ocupada
   
-          // **Actualizar Firestore**
+          // **Actualizar Firestore con las órdenes**
           this.coffeService.updateFirestore('tables', this.id, {
             orders: table.orders,
-            available: false // La mesa se marca como ocupada en la base de datos
+            available: false // Marcar como ocupada en la base de datos
           });
   
           this.cdr.detectChanges();

@@ -15,6 +15,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
+import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
 import { MenuDialogComponent } from './components/menu-dialog/menu-dialog.component';
 import { CardComponent } from './components/app-card/app-cardcomponent';
@@ -67,9 +68,11 @@ import { AngularFireModule } from '@angular/fire/compat';
     MatSnackBarModule,
     MatInputModule,
     MatSidenavModule,
+    MatSelectModule,
     MatListModule,
     MatIconModule,
     MatToolbarModule,
+    
     HttpClientModule,
     AngularFirestoreModule,
     AngularFireModule.initializeApp(environment.firebase),

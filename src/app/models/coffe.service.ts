@@ -17,6 +17,7 @@ export interface Table {
   linkedTables: any[];
   controlledBy?: any;
   waiterId?: any;
+  waiterName?:any
 }
 
 export interface Waiter {
@@ -98,14 +99,16 @@ export class CoffeService {
   
       table.orders = [];
       table.waiterId = undefined;
+      table.waiterName = undefined; // También eliminar el nombre
       table.available = true;
       table.controlledBy = undefined;
       table.linkedTables = [];
   
-      // **Actualizar Firestore para la mesa administradora**
+      // **Actualizar Firestore**
       this.updateFirestore('tables', tableId, {
         orders: [],
         waiterId: null,
+        waiterName: null, // Se borra también el nombre en la base de datos
         available: true,
         controlledBy: null,
         linkedTables: []
@@ -117,6 +120,7 @@ export class CoffeService {
         if (linkedTable) {
           linkedTable.orders = [];
           linkedTable.waiterId = undefined;
+          linkedTable.waiterName = undefined; // También eliminar el nombre
           linkedTable.available = true;
           linkedTable.controlledBy = undefined;
           linkedTable.linkedTables = [];
@@ -124,6 +128,7 @@ export class CoffeService {
           this.updateFirestore('tables', linkedTableId, {
             orders: [],
             waiterId: null,
+            waiterName: null, // Se borra también el nombre en la base de datos
             available: true,
             controlledBy: null,
             linkedTables: []
@@ -131,7 +136,7 @@ export class CoffeService {
         }
       });
   
-      this.tablesSubject.next([...this.tables]); // Emitir cambios para actualizar la UI
+      this.tablesSubject.next([...this.tables]); // Emitir cambios a la UI
     }
   }
 

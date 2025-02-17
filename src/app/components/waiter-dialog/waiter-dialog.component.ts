@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./waiter-dialog.component.scss']
 })
 export class WaiterDialogComponent {
-  waiterId: string = '';
+  selectedWaiterId: string = '';
 
   constructor(
     public dialogRef: MatDialogRef<WaiterDialogComponent>,
@@ -19,6 +19,6 @@ export class WaiterDialogComponent {
   }
 
   onConfirm(): void {
-    this.dialogRef.close(this.waiterId);
+    this.dialogRef.close(this.selectedWaiterId);
   }
 }
