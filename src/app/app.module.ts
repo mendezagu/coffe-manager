@@ -37,6 +37,8 @@ import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireModule } from '@angular/fire/compat';
+import { StadisticsComponent } from './pages/stadistics/stadistics.component';
+import { BalanceComponent } from './pages/balance/balance.component';
 
 
 @NgModule({
@@ -51,7 +53,9 @@ import { AngularFireModule } from '@angular/fire/compat';
     WaiterDialogComponent,
     LoginComponent,
     RegisterComponent,
-    AdminPanelComponent
+    AdminPanelComponent,
+    StadisticsComponent,
+    BalanceComponent
 
   ],
   imports: [

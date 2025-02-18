@@ -11,6 +11,14 @@
     <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'">
       Administrar
     </button>
+
+    <button mat-button routerLink="/stadistic" *ngIf="(role$ | async) === 'admin'">
+      Estadisticas
+    </button>
+
+    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'">
+      Balance
+    </button>
   
     <button mat-flat-button color="warn" *ngIf="isLoggedIn" (click)="logout()">Cerrar sesión</button>
   </mat-drawer>

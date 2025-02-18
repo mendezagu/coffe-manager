@@ -94,50 +94,41 @@ export class CoffeService {
   releaseTable(tableId: any): void {
     const table = this.tables.find(t => t.id === tableId);
   
-    if (table) {
-      const linkedTableIds = [...table.linkedTables];
+    // Si la mesa no existe, salir de la función
+    if (!table) return;
   
-      table.orders = [];
-      table.waiterId = undefined;
-      table.waiterName = undefined; // También eliminar el nombre
-      table.available = true;
-      table.controlledBy = undefined;
-      table.linkedTables = [];
+    if (table.orders.length > 0) {
+      const revenue = table.orders.reduce((sum, order) => sum + (order.price * (order.quantity || 1)), 0);
   
-      // **Actualizar Firestore**
-      this.updateFirestore('tables', tableId, {
-        orders: [],
-        waiterId: null,
-        waiterName: null, // Se borra también el nombre en la base de datos
-        available: true,
-        controlledBy: null,
-        linkedTables: []
-      });
+      const data = {
+        date: new Date().getTime(),
+        tableName: table.name,
+        waiterName: table.waiterName || 'Desconocido',
+        revenue
+      };
   
-      // **Liberar también las mesas vinculadas**
-      linkedTableIds.forEach(linkedTableId => {
-        const linkedTable = this.tables.find(t => t.id === linkedTableId);
-        if (linkedTable) {
-          linkedTable.orders = [];
-          linkedTable.waiterId = undefined;
-          linkedTable.waiterName = undefined; // También eliminar el nombre
-          linkedTable.available = true;
-          linkedTable.controlledBy = undefined;
-          linkedTable.linkedTables = [];
-  
-          this.updateFirestore('tables', linkedTableId, {
-            orders: [],
-            waiterId: null,
-            waiterName: null, // Se borra también el nombre en la base de datos
-            available: true,
-            controlledBy: null,
-            linkedTables: []
-          });
-        }
-      });
-  
-      this.tablesSubject.next([...this.tables]); // Emitir cambios a la UI
+      // Guardar la transacción en Firebase antes de liberar la mesa
+      this.firestore.collection('daily_statistics').add(data);
     }
+  
+    // Proceder con la liberación de la mesa
+    table.orders = [];
+    table.waiterId = undefined;
+    table.waiterName = undefined;
+    table.available = true;
+    table.controlledBy = undefined;
+    table.linkedTables = [];
+  
+    this.updateFirestore('tables', tableId, {
+      orders: [],
+      waiterId: null,
+      waiterName: null,
+      available: true,
+      controlledBy: null,
+      linkedTables: []
+    });
+  
+    this.tablesSubject.next([...this.tables]); // Emitir cambios a la UI
   }
 
   addMenuItem(name: string, price: number): void {
