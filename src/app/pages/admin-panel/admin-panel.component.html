@@ -149,7 +149,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let item of menuItems">
-                  <td>{{ item.id }}</td>
+                  <td>{{ item._id }}</td>
                   <td>{{ item.name }}</td>
                   <td>${{ item.price }}</td>
                   <td>
@@ -162,7 +162,7 @@
                       </button>
                       <button
                         class="btn btn-danger btn-sm"
-                        (click)="deleteMenuItem(item.id)"
+                        (click)="deleteMenuItem(item._id)"
                       >
                         Eliminar
                       </button>
@@ -236,7 +236,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let waiter of waiters">
-            <td>{{ waiter.id }}</td>
+            <td>{{ waiter._id }}</td>
             <td>{{ waiter.name }}</td>
             <td>
               <div class="d-flex gap-2">
@@ -248,7 +248,7 @@
                 </button>
                 <button
                   class="btn btn-danger btn-sm"
-                  (click)="deleteWaiter(waiter.id)"
+                  (click)="deleteWaiter(waiter._id)"
                 >
                   Eliminar
                 </button>

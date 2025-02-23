@@ -3,10 +3,10 @@ import { BehaviorSubject } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 export interface MenuItem {
-  id: any;
-  name: any;
-  price: any;
-  quantity?: any;
+  _id: string;  // O 'number' si es así como lo manejas en tu backend
+  name: string;
+  price: number;
+  quantity?: number; // Opcional, ya que no siempre se proporciona
 }
 
 export interface Table {
@@ -21,7 +21,7 @@ export interface Table {
 }
 
 export interface Waiter {
-  id: any;
+  _id: any;
   name: any;
 }
 
@@ -131,15 +131,7 @@ export class CoffeService {
     this.tablesSubject.next([...this.tables]); // Emitir cambios a la UI
   }
 
-  addMenuItem(name: string, price: number): void {
-    const newItem: MenuItem = {
-      id: this.menu.length > 0 ? Math.max(...this.menu.map(m => m.id)) + 1 : 1,
-      name,
-      price,
-      quantity: 1
-    };
-    this.firestore.collection('menu').doc(newItem.id.toString()).set(newItem);
-  }
+
 
   editMenuItem(itemId: number, newName: string, newPrice: number): void {
     this.updateFirestore('menu', itemId, { name: newName, price: newPrice });
@@ -151,10 +143,10 @@ export class CoffeService {
 
   addWaiter(name: string): void {
     const newWaiter: Waiter = {
-      id: this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w.id)) + 1 : 1,
+      _id: this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w._id)) + 1 : 1,
       name
     };
-    this.firestore.collection('waiters').doc(newWaiter.id.toString()).set(newWaiter);
+    this.firestore.collection('waiters').doc(newWaiter._id.toString()).set(newWaiter);
   }
 
   editWaiter(waiterId: number, newName: string): void {
@@ -202,11 +194,6 @@ export class CoffeService {
   }
 }
 
-  removeOrderFromTable(tableId: any, orderId: number): void {
-    const table = this.tables.find(t => t.id === tableId);
-    if (table) {
-      table.orders = table.orders.filter(order => order.id !== orderId);
-      this.updateFirestore('tables', tableId, { orders: table.orders });
-    }
-  }
+
+  
 }

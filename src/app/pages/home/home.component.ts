@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { CoffeService, MenuItem, Table } from 'src/app/models/coffe.service';
+import { CoffeService, MenuItem } from 'src/app/models/coffe.service';
+import { GestionService, Table } from 'src/app/services/gestionService';
 import { PrintService } from 'src/app/services/printService';
 
 @Component({
@@ -8,42 +9,40 @@ import { PrintService } from 'src/app/services/printService';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit{
+  
   tables: Table[] = [];
-  refreshLinkedTables: boolean = false; 
+  refreshLinkedTables: boolean = false;
 
-  constructor(private coffeService: CoffeService, 
-    private printService: PrintService){}
-
+  constructor(
+    private coffeService: CoffeService,
+    private gestionService: GestionService,
+    private printService: PrintService
+  ) {}
 
   ngOnInit(): void {
-    this.coffeService.tables$.subscribe((tables) => {
+    this.loadTables();
+  }
+
+  loadTables(): void {
+    this.gestionService.getTables().subscribe((tables) => {
       this.tables = tables;
+      console.log(tables,'MESAS DESDE');
+      
     });
   }
 
-
-
-  addOrder(tableId: any, menuItem: MenuItem): void {
-   
-  }
-  
-  removeOrder(tableId: number, orderId: number): void {
-   
+  handleAddOrder(event: { tableId: string; menuItem: MenuItem }): void {
+    console.log('Añadiendo orden a la mesa:', event.tableId);
   }
 
-
-  handleAddOrder(event: { tableId: any; menuItem: MenuItem }): void {
-    this.addOrder(event.tableId, event.menuItem);
-  }
-  
-  handleRemoveOrder(event: { tableId: any; orderId: number }): void {
-    this.removeOrder(event.tableId, event.orderId);
+  handleRemoveOrder(event: { tableId: string; orderId: number }): void {
+    console.log('Removiendo orden', event.orderId, 'de la mesa', event.tableId);
   }
 
   handleLinkTables(): void {
-    // Cambiar el valor para forzar la actualización de las tarjetas
     this.refreshLinkedTables = !this.refreshLinkedTables;
   }
+
 
  /* printReceipt() {
     const printWindow = window.open('', '', 'width=400,height=600');

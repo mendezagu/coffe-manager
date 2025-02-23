@@ -14,7 +14,7 @@ export class TotalDialogComponent {
   discountPercentage: number = 0; // Porcentaje de descuento aplicado
 
   constructor(
-    private coffeService: CoffeService,
+    
     @Inject(MAT_DIALOG_DATA) public table: Table,
     private dialogRef: MatDialogRef<TotalDialogComponent>
   ) {
@@ -51,7 +51,7 @@ export class TotalDialogComponent {
       return;
     }
   
-    this.coffeService.releaseTable(this.table.id); // Llamamos a releaseTable() que ahora actualiza Firestore
+; // Llamamos a releaseTable() que ahora actualiza Firestore
     this.dialogRef.close('mesa_liberada'); // Notificar al componente padre
   }
 

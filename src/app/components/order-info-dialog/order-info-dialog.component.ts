@@ -1,84 +1,72 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatListOption } from '@angular/material/list';
-import { ChangeDetectorRef } from '@angular/core'; // Importar ChangeDetectorRef
-import { CoffeService, MenuItem, Table } from 'src/app/models/coffe.service';
-import { Observable } from 'rxjs';
-import { UserService } from 'src/app/services/user.service';
-
-interface GroupedOrder {
-  name: string;
-  price: number;
-  quantity: number;
-}
+import { GestionService, MenuItem } from '../../services/gestionService';
+import { Table } from '../../services/gestionService';
 
 @Component({
   selector: 'app-order-info-dialog',
   templateUrl: './order-info-dialog.component.html',
   styleUrls: ['./order-info-dialog.component.scss']
 })
-export class OrderInfoDialogComponent {
-  groupedOrders: GroupedOrder[] = [];
-  allOrdersRemoved: boolean = false; // Nuevo indicador
-  role$: Observable<string | null>;
+export class OrderInfoDialogComponent implements OnInit {
+  table: Table;
+  orders: any[] = [];
+  name: any
 
   constructor(
     public dialogRef: MatDialogRef<OrderInfoDialogComponent>,
-    public coffeService: CoffeService,
-    @Inject(MAT_DIALOG_DATA) public table: Table,
-    private cdr: ChangeDetectorRef,
-    private userService: UserService
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private gestionService: GestionService
   ) {
-    this.role$ = this.userService.getRoleState();
-    this.groupOrders();
+    this.table = data;
+    console.log(this.table, 'Mesa seleccionada');
+    this.orders = this.table.orders;
   }
 
-  private groupOrders(): void {
-    if (!this.table || !this.table.orders) {
-      console.warn('No hay órdenes disponibles para agrupar.');
-      this.groupedOrders = [];
-      return;
-    }
-  
-    const orderMap: { [key: string]: GroupedOrder } = {};
-  
-    this.table.orders.forEach(order => {
-      const qty = order.quantity ?? 1;
-  
-      if (orderMap[order.name]) {
-        orderMap[order.name].quantity += qty;
-      } else {
-        orderMap[order.name] = { ...order, quantity: qty };
+  ngOnInit(): void {
+    this.printMenuItems();
+  }
+
+  // Método para imprimir los valores de name y quantity dentro de las órdenes
+  printMenuItems(): void {
+    this.orders.forEach(order => {
+      if (order && order.menuItem && order.quantity !== undefined) {
+        this.gestionService.getMenu().subscribe(menuItems => {
+          const menuItem = menuItems.find(item => item._id === order.menuItem);
+          if (menuItem) {
+            order.name = menuItem.name; // Asignar el nombre directamente a la orden
+          } else {
+            order.name = 'No encontrado';
+          }
+        });
       }
     });
-  
-    this.groupedOrders = Object.values(orderMap);
-    this.allOrdersRemoved = this.groupedOrders.length === 0;
   }
 
-  removeSelectedOrders(selectedOptions: MatListOption[]): void {
-    const selectedOrders = selectedOptions.map(option => option.value as GroupedOrder);
-  
-    selectedOrders.forEach(selectedOrder => {
-      const orderIndex = this.table.orders.findIndex(order => order.name === selectedOrder.name);
-      if (orderIndex > -1) {
-        const orderId = this.table.orders[orderIndex].id;
-        this.coffeService.removeOrderFromTable(this.table.id, orderId); // Actualiza en el servicio
-        this.table.orders.splice(orderIndex, 1); // Elimina localmente
+  // Método para eliminar órdenes
+  removeSelectedOrders(selectedOrders: any[]): void {
+    const orderIdsToDelete = selectedOrders.map(order => order.value);
+    
+    this.gestionService.deleteOrdersFromTable(this.table.id, orderIdsToDelete).subscribe(
+      (updatedTable: Table) => {
+        this.table = updatedTable;
+       // this.dialogRef.close(updatedTable); // Cierra el diálogo y pasa la mesa actualizada
+      },
+      (error) => {
+        console.error('Error eliminando órdenes:', error);
       }
-    });
-  
-    this.groupOrders(); // Reagrupa las órdenes
-    this.allOrdersRemoved = this.table.orders.length === 0; // Actualiza si ya no hay órdenes
-    this.cdr.detectChanges(); // Forza la detección de cambios
+    );
   }
 
+  // Método para liberar la mesa
   releaseTable(): void {
-    this.coffeService.releaseTable(this.table.id); // Liberar la mesa
-    this.dialogRef.close([]); // Cerrar el diálogo y enviar una lista vacía
-  }
-
-  closeDialog(): void {
-    this.dialogRef.close(this.table.orders); // Envía la lista actualizada al componente padre
+    this.gestionService.releaseTable(this.table.id).subscribe(
+      () => {
+        this.dialogRef.close(); // Cierra el diálogo
+      },
+      (error) => {
+        console.error('Error liberando la mesa:', error);
+      }
+    );
   }
 }

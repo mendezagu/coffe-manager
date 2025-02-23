@@ -5,6 +5,7 @@ import { DatePipe } from '@angular/common';
 import { UserService } from './services/user.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { GestionService } from './services/gestionService';
 
 @Component({
   selector: 'app-root',
@@ -21,10 +22,15 @@ export class AppComponent {
   currentDate: string;
   shift: string;
 
+    tables: any[] = [];
+  menu: any[] = [];
+  waiters: any[] = [];
+
   constructor(
     private datePipe: DatePipe,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private gestionService: GestionService
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.getShift();
@@ -36,6 +42,10 @@ export class AppComponent {
     this.userService.getAuthState().subscribe(user => {
       this.isLoggedIn = !!user; // Si hay usuario, true; si no, false
     });
+
+    //NUEVOOOO
+
+    
   }
 
   toggleSidenav() {

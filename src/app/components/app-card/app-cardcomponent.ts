@@ -1,287 +1,120 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CoffeService, Table, MenuItem } from 'src/app/models/coffe.service';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
-import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
 import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog.component';
-import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog.component';
+import { GestionService, Table } from 'src/app/services/gestionService';
 import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
-import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-card',
   templateUrl: './app-card.component.html',
   styleUrls: ['./app-card.component.scss']
 })
-export class CardComponent implements OnInit, OnChanges {
-  @Input() id: any = '';
-  @Input() name: string = '';
-  @Input() available: boolean = false;
-  @Input() orders: MenuItem[] = [];
-  @Input() refreshLinkedTables: boolean = false;
-  @Output() addOrder = new EventEmitter<{ tableId: string; menuItem: MenuItem }>();
-  @Output() removeOrder = new EventEmitter<{ tableId: string; orderId: number }>();
-
-  waiterId?: any;
-  waiterName?: any
-  linkedTables: Table[] = [];
-  linkedTablesNames: string = '';
-  controlledBy?: any;
-  hasOrders: boolean = false;
+export class CardComponent implements OnInit {
+  tables: Table[] = [];
 
   constructor(
-    public dialog: MatDialog,
-    public coffeService: CoffeService,
-    private cdr: ChangeDetectorRef 
+    private gestionService: GestionService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    this.loadLinkedTables();
-    this.updateOrderStatus();
+    this.loadTables();
   }
 
-  ngOnChanges(): void {
-    this.loadLinkedTables();
-    this.updateOrderStatus();
-  }
-
-  getWaiterNameFromService(waiterId: string | null): string {
-    if (!waiterId) return 'Sin asignar';
-    const waiter = this.coffeService.getWaiters().find(w => w.id === waiterId);
-    return waiter ? waiter.name : 'Mozo no encontrado';
-  }
-
-  loadLinkedTables(): void {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-    if (table) {
-      this.linkedTables = table.linkedTables
-        .map(id => this.coffeService.getTables().find(t => t.id === id)!)
-        .filter(t => t);
-      
-      this.linkedTablesNames = this.linkedTables.map(t => t.name).join(', ');
-      this.waiterId = table.waiterId;
-      this.waiterName = table.waiterName || this.getWaiterNameFromService(table.waiterId); // ✅ Asignar nombre
-      this.controlledBy = table.controlledBy;
-  
-      // Si la mesa está controlada, copia el estado de la mesa administradora
-      if (this.controlledBy) {
-        const adminTable = this.coffeService.getTables().find(t => t.id === this.controlledBy);
-        if (adminTable) {
-          this.hasOrders = adminTable.orders.length > 0;
-        }
-      } else {
-        this.hasOrders = table.orders.length > 0 || this.linkedTables.some(t => t.orders.length > 0);
-      }
-    }
-  }
-
-  linkTable(): void {
-    const dialogRef = this.dialog.open(LinkTableDialogComponent, {
-      width: '400px',
-      data: { tables: this.coffeService.getTables(), currentTableId: this.id }
-    });
-
-    dialogRef.afterClosed().subscribe((linkedTableIds: string[] | null) => {
-      if (linkedTableIds && linkedTableIds.length > 0) {
-        this.coffeService.linkMultipleTables(this.id, linkedTableIds);
-        this.loadLinkedTables();
-      }
+  loadTables(): void {
+    this.gestionService.getTables().subscribe((tables) => {
+      this.tables = tables;
+      console.log(this.tables, 'Mesas cargadas');
     });
   }
 
-  releaseTable(): void {
-    this.coffeService.releaseTable(this.id);
-    this.loadLinkedTables();
-    this.updateOrderStatus();
-  }
-
-  updateOrderStatus(): void {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-  
-    if (table) {
-      if (this.controlledBy) {
-        const adminTable = this.coffeService.getTables().find(t => t.id === this.controlledBy);
-        if (adminTable) {
-          this.hasOrders = adminTable.orders.length > 0;
-          this.available = !this.hasOrders;
-  
-          // **Actualizar Firestore para reflejar el estado**
-          this.coffeService.updateFirestore('tables', this.id, {
-            available: !this.hasOrders
-          });
-        }
-      } else {
-        this.hasOrders = table.orders.length > 0 || this.linkedTables.some(t => t.orders.length > 0);
-        this.available = !this.hasOrders;
-  
-        // **Si la mesa está ocupada, marcar todas las vinculadas como ocupadas**
-        if (this.hasOrders) {
-          this.linkedTables.forEach(linkedTable => {
-            linkedTable.available = false;
-  
-            this.coffeService.updateFirestore('tables', linkedTable.id, {
-              available: false
-            });
-          });
-        }
-      }
-    }
-  
-    this.cdr.detectChanges(); // Forzar actualización en la vista
-  }
-
-  onAddOrder(): void {
-    if (this.controlledBy) {
-      alert(`Esta mesa está siendo administrada por la mesa ${this.controlledBy}`);
-      return;
-    }
-  
-    // Si la mesa ya tiene un mozo asignado, abrir directamente el menú
-    if (this.waiterId) {
-      this.openMenuDialog();
-      return;
-    }
-  
-    // Abrir el diálogo de selección de mozo
+  // Método para abrir el diálogo de agregar ítems
+  addMenuItems(table: Table): void {
     const waiterDialogRef = this.dialog.open(WaiterDialogComponent, {
       width: '400px',
-      data: { waiters: this.coffeService.getWaiters() }
+      data: { table }
     });
   
-    waiterDialogRef.afterClosed().subscribe((waiterId: string | null) => {
-      if (waiterId) {
-        const waiter = this.coffeService.getWaiters().find(w => w.id === waiterId);
-        if (waiter) {
-          this.waiterId = waiterId;
-          this.waiterName = waiter.name; // ✅ Asignar nombre del mozo
+    waiterDialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const { waiterId, waiterName } = result;
   
-          const table = this.coffeService.getTables().find(t => t.id === this.id);
-          if (table) {
+        // Asigna el mozo a la mesa usando su ID
+        this.gestionService.assignWaiterToTable(table.id, waiterId, waiterName).subscribe({
+          next: (response) => {
+            console.log('Mozo asignado correctamente:', response);
+  
+            // Actualizar la mesa localmente
             table.waiterId = waiterId;
-            table.waiterName = waiter.name; // ✅ Guardar también en la mesa
+            table.waiterName = waiterName;
+            console.log(waiterName,'NOMBREMOZO');
+            
   
-            // **Actualizar Firestore con el nombre del mozo**
-            this.coffeService.updateFirestore('tables', this.id, {
-              waiterId: waiterId,
-              waiterName: waiter.name // ✅ Guardar nombre en Firestore
+            // Abre el diálogo de menú después de asignar el mozo
+            const menuDialogRef = this.dialog.open(MenuDialogComponent, {
+              width: '400px',
+              data: table,
             });
   
-            this.cdr.detectChanges();
+            menuDialogRef.afterClosed().subscribe((menu: any[]) => {
+              if (menu && menu.length > 0) {
+                this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
+                  this.loadTables(); // Recargar las mesas actualizadas
+                });
+              }
+            });
+          },
+          error: (error) => {
+            console.error('Error al asignar el mozo:', error);
+            alert('No se pudo asignar el mozo. Inténtalo nuevamente.');
           }
-  
-          // Abrir el menú después de seleccionar el mozo
-          this.openMenuDialog();
-        }
+        });
       }
     });
   }
-  
-  // Función para abrir el menú de órdenes
-  openMenuDialog(): void {
-    const menuDialogRef = this.dialog.open(MenuDialogComponent, {
-      width: '800px',
-      data: { menu: this.coffeService.getMenu() },
-    });
-  
-    menuDialogRef.afterClosed().subscribe((selectedMenuItems: MenuItem[] | undefined) => {
-      if (selectedMenuItems && selectedMenuItems.length > 0) {
-        const table = this.coffeService.getTables().find(t => t.id === this.id);
-        if (table) {
-          selectedMenuItems.forEach(menuItem => {
-            table.orders.push(menuItem);
-          });
-  
-          this.hasOrders = table.orders.length > 0;
-          this.available = false; // Marcar la mesa como ocupada
-  
-          // **Actualizar Firestore con las órdenes**
-          this.coffeService.updateFirestore('tables', this.id, {
-            orders: table.orders,
-            available: false // Marcar como ocupada en la base de datos
-          });
-  
-          this.cdr.detectChanges();
-        }
-      }
-    });
-  }
-
-  onViewOrders() {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-    
-    if (!table) {
-      console.error('No se encontró la mesa');
-      return;
-    }
-  
-    const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
-      width: '800px',
-      data: table, // Pasar directamente el objeto table
-    });
-  
-    dialogRef.afterClosed().subscribe((updatedOrders: MenuItem[] | undefined) => {
-      if (updatedOrders) {
-        this.coffeService.getTables().find(t => t.id === this.id)!.orders = updatedOrders;
-        this.updateOrderStatus();
-      }
-    });
-  }
-  
-
-  onRemoveOrder(orderId: number): void {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-    if (table) {
-      table.orders = table.orders.filter(order => order.id !== orderId);
-  
-      this.hasOrders = table.orders.length > 0;
-      this.available = !this.hasOrders; // Si no hay órdenes, la mesa se libera
-  
-      // **Actualizar Firestore**
-      this.coffeService.updateFirestore('tables', this.id, {
-        orders: table.orders,
-        available: !this.hasOrders // La mesa se libera si ya no tiene órdenes
+  // Método para abrir el diálogo de información de la mesa
+  openTableInfoDialog(table: Table): void {
+    if (table && table.orders) {
+      const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
+        width: '600px',
+        data: table,
       });
-  
-      this.cdr.detectChanges();
+
+      dialogRef.afterClosed().subscribe(result => {
+        // Si es necesario, se puede recargar la información de la mesa aquí
+        this.loadTables();
+      });
+    } else {
+      console.error('La mesa no tiene órdenes o es undefined:', table);
     }
   }
 
-  onGetTotal(): void {
-    const table = this.coffeService.getTables().find(t => t.id === this.id);
-    
-    if (!table) {
-      console.error('No se encontró la mesa');
-      return;
-    }
-  
-    const dialogRef = this.dialog.open(TotalDialogComponent, {
+  // Método para abrir el diálogo de asignación de mozo
+  openWaiterDialog(table: Table): void {
+    const dialogRef = this.dialog.open(WaiterDialogComponent, {
       width: '400px',
-      data: table,
+      data: { table }
     });
   
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'mesa_liberada') {
-        this.available = true; // Marcar la mesa como disponible
-        this.hasOrders = false;
-        this.controlledBy = undefined;
-        this.linkedTables = [];
+      if (result) {
+        const { waiterId, waiterName } = result;
+        this.gestionService.assignWaiterToTable(table.id, waiterId, waiterName).subscribe({
+          next: (response) => {
+            console.log('Mozo asignado correctamente:', response);
   
-        // Forzar actualización en Firestore
-        this.coffeService.updateFirestore('tables', this.id, {
-          available: true,
-          hasOrders: false,
-          controlledBy: null,
-          linkedTables: []
+            // Actualizar la mesa localmente
+            table.waiterId = waiterId;
+            table.waiterName = waiterName;
+  
+            this.loadTables(); // Recargar las mesas actualizadas
+          },
+          error: (error) => {
+            console.error('Error al asignar el mozo:', error);
+          }
         });
-  
-        this.cdr.detectChanges(); // Forzar actualización en la vista
       }
     });
-  }
-
-  getWaiterName(): string {
-    if (!this.waiterId) return 'Sin asignar';
-    const waiter = this.coffeService.getWaiters().find(w => w.id === this.waiterId);
-    return waiter ? waiter.name : 'Mozo no encontrado';
   }
 }

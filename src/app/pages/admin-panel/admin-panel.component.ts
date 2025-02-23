@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CoffeService, MenuItem, Table, Waiter } from 'src/app/models/coffe.service';
+import { GestionService } from 'src/app/services/gestionService';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
@@ -10,41 +11,51 @@ import { UserService } from 'src/app/services/user.service';
 })
 export class AdminPanelComponent {
   role$: Observable<string | null>;
-  //TABLES
+
+  // TABLES
   tables: Table[] = [];
   newTableName: string = '';
-  editTableId?: number;
+  editTableId?: string;
   editTableName: string = '';
   editTableAvailability: boolean = true;
-  //MENU 
+
+  // MENU
   menuItems: MenuItem[] = [];
   newItemName: string = '';
   newItemPrice: number = 0;
-  editItemId?: number;
+  editItemId?: string;
   editItemName: string = '';
   editItemPrice: number = 0;
 
-  //waiters 
-
+  // WAITERS
   waiters: Waiter[] = [];
   newWaiterName: string = '';
-  editWaiterId?: number;
+  editWaiterId?: string;
   editWaiterName: string = '';
 
-  constructor(private userService: UserService, private coffeService: CoffeService) {
+  constructor(
+    private userService: UserService,
+    private gestionService: GestionService
+  ) {
     this.role$ = this.userService.getRoleState();
-    this.tables = this.coffeService.getTables();
-    this.menuItems = this.coffeService.getMenu();
-    this.waiters = this.coffeService.getWaiters();
+    this.loadTables();
+    this.loadMenuItems();
+    this.loadWaiters();
   }
 
-  //TABLES
+  // TABLES
+  loadTables() {
+    this.gestionService.getTables().subscribe((tables) => {
+      this.tables = tables;
+    });
+  }
 
   addTable() {
     if (this.newTableName.trim()) {
-      this.coffeService.addTable(this.newTableName.trim());
-      this.tables = this.coffeService.getTables();
-      this.newTableName = '';
+      this.gestionService.addTable(this.newTableName.trim()).subscribe(() => {
+        this.loadTables();
+        this.newTableName = '';
+      });
     }
   }
 
@@ -56,76 +67,97 @@ export class AdminPanelComponent {
 
   saveTableEdit() {
     if (this.editTableId !== undefined) {
-      this.coffeService.editTable(this.editTableId, this.editTableName, this.editTableAvailability);
-      this.tables = this.coffeService.getTables();
-      this.editTableId = undefined;
+      this.gestionService
+        .editTable(this.editTableId, this.editTableName, this.editTableAvailability)
+        .subscribe(() => {
+          this.loadTables();
+          this.editTableId = undefined;
+        });
     }
   }
 
-  deleteTable(tableId: number) {
-    this.coffeService.deleteTable(tableId);
-    this.tables = this.coffeService.getTables();
+  deleteTable(tableId: string) {
+    this.gestionService.deleteTable(tableId).subscribe(() => {
+      this.loadTables();
+    });
   }
 
-  //MENU
+  // MENU
+  loadMenuItems() {
+    this.gestionService.getMenu().subscribe((menuItems) => {
+      this.menuItems = menuItems;
+    });
+  }
 
   addMenuItem() {
     if (this.newItemName.trim() && this.newItemPrice > 0) {
-      this.coffeService.addMenuItem(this.newItemName.trim(), this.newItemPrice);
-      this.menuItems = this.coffeService.getMenu();
-      this.newItemName = '';
-      this.newItemPrice = 0;
+      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice).subscribe(() => {
+        this.loadMenuItems();
+        this.newItemName = '';
+        this.newItemPrice = 0;
+      });
     }
   }
 
   startEditingMenu(item: MenuItem) {
-    this.editItemId = item.id;
+    this.editItemId = item._id;
     this.editItemName = item.name;
     this.editItemPrice = item.price;
   }
 
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
-      this.coffeService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice);
-      this.menuItems = this.coffeService.getMenu();
-      this.editItemId = undefined;
+      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice).subscribe(() => {
+        this.loadMenuItems();
+        this.editItemId = undefined;
+      });
     }
   }
 
-  deleteMenuItem(itemId: number) {
-    this.coffeService.deleteMenuItem(itemId);
-    this.menuItems = this.coffeService.getMenu();
+  deleteMenuItem(itemId: string) {
+    this.gestionService.deleteMenuItem(itemId).subscribe(() => {
+      this.loadMenuItems();
+    });
   }
 
-  //waiters
+  // WAITERS
+  loadWaiters() {
+    this.gestionService.getWaiters().subscribe((waiters) => {
+      this.waiters = waiters;
+    });
+  }
 
   addWaiter() {
     if (this.newWaiterName.trim()) {
-      this.coffeService.addWaiter(this.newWaiterName.trim());
-      this.waiters = this.coffeService.getWaiters();
-      this.newWaiterName = '';
+      this.gestionService.addWaiter(this.newWaiterName.trim()).subscribe(() => {
+        this.loadWaiters();
+        this.newWaiterName = '';
+      });
     }
   }
 
   startEditingWaiter(waiter: Waiter) {
-    this.editWaiterId = waiter.id;
+    this.editWaiterId = waiter._id;
     this.editWaiterName = waiter.name;
   }
 
   saveWaiterEdit() {
     if (this.editWaiterId !== undefined) {
-      this.coffeService.editWaiter(this.editWaiterId, this.editWaiterName);
-      this.waiters = this.coffeService.getWaiters();
-      this.editWaiterId = undefined;
+      this.gestionService.editWaiter(this.editWaiterId, this.editWaiterName).subscribe(() => {
+        this.loadWaiters();
+        this.editWaiterId = undefined;
+      });
     }
   }
 
-  deleteWaiter(waiterId: number) {
-    this.coffeService.deleteWaiter(waiterId);
-    this.waiters = this.coffeService.getWaiters();
+  deleteWaiter(waiterId: string) {
+    this.gestionService.deleteWaiter(waiterId).subscribe(() => {
+      this.loadWaiters();
+    });
   }
 
+  // Format price input
   formatPrice() {
-    this.newItemPrice = Number(this.newItemPrice); // Convierte a número explícitamente
+    this.newItemPrice = Number(this.newItemPrice);
   }
 }

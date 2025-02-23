@@ -1,148 +1,47 @@
-<div class="container">
-  <div class="row">
-    <div class="col">
-      <mat-card
-        class="example-card"
-        [ngClass]="{
-          'available-card': !hasOrders,
-          'occupied-card': hasOrders
-        }"
-      >
-        <mat-card-header>
-          <mat-card-title class="d-flex flex-column align-items-start w-100">
-            <!-- Nombre alineado a la izquierda -->
-            <h2 class="text-white m-0">
-              {{ name }}
-            </h2>
+<div class="container my-5">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div
+      *ngFor="let table of tables"
+      class="card shadow-lg rounded-3 p-4 d-flex flex-column justify-between"
+    >
+      <div class="card-body">
+        <h5 class="card-title mb-2">Mesa: {{ table.name }}</h5>
+        
+        <!-- Mozo asignado -->
+        <p  class="text-info">
+          Gestionada por: <strong>{{ table.waiterName }}</strong>
+        </p>
 
-            <!-- Párrafo alineado a la izquierda -->
-            <small
-              *ngIf="waiterId"
-              class="d-flex align-items-center m-0 justify-content-center"
-              style="font-size: 14px"
-            >
-              <div
-                style="
-                  display: flex;
-                  justify-content: center;
-                  align-items: baseline;
-                  gap: 0.5rem;
-                  color: white;
-                "
-              >
-              Gestionado por: <strong>{{ waiterName }}</strong>
-                <mat-icon
-                  fontIcon="manage_accounts"
-                  class="me-2"
-                  style="font-size: 14px; font-weight: 300"
-                ></mat-icon>
-              </div>
-            </small>
-          </mat-card-title>
-
-          <mat-card-subtitle>
-            <span
-              style="font-size: x-small; color: white; font-weight: 500"
-              *ngIf="linkedTables.length > 0"
-            >
-              Vinculada con: {{ linkedTablesNames }}
-            </span>
-          </mat-card-subtitle>
-        </mat-card-header>
-
-        <mat-card-content
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-          "
+        <p
+          class="card-text"
+          [ngClass]="{ 'text-success': table.available, 'text-danger': !table.available }"
         >
-          <div style="margin-top: 1rem; margin-bottom: 1rem">
-            <img
-              *ngIf="available"
-              style="width: 90px; height: 90px; border-radius: 100px"
-              mat-card-image
-              src="./assets/nuovo-cafe.jpg"
-              alt="table"
-            />
-            <img
-              *ngIf="!available"
-              style="width: 90px; height: 90px; border-radius: 100px"
-              mat-card-image
-              src="./assets/nuovo-cafe.jpg"
-              alt="table"
-            />
-          </div>
+          {{ table.available ? 'Disponible' : 'Ocupada' }}
+        </p>
 
-          <div class="row gx-2 gy-2 justify-content-center">
-            <div class="col-6">
-              <button
-                class="btn btn-primary w-100"
-                style="color: white; font-size: 10px"
-                mat-raised-button
-                (click)="onAddOrder()"
-                [disabled]="controlledBy"
-              >
-                Ordenar
-                <mat-icon fontIcon="restaurant"></mat-icon>
-              </button>
-            </div>
+        <p class="mt-2 small">Pedidos:</p>
+        <ul class="list-unstyled">
+          <li *ngFor="let item of table.orders">
+            <span>{{ item.name }}</span>
+          </li>
+        </ul>
+      </div>
 
-            <div class="col-6" *ngIf="orders.length > 0">
-              <button
-                class="btn btn-primary w-100"
-                style="color: white; font-size: 10px"
-                mat-raised-button
-                (click)="onViewOrders()"
-                [disabled]="controlledBy"
-              >
-                Ver Órdenes
-                <mat-icon fontIcon="table_restaurant"></mat-icon>
-              </button>
-            </div>
+      <div class="card-footer d-flex justify-content-between">
+        <button
+          class="btn btn-primary"
+          (click)="addMenuItems(table)"
+        >
+          ➕ Agregar Ítems
+        </button>
 
-            <div class="col-6">
-              <button
-                class="btn btn-primary w-100"
-                style="color: white; font-size: 10px"
-                mat-raised-button
-                (click)="linkTable()"
-                [disabled]="controlledBy"
-              >
-                Vincular Mesas
-                <mat-icon fontIcon="link"></mat-icon>
-              </button>
-            </div>
-
-            <div class="col-6" *ngIf="orders && orders.length > 0">
-              <button
-                class="btn btn-danger w-100"
-                style="color: white; font-size: 10px"
-                mat-raised-button
-                (click)="onGetTotal()"
-                [disabled]="controlledBy"
-              >
-                Total
-                <mat-icon fontIcon="currency_exchange"></mat-icon>
-              </button>
-            </div>
-
-            <div>
-              <button
-                class="btn btn-primary w-100"
-                *ngIf="waiterId && orders.length === 0"
-                style="color: white; font-size: 10px"
-                mat-raised-button
-                (click)="releaseTable()"
-              >
-                Liberar Mesa
-                <mat-icon fontIcon="refresh"></mat-icon>
-              </button>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        <button
+          class="btn btn-secondary"
+          (click)="openTableInfoDialog(table)"
+        >
+          ➕ Ver Ítems
+        </button>
+      </div>
     </div>
   </div>
 </div>

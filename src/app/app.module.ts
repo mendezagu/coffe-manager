@@ -15,6 +15,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { AppComponent } from './app.component';
 import { MenuDialogComponent } from './components/menu-dialog/menu-dialog.component';
@@ -55,7 +56,7 @@ import { BalanceComponent } from './pages/balance/balance.component';
     RegisterComponent,
     AdminPanelComponent,
     StadisticsComponent,
-    BalanceComponent
+    BalanceComponent,
 
   ],
   imports: [
@@ -69,6 +70,7 @@ import { BalanceComponent } from './pages/balance/balance.component';
     MatDialogModule,
     MatFormFieldModule,
     MatExpansionModule,
+    MatCheckboxModule,
     MatSnackBarModule,
     MatInputModule,
     MatSidenavModule,
