@@ -1,16 +1,16 @@
-<h2>Asignar Mozo</h2>
-<div>
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Seleccionar Mozo</mat-label>
-    <mat-select [(ngModel)]="selectedWaiterId">
-      <mat-option *ngFor="let waiter of waiters" [value]="waiter._id">
-        {{ waiter.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+<h2 class="mb-4 text-center">Asignar Mozo</h2>
+
+<div class="mb-3">
+  <label for="waiterSelect" class="form-label">Seleccionar Mozo</label>
+  <select id="waiterSelect" class="form-select form-select-lg shadow-sm" [(ngModel)]="selectedWaiterId">
+    <option value="" disabled selected>Seleccione un mozo...</option>
+    <option *ngFor="let waiter of waiters" [value]="waiter._id">
+      {{ waiter.name }}
+    </option>
+  </select>
 </div>
 
-<div class="dialog-actions">
-  <button mat-button (click)="onCancel()">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="onConfirm()">Asignar</button>
+<div class="d-flex justify-content-between mt-4">
+  <button class="btn btn-outline-secondary btn-lg" (click)="onCancel()">Cancelar</button>
+  <button class="btn btn-primary btn-lg" (click)="onConfirm()">Asignar</button>
 </div>
