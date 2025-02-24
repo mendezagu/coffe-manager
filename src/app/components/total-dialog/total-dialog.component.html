@@ -1,55 +1,67 @@
-<h2 mat-dialog-title>Detalle de la Orden</h2>
+<h2 mat-dialog-title class="text-center mb-4">Detalle de la Orden</h2>
+
 <mat-dialog-content>
- <!-- Encabezado -->
- <div class="header-row">
-  <span>Producto</span>
-  <span>Unit</span>
-  <span>Subtotal</span>
-</div>
+  <!-- Encabezado -->
+  <div class="row mb-3">
+    <div class="col-8"><strong>Producto</strong></div>
+    <div class="col-2 text-center"><strong>Unit</strong></div>
+    <div class="col-2 text-end"><strong>Subtotal</strong></div>
+  </div>
 
-<!-- Lista de items -->
-<mat-list>
-  <mat-list-item *ngFor="let order of data.orders">
-    <div class="data-row">
-      <span>{{ order.name }} (x{{ order.quantity || 1 }})</span>
-      <span>{{ order.price | currency }}</span>
-      <span>{{ (order.price * (order.quantity || 1)) | currency }}</span>
+  <!-- Lista de items -->
+  <div *ngFor="let order of data.orders" class="row mb-2">
+    <div class="col-8">{{ order.name }} (x{{ order.quantity || 1 }})</div>
+    <div class="col-2 text-center">{{ order.price | currency }}</div>
+    <div class="col-2 text-end">{{ (order.price * (order.quantity || 1)) | currency }}</div>
+  </div>
+
+  <!-- Total -->
+  <div class="row mt-4">
+    <div class="col-8">
+      <strong>Total:</strong>
     </div>
-  </mat-list-item>
-</mat-list>
-
-  <p class="total-amount">
-    <strong>Total:</strong> {{ total | currency }}
-  </p>
+    <div class="col-4 text-end">
+      <strong>{{ total | currency }}</strong>
+    </div>
+  </div>
 
   <!-- Panel de descuento -->
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Aplicar Descuento
-        </mat-panel-title>
-     
-      </mat-expansion-panel-header>
-      <div>
-        <button mat-button color="primary" (click)="applyDiscount(0)">0%</button>
-        <button mat-button color="primary" (click)="applyDiscount(5)">5%</button>
-        <button mat-button color="primary" (click)="applyDiscount(10)">10%</button>
-        <button mat-button color="primary" (click)="applyDiscount(15)">15%</button>
-        <button mat-button color="primary" (click)="applyDiscount(20)">20%</button>
-        <button mat-button color="primary" (click)="applyDiscount(25)">25%</button>
-        <button mat-button color="primary" (click)="applyDiscount(30)">30%</button>
-        <button mat-button color="primary" (click)="applyDiscount(35)">35%</button>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+  <div class="mt-4">
+    <h5>Aplicar Descuento</h5>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Escoge un descuento
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="d-flex flex-wrap">
+          <button class="btn btn-primary m-1" (click)="applyDiscount(0)">0%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(5)">5%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(10)">10%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(15)">15%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(20)">20%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(25)">25%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(30)">30%</button>
+          <button class="btn btn-primary m-1" (click)="applyDiscount(35)">35%</button>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 
-  <p class="total-amount">
-    <strong>Total con Descuento:</strong> {{ discountedTotal | currency }}
-  </p>
+  <!-- Total con descuento -->
+  <div class="row mt-4">
+    <div class="col-8">
+      <strong>Total con Descuento:</strong>
+    </div>
+    <div class="col-4 text-end">
+      <strong>{{ discountedTotal | currency }}</strong>
+    </div>
+  </div>
 </mat-dialog-content>
+
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cerrar</button>
-  <button mat-button (click)="printTicket()">Imprimir</button>
-  <button mat-button color="warn" (click)="liberarMesa()">Liberar Mesa</button>
+  <button mat-button class="btn btn-secondary" mat-dialog-close>Cerrar</button>
+  <button mat-button class="btn btn-primary" (click)="printTicket()">Imprimir</button>
+  <button mat-button class="btn btn-danger" color="warn" (click)="liberarMesa()">Liberar Mesa</button>
 </mat-dialog-actions>

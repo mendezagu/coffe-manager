@@ -114,7 +114,7 @@ export class CardComponent implements OnInit {
   openTotalDialog(table: Table): void {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
-        width: '400px',
+        width: '600px',
         data: table
       });
   
