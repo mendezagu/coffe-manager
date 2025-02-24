@@ -8,7 +8,7 @@
         <h5 class="card-title mb-2">Mesa: {{ table.name }}</h5>
         
         <!-- Mozo asignado -->
-        <p  class="text-info">
+        <p  class="text-info" *ngIf="waiters">
           Gestionada por: <strong>{{ table.waiterName }}</strong>
         </p>
 
@@ -19,12 +19,6 @@
           {{ table.available ? 'Disponible' : 'Ocupada' }}
         </p>
 
-        <p class="mt-2 small">Pedidos:</p>
-        <ul class="list-unstyled">
-          <li *ngFor="let item of table.orders">
-            <span>{{ item.name }}</span>
-          </li>
-        </ul>
       </div>
 
       <div class="card-footer d-flex justify-content-between">

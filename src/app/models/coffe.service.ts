@@ -18,10 +18,11 @@ export interface Table {
   controlledBy?: any;
   waiterId?: any;
   waiterName?:any
+   waiter?: Waiter;
 }
 
 export interface Waiter {
-  _id: any;
+  id: any;
   name: any;
 }
 
@@ -143,10 +144,10 @@ export class CoffeService {
 
   addWaiter(name: string): void {
     const newWaiter: Waiter = {
-      _id: this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w._id)) + 1 : 1,
+      id: this.waiters.length > 0 ? Math.max(...this.waiters.map(w => w.id)) + 1 : 1,
       name
     };
-    this.firestore.collection('waiters').doc(newWaiter._id.toString()).set(newWaiter);
+    this.firestore.collection('waiters').doc(newWaiter.id.toString()).set(newWaiter);
   }
 
   editWaiter(waiterId: number, newName: string): void {

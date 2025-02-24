@@ -38,12 +38,15 @@ export class GestionService {
   // 📌 Tables
   getTables(): Observable<Table[]> {
     return this.http.get<Table[]>(`${this.apiUrl}/tables`).pipe(
-      map((tables: any[]) =>
-        tables.map(table => ({
+      map((tables: any[]) => {
+        return tables.map(table => ({
           ...table,
-          id: table._id, // Mapea _id a id si es necesario
-        }))
-      )
+          id: table._id,
+          waiterId: table.waiterId,
+          waiterName: table.waiter ? table.waiter.name : 'Sin asignar'  // Aquí asignamos el nombre si existe
+        }));
+        
+      })
     );
   }
 
@@ -137,7 +140,7 @@ addItemsToTable(tableId: string, items: MenuItem[]): Observable<Table> {
   }
 
  // ✅ Asignar un mozo a una mesa solo con su ID
-assignWaiterToTable(tableId: string, waiterId: string, waiterName: any): Observable<any> {
+ assignWaiterToTable(tableId: string, waiterId: string): Observable<any> {
   return this.http.put(`${this.apiUrl}/tables/${tableId}/assign-waiter`, { waiterId });
 }
 }

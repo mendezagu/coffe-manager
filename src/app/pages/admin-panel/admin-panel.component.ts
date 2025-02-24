@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CoffeService, MenuItem, Table, Waiter } from 'src/app/models/coffe.service';
+import { CoffeService, MenuItem} from 'src/app/models/coffe.service';
 import { GestionService } from 'src/app/services/gestionService';
 import { UserService } from 'src/app/services/user.service';
+import { Waiter } from 'src/app/services/gestionService';
+import { Table } from 'src/app/services/gestionService';
 
 @Component({
   selector: 'app-admin-panel',
