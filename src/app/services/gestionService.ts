@@ -39,13 +39,16 @@ export class GestionService {
   getTables(): Observable<Table[]> {
     return this.http.get<Table[]>(`${this.apiUrl}/tables`).pipe(
       map((tables: any[]) => {
-        return tables.map(table => ({
-          ...table,
-          id: table._id,
-          waiterId: table.waiterId,
-          waiterName: table.waiter ? table.waiter.name : 'Sin asignar'  // Aquí asignamos el nombre si existe
-        }));
-        
+        return tables.map(table => {
+          // Actualizar el estado de la mesa en función de si tiene órdenes
+          table.available = table.orders.length === 0; // Si no tiene órdenes, está disponible
+          return {
+            ...table,
+            id: table._id,
+            waiterId: table.waiterId,
+            waiterName: table.waiter ? table.waiter.name : 'Sin asignar',  // Asignar el nombre si existe
+          };
+        });
       })
     );
   }
@@ -64,20 +67,32 @@ export class GestionService {
 
 // 📌 Agregar ítems a la mesa
 addItemsToTable(tableId: string, items: MenuItem[]): Observable<Table> {
-    const formattedItems = items.map(item => ({
-      id: item._id,
-      quantity: item.quantity || 1,
-      name:item.name
-    }));
-    console.log(formattedItems,'FORMATO');
-    
-  
-    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems });
-  }
+  const formattedItems = items.map(item => ({
+    id: item._id,
+    quantity: item.quantity || 1,
+    name: item.name
+  }));
+  console.log(formattedItems, 'FORMATO');
+
+  return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems }).pipe(
+    map((table: Table) => {
+      // Verificar si la mesa tiene al menos un producto en orders y cambiar el estado
+      table.available = table.orders.length === 0; // Si no tiene órdenes, está disponible
+
+      return table;
+    })
+  );
+}
 
   // Eliminar una orden específica de una mesa
   deleteOrdersFromTable(tableId: string, orderIds: string[]): Observable<Table> {
-    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/remove-order`, { orderIds });
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/remove-order`, { orderIds }).pipe(
+      map((table: Table) => {
+        // Actualizar la disponibilidad de la mesa después de eliminar órdenes
+        table.available = table.orders.length === 0; // Si no tiene órdenes, está disponible
+        return table;
+      })
+    );
   }
 
 //obtener la info de las mesas 
