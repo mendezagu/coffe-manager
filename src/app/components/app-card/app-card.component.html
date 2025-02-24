@@ -35,6 +35,13 @@
         >
           ➕ Ver Ítems
         </button>
+
+        <button
+          class="btn btn-success"
+          [disabled]="!table.orders || table.orders.length === 0"
+          (click)="openTotalDialog(table)">
+          💰 Ver Total
+        </button>
       </div>
     </div>
   </div>

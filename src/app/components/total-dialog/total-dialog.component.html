@@ -9,7 +9,7 @@
 
 <!-- Lista de items -->
 <mat-list>
-  <mat-list-item *ngFor="let order of table.orders">
+  <mat-list-item *ngFor="let order of data.orders">
     <div class="data-row">
       <span>{{ order.name }} (x{{ order.quantity || 1 }})</span>
       <span>{{ order.price | currency }}</span>

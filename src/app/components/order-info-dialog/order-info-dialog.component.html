@@ -5,6 +5,7 @@
     <mat-list-option *ngFor="let order of table.orders" [value]="order._id">
       <div class="order-info">
         <span>{{ order.name || 'Nombre no disponible' }} x ({{ order.quantity }})</span>
+        <span>{{order.price}}</span>
       </div>
     </mat-list-option>
   </mat-selection-list>

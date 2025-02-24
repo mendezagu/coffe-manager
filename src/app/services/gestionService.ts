@@ -140,7 +140,7 @@ addItemsToTable(tableId: string, items: MenuItem[]): Observable<Table> {
   }
 
  // ✅ Asignar un mozo a una mesa solo con su ID
- assignWaiterToTable(tableId: string, waiterId: string): Observable<any> {
+assignWaiterToTable(tableId: string, waiterId: string): Observable<any> {
   return this.http.put(`${this.apiUrl}/tables/${tableId}/assign-waiter`, { waiterId });
 }
 }

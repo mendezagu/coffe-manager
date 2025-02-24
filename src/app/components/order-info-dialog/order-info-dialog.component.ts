@@ -35,7 +35,10 @@ export class OrderInfoDialogComponent implements OnInit {
           const menuItem = menuItems.find(item => item._id === order.menuItem);
           if (menuItem) {
             order.name = menuItem.name; // Asignar el nombre directamente a la orden
-          } else {
+          } if(menuItem){
+            order.price = menuItem.price
+          }
+           else {
             order.name = 'No encontrado';
           }
         });

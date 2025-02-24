@@ -4,6 +4,7 @@ import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
 import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog.component';
 import { GestionService, Table, Waiter } from 'src/app/services/gestionService';
 import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
+import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
 
 @Component({
   selector: 'app-card',
@@ -110,6 +111,23 @@ export class CardComponent implements OnInit {
     }
   }
 
+  openTotalDialog(table: Table): void {
+    if (table && table.orders && table.orders.length > 0) {
+      const dialogRef = this.dialog.open(TotalDialogComponent, {
+        width: '400px',
+        data: table
+      });
+  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === 'mesa_liberada') {
+          this.loadTables(); // Recargar las mesas si la mesa fue liberada
+        }
+      });
+    } else {
+      console.warn('La mesa no tiene órdenes.');
+    }
+  }
+
   // Método para abrir el diálogo de asignación de mozo
   openWaiterDialog(table: Table): void {
     const dialogRef = this.dialog.open(WaiterDialogComponent, {
@@ -153,4 +171,8 @@ export class CardComponent implements OnInit {
       }
     });
   }
+
+  //Metodo para abrir el dialogo de ver total 
+
+ 
 }
