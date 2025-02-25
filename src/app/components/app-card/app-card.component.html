@@ -1,48 +1,103 @@
 <div class="container my-5">
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     <div
-      *ngFor="let table of tables"
-      class="card shadow-lg rounded-3 p-4 d-flex flex-column justify-between"
+  *ngFor="let table of tables"
+  class="card shadow-lg rounded-3 p-4 d-flex flex-column justify-between"
+  [ngClass]="{
+    'bg-success': table.available && !table.controlledBy,    
+    'bg-danger': !table.available || table.controlledBy
+  }"
+>
+  <div class="card-body">
+    <h5 class="card-title mb-2">Mesa: {{ table.name }}</h5>
+
+    <!-- Mozo asignado -->
+    <p class="text-info" *ngIf="waiters && !table.controlledBy">
+      Gestionada por: <strong>{{ table.waiterName }}</strong>
+    </p>
+
+    <!-- Si la mesa está controlada por otra -->
+    <p class="text-warning" *ngIf="table.controlledBy">
+      Mesa administrada por {{ getTableNameById(table.controlledBy) }}
+    </p>
+
+    <p
+      class="card-text"
+      [ngClass]="{
+        'text-success': table.available && !table.controlledBy,
+        'text-danger': !table.available || table.controlledBy
+      }"
     >
-      <div class="card-body">
-        <h5 class="card-title mb-2">Mesa: {{ table.name }}</h5>
-        
-        <!-- Mozo asignado -->
-        <p  class="text-info" *ngIf="waiters">
-          Gestionada por: <strong>{{ table.waiterName }}</strong>
-        </p>
+      {{ table.available && !table.controlledBy ? 'Disponible' : 'Ocupada' }}
+    </p>
 
-        <p
-          class="card-text"
-          [ngClass]="{ 'text-success': table.available, 'text-danger': !table.available }"
-        >
-          {{ table.available ? 'Disponible' : 'Ocupada' }}
-        </p>
-
-      </div>
-
-      <div class="card-footer d-flex justify-content-between">
-        <button
-          class="btn btn-primary"
-          (click)="addMenuItems(table)"
-        >
-          ➕ Agregar Ítems
-        </button>
-
-        <button
-          class="btn btn-secondary"
-          (click)="openTableInfoDialog(table)"
-        >
-          ➕ Ver Ítems
-        </button>
-
-        <button
-          class="btn btn-success"
-          [disabled]="!table.orders || table.orders.length === 0"
-          (click)="openTotalDialog(table)">
-          💰 Ver Total
-        </button>
-      </div>
+    <!-- Mesas vinculadas -->
+    <div *ngIf="table.linkedTables && table.linkedTables.length > 0">
+      <p class="text-info">
+        Mesa vinculada con:
+        <span *ngFor="let linkedTableId of table.linkedTables">
+          {{ getTableNameById(linkedTableId) }}
+          <span *ngIf="!isLastLinkedTable(table.linkedTables, linkedTableId)">, </span>
+        </span>
+      </p>
     </div>
+  </div>
+
+  <div class="card-footer d-flex flex-column">
+    <div class="btn-group mb-2" *ngIf="!table.orders || table.orders.length === 0">
+      <button
+        class="btn btn-primary"
+        (click)="addMenuItems(table)"
+        [disabled]="table.controlledBy"
+      >
+        ➕ Agregar Ítems
+      </button>
+
+      <button
+        class="btn btn-warning"
+        (click)="openLinkTablesDialog(table)"
+        [disabled]="table.controlledBy"
+      >
+        🔗 Vincular Mesas
+      </button>
+    </div>
+
+    <button
+      class="btn btn-danger w-100 mb-2"
+      *ngIf="!table.orders || table.orders.length === 0 && table.linkedTables.length > 0"
+      (click)="unlinkTables(table)"
+      [disabled]="table.controlledBy"
+    >
+      🔗 Desvincular Mesas
+    </button>
+
+    <div class="btn-group mb-2" *ngIf="table.orders && table.orders.length > 0">
+      <button
+        class="btn btn-primary"
+        (click)="addMenuItems(table)"
+        [disabled]="table.controlledBy"
+      >
+        ➕ Agregar Ítems
+      </button>
+
+      <button
+        class="btn btn-secondary"
+        (click)="openTableInfoDialog(table)"
+        [disabled]="table.controlledBy"
+      >
+        ➕ Ver Ítems
+      </button>
+    </div>
+
+    <button
+      class="btn btn-success w-100"
+      *ngIf="table.orders && table.orders.length > 0"
+      (click)="openTotalDialog(table)"
+      [disabled]="table.controlledBy"
+    >
+      💰 Ver Total
+    </button>
+  </div>
+</div>
   </div>
 </div>

@@ -16,7 +16,7 @@ export interface Table {
   available: boolean;
   orders: MenuItem[];
   linkedTables: string[];
-  controlledBy?: string;
+  controlledBy?: string | null;  // Acepta null
   waiterId?: any;
   waiterName?: string;
   waiter?: Waiter;
@@ -32,6 +32,7 @@ export interface Waiter {
 })
 export class GestionService {
   private apiUrl = environmentMongo.apiUrl;
+  tables: any;
 
   constructor(private http: HttpClient) {}
 
@@ -108,6 +109,57 @@ addItemsToTable(tableId: string, items: MenuItem[]): Observable<Table> {
   //libera las mesas 
   releaseTable(tableId: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/tables/${tableId}/release`, {}); // Ajusta la ruta y payload según tu backend
+  }
+
+  resetTable(tableId: string): Observable<Table> {
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/reset`, {}).pipe(
+      map((table) => ({
+        ...table,
+        waiterId: null,  // En lugar de undefined, usa null si el backend lo maneja mejor
+        waiterName: 'No asignado',
+        linkedTables: [],
+        orders: [],
+        available: true,
+        controlledBy: null,
+      }))
+    );
+  }
+
+  // 📌 Vincular mesas
+  linkTables(tableId: string, linkedTableIds: string[]): Observable<Table> {
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/link-tables`, { linkedTableIds }).pipe(
+      map((table: Table) => {
+        // Actualizar la mesa principal
+        const mainTable = this.tables.find((t: { id: string; }) => t.id === tableId);
+        if (mainTable) {
+          mainTable.linkedTables = linkedTableIds;
+          mainTable.available = false; // Ocupa la mesa principal
+        }
+  
+        // Actualizar las mesas vinculadas
+        linkedTableIds.forEach(linkedTableId => {
+          const linkedTable = this.tables.find((t: { id: string; }) => t.id === linkedTableId);
+          if (linkedTable) {
+            linkedTable.controlledBy = tableId; // Asigna la mesa principal como controladora
+            linkedTable.available = false; // Marca la mesa como ocupada
+          }
+        });
+  
+        return table;
+      })
+    );
+  }
+
+  // 📌 Desvincular mesas
+  unlinkTables(tableId: string, linkedTableIds: string[]): Observable<Table> {
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/unlink-tables`, { linkedTableIds }).pipe(
+      map((table: Table) => {
+        return {
+          ...table,
+          linkedTables: table.linkedTables
+        };
+      })
+    );
   }
 
   // 📌 Menu Items

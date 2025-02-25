@@ -5,6 +5,7 @@ import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog
 import { GestionService, Table, Waiter } from 'src/app/services/gestionService';
 import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
 import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
+import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog.component';
 
 @Component({
   selector: 'app-card',
@@ -39,14 +40,14 @@ export class CardComponent implements OnInit {
   loadTables(): void {
     this.gestionService.getTables().subscribe((tables) => {
       this.tables = tables.map((table) => {
-        // Verifica si hay un mozo asignado y busca su nombre en la lista de mozos
         const waiter = this.waiters.find((w) => w._id === table.waiterId);
         return {
           ...table,
           waiterName: waiter ? waiter.name : 'No asignado',
+          available: table.controlledBy ? false : table.available, // Ocupa las mesas vinculadas
+          linkedTables: table.linkedTables || [] // Asegura que siempre haya un array
         };
       });
-      console.log(this.tables, 'Mesas cargadas con mozos asignados');
     });
   }
 
@@ -115,12 +116,15 @@ export class CardComponent implements OnInit {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
         width: '600px',
-        data: table
+        data: { tableId: table.id, orders: table.orders }
       });
   
       dialogRef.afterClosed().subscribe(result => {
-        if (result === 'mesa_liberada') {
-          this.loadTables(); // Recargar las mesas si la mesa fue liberada
+        if (result?.status === 'mesa_liberada') {
+          console.log(`Mesa con ID ${result.tableId} liberada correctamente.`);
+          
+          // 🔄 Recargar las mesas si la mesa fue liberada
+          this.loadTables();
         }
       });
     } else {
@@ -172,7 +176,65 @@ export class CardComponent implements OnInit {
     });
   }
 
-  //Metodo para abrir el dialogo de ver total 
+// Método para abrir el diálogo de vinculación de mesas
+openLinkTablesDialog(table: Table): void {
+  const dialogRef = this.dialog.open(LinkTableDialogComponent, {
+    width: '400px',
+    data: { table }
+  });
 
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.gestionService.linkTables(table.id, result).subscribe({
+        next: (response) => {
+          console.log('Mesas vinculadas correctamente:', response);
+
+          // 🔄 Actualizar directamente el estado de las mesas
+          this.tables = this.tables.map((t) => {
+            if (t.id === table.id) {
+              return { ...t, linkedTables: result, available: false };
+            } else if (result.includes(t.id)) {
+              return { ...t, controlledBy: table.id, available: false };
+            }
+            return t;
+          });
+        },
+        error: (error) => {
+          console.error('Error al vincular las mesas:', error);
+        }
+      });
+    }
+  });
+}
+
+// Método para desvincular mesas
+unlinkTables(table: Table): void {
+  const linkedTableIds = table.linkedTables;
+  this.gestionService.unlinkTables(table.id, linkedTableIds).subscribe({
+    next: (response) => {
+      console.log('Mesas desvinculadas correctamente:', response);
+      this.loadTables(); // Recargar las mesas actualizadas
+    },
+    error: (error) => {
+      console.error('Error al desvincular las mesas:', error);
+    }
+  });
+}
+
+// Obtener el nombre de una mesa por su ID
+getTableNameById(tableId: string): string {
+  const table = this.tables.find(t => t.id === tableId);
+  return table ? table.name : 'Desconocida';
+}
+
+getControllingTableName(controlledById: string): string {
+  const controllingTable = this.tables.find((t) => t.id === controlledById);
+  return controllingTable ? controllingTable.name : 'Desconocida';
+}
+
+// Verificar si una mesa es la última en la lista de mesas vinculadas
+isLastLinkedTable(linkedTables: string[], tableId: string): boolean {
+  return linkedTables.indexOf(tableId) === linkedTables.length - 1;
+}
  
 }

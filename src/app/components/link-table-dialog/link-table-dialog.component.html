@@ -1,16 +1,13 @@
-<h2 mat-dialog-title>Vincular Mesas</h2>
-<mat-dialog-content>
-  <mat-selection-list #tableList>
-    <mat-list-option *ngFor="let table of availableTables" [value]="table.id">
+<h2>Vincular Mesas</h2>
+<div>
+  <p>Selecciona las mesas que deseas vincular con la mesa {{ data.table.name }}:</p>
+  <div *ngFor="let table of tables">
+    <mat-checkbox (change)="onTableSelectionChange($event, table.id)">
       {{ table.name }}
-    </mat-list-option>
-  </mat-selection-list>
-</mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="primary" 
-    [disabled]="tableList.selectedOptions.selected.length === 0" 
-    (click)="linkSelectedTables(tableList.selectedOptions.selected)">
-    Vincular
-  </button>
-</mat-dialog-actions>
+    </mat-checkbox>
+  </div>
+</div>
+<div class="dialog-actions">
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onConfirm()">Vincular</button>
+</div>

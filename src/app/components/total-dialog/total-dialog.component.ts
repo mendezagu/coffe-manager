@@ -88,11 +88,27 @@ export class TotalDialogComponent implements OnInit {
 
   liberarMesa() {
     if (!this.data.tableId) {
+      console.log(this.data.tableId, 'ID DE MESA ENCONTRADO');
+      
       console.error('No se pudo liberar la mesa: ID de la mesa no encontrado.');
       return;
     }
-    // Llamamos a releaseTable() que ahora actualiza Firestore
-    this.dialogRef.close('mesa_liberada'); // Notificar al componente padre
+  
+    this.gestionService.resetTable(this.data.tableId).subscribe({
+      next: (response) => {
+        console.log('Mesa liberada correctamente:', response);
+  
+        // 🔄 Notificar al componente padre que la mesa fue liberada
+        this.dialogRef.close({
+          status: 'mesa_liberada',
+          tableId: this.data.tableId
+        });
+      },
+      error: (error) => {
+        console.error('Error al liberar la mesa:', error);
+        alert('Hubo un error al liberar la mesa. Inténtalo nuevamente.');
+      }
+    });
   }
 
   printTicket() {
