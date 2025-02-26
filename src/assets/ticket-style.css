@@ -1,0 +1,40 @@
+/* ticket-style.css */
+body {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+  }
+  
+  .ticket {
+    width: 250px;
+    padding: 10px;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .order-item p {
+    margin: 0;
+  }
+  
+  .totals {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .line {
+    border-top: 1px dashed #000;
+    margin: 5px 0;
+  }
+  
+  @media print {
+    body {
+      margin: 0;
+    }
+  }

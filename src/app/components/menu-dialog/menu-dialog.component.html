@@ -39,4 +39,11 @@
   <button class="btn btn-primary" (click)="assign()">
     ✅ Asignar
   </button>
+  <button class="btn btn-success" (click)="printTicket()" [disabled]="!canPrint">
+    🖨️ Imprimir Comanda
+  </button>
+
+
+  
 </div>
+
