@@ -12,6 +12,7 @@ export class MenuDialogComponent {
   menuItems: MenuItem[] = [];
   selectedItems: MenuItem[] = [];
   canPrint: boolean = false;
+  filterText: string = '';
 
   constructor(
     private gestionService: GestionService,
@@ -34,6 +35,12 @@ export class MenuDialogComponent {
     this.gestionService.getMenu().subscribe((menus) => {
       this.menuItems = menus;
     });
+  }
+
+  get filteredMenuItems(): MenuItem[] {
+    return this.menuItems.filter(menu => 
+      menu.name.toLowerCase().includes(this.filterText.toLowerCase())
+    );
   }
 
   toggleSelection(menu: MenuItem, event: any): void {
