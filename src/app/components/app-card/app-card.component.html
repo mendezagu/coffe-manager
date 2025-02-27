@@ -1,103 +1,101 @@
 <div class="container my-5">
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    <div
-  *ngFor="let table of tables"
-  class="card shadow-lg rounded-3 p-4 d-flex flex-column justify-between"
-  [ngClass]="{
-    'bg-success': table.available && !table.controlledBy,    
-    'bg-danger': !table.available || table.controlledBy
-  }"
->
-  <div class="card-body">
-    <h5 class="card-title mb-2">Mesa: {{ table.name }}</h5>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+    <div *ngFor="let table of tables" class="col">
+      <div
+        class="card shadow-lg rounded-3 p-4 d-flex flex-column justify-between h-100"
+        [ngClass]="{
+          'bg-free': table.available && !table.controlledBy,    
+          'bg-bussy': !table.available || table.controlledBy
+        }"
+      >
+        <div class="card-body">
+          <!-- Nombre de la Mesa (Izquierda) y Estado (Derecha) -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="card-title m-0">{{ table.name }}</h2>
+            <p
+              class="card-text m-0"
+              [ngClass]="{
+                'text-success': table.available && !table.controlledBy,
+                'text-danger': !table.available || table.controlledBy
+              }"
+            >
+              {{ table.available && !table.controlledBy ? 'Disponible' : 'Ocupada' }}
+            </p>
+          </div>
 
-    <!-- Mozo asignado -->
-    <p class="text-info" *ngIf="waiters && !table.controlledBy">
-      Gestionada por: <strong>{{ table.waiterName }}</strong>
-    </p>
+          <!-- Mozo asignado (Izquierda) -->
+          <p class="text-info" style="color: white;" *ngIf="table.waiterName?.trim()">
+            Mozo: <strong>{{ table.waiterName }}</strong>
+          </p>
 
-    <!-- Si la mesa está controlada por otra -->
-    <p class="text-warning" *ngIf="table.controlledBy">
-      Mesa administrada por {{ getTableNameById(table.controlledBy) }}
-    </p>
+          <!-- Si la mesa está controlada por otra -->
+          <p class="text-warning" *ngIf="table.controlledBy">
+            Mesa administrada por {{ getTableNameById(table.controlledBy) }}
+          </p>
 
-    <p
-      class="card-text"
-      [ngClass]="{
-        'text-success': table.available && !table.controlledBy,
-        'text-danger': !table.available || table.controlledBy
-      }"
-    >
-      {{ table.available && !table.controlledBy ? 'Disponible' : 'Ocupada' }}
-    </p>
+          <!-- Mesas vinculadas (Debajo del gestor) -->
+          <div *ngIf="table.linkedTables && table.linkedTables.length > 0">
+            <p class="text-info">
+              Mesa vinculada con:
+              <span *ngFor="let linkedTableId of table.linkedTables">
+                {{ getTableNameById(linkedTableId) }}
+                <span *ngIf="!isLastLinkedTable(table.linkedTables, linkedTableId)">, </span>
+              </span>
+            </p>
+          </div>
+        </div>
 
-    <!-- Mesas vinculadas -->
-    <div *ngIf="table.linkedTables && table.linkedTables.length > 0">
-      <p class="text-info">
-        Mesa vinculada con:
-        <span *ngFor="let linkedTableId of table.linkedTables">
-          {{ getTableNameById(linkedTableId) }}
-          <span *ngIf="!isLastLinkedTable(table.linkedTables, linkedTableId)">, </span>
-        </span>
-      </p>
+        <!-- Botones (Izquierda - Derecha) -->
+        <div class="card-footer d-flex justify-content-between">
+          <button class="btn btn-sm" 
+                  (click)="addMenuItems(table)" 
+                  [ngClass]="{
+                    'btn-success': table.available && !table.controlledBy,
+                    'btn-danger': !table.available || table.controlledBy
+                  }"
+                  [disabled]="table.controlledBy">
+            Ordenar
+          </button>
+          <button class="btn btn-sm"
+                  (click)="openLinkTablesDialog(table)" 
+                  [ngClass]="{
+                    'btn-success': table.available && !table.controlledBy,
+                    'btn-danger': !table.available || table.controlledBy
+                  }"
+                  [disabled]="table.controlledBy || table.orders.length > 0">
+            Vincular
+          </button>
+        </div>
+
+        <!-- Desvincular (Ocupa todo el ancho) -->
+        <button
+          class="btn btn-danger btn-sm w-100 my-2"
+          *ngIf="!table.orders || table.orders.length === 0 && table.linkedTables.length > 0"
+          (click)="unlinkTables(table)"
+          [disabled]="table.controlledBy"
+        >
+          Desvincular
+        </button>
+
+        <!-- Botones de órdenes y total alineados horizontalmente -->
+        <div class="card-footer d-flex justify-content-between" *ngIf="table.orders && table.orders.length > 0">
+          <button class="btn btn-danger btn-sm" 
+                  (click)="openTableInfoDialog(table)" 
+                  [disabled]="table.controlledBy">
+            Ordenes
+          </button>
+          <button class="btn btn-sm" 
+                  (click)="openTotalDialog(table)" 
+                  [ngClass]="{
+                    'btn-success': table.available && !table.controlledBy,
+                    'btn-danger': !table.available || table.controlledBy
+                  }"
+                  [disabled]="table.controlledBy">
+            Ver Total
+          </button>
+        </div>
+
+      </div>
     </div>
-  </div>
-
-  <div class="card-footer d-flex flex-column">
-    <div class="btn-group mb-2" *ngIf="!table.orders || table.orders.length === 0">
-      <button
-        class="btn btn-primary"
-        (click)="addMenuItems(table)"
-        [disabled]="table.controlledBy"
-      >
-        ➕ Agregar Ítems
-      </button>
-
-      <button
-        class="btn btn-warning"
-        (click)="openLinkTablesDialog(table)"
-        [disabled]="table.controlledBy"
-      >
-        🔗 Vincular Mesas
-      </button>
-    </div>
-
-    <button
-      class="btn btn-danger w-100 mb-2"
-      *ngIf="!table.orders || table.orders.length === 0 && table.linkedTables.length > 0"
-      (click)="unlinkTables(table)"
-      [disabled]="table.controlledBy"
-    >
-      🔗 Desvincular Mesas
-    </button>
-
-    <div class="btn-group mb-2" *ngIf="table.orders && table.orders.length > 0">
-      <button
-        class="btn btn-primary"
-        (click)="addMenuItems(table)"
-        [disabled]="table.controlledBy"
-      >
-        ➕ Agregar Ítems
-      </button>
-
-      <button
-        class="btn btn-secondary"
-        (click)="openTableInfoDialog(table)"
-        [disabled]="table.controlledBy"
-      >
-        ➕ Ver Ítems
-      </button>
-    </div>
-
-    <button
-      class="btn btn-success w-100"
-      *ngIf="table.orders && table.orders.length > 0"
-      (click)="openTotalDialog(table)"
-      [disabled]="table.controlledBy"
-    >
-      💰 Ver Total
-    </button>
-  </div>
-</div>
   </div>
 </div>

@@ -1,15 +1,42 @@
-.card.bg-success {
-  background-color: #28a745; /* Verde para disponible */
+.card.bg-free {
+  background-color: #6ee87d !important; /* Verde para disponible */
 }
 
-.card.bg-danger {
-  background-color: #dc3545; /* Rojo para ocupada */
+.card.bg-bussy {
+  background-color: #f03434 !important; /* Rojo para ocupada */
+}
+
+.card.text-info{
+  color: #ffffff !important; /* Color de texto blanco */
 }
 
 .card-text.text-success {
-  color: #28a745; /* Verde para el texto de disponible */
+  color: #49d93d; /* Verde para el texto de disponible */
 }
 
 .card-text.text-danger {
   color: #dc3545; /* Rojo para el texto de ocupada */
+}
+
+.card {
+  color: white !important;
+}
+
+.card h5,
+.card p,
+.card span,
+.card button {
+  color: white !important;
+}
+
+.card button {
+  border-color: white !important;
+}
+
+.card .btn-primary,
+.card .btn-warning,
+.card .btn-danger,
+.card .btn-secondary,
+.card .btn-success {
+  color: white !important;
 }
