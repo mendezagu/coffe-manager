@@ -2,6 +2,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestionService, MenuItem } from '../../services/gestionService';
 import { Table } from '../../services/gestionService';
+import { Observable } from 'rxjs';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-order-info-dialog',
@@ -11,16 +13,18 @@ import { Table } from '../../services/gestionService';
 export class OrderInfoDialogComponent implements OnInit {
   table: Table;
   orders: any[] = [];
-  name: any
+    role$: Observable<string | null>;
 
   constructor(
     public dialogRef: MatDialogRef<OrderInfoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private gestionService: GestionService
+    private gestionService: GestionService,
+      private userService: UserService,
   ) {
     this.table = data;
     console.log(this.table, 'Mesa seleccionada');
-    this.orders = this.table.orders;
+    this.orders = this.table.orders || []; 
+    this.role$ = this.userService.getRoleState();
   }
 
   ngOnInit(): void {
@@ -35,10 +39,7 @@ export class OrderInfoDialogComponent implements OnInit {
           const menuItem = menuItems.find(item => item._id === order.menuItem);
           if (menuItem) {
             order.name = menuItem.name; // Asignar el nombre directamente a la orden
-          } if(menuItem){
-            order.price = menuItem.price
-          }
-           else {
+          } else {
             order.name = 'No encontrado';
           }
         });
@@ -53,7 +54,8 @@ export class OrderInfoDialogComponent implements OnInit {
     this.gestionService.deleteOrdersFromTable(this.table.id, orderIdsToDelete).subscribe(
       (updatedTable: Table) => {
         this.table = updatedTable;
-       // this.dialogRef.close(updatedTable); // Cierra el diálogo y pasa la mesa actualizada
+        this.orders = this.table.orders; // Actualizar las órdenes después de eliminar
+        this.printMenuItems(); // Volver a imprimir los nombres de los productos
       },
       (error) => {
         console.error('Error eliminando órdenes:', error);

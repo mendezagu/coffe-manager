@@ -189,6 +189,13 @@ addBalanceEntry(entry: { tableName: string; waiterName: string; totalAmount: num
   );
 }
 
+// Eliminar todos los balances
+deleteAllBalances(): Observable<{ message: string }> {
+  return this.http.delete<{ message: string }>(`${this.apiUrl}/balances`).pipe(
+    catchError(this.handleError)
+  );
+}
+
   // 📌 Menu Items
   getMenu(): Observable<MenuItem[]> {
     return this.http.get<MenuItem[]>(`${this.apiUrl}/menu`).pipe(

@@ -2,7 +2,7 @@
 <mat-dialog-content>
   <!-- Lista de órdenes agrupadas -->
   <mat-selection-list #orders>
-    <mat-list-option *ngFor="let order of table.orders" [value]="order._id">
+    <mat-list-option *ngFor="let order of table?.orders" [value]="order._id">
       <div class="order-info">
         <span>{{ order.name || 'Nombre no disponible' }} x ({{ order.quantity }})</span>
       </div>
@@ -15,13 +15,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-raised-button color="warn" (click)="removeSelectedOrders(orders.selectedOptions.selected)">
+  <button  *ngIf="(role$ | async) === 'admin'" mat-raised-button color="warn" (click)="removeSelectedOrders(orders.selectedOptions.selected)">
     Eliminar Seleccionados
   </button>
   <button mat-raised-button mat-dialog-close>
     Cerrar
   </button>
-  <button *ngIf="table.orders.length === 0" mat-raised-button color="primary" (click)="releaseTable()">
+  <button *ngIf="table?.orders?.length === 0" mat-raised-button color="primary" (click)="releaseTable()">
     Liberar Mesa
   </button>
 </mat-dialog-actions>

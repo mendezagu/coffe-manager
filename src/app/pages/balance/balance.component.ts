@@ -37,4 +37,19 @@ export class BalanceComponent implements OnInit {
   calculateTotalRevenue(): void {
     this.totalRevenue = this.balanceData.reduce((sum, entry) => sum + entry.totalAmount, 0);
   }
+  
+  deleteBalance(): void {
+    if (confirm('¿Estás seguro de que deseas eliminar todos los datos del balance?')) {
+      this.gestionService.deleteAllBalances().subscribe({
+        next: (response) => {
+          console.log(response.message);
+          this.balanceData = []; // Limpiar datos en el frontend
+          this.totalRevenue = 0; // Reiniciar total recaudado
+        },
+        error: (error) => {
+          console.error('Error al eliminar balance:', error);
+        },
+      });
+    }
+  }
 }

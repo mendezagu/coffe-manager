@@ -97,25 +97,19 @@ export class CardComponent implements OnInit {
   }
   // Método para abrir el diálogo de información de la mesa
   openTableInfoDialog(table: Table): void {
-    if (table && table.orders) {
+    if (table && Array.isArray(table.orders)) {  // Validamos que orders sea un array
       const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
         width: '600px',
-        data: {
-          table: table,
-          waiterName: table.waiterName // Enviamos el nombre del mozo aquí
-        },
-        
+        data: table
       });
-
+  
       dialogRef.afterClosed().subscribe(result => {
-        // Si es necesario, se puede recargar la información de la mesa aquí
         this.loadTables();
       });
     } else {
       console.error('La mesa no tiene órdenes o es undefined:', table);
     }
   }
-
   openTotalDialog(table: Table): void {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
