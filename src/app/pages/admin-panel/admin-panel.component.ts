@@ -35,6 +35,10 @@ export class AdminPanelComponent {
   editWaiterId?: string;
   editWaiterName: string = '';
 
+
+  // Para el buscador
+  searchTerm: string 
+
   constructor(
     private userService: UserService,
     private gestionService: GestionService
@@ -43,6 +47,8 @@ export class AdminPanelComponent {
     this.loadTables();
     this.loadMenuItems();
     this.loadWaiters();
+    
+    this.searchTerm = '';
   }
 
   // TABLES
@@ -51,6 +57,17 @@ export class AdminPanelComponent {
       this.tables = tables;
     });
   }
+
+   // Filtrar los ítems del menú según el término de búsqueda
+  get filteredMenuItems() {
+    if (!this.searchTerm) {
+      return this.menuItems;
+    }
+    return this.menuItems.filter(item =>
+      item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
 
   addTable() {
     if (this.newTableName.trim()) {

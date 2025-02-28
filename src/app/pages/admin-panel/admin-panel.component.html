@@ -5,119 +5,109 @@
     <!-- Contenedor de las dos tablas en pantallas grandes -->
     <div class="d-flex flex-column flex-md-row gap-3">
       <!-- Sección de Menú -->
- 
     </div>
   </div>
 
+  <!-- ADMINISTRAR MESAS -->
 
-
-
-<!--ADMINISTRAR MESAS -->
-
-<mat-accordion>
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title> Administrar mesas </mat-panel-title>
-      <mat-panel-description>
-        Agrega, edita o elimina tus mesas
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <!-- Sección de Mesas -->
-    <div class="col-md-12">
-      <div class="card p-3 shadow">
-        <h3>Agregar Mesa</h3>
-        <div class="input-group mb-3">
-          <input
-            class="form-control"
-            [(ngModel)]="newTableName"
-            placeholder="Nombre de la mesa"
-          />
-          <button class="btn btn-primary" (click)="addTable()">Agregar</button>
-        </div>
-
-        <h3>Lista de Mesas</h3>
-        <div class="table-responsive">
-          <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Disponible</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let table of tables">
-                <td>{{ table.id }}</td>
-                <td>{{ table.name }}</td>
-                <td>{{ table.available ? "Sí" : "No" }}</td>
-                <td>
-                  <div class="d-flex gap-2">
-                    <button
-                      class="btn btn-warning btn-sm"
-                      (click)="startEditingTable(table)"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      class="btn btn-danger btn-sm"
-                      (click)="deleteTable(table.id)"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Editar Mesa -->
-        <div *ngIf="editTableId !== undefined" class="mt-3">
-          <h3>Editar Mesa</h3>
-          <input
-            class="form-control mb-2"
-            [(ngModel)]="editTableName"
-            placeholder="Nuevo nombre"
-          />
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              [(ngModel)]="editTableAvailability"
-              id="disponibleCheck"
-            />
-            <label class="form-check-label" for="disponibleCheck"
-              >Disponible</label
-            >
-          </div>
-          <button class="btn btn-success mt-2" (click)="saveTableEdit()">
-            Guardar
-          </button>
-        </div>
-      </div>
-    </div>
-  </mat-expansion-panel>
-</mat-accordion>
-
-<!--ADMINISTRAR MENU-->
-
-<mat-accordion>
-  <mat-expansion-panel>
-  <mat-expansion-panel-header>
-    <mat-panel-title>
-      Administrar lista de menu
-    </mat-panel-title>
-    <mat-panel-description>
-      Agrega, edita o elimina tus menú
-    </mat-panel-description>
-  </mat-expansion-panel-header>
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Administrar mesas </mat-panel-title>
+        <mat-panel-description>
+          Agrega, edita o elimina tus mesas
+        </mat-panel-description>
+      </mat-expansion-panel-header>
 
       <!-- Sección de Mesas -->
       <div class="col-md-12">
         <div class="card p-3 shadow">
-          <h3>Agregar Ítem al Menú</h3>
+          <h2>Agregar Mesa</h2>
+          <div class="input-group mb-3">
+            <input
+              class="form-control"
+              [(ngModel)]="newTableName"
+              placeholder="Nombre de la mesa"
+            />
+            <button class="btn btn-primary" (click)="addTable()">Agregar</button>
+          </div>
+
+          <h2>Lista de Mesas</h2>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Disponible</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let table of tables">
+                  <td>{{ table.id }}</td>
+                  <td>{{ table.name }}</td>
+                  <td>{{ table.available ? "Sí" : "No" }}</td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-warning btn-sm"
+                        (click)="startEditingTable(table)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        (click)="deleteTable(table.id)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Editar Mesa -->
+          <div *ngIf="editTableId !== undefined" class="mt-3">
+            <h3>Editar Mesa</h3>
+            <input
+              class="form-control mb-2"
+              [(ngModel)]="editTableName"
+              placeholder="Nuevo nombre"
+            />
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [(ngModel)]="editTableAvailability"
+                id="disponibleCheck"
+              />
+              <label class="form-check-label" for="disponibleCheck">Disponible</label>
+            </div>
+            <button class="btn btn-success mt-2" (click)="saveTableEdit()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <!-- ADMINISTRAR MENU -->
+
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Administrar lista de menú </mat-panel-title>
+        <mat-panel-description>
+          Agrega, edita o elimina tus menú
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <!-- Sección de Menú -->
+      <div class="col-md-12">
+        <div class="card p-3 shadow">
+          <h2>Agregar Ítem al Menú</h2>
           <div class="input-group mb-3">
             <input
               class="form-control"
@@ -131,12 +121,21 @@
               placeholder="Precio"
               (change)="formatPrice()"
             />
-            <button class="btn btn-primary" (click)="addMenuItem()">
-              Agregar
-            </button>
+            <button class="btn btn-primary" (click)="addMenuItem()">Agregar</button>
           </div>
 
-          <h3>Lista del Menú</h3>
+          <!-- Filtro de búsqueda para el menú -->
+          <div class="mb-3">
+            <h2 for="searchMenu" class="form-label">Buscar ítem del menú:</h2>
+            <input
+              id="searchMenu"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="Buscar por nombre"
+            />
+          </div>
+
+          <h2>Lista del Menú</h2>
           <div class="table-responsive">
             <table class="table table-bordered table-striped">
               <thead class="table-dark">
@@ -148,7 +147,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let item of menuItems">
+                <tr *ngFor="let item of filteredMenuItems">
                   <td>{{ item._id }}</td>
                   <td>{{ item.name }}</td>
                   <td>${{ item.price }}</td>
@@ -175,7 +174,7 @@
 
           <!-- Editar Ítem del Menú -->
           <div *ngIf="editItemId !== undefined" class="mt-3">
-            <h3>Editar Ítem del Menú</h3>
+            <h2>Editar Ítem del Menú</h2>
             <input
               class="form-control mb-2"
               [(ngModel)]="editItemName"
@@ -187,101 +186,91 @@
               [(ngModel)]="editItemPrice"
               placeholder="Nuevo precio"
             />
-            <button class="btn btn-success mt-2" (click)="saveMenuItemEdit()">
-              Guardar
-            </button>
+            <button class="btn btn-success mt-2" (click)="saveMenuItemEdit()">Guardar</button>
           </div>
         </div>
       </div>
-
-
-  </mat-expansion-panel>
+    </mat-expansion-panel>
   </mat-accordion>
 
-<!--ADMINISTRAR MOZOS-->
+  <!-- ADMINISTRAR MOZOS -->
 
-<mat-accordion>
-  <mat-expansion-panel>
-  <mat-expansion-panel-header>
-    <mat-panel-title>
-      Administrar lista de mozos
-    </mat-panel-title>
-    <mat-panel-description>
-      Agrega, edita o elimina los datos de tus mozos
-    </mat-panel-description>
-  </mat-expansion-panel-header>
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Administrar lista de mozos </mat-panel-title>
+        <mat-panel-description>
+          Agrega, edita o elimina los datos de tus mozos
+        </mat-panel-description>
+      </mat-expansion-panel-header>
 
-    <!-- Sección de Meseros -->
-<div class="col-md-12">
-  <div class="card p-3 shadow">
-    <h3>Agregar Mesero</h3>
-    <div class="input-group mb-3">
-      <input
-        class="form-control"
-        [(ngModel)]="newWaiterName"
-        placeholder="Nombre del mesero"
-      />
-      <button class="btn btn-primary" (click)="addWaiter()">Agregar</button>
-    </div>
+      <!-- Sección de Meseros -->
+      <div class="col-md-12">
+        <div class="card p-3 shadow">
+          <h2>Agregar Mesero</h2>
+          <div class="input-group mb-3">
+            <input
+              class="form-control"
+              [(ngModel)]="newWaiterName"
+              placeholder="Nombre del mesero"
+            />
+            <button class="btn btn-primary" (click)="addWaiter()">Agregar</button>
+          </div>
 
-    <h3>Lista de Meseros</h3>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let waiter of waiters">
-            <td>{{ waiter._id }}</td>
-            <td>{{ waiter.name }}</td>
-            <td>
-              <div class="d-flex gap-2">
-                <button
-                  class="btn btn-warning btn-sm"
-                  (click)="startEditingWaiter(waiter)"
-                >
-                  Editar
-                </button>
-                <button
-                  class="btn btn-danger btn-sm"
-                  (click)="deleteWaiter(waiter._id)"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          <h2>Lista de Meseros</h2>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let waiter of waiters">
+                  <td>{{ waiter._id }}</td>
+                  <td>{{ waiter.name }}</td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      <button
+                        class="btn btn-warning btn-sm"
+                        (click)="startEditingWaiter(waiter)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        (click)="deleteWaiter(waiter._id)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-    <!-- Editar Mesero -->
-    <div *ngIf="editWaiterId !== undefined" class="mt-3">
-      <h3>Editar Mesero</h3>
-      <input
-        class="form-control mb-2"
-        [(ngModel)]="editWaiterName"
-        placeholder="Nuevo nombre"
-      />
-      <button class="btn btn-success mt-2" (click)="saveWaiterEdit()">
-        Guardar
-      </button>
-    </div>
-  </div>
-</div>
-
-
-  </mat-expansion-panel>
+          <!-- Editar Mesero -->
+          <div *ngIf="editWaiterId !== undefined" class="mt-3">
+            <h3>Editar Mesero</h3>
+            <input
+              class="form-control mb-2"
+              [(ngModel)]="editWaiterName"
+              placeholder="Nuevo nombre"
+            />
+            <button class="btn btn-success mt-2" (click)="saveWaiterEdit()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
   </mat-accordion>
 </div>
 
 <ng-template #accessDenied>
   <div class="text-center text-danger">
     <h1>ACCESO DENEGADO</h1>
-    <p>No tienes los permisos suficientes para visualizar el contenido de  esta página.</p>
+    <p>No tienes los permisos suficientes para visualizar el contenido de esta página.</p>
   </div>
 </ng-template>
