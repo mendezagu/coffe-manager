@@ -52,3 +52,9 @@
       display: none;
     }
   }
+
+  .scrollable-menu {
+    max-height: 400px; /* Ajusta según necesidad */
+    overflow-y: auto;
+    padding-right: 10px; /* Evita superposición con scrollbar */
+  }

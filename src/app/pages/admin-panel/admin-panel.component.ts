@@ -162,4 +162,5 @@ export class AdminPanelComponent {
   formatPrice() {
     this.newItemPrice = Number(this.newItemPrice);
   }
+  
 }
