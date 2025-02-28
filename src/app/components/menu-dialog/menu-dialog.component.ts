@@ -13,6 +13,7 @@ export class MenuDialogComponent {
   selectedItems: MenuItem[] = [];
   canPrint: boolean = false;
   filterText: string = '';
+  waiterName: string = '';
 
   constructor(
     private gestionService: GestionService,
@@ -22,6 +23,16 @@ export class MenuDialogComponent {
 
   ngOnInit(): void {
     this.loadMenu();
+  // Verificamos si 'this.data.waiter' es un objeto de tipo Waiter y accedemos al nombre del mozo
+  if (this.data && this.data.waiter) {
+    if (typeof this.data.waiter === 'object' && this.data.waiter.name) {
+      this.waiterName = this.data.waiter.name;  // Accedemos al nombre del mozo
+    } else {
+      this.waiterName = 'Desconocido';  // Si no tiene la propiedad 'name', asignamos un valor por defecto
+    }
+  } else {
+    this.waiterName = 'Desconocido';  // Si no hay 'waiter' en los datos, asignamos un valor por defecto
+  }
 
     // Escuchar el mensaje de cierre desde la ventana de impresión
     window.addEventListener('message', (event) => {
@@ -113,6 +124,7 @@ export class MenuDialogComponent {
             <div class="header">
               <h2 style="font-size: 14px;">🍽️ NUOVO CAFFE</h2>
               <p style="font-size: 14px;">Mesa: <strong>${this.data.name}</strong></p>
+             
               <p>${new Date().toLocaleString()}</p>
             </div>
             <div class="line"></div>
@@ -128,8 +140,14 @@ export class MenuDialogComponent {
             </div>
             <div class="line"></div>
             <div class="totals">
-              <p>Muchas gracias!</p>
+              <p>Aclaracion:</p>
             </div>
+            <div class="line"></div>
+            <br>
+            <br>
+            <div class="line"></div>
+             <br>
+            <br>
             <div class="line"></div>
             <p style="text-align:center; font-size:8px;"><br></p>
           </div>

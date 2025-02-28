@@ -100,7 +100,11 @@ export class CardComponent implements OnInit {
     if (table && table.orders) {
       const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
         width: '600px',
-        data: table,
+        data: {
+          table: table,
+          waiterName: table.waiterName // Enviamos el nombre del mozo aquí
+        },
+        
       });
 
       dialogRef.afterClosed().subscribe(result => {
@@ -116,7 +120,10 @@ export class CardComponent implements OnInit {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
         width: '600px',
-        data: { tableId: table.id, orders: table.orders }
+        data: { tableId: table.id,
+            orders: table.orders,
+            tableName: table.name,        // Asegúrate de pasar el nombre de la mesa
+            waiterName: table.waiterName  }
       });
   
       dialogRef.afterClosed().subscribe(result => {

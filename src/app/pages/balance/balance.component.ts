@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Observable } from 'rxjs';
-import { CoffeService } from 'src/app/models/coffe.service';
+import { GestionService, Table } from 'src/app/services/gestionService';
 
-interface TableRevenue {
-  date: number;
+interface BalanceEntry {
   tableName: string;
   waiterName: string;
-  revenue: number;
+  totalAmount: number;
 }
 
 @Component({
@@ -16,44 +13,28 @@ interface TableRevenue {
   styleUrls: ['./balance.component.scss']
 })
 export class BalanceComponent implements OnInit {
-  occupiedTables: TableRevenue[] = [];
+  balanceData: BalanceEntry[] = [];
   totalRevenue: number = 0;
 
-  constructor(private firestore: AngularFirestore, private coffeService: CoffeService) {}
+  constructor(private gestionService: GestionService) {}
 
   ngOnInit(): void {
-    this.loadOccupiedTables();
+    this.loadBalance();
   }
 
-  loadOccupiedTables(): void {
-    this.firestore.collection<TableRevenue>('daily_statistics').valueChanges().subscribe(data => {
-      this.occupiedTables = data;
-      this.totalRevenue = this.occupiedTables.reduce((sum, table) => sum + table.revenue, 0);
+  loadBalance(): void {
+    this.gestionService.getBalance().subscribe({
+      next: (data: BalanceEntry[]) => {
+        this.balanceData = data;  // Cargar datos de balance
+        this.calculateTotalRevenue();
+      },
+      error: (error) => {
+        console.error('Error al obtener el balance:', error);
+      },
     });
   }
 
-
- /* exportToPDF(): void {
-    const doc = new jsPDF();
-    doc.text('Estadísticas del Restaurante', 10, 10);
-
-    const tableData = this.occupiedTables.map(table => [
-      table.name,
-      table.waiterName || 'Desconocido',
-      table.orders.reduce((sum, order) => sum + (order.price * (order.quantity || 1)), 0)
-    ]);
-
-    doc.autoTable({
-      head: [['Mesa', 'Moz@', 'Ingresos']],
-      body: tableData,
-      startY: 20
-    });
-
-    doc.text(`Total Ingresos: $${this.totalRevenue.toFixed(2)}`, 10, doc.autoTable.previous.finalY + 10);
-
-    doc.save('estadisticas.pdf');
-  }*/
-
+  calculateTotalRevenue(): void {
+    this.totalRevenue = this.balanceData.reduce((sum, entry) => sum + entry.totalAmount, 0);
+  }
 }
-
-

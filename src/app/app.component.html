@@ -4,17 +4,17 @@
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
     <p>Bienvenido</p>
     <button mat-button routerLink="/home">Inicio</button>
-    <button mat-button routerLink="/home">Planta baja</button>
-    <button mat-button routerLink="/home">Planta alta</button>
+    <!--<button mat-button routerLink="/home">Planta baja</button>
+    <button mat-button routerLink="/home">Planta alta</button> -->
     
     <!-- ✅ Botón Administrar solo para Admin -->
     <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'">
       Administrar
     </button>
 
-    <button mat-button routerLink="/stadistic" *ngIf="(role$ | async) === 'admin'">
+    <!--<button mat-button routerLink="/stadistic" *ngIf="(role$ | async) === 'admin'">
       Estadisticas
-    </button>
+    </button> -->
   
     <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'">
       Balance

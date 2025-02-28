@@ -175,6 +175,20 @@ export class GestionService {
     );
   }
 
+// Obtener balance
+getBalance(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/balances`).pipe(
+    catchError(this.handleError)
+  );
+}
+
+// Agregar una entrada al balance
+addBalanceEntry(entry: { tableName: string; waiterName: string; totalAmount: number }): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/balances`, entry).pipe(
+    catchError(this.handleError)
+  );
+}
+
   // 📌 Menu Items
   getMenu(): Observable<MenuItem[]> {
     return this.http.get<MenuItem[]>(`${this.apiUrl}/menu`).pipe(
