@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1739940529245,
+  "timestamp": 1740776303620,
   "index": "/coffe-manager/index.html",
   "assetGroups": [
     {
@@ -13,7 +13,7 @@
       "urls": [
         "/coffe-manager/favicon.ico",
         "/coffe-manager/index.html",
-        "/coffe-manager/main.5f68e3c223b45f4e.js",
+        "/coffe-manager/main.61b0e7c9cab68ae2.js",
         "/coffe-manager/manifest.webmanifest",
         "/coffe-manager/polyfills.c1d09ce1b7230b82.js",
         "/coffe-manager/runtime.2e215144d3f83b1e.js",
@@ -33,7 +33,9 @@
         "/coffe-manager/assets/google.png",
         "/coffe-manager/assets/nuovo-cafe.jpg",
         "/coffe-manager/assets/table-busy.png",
-        "/coffe-manager/assets/table-free.png"
+        "/coffe-manager/assets/table-free.png",
+        "/coffe-manager/assets/ticket-style.css",
+        "/coffe-manager/assets/ticket-template.html"
       ],
       "patterns": []
     }
@@ -44,9 +46,11 @@
     "/coffe-manager/assets/nuovo-cafe.jpg": "05e8ee9f206a83dbf8c7ef976263bd008da7c51d",
     "/coffe-manager/assets/table-busy.png": "2e0323299f6ec02fd9d0e61e3b53740f6f5e7296",
     "/coffe-manager/assets/table-free.png": "05600d1660c10da0c3c4aa36f5077672492ce9b3",
+    "/coffe-manager/assets/ticket-style.css": "28bb2630f63ff37cd9009f1150ebf526bcdcfd0f",
+    "/coffe-manager/assets/ticket-template.html": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
     "/coffe-manager/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "/coffe-manager/index.html": "7ffa66863c241111281c76de161c521559b53716",
-    "/coffe-manager/main.5f68e3c223b45f4e.js": "08c14f5273166bae7dd2ed5b6065647bcba5ad9f",
+    "/coffe-manager/index.html": "7c95e1c92f4e9f4d94017aa16aa81bd230fad6c0",
+    "/coffe-manager/main.61b0e7c9cab68ae2.js": "aa1e81c713906cb2c82976dff37efd2b409965d1",
     "/coffe-manager/manifest.webmanifest": "d3f08acbcc1d881a6ba2735373bb02926bb0af9a",
     "/coffe-manager/polyfills.c1d09ce1b7230b82.js": "35be750de46882f1377f4814e5a48873648e10bb",
     "/coffe-manager/runtime.2e215144d3f83b1e.js": "2b0d6e03c3f351aa0e25906ca96b61d63f2b5f9d",
