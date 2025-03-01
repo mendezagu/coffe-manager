@@ -23,7 +23,9 @@ export class LinkTableDialogComponent implements OnInit {
 
   loadTables(): void {
     this.gestionService.getTables().subscribe((tables) => {
-      this.tables = tables.filter(table => table.id !== this.data.table.id); // Excluir la mesa actual
+      this.tables = tables.filter(table => 
+        table.id !== this.data.table.id && table.available // Excluir mesa actual y mesas ocupadas
+      );
     });
   }
 

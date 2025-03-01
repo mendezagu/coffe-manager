@@ -4,6 +4,7 @@ import { environmentMongo } from 'src/environmets/environment';
 import { map, Observable, catchError, throwError } from 'rxjs';
 
 export interface MenuItem {
+  menuItem: any;
   _id: string;
   name: string;
   price: number;
