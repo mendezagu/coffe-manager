@@ -1,0 +1,6 @@
+.table-list-container {
+    max-height: 200px; /* Establece una altura máxima para el contenedor */
+    overflow-y: auto;  /* Activa el desplazamiento vertical cuando se excede el tamaño */
+    padding-right: 10px; /* Añade espacio para evitar que las barras de desplazamiento se superpongan al contenido */
+    margin-bottom: 20px; /* Espacio en la parte inferior para los botones */
+  }
