@@ -15,6 +15,9 @@ export class MenuDialogComponent {
   filterText: string = '';
   waiterName: string = '';
 
+  // Objeto auxiliar para rastrear menús agregados temporalmente
+  addedItems: { [key: string]: boolean } = {};
+
   constructor(
     private gestionService: GestionService,
     public dialogRef: MatDialogRef<MenuDialogComponent>,
@@ -177,9 +180,18 @@ export class MenuDialogComponent {
       // Si ya está en la lista, incrementamos la cantidad asegurándonos de que no sea undefined
       this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + 1;
     }
-  
+
+    // Marcar el botón como "agregado" en el objeto auxiliar
+    this.addedItems[menu._id] = true;
+
+    // Restaurar el color después de 2 segundos
+    setTimeout(() => {
+      this.addedItems[menu._id] = false;
+    }, 2000);
+
     this.canPrint = this.selectedItems.length > 0; // Habilitar botón de imprimir si hay elementos
   }
+
 
   // Cancela la operación
   cancel(): void {
