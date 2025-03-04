@@ -165,10 +165,7 @@ export class MenuDialogComponent {
       }
     );
   }
-  assign(): void {
-    this.canPrint = true;
-    this.dialogRef.close(this.selectedItems);
-  }
+
 
   addItem(menu: MenuItem): void {
     const index = this.selectedItems.findIndex(item => item._id === menu._id);
