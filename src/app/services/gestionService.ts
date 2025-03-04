@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environmentMongo } from 'src/environmets/environmentMongo';
+import { environmentMongo } from 'src/environments/environmentMongo';
 import { map, Observable, catchError, throwError } from 'rxjs';
 
 export interface MenuItem {
