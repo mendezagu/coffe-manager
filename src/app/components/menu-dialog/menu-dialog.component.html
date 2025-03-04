@@ -1,10 +1,12 @@
-<h2 class="text-center mb-4">🍽️ Selecciona Menús</h2>
+<h2 class="text-center mb-4">
+  <mat-icon fontIcon="restaurant_menu"></mat-icon> Selecciona Menús
+</h2>
 
 <!-- Campo de búsqueda -->
 <input
   type="text"
   class="form-control mb-3"
-  placeholder="🔎 Buscar menú..."
+  placeholder="Buscar menú..."
   [(ngModel)]="filterText"
 />
 
@@ -31,12 +33,15 @@
           />
         </div>
 
+        <!-- Botón Agregar/Agregado con Icono -->
         <button
-          class="btn btn-sm"
+          class="btn btn-sm d-flex align-items-center gap-2"
           [ngClass]="addedItems[menu._id] ? 'btn-primary' : 'btn-success'"
           (click)="addItem(menu)"
         >
-          {{ addedItems[menu._id] ? "✅ Agregado" : "➕ Agregar" }}
+          <mat-icon *ngIf="!addedItems[menu._id]" fontIcon="add"></mat-icon>
+          <mat-icon *ngIf="addedItems[menu._id]" fontIcon="check"></mat-icon>
+          {{ addedItems[menu._id] ? "Agregado" : "Agregar" }}
         </button>
       </div>
     </div>
@@ -45,26 +50,15 @@
 
 <!-- Acciones del diálogo -->
 <div class="d-flex justify-content-end mt-4 gap-2">
-  <button class="btn btn-outline-secondary" (click)="cancel()">
-    ❌ Cancelar
+  <button class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="cancel()">
+    <mat-icon fontIcon="cancel"></mat-icon> Cancelar
   </button>
+
   <button
-    class="btn btn-primary"
+    class="btn btn-primary d-flex align-items-center gap-2"
     (click)="printTicket()"
-    [disabled]="selectedItems.length === 0"
-    [disabled]="!canPrint"
+    [disabled]="selectedItems.length === 0 || !canPrint"
   >
-    🖨️ Imprimir Comanda
+    <mat-icon fontIcon="print"></mat-icon> Imprimir Comanda
   </button>
 </div>
-
-<!-- Estilos para el scroll -->
-<style>
-  .scrollable-menu {
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 8px;
-  }
-</style>

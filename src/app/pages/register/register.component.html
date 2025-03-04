@@ -1,19 +1,43 @@
-<div class="register-container">
-    <form [formGroup]="formRegister" (ngSubmit)="onSubmit()">
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="register-container w-100 shadow-box">
+    
+    <!-- Imagen centrada -->
+    <div class="image-container">
+      <img
+        class="rounded-circle"
+        mat-card-image
+        src="./assets/nuovo-cafe.jpg"
+        alt="table"
+      />
+    </div>
+
+    <!-- Formulario de Registro -->
+    <form [formGroup]="formRegister" (ngSubmit)="onSubmit()" class="w-100 p-4">
       
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Email</mat-label>
         <input matInput type="email" formControlName="email" required>
       </mat-form-field>
-  
-      <mat-form-field appearance="outline" class="full-width">
+
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Contraseña</mat-label>
         <input matInput type="password" formControlName="password" required>
       </mat-form-field>
-  
-      <button mat-raised-button color="primary" type="submit" [disabled]="formRegister.invalid">
-        Registrarse
-      </button>
-  
+
+      <!-- Botón de Registro -->
+      <div class="text-center">
+        <button mat-raised-button color="primary" type="submit" class="btn btn-primary" [disabled]="formRegister.invalid">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Botón para ir a Iniciar Sesión -->
+      <div class="text-center mt-3">
+        <button mat-raised-button color="accent" routerLink="/login">
+          Iniciar sesión
+        </button>
+      </div>
+
     </form>
   </div>
+</div>

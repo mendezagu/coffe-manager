@@ -1,19 +1,47 @@
-<h2>Vincular Mesas</h2>
+<h2 class="text-center mb-3">Vincular Mesas</h2>
+
 <div>
-  <p>Selecciona las mesas que deseas vincular con la {{ data.table.name }}:</p>
+  <p class="fw-bold text-center">
+    Selecciona las mesas que deseas vincular con la <span class="text-primary">{{ data.table.name }}</span>:
+  </p>
   
   <!-- Contenedor con scroll -->
-  <div class="table-list-container">
-    <div *ngFor="let table of tables">
-      <mat-checkbox (change)="onTableSelectionChange($event, table.id)">
+  <div class="table-list-container border rounded p-3 overflow-auto" style="max-height: 300px;">
+    <div class="form-check d-flex align-items-center gap-2" *ngFor="let table of tables">
+      <input class="form-check-input cursor-pointer" type="checkbox" id="table-{{ table.id }}" (change)="onTableSelectionChange($event, table.id)">
+      <label class="form-check-label fs-5 table-hover" for="table-{{ table.id }}">
         {{ table.name }}
-      </mat-checkbox>
+      </label>
     </div>
   </div>
-
 </div>
 
-<div class="dialog-actions">
-  <button mat-button (click)="onCancel()">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="onConfirm()">Vincular</button>
+<!-- Acciones del diálogo -->
+<div class="d-flex justify-content-end mt-4 gap-2">
+  <button class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="onCancel()">
+    <mat-icon fontIcon="cancel"></mat-icon> Cancelar
+  </button>
+
+  <button class="btn btn-primary d-flex align-items-center gap-2" (click)="onConfirm()">
+    <mat-icon fontIcon="link"></mat-icon> Vincular
+  </button>
 </div>
+
+<!-- Estilos adicionales -->
+<style>
+  /* Efecto hover en los nombres de las mesas */
+  .table-hover {
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+  }
+  
+  .table-hover:hover {
+    color: #007bff; /* Azul Bootstrap */
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Cursor pointer para checkboxes */
+  .cursor-pointer {
+    cursor: pointer;
+  }
+</style>

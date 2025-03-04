@@ -1,37 +1,56 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #f3e498 !important;
+  color: white !important;
+}
+
 :host {
-    display: block;
-    min-height: 100vh;
-    background-color: #f7f9fa;
-    color: #ffffff;
-  }
-  
+  display: block;
+  min-height: 100vh;
+  background-color:  #f6efcc !important;
+  color: white;
+}
 
-  .example-container {
-    height: 100vh;
-  }
-  
-  .example-sidenav {
-    width: 250px;
-    padding: 20px;
-  }
-  
-  .custom-toolbar {
-    width: 100%;
-    margin-bottom: 1rem;
-    margin-top: 1rem;
-    border: solid 1px;
-    border-right: none;
-    border-left: none;
-    border-top: none;
-  }
-  
-  .example-spacer {
-    flex: 1;
-  }
+mat-drawer-container {
+  background-color:  #f6efcc !important;
+}
 
-  .example-sidenav button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    margin-bottom: 10px; /* Espacio entre botones */
-  }
+mat-drawer {
+  background-color: #f6efcc !important;
+}
+
+mat-drawer-content {
+  background-color: #f6efcc !important;
+}
+
+.example-container {
+  height: 100vh;
+}
+
+.example-sidenav {
+  width: 250px;
+  padding: 20px;
+}
+
+.custom-toolbar {
+  width: 100%;
+  margin-bottom: 1rem;
+  margin-top: 0rem;
+  border: solid #aa7e67 1px;
+  border-right: none;
+  border-left: none;
+  border-top: none;
+  background-color: #f6efcc !important;
+}
+
+.example-spacer {
+  flex: 1;
+}
+
+.example-sidenav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px; /* Espacio entre botones */
+}

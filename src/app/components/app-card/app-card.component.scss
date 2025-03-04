@@ -1,12 +1,29 @@
+.card {
+  color: white !important;
+  border: 1px solid #ccc !important; /* Borde gris */
+  border-radius: 10px !important; /* Bordes redondeados */
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2) !important; /* Efecto 3D */
+  transition: transform 0.2s ease-in-out; /* Suaviza el hover */
+}
+
+/* Efecto 3D al pasar el mouse */
+.card:hover {
+  transform: scale(1.08); /* Agranda ligeramente para un mejor efecto */
+  box-shadow: 7px 7px 20px rgba(0, 0, 0, 0.3) !important; /* Sombra más intensa */
+}
+
+/* Fondo verde para mesas disponibles */
 .card.bg-free {
-  background-color: #6ee87d !important; /* Verde para disponible */
+  background-color: #4CAF50 !important; /* Verde para disponible */
 }
 
+/* Fondo rojo para mesas ocupadas */
 .card.bg-bussy {
-  background-color: #f03434 !important; /* Rojo para ocupada */
+  background-color: #D32F2F !important; /* Rojo para ocupada */
 }
 
-.card.text-info{
+/* Texto */
+.card.text-info {
   color: #ffffff !important; /* Color de texto blanco */
 }
 
@@ -18,17 +35,7 @@
   color: #dc3545; /* Rojo para el texto de ocupada */
 }
 
-.card {
-  color: white !important;
-}
-
-.card h5,
-.card p,
-.card span,
-.card button {
-  color: white !important;
-}
-
+/* Botones dentro de la tarjeta */
 .card button {
   border-color: white !important;
 }
@@ -39,4 +46,47 @@
 .card .btn-secondary,
 .card .btn-success {
   color: white !important;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem; /* Espaciado uniforme entre botones */
+}
+
+/* Elimina el borde de los card-footer */
+.card-footer {
+  border: none !important;
+  background: transparent !important; /* Asegura que no haya un fondo sólido */
+  padding: 0.5rem 0; /* Ajusta el espacio sin afectar la alineación */
+}
+
+
+.card-footer .btn {
+  width: 100px; /* Ajusta el ancho de los botones */
+  height: 40px; /* Ajusta la altura de los botones */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px; /* Tamaño del texto uniforme */
+}
+
+.card-footer .btn mat-icon {
+  font-size: 18px; /* Tamaño de los íconos dentro del botón */
+  margin-right: 5px; /* Espaciado entre el ícono y el texto */
+}
+
+.btn.w-100 {
+  height: 40px; /* Para botones que ocupan todo el ancho */
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Espaciado entre el ícono y el texto */
+}
+
+.btn mat-icon {
+  font-size: 18px; /* Ajusta el tamaño del icono */
 }

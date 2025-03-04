@@ -1,40 +1,113 @@
-<div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="register-container w-100" style="max-width: 400px;">
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 2rem;">
-            <img
-            class="rounded-circle"
-            style="width: 150px; height: 150px;"
-            mat-card-image
-            src="./assets/nuovo-cafe.jpg"
-            alt="table"
-          />
-        </div>
-      <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-100">
-        
-        <mat-form-field appearance="outline" class="w-100 mb-3">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" required>
-        </mat-form-field>
-  
-        <mat-form-field appearance="outline" class="w-100 mb-3">
-          <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="password" required>
-        </mat-form-field>
-  
-        <div style="display: flex; justify-content: center;">
-            <button mat-raised-button color="primary" type="submit" class="btn btn-primary justify-content-end" [disabled]="formLogin.invalid">
-                Iniciar sesión
-            </button>
-        </div>
-       
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center login-background">
+  <div class="login-container p-5 rounded shadow">
+    
+    <!-- Título principal -->
+    <h2 class="text-center fw-bold login-title">Nuovo caffé</h2>
+    <p class="text-center text-muted login-subtitle">Bienvenido</p>
 
-        <div style="display: flex; justify-content: center; margin-top: 1rem;">
-            <button mat-stroked-button color="warn"type="submit" class=" justify-content-end" (click)="loginWithGoogle()">
-                <img src="./assets/google.png" alt="google" style="width: 30px; height: 20px;">
-                Iniciar con Google
-            </button>
-        </div>
-  
-      </form>
+    <!-- Imagen centrada -->
+    <div class="text-center my-4">
+      <img
+        class="rounded-circle login-image"
+        src="./assets/nuovo-cafe.jpg"
+        alt="Cafe Logo"
+      />
     </div>
+
+    <!-- Formulario de Login -->
+    <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-100">
+      
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100 mb-4">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" required>
+      </mat-form-field>
+
+      <!-- Botón de Iniciar Sesión -->
+      <div class="text-center">
+        <button type="submit" class="btn login-btn" [disabled]="formLogin.invalid">
+          Login
+        </button>
+      </div>
+
+      <!-- Botón para ir a Registro -->
+      <div class="text-center mt-3">
+        <button class="btn login-btn-outline" routerLink="/register">
+          Sign Up
+        </button>
+      </div>
+
+    </form>
   </div>
+</div>
+
+<!-- Estilos CSS -->
+<style>
+  /* Fondo general similar a la imagen */
+  .login-background {
+    background: linear-gradient(to right, #d2a679, #c0936b);
+  }
+
+  /* Contenedor del login con sombra y bordes redondeados */
+  .login-container {
+    max-width: 400px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Imagen de usuario */
+  .login-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+
+  /* Estilos para los títulos */
+  .login-title {
+    font-size: 28px;
+    color: #5a3e2b;
+  }
+
+  .login-subtitle {
+    font-size: 16px;
+    color: #7a5e47;
+  }
+
+  /* Botón principal de Login */
+  .login-btn {
+    width: 100%;
+    padding: 10px;
+    background: #5a3e2b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+
+  .login-btn:hover {
+    background: #3e2b1c;
+  }
+
+  /* Botón secundario de Sign Up */
+  .login-btn-outline {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 2px solid #5a3e2b;
+    color: #5a3e2b;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+
+  .login-btn-outline:hover {
+    background: #5a3e2b;
+    color: white;
+  }
+</style>
