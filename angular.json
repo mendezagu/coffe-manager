@@ -63,7 +63,7 @@
                 },
                 {
                   "replace": "src/environments/environmentMongo.ts",
-                  "with": "src/environments/environmentMongoProd.ts"
+                  "with": "src/environments/environmentMongo.prod.ts"
                 }
               ],
               "serviceWorker": true,
