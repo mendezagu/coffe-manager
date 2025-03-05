@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>CoffeManager</title>
-  <base href="./?v=2">
+  <base href="./?v=3">
+  <!-- Desactivar caché del navegador -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -15,5 +19,26 @@
 <body class="mat-typography">
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
+  <script>
+    // Eliminar service workers para evitar caché
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  
+    // Forzar actualización de la app si cambia la versión
+    fetch('./assets/version.json?v=' + new Date().getTime())
+      .then(response => response.json())
+      .then(version => {
+        if (localStorage.getItem('appVersion') !== version.version) {
+          localStorage.setItem('appVersion', version.version);
+          location.reload(true);
+        }
+      })
+      .catch(err => console.warn('No se encontró version.json, ignorando actualización automática.'));
+  </script>
 </body>
 </html>
