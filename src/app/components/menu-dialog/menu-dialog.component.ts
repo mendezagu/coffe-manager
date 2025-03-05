@@ -47,7 +47,7 @@ export class MenuDialogComponent {
 
   loadMenu(): void {
     this.gestionService.getMenu().subscribe((menus) => {
-      this.menuItems = menus.map(menu => ({ ...menu, quantity: 0 })); // Establecer cantidad en 0
+      this.menuItems = menus.map(menu => ({ ...menu, quantity: 1 })); // Establecer cantidad en 0
       //this.menuItems = menus;
       console.log(this.menuItems, 'menuItems desde dialog menu');
       
@@ -78,7 +78,7 @@ export class MenuDialogComponent {
     menu.quantity = quantity;
     const index = this.selectedItems.findIndex(item => item._id === menu._id);
     if (index > -1) {
-      this.selectedItems[index].quantity = quantity;
+      this.selectedItems[index].quantity = quantity * 1;
     }
   }
 
