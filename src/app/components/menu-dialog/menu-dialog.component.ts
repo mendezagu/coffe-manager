@@ -47,7 +47,10 @@ export class MenuDialogComponent {
 
   loadMenu(): void {
     this.gestionService.getMenu().subscribe((menus) => {
-      this.menuItems = menus;
+      this.menuItems = menus.map(menu => ({ ...menu, quantity: 0 })); // Establecer cantidad en 0
+      //this.menuItems = menus;
+      console.log(this.menuItems, 'menuItems desde dialog menu');
+      
     });
   }
   get filteredMenuItems(): MenuItem[] {
