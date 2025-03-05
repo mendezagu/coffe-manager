@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1741141854629,
+  "timestamp": 1741142882634,
   "index": "/coffe-manager/index.html",
   "assetGroups": [
     {
@@ -13,7 +13,7 @@
       "urls": [
         "/coffe-manager/favicon.ico",
         "/coffe-manager/index.html",
-        "/coffe-manager/main.d2e5517cf7280827.js",
+        "/coffe-manager/main.0220a8beead2ad31.js",
         "/coffe-manager/manifest.webmanifest",
         "/coffe-manager/polyfills.c1d09ce1b7230b82.js",
         "/coffe-manager/runtime.2e215144d3f83b1e.js",
@@ -49,8 +49,8 @@
     "/coffe-manager/assets/ticket-style.css": "28bb2630f63ff37cd9009f1150ebf526bcdcfd0f",
     "/coffe-manager/assets/ticket-template.html": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
     "/coffe-manager/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "/coffe-manager/index.html": "4e6e8c7cc433214e479f70b9c294e11b2fd83201",
-    "/coffe-manager/main.d2e5517cf7280827.js": "fa1c6e7ae57088ae66d5fea0788e68084458a6a1",
+    "/coffe-manager/index.html": "ba4ae48b446e96e28c8fc5c2ef1c5a59edcb9ab1",
+    "/coffe-manager/main.0220a8beead2ad31.js": "98a23b314cb443b4e04f6f8f80640dd76ce544f1",
     "/coffe-manager/manifest.webmanifest": "d3f08acbcc1d881a6ba2735373bb02926bb0af9a",
     "/coffe-manager/polyfills.c1d09ce1b7230b82.js": "35be750de46882f1377f4814e5a48873648e10bb",
     "/coffe-manager/runtime.2e215144d3f83b1e.js": "2b0d6e03c3f351aa0e25906ca96b61d63f2b5f9d",
