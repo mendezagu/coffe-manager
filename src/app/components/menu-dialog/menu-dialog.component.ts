@@ -1,17 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-  GestionService,
-  MenuItem,
-  Table,
-} from 'src/app/services/gestionService';
+import { GestionService, MenuItem, Table } from 'src/app/services/gestionService';
 
 @Component({
   selector: 'app-menu-dialog',
   templateUrl: './menu-dialog.component.html',
-  styleUrls: ['./menu-dialog.component.scss'],
+  styleUrls: ['./menu-dialog.component.scss']
 })
 export class MenuDialogComponent {
+
   menuItems: MenuItem[] = [];
   selectedItems: MenuItem[] = [];
   canPrint: boolean = false;
@@ -24,21 +21,21 @@ export class MenuDialogComponent {
   constructor(
     private gestionService: GestionService,
     public dialogRef: MatDialogRef<MenuDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Table // Se pasa la información de la mesa si es necesario
+    @Inject(MAT_DIALOG_DATA) public data: Table  // Se pasa la información de la mesa si es necesario
   ) {}
 
   ngOnInit(): void {
     this.loadMenu();
     // Verificamos si 'this.data.waiter' es un objeto de tipo Waiter y accedemos al nombre del mozo
-    if (this.data && this.data.waiter) {
-      if (typeof this.data.waiter === 'object' && this.data.waiter.name) {
-        this.waiterName = this.data.waiter.name; // Accedemos al nombre del mozo
-      } else {
-        this.waiterName = 'Desconocido'; // Si no tiene la propiedad 'name', asignamos un valor por defecto
-      }
+  if (this.data && this.data.waiter) {
+    if (typeof this.data.waiter === 'object' && this.data.waiter.name) {
+      this.waiterName = this.data.waiter.name;  // Accedemos al nombre del mozo
     } else {
-      this.waiterName = 'Desconocido'; // Si no hay 'waiter' en los datos, asignamos un valor por defecto
+      this.waiterName = 'Desconocido';  // Si no tiene la propiedad 'name', asignamos un valor por defecto
     }
+  } else {
+    this.waiterName = 'Desconocido';  // Si no hay 'waiter' en los datos, asignamos un valor por defecto
+  }
 
     // Escuchar el mensaje de cierre desde la ventana de impresión
     window.addEventListener('message', (event) => {
@@ -54,13 +51,13 @@ export class MenuDialogComponent {
     });
   }
   get filteredMenuItems(): MenuItem[] {
-    return this.menuItems.filter((menu) =>
+    return this.menuItems.filter(menu => 
       menu.name.toLowerCase().includes(this.filterText.toLowerCase())
     );
   }
 
   toggleSelection(menu: MenuItem, event: any): void {
-    const index = this.selectedItems.findIndex((item) => item._id === menu._id);
+    const index = this.selectedItems.findIndex(item => item._id === menu._id);
     if (event.target.checked) {
       if (index === -1) {
         this.selectedItems.push({ ...menu, quantity: 1 });
@@ -74,36 +71,31 @@ export class MenuDialogComponent {
 
   updateQuantity(menu: MenuItem, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    let quantity = parseInt(inputElement.value, 10);
-
-    // Evita valores inválidos o negativos
-    if (isNaN(quantity) || quantity < 1) {
-      quantity = 1;
-    }
-
-    const index = this.selectedItems.findIndex((item) => item._id === menu._id);
+    const quantity = parseInt(inputElement.value, 10);
+    menu.quantity = quantity;
+    const index = this.selectedItems.findIndex(item => item._id === menu._id);
     if (index > -1) {
       this.selectedItems[index].quantity = quantity;
     }
   }
 
+  
+
   // Cierra el diálogo y devuelve los items seleccionados
-  // Cierra el diálogo después de imprimir el ticket
-  printTicket(): void {
+   // Cierra el diálogo después de imprimir el ticket
+   printTicket(): void {
     if (!this.selectedItems.length) {
-      alert('No hay ítems seleccionados para imprimir.');
+      alert("No hay ítems seleccionados para imprimir.");
       return;
     }
-
-    this.gestionService
-      .addItemsToTable(this.data.id, this.selectedItems)
-      .subscribe(
-        (updatedTable) => {
-          this.data.orders = updatedTable.orders;
-          this.data.available = false; // Marcamos la mesa como ocupada
-          this.canPrint = false; // 🔴 Deshabilitamos el botón de imprimir
-
-          const printContent = `
+  
+    this.gestionService.addItemsToTable(this.data.id, this.selectedItems).subscribe(
+      (updatedTable) => {
+        this.data.orders = updatedTable.orders;
+        this.data.available = false; // Marcamos la mesa como ocupada
+        this.canPrint = false; // 🔴 Deshabilitamos el botón de imprimir
+  
+        const printContent = `
           <html>
             <head>
               <title>Ticket</title>
@@ -129,24 +121,18 @@ export class MenuDialogComponent {
                 " alt="Logo"></div>
                 <div class="header">
                   <h2 style="font-size: 14px;">🍽️ NUOVO CAFFE</h2>
-                  <p style="font-size: 14px;">Mesa: <strong>${
-                    this.data.name
-                  }</strong></p>
+                  <p style="font-size: 14px;">Mesa: <strong>${this.data.name}</strong></p>
                   <p>${new Date().toLocaleString()}</p>
                 </div>
                 <div class="line"></div>
                 <div class="order-list">
-                ${this.selectedItems
-                  .map(
-                    (item) => `
-                  <div class="order-item">
-                    <p>${item.name}</p>
-                    <p>x${item.quantity}</p>
-                  </div>
-                `
-                  )
-                  .join('')}
-              </div>
+                  ${this.selectedItems.map(item => `
+                    <div class="order-item">
+                      <p>${item.name}</p>
+                      <p>x${item.quantity}</p>
+                    </div>
+                  `).join('')}
+                </div>
                 <div class="line"></div>
                 <div class="totals"><p>Aclaracion:</p></div>
                 <div class="line"></div>
@@ -164,42 +150,47 @@ export class MenuDialogComponent {
             </body>
           </html>
         `;
-
-          // Imprimir dos veces
-          for (let i = 0; i < 3; i++) {
-            const printWindow = window.open('', '', 'width=900,height=900');
-            if (printWindow) {
-              printWindow.document.write(printContent);
-              printWindow.document.close();
-              printWindow.focus();
-            }
+  
+        // Imprimir dos veces
+        for (let i = 0; i < 3; i++) {
+          const printWindow = window.open('', '', 'width=900,height=900');
+          if (printWindow) {
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
           }
-        },
-        (error) => {
-          console.error('Error al actualizar la mesa:', error);
-          alert('Ocurrió un error al actualizar la mesa antes de imprimir.');
         }
-      );
+      },
+      (error) => {
+        console.error("Error al actualizar la mesa:", error);
+        alert("Ocurrió un error al actualizar la mesa antes de imprimir.");
+      }
+    );
   }
 
-  addItem(menu: MenuItem): void {
-    const index = this.selectedItems.findIndex((item) => item._id === menu._id);
 
+  addItem(menu: MenuItem): void {
+    const index = this.selectedItems.findIndex(item => item._id === menu._id);
+    
     if (index === -1) {
-      this.selectedItems.push({ ...menu, quantity: 1 });
+      // Si el ítem no está en la lista, lo agregamos con cantidad mínima 1
+      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1 });
     } else {
-      // Actualiza la cantidad directamente, sin acumulaciones erróneas
-      this.selectedItems[index].quantity = 2;
+      // Si ya está en la lista, incrementamos la cantidad asegurándonos de que no sea undefined
+      this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + 1;
     }
 
+    // Marcar el botón como "agregado" en el objeto auxiliar
     this.addedItems[menu._id] = true;
 
+    // Restaurar el color después de 2 segundos
     setTimeout(() => {
       this.addedItems[menu._id] = false;
     }, 2000);
 
-    this.canPrint = this.selectedItems.length > 0;
+    this.canPrint = this.selectedItems.length > 0; // Habilitar botón de imprimir si hay elementos
   }
+
 
   // Cancela la operación
   cancel(): void {

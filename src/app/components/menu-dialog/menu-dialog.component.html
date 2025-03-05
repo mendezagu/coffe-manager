@@ -24,13 +24,14 @@
         </div>
 
         <div class="input-group w-25">
+       
           <input
-            class="form-control rounded-end shadow-sm border-0 text-center stylish-input"
-            type="number"
-            min="1"
-            [value]="menu.quantity || 1"
-            (input)="updateQuantity(menu, $event)"
-          />
+          class="form-control rounded-end shadow-sm border-0 text-center stylish-input"
+          type="number"
+          min="1"
+          [value]="menu.quantity || 1"
+          (input)="updateQuantity(menu, $event)"
+        />
         </div>
 
         <!-- Botón Agregar/Agregado con Icono -->
