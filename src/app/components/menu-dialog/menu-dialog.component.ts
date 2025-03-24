@@ -155,13 +155,11 @@ export class MenuDialogComponent {
         `;
   
         // Imprimir dos veces
-        for (let i = 0; i < 3; i++) {
-          const printWindow = window.open('', '', 'width=900,height=900');
-          if (printWindow) {
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.focus();
-          }
+        const printWindow = window.open('', '', 'width=900,height=900');
+        if (printWindow) {
+          printWindow.document.write(printContent);
+          printWindow.document.close();
+          printWindow.focus();
         }
       },
       (error) => {
