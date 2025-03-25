@@ -6,6 +6,8 @@ import { GestionService, MenuItem, Table, Waiter } from 'src/app/services/gestio
 import { WaiterDialogComponent } from '../waiter-dialog/waiter-dialog.component';
 import { TotalDialogComponent } from '../total-dialog/total-dialog.component';
 import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog.component';
+import { Observable } from 'rxjs';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-card',
@@ -17,11 +19,15 @@ export class CardComponent implements OnInit {
   waiters: Waiter[] = [];
    selectedItems: MenuItem[] = [];
    menuItems: MenuItem[] = [];
+     role$: Observable<string | null>;
 
   constructor(
     private gestionService: GestionService,
-    private dialog: MatDialog
-  ) {}
+    private dialog: MatDialog,
+    private userService: UserService,
+  ) {
+    this.role$ = this.userService.getRoleState();
+  }
 
   ngOnInit(): void {
     this.loadTables();

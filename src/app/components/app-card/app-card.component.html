@@ -79,12 +79,26 @@
 <!-- Botones de Órdenes y Total alineados -->
 <div class="card-footer d-flex justify-content-between" *ngIf="table.orders && table.orders.length > 0">
   <button class="btn btn-danger btn-sm" 
+  *ngIf="(role$ | async) === 'admin'"
           (click)="openTableInfoDialog(table)" 
           [disabled]="table.controlledBy">
     <mat-icon fontIcon="local_cafe"></mat-icon> Ordenes
   </button>
 
+  <!--otro ordenes-->
+
+
+
+    <button class="btn btn-danger btn-sm d-flex justify-content-center w-100" *ngIf="(role$ | async) === 'user'"
+            (click)="openTableInfoDialog(table)" 
+            [disabled]="table.controlledBy">
+      <mat-icon fontIcon="local_cafe"></mat-icon> Ordenes
+    </button>
+
+
+
   <button class="btn btn-sm" 
+          *ngIf="(role$ | async) === 'admin'"
           (click)="openTotalDialog(table)" 
           [ngClass]="{
             'btn-success': table.available && !table.controlledBy,

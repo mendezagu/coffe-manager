@@ -90,3 +90,10 @@
 .btn mat-icon {
   font-size: 18px; /* Ajusta el tamaño del icono */
 }
+
+.center-button {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* opcional, si quieres centrar también verticalmente */
+  height: 100%; /* asegúrate de que el contenedor tenga altura */
+}
