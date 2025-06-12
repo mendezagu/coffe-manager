@@ -140,6 +140,7 @@ export class TotalDialogComponent implements OnInit {
           status: 'mesa_liberada',
           tableId: this.data.tableId,
         });
+        location.reload();
       },
       error: (error) => {
         console.error('Error al liberar la mesa:', error);

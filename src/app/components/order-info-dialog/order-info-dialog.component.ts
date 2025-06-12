@@ -61,7 +61,7 @@ export class OrderInfoDialogComponent implements OnInit {
     (updatedTable: Table) => {
       // Registrar log después del éxito
       this.gestionService.saveLog(
-        `Se eliminaron órdenes: <strong> ${itemsToDeleteLog.join(', ')}</strong> de la mesa <strong>${this.table.name}</strong> atendida por <strong>${this.table.waiterName || 'Desconocido'}</strong>`,
+        `<strong style="color: red;">Se eliminaron</strong> órdenes: <strong> ${itemsToDeleteLog.join(', ')}</strong> de la mesa <strong>${this.table.name}</strong> atendida por <strong>${this.table.waiterName || 'Desconocido'}</strong>`,
       );
 
       this.table = updatedTable;
