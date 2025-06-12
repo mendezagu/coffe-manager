@@ -73,37 +73,56 @@ export class CardComponent implements OnInit {
   }
 
   // Método para abrir el diálogo de agregar ítems
-  addMenuItems(table: Table): void {
+addMenuItems(table: Table): void {
+  if (table.waiterId) {
+    // 👉 Ya tiene mozo asignado: ir directo al menú
+    const menuDialogRef = this.dialog.open(MenuDialogComponent, {
+      width: '400px',
+      data: {
+        ...table,
+        waiter: this.waiters.find(w => w._id === table.waiterId) || null
+      }
+    });
+
+    menuDialogRef.afterClosed().subscribe((menu: any[]) => {
+      if (menu && menu.length > 0) {
+        this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
+          this.loadTables();
+        });
+      }
+    });
+
+  } else {
+    // 👉 No tiene mozo: primero asignar mozo, luego mostrar menú
     const waiterDialogRef = this.dialog.open(WaiterDialogComponent, {
       width: '400px',
       data: { table }
     });
-  
+
     waiterDialogRef.afterClosed().subscribe(result => {
       if (result) {
         const { waiterId, waiterName } = result;
-  
-        // Asigna el mozo a la mesa usando su ID
+
         this.gestionService.assignWaiterToTable(table.id, waiterId).subscribe({
-          next: (response) => {
-            console.log('Mozo asignado correctamente:', response);
-        
-            // Actualizar la mesa localmente con el nombre desde la respuesta
-            table.waiterId = response.table.waiterId;
-            table.waiterName = response.table.waiterName;
-        
-            console.log(`Nombre del mozo asignado: ${table.waiterName}`);
-        
-            // Abre el diálogo de menú después de asignar el mozo
+          next: () => {
+            table.waiterId = waiterId;
+            table.waiterName = waiterName;
+
+            const logMessage = `Se asignó el mozo <strong>${waiterName}</strong> a la mesa <strong>${table.name}</strong>`;
+            this.gestionService.saveLog(logMessage);
+
             const menuDialogRef = this.dialog.open(MenuDialogComponent, {
               width: '400px',
-              data: table,
+              data: {
+                ...table,
+                waiter: this.waiters.find(w => w._id === waiterId) || null
+              }
             });
-        
+
             menuDialogRef.afterClosed().subscribe((menu: any[]) => {
               if (menu && menu.length > 0) {
                 this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
-                  this.loadTables(); // Recargar las mesas actualizadas
+                  this.loadTables();
                 });
               }
             });
@@ -116,6 +135,8 @@ export class CardComponent implements OnInit {
       }
     });
   }
+}
+
   // Método para abrir el diálogo de información de la mesa
   openTableInfoDialog(table: Table): void {
     if (table && Array.isArray(table.orders)) {  // Validamos que orders sea un array
@@ -155,48 +176,53 @@ export class CardComponent implements OnInit {
   }
 
   // Método para abrir el diálogo de asignación de mozo
-  openWaiterDialog(table: Table): void {
-    const dialogRef = this.dialog.open(WaiterDialogComponent, {
-      width: '400px',
-      data: { table }
-    });
-  
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const { waiterId, waiterName } = result;
-  
-        this.gestionService.assignWaiterToTable(table.id, waiterId).subscribe({
-          next: (response) => {
-            console.log('Mozo asignado correctamente:', response);
-        
-            // Actualizar la mesa localmente con el nombre desde la respuesta
-            table.waiterId = response.table.waiterId;
-            table.waiterName = response.table.waiterName;
-        
-            console.log(`Nombre del mozo asignado: ${table.waiterName}`);
-        
-            // Abre el diálogo de menú después de asignar el mozo
-            const menuDialogRef = this.dialog.open(MenuDialogComponent, {
-              width: '400px',
-              data: table,
-            });
-        
-            menuDialogRef.afterClosed().subscribe((menu: any[]) => {
-              if (menu && menu.length > 0) {
-                this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
-                  this.loadTables(); // Recargar las mesas actualizadas
-                });
-              }
-            });
-          },
-          error: (error) => {
-            console.error('Error al asignar el mozo:', error);
-            alert('No se pudo asignar el mozo. Inténtalo nuevamente.');
-          }
-        });
-      }
-    });
-  }
+openWaiterDialog(table: Table): void {
+  const dialogRef = this.dialog.open(WaiterDialogComponent, {
+    width: '400px',
+    data: { table }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      const { waiterId, waiterName } = result;
+
+      this.gestionService.assignWaiterToTable(table.id, waiterId).subscribe({
+        next: (response) => {
+          console.log('Mozo asignado correctamente:', response);
+
+          table.waiterId = response.table.waiterId;
+          table.waiterName = response.table.waiterName;
+
+          // ✅ Guardar en logs
+          const logMessage = `Se asignó el mozo <strong>${table.waiterName}</strong> a la mesa <strong>${table.name}</strong>`;
+          this.gestionService.saveLog(logMessage);
+
+          // Abre el diálogo de menú después de asignar el mozo
+          const menuDialogRef = this.dialog.open(MenuDialogComponent, {
+            width: '400px',
+            data: {
+              ...table,
+              waiter: this.waiters.find(w => w._id === table.waiterId) || null
+            }
+          });
+
+          menuDialogRef.afterClosed().subscribe((menu: any[]) => {
+            if (menu && menu.length > 0) {
+              this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
+                this.loadTables();
+              });
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error al asignar el mozo:', error);
+          alert('No se pudo asignar el mozo. Inténtalo nuevamente.');
+        }
+      });
+    }
+  });
+}
+
 
 // Método para abrir el diálogo de vinculación de mesas
 openLinkTablesDialog(table: Table): void {
@@ -342,8 +368,13 @@ printTicket(tableId: string): void {
       printWindow.document.write(printContent);
       printWindow.document.close();
       printWindow.focus();
+      
     }
   }
+    location.reload();
+    // ✅ Guardar log de impresión
+  const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${table.name}</strong> atendida por <strong>${table.waiterName || 'Sin asignar'}</strong>`;
+  this.gestionService.saveLog(logMessage);
 }
 
 

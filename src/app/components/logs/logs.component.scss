@@ -1,0 +1,14 @@
+.logs-container {
+  padding: 1rem;
+  h2 {
+    margin-bottom: 1rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 0.5rem;
+    text-align: left;
+  }
+}

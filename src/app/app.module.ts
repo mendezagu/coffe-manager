@@ -29,6 +29,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.component';
 import { LoginComponent } from './pages/login/login.component';
+import { MatTableModule } from '@angular/material/table';
 
 import { environment } from 'src/environments/environment';
 import {getAuth, provideAuth} from '@angular/fire/auth'
@@ -40,6 +41,8 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireModule } from '@angular/fire/compat';
 import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
+import { LogsComponent } from './components/logs/logs.component';
+import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 
 
 @NgModule({
@@ -57,6 +60,8 @@ import { BalanceComponent } from './pages/balance/balance.component';
     AdminPanelComponent,
     StadisticsComponent,
     BalanceComponent,
+    LogsComponent,
+    PasswordDialogComponent,
 
   ],
   imports: [
@@ -78,6 +83,7 @@ import { BalanceComponent } from './pages/balance/balance.component';
     MatListModule,
     MatIconModule,
     MatToolbarModule,
+    MatTableModule,
     
     HttpClientModule,
     AngularFirestoreModule,

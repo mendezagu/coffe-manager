@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environmentMongo } from 'src/environments/environmentMongo';
-import { map, Observable, catchError, throwError } from 'rxjs';
+import { map, Observable, catchError, throwError, BehaviorSubject, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export interface MenuItem {
   menuItem: any;
@@ -32,6 +33,8 @@ export interface Waiter {
   providedIn: 'root',
 })
 export class GestionService {
+  // Dentro de la clase GestionService
+private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
   private apiUrl = environmentMongo.apiUrl;
   tables: any;
 
@@ -98,15 +101,19 @@ export class GestionService {
   }
 
   // Eliminar órdenes de la mesa
-  deleteOrdersFromTable(tableId: string, orderIds: string[]): Observable<Table> {
-    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/remove-order`, { orderIds }).pipe(
-      map((table: Table) => {
-        table.available = table.orders.length === 0;
-        return table;
-      }),
-      catchError(this.handleError)
-    );
-  }
+deleteOrdersFromTable(tableId: string, orderIds: string[]): Observable<Table> {
+  return this.http.put<{ message: string; table: Table }>(
+    `${this.apiUrl}/tables/${tableId}/remove-order`,
+    { orderIds }
+  ).pipe(
+    map((response) => {
+      const table = response.table;
+      table.available = table.orders?.length === 0;
+      return table;
+    }),
+    catchError(this.handleError)
+  );
+}
 
   // Obtener información de la mesa
   getTableById(tableId: string): Observable<Table> {
@@ -198,11 +205,26 @@ deleteAllBalances(): Observable<{ message: string }> {
 }
 
   // 📌 Menu Items
-  getMenu(): Observable<MenuItem[]> {
-    return this.http.get<MenuItem[]>(`${this.apiUrl}/menu`).pipe(
-      catchError(this.handleError)
-    );
+// Nueva versión de getMenu
+getMenu(): Observable<MenuItem[]> {
+  const cached = this.menuCache$.getValue();
+  if (cached) {
+    return of(cached);
   }
+
+  return this.http.get<MenuItem[]>(`${this.apiUrl}/menu`).pipe(
+    tap(menuItems => this.menuCache$.next(menuItems)), // cache result
+    catchError(this.handleError)
+  );
+}
+
+// Método opcional para forzar actualización
+refreshMenu(): Observable<MenuItem[]> {
+  return this.http.get<MenuItem[]>(`${this.apiUrl}/menu`).pipe(
+    tap(menuItems => this.menuCache$.next(menuItems)),
+    catchError(this.handleError)
+  );
+}
 
   addMenuItem(name: string, price: number): Observable<MenuItem> {
     return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1 }).pipe(
@@ -267,5 +289,23 @@ deleteAllBalances(): Observable<{ message: string }> {
       catchError(this.handleError)
     );
   }
+
+    // 📌 Logs de acciones
+saveLog(action: string): void {
+  const timestamp = new Date().toISOString();
+  const logEntry = { action, timestamp };
+  const existingLogs = JSON.parse(localStorage.getItem('appLogs') || '[]');
+  existingLogs.push(logEntry);
+  localStorage.setItem('appLogs', JSON.stringify(existingLogs));
+  console.log('[LOG GUARDADO]', logEntry); // 👈 Agrega esto temporalmente
+}
+
+getLogs(): { action: string; timestamp: string }[] {
+  return JSON.parse(localStorage.getItem('appLogs') || '[]');
+}
+
+clearLogs(): void {
+  localStorage.removeItem('appLogs');
+}
 
 }

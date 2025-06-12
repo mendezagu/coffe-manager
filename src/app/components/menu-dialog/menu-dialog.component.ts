@@ -25,6 +25,7 @@ export class MenuDialogComponent {
   ) {}
 
   ngOnInit(): void {
+     console.log('Datos recibidos en MenuDialogComponent:', this.data);
     this.loadMenu();
     // Verificamos si 'this.data.waiter' es un objeto de tipo Waiter y accedemos al nombre del mozo
   if (this.data && this.data.waiter) {
@@ -72,15 +73,25 @@ export class MenuDialogComponent {
     }
   }
 
-  updateQuantity(menu: MenuItem, event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    const quantity = parseInt(inputElement.value, 10);
-    menu.quantity = quantity;
-    const index = this.selectedItems.findIndex(item => item._id === menu._id);
-    if (index > -1) {
-      this.selectedItems[index].quantity = quantity * 1;
-    }
+updateQuantity(menu: MenuItem, event: Event): void {
+  const inputElement = event.target as HTMLInputElement;
+  const quantity = parseInt(inputElement.value, 10);
+  menu.quantity = quantity;
+
+  const index = this.selectedItems.findIndex(item => item._id === menu._id);
+  if (index > -1) {
+    this.selectedItems[index].quantity = quantity;
+
+    // Obtener nombre del mozo (por si acaso cambia dinámicamente)
+    const mozo = this.waiterName || (this.data.waiter?.name ?? 'Desconocido');
+
+    // Registrar en el log la modificación
+    this.gestionService.saveLog(
+      `Se actualizó la cantidad de <strong>${menu.name}</strong> a <strong>${quantity}</strong> en la mesa <strong>${this.data.name}</strong> por el mozo <strong>${mozo}</strong>.`
+    );
   }
+}
+
 
   
 
@@ -97,6 +108,19 @@ export class MenuDialogComponent {
         this.data.orders = updatedTable.orders;
         this.data.available = false; // Marcamos la mesa como ocupada
         this.canPrint = false; // 🔴 Deshabilitamos el botón de imprimir
+
+ // Construir log detallado con cantidades, nombres y mozo
+      const itemsDescription = this.selectedItems
+        .map(item => `${item.quantity}x ${item.name}`)
+        .join(', ');
+
+      const mozo = this.waiterName || (this.data.waiter?.name ?? 'Desconocido');
+      console.log(mozo);
+      
+
+      this.gestionService.saveLog(
+        `Se agregaron: <strong>${itemsDescription}</strong> a la mesa <strong>${this.data.name}</strong> por el mozo <strong>${mozo}</strong>`
+      );
   
         const printContent = `
           <html>
@@ -148,6 +172,7 @@ export class MenuDialogComponent {
                 window.onafterprint = function() {
                   window.close();
                   window.opener.postMessage('closeDialog', '*');
+                   window.opener.location.reload();
                 }
               </script>
             </body>
@@ -160,7 +185,12 @@ export class MenuDialogComponent {
           printWindow.document.write(printContent);
           printWindow.document.close();
           printWindow.focus();
+           this.dialogRef.close();
+           location.reload();
+
         }
+          const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${this.data.name}</strong> atendida por <strong>${this.data.waiterName || 'Sin asignar'}</strong>`;
+          this.gestionService.saveLog(logMessage);
       },
       (error) => {
         console.error("Error al actualizar la mesa:", error);

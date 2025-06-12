@@ -19,6 +19,11 @@
       <mat-icon fontIcon="paid"></mat-icon>
       Balance
     </button>
+
+       <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" style="color: #aa7e67;">
+      <mat-icon fontIcon="visibility_lock"></mat-icon>
+        Logs
+    </button>
     
     <button mat-flat-button color="warn" *ngIf="isLoggedIn" (click)="logout()">Cerrar sesión</button>
   </mat-drawer>
