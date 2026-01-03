@@ -1,65 +1,104 @@
-<div *ngIf="(role$ | async) === 'admin'">
-  <h2 class="text-center my-4">Panel de Administrador</h2>
-
-  <div class="row">
-    <!-- Contenedor de las dos tablas en pantallas grandes -->
-    <div class="d-flex flex-column flex-md-row gap-3">
-      <!-- Sección de Menú -->
+<div *ngIf="(role$ | async) === 'admin'" class="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 p-4 sm:p-6 lg:p-10">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header mejorado -->
+    <div class="mb-8 sm:mb-10">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+          <mat-icon class="!w-10 !h-10 !text-4xl text-white">admin_panel_settings</mat-icon>
+        </div>
+        <div>
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Panel de Administrador</h2>
+          <p class="text-gray-600 text-sm sm:text-base mt-1">Gestiona mesas, menú y mozos</p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- ADMINISTRAR MESAS -->
+    <!-- ADMINISTRAR MESAS -->
+    <mat-accordion class="mb-6">
+      <mat-expansion-panel class="!rounded-2xl !shadow-xl overflow-hidden !bg-white">
+        <mat-expansion-panel-header class="!bg-gradient-to-r !from-coffee-600 !via-coffee-700 !to-coffee-600 !text-white !py-6">
+          <mat-panel-title class="!font-bold !text-xl flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <mat-icon class="!w-6 !h-6 !text-2xl">table_restaurant</mat-icon>
+            </div>
+            <span>Administrar Mesas</span>
+          </mat-panel-title>
+          <mat-panel-description class="!text-white/90 !text-base">
+            Agrega, edita o elimina tus mesas
+          </mat-panel-description>
+        </mat-expansion-panel-header>
 
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title> Administrar mesas </mat-panel-title>
-        <mat-panel-description>
-          Agrega, edita o elimina tus mesas
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <!-- Sección de Mesas -->
-      <div class="col-md-12">
-        <div class="card p-3 shadow">
-          <h2>Agregar Mesa</h2>
-          <div class="input-group mb-3">
-            <input
-              class="form-control"
-              [(ngModel)]="newTableName"
-              placeholder="Nombre de la mesa"
-            />
-            <button class="btn btn-primary" (click)="addTable()">Agregar</button>
+        <div class="p-6 sm:p-8 bg-gradient-to-br from-white to-gray-50">
+          <!-- Agregar Mesa -->
+          <div class="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-blue-600">add_circle</mat-icon>
+              Agregar Nueva Mesa
+            </h3>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input
+                class="flex-1 px-5 py-4 border-2 border-blue-300 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all text-gray-700 font-semibold"
+                [(ngModel)]="newTableName"
+                placeholder="Nombre de la mesa (ej: Mesa 1)"
+              />
+              <button class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="addTable()">
+                <mat-icon class="!w-6 !h-6 !text-2xl">add</mat-icon>
+                Agregar
+              </button>
+            </div>
           </div>
 
-          <h2>Lista de Mesas</h2>
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead class="table-dark">
+          <!-- Lista de Mesas -->
+          <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <mat-icon class="!w-7 !h-7 !text-3xl text-purple-600">list</mat-icon>
+            Lista de Mesas
+          </h3>
+          <div class="overflow-x-auto rounded-2xl shadow-xl bg-white">
+            <table class="w-full">
+              <thead class="bg-gradient-to-r from-gray-800 to-gray-900">
                 <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Disponible</th>
-                  <th>Acciones</th>
+             
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">table_restaurant</mat-icon>
+                      Nombre
+                    </div>
+                  </th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">check_circle</mat-icon>
+                      Disponible
+                    </div>
+                  </th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">settings</mat-icon>
+                      Acciones
+                    </div>
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr *ngFor="let table of tables">
-                  <td>{{ table.id }}</td>
-                  <td>{{ table.name }}</td>
-                  <td>{{ table.available ? "Sí" : "No" }}</td>
-                  <td>
-                    <div class="d-flex gap-2">
-                      <button
-                        class="btn btn-warning btn-sm"
-                        (click)="startEditingTable(table)"
-                      >
+              <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let table of tables; let i = index" 
+                    class="hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300"
+                    [class.bg-gray-50]="i % 2 === 0">
+               
+                  <td class="px-6 py-4 text-gray-900 font-bold text-lg">{{ table.name }}</td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm shadow-sm" 
+                          [ngClass]="table.available ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-2 border-green-200' : 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border-2 border-red-200'">
+                      <span class="w-2 h-2 rounded-full" [ngClass]="table.available ? 'bg-green-500 animate-pulse' : 'bg-red-500'"></span>
+                      {{ table.available ? "Disponible" : "Ocupada" }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="startEditingTable(table)">
+                        <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
                         Editar
                       </button>
-                      <button
-                        class="btn btn-danger btn-sm"
-                        (click)="deleteTable(table.id)"
-                      >
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="deleteTable(table.id)">
+                        <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
                         Eliminar
                       </button>
                     </div>
@@ -70,99 +109,122 @@
           </div>
 
           <!-- Editar Mesa -->
-          <div *ngIf="editTableId !== undefined" class="mt-3">
-            <h3>Editar Mesa</h3>
-            <input
-              class="form-control mb-2"
-              [(ngModel)]="editTableName"
-              placeholder="Nuevo nombre"
-            />
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                [(ngModel)]="editTableAvailability"
-                id="disponibleCheck"
-              />
-              <label class="form-check-label" for="disponibleCheck">Disponible</label>
+          <div *ngIf="editTableId !== undefined" class="mt-6 p-6 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border-2 border-yellow-400 shadow-xl">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-yellow-600">edit_note</mat-icon>
+              Editar Mesa
+            </h3>
+            <div class="space-y-4">
+              <input class="w-full px-5 py-4 border-2 border-yellow-400 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 text-gray-700 font-semibold" [(ngModel)]="editTableName" placeholder="Nuevo nombre" />
+              <div class="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-yellow-300">
+                <input class="w-6 h-6 cursor-pointer" type="checkbox" [(ngModel)]="editTableAvailability" id="disponibleCheck" />
+                <label class="font-bold text-gray-900 cursor-pointer text-lg" for="disponibleCheck">Marcar como disponible</label>
+              </div>
+              <div class="flex gap-3">
+                <button class="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="saveTableEdit()">
+                  <mat-icon class="!w-6 !h-6 !text-2xl">save</mat-icon>
+                  Guardar Cambios
+                </button>
+                <button class="px-6 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" (click)="editTableId = undefined">
+                  Cancelar
+                </button>
+              </div>
             </div>
-            <button class="btn btn-success mt-2" (click)="saveTableEdit()">Guardar</button>
           </div>
         </div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
 
-  <!-- ADMINISTRAR MENU -->
+    <!-- ADMINISTRAR MENU -->
+    <mat-accordion class="mb-6">
+      <mat-expansion-panel class="!rounded-2xl !shadow-xl overflow-hidden !bg-white">
+        <mat-expansion-panel-header class="!bg-gradient-to-r !from-orange-600 !via-red-600 !to-orange-600 !text-white !py-6">
+          <mat-panel-title class="!font-bold !text-xl flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <mat-icon class="!w-6 !h-6 !text-2xl">restaurant_menu</mat-icon>
+            </div>
+            <span>Administrar Menú</span>
+          </mat-panel-title>
+          <mat-panel-description class="!text-white/90 !text-base">
+            Agrega, edita o elimina ítems del menú
+          </mat-panel-description>
+        </mat-expansion-panel-header>
 
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title> Administrar lista de menú </mat-panel-title>
-        <mat-panel-description>
-          Agrega, edita o elimina tus menú
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <!-- Sección de Menú -->
-      <div class="col-md-12">
-        <div class="card p-3 shadow">
-          <h2>Agregar Ítem al Menú</h2>
-          <div class="input-group mb-3">
-            <input
-              class="form-control"
-              [(ngModel)]="newItemName"
-              placeholder="Nombre del ítem"
-            />
-            <input
-              class="form-control"
-              type="number"
-              [(ngModel)]="newItemPrice"
-              placeholder="Precio"
-              (change)="formatPrice()"
-            />
-            <button class="btn btn-primary" (click)="addMenuItem()">Agregar</button>
+        <div class="p-6 sm:p-8 bg-gradient-to-br from-white to-gray-50">
+          <!-- Agregar ítem -->
+          <div class="mb-8 p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl border-2 border-orange-200">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-orange-600">add_circle</mat-icon>
+              Agregar Ítem al Menú
+            </h3>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input class="flex-1 px-5 py-4 border-2 border-orange-300 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all text-gray-700 font-semibold" [(ngModel)]="newItemName" placeholder="Nombre del ítem (ej: Café Americano)" />
+              <input class="w-full sm:w-40 px-5 py-4 border-2 border-orange-300 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all text-gray-700 font-semibold" type="number" [(ngModel)]="newItemPrice" placeholder="Precio" (change)="formatPrice()" />
+              <button class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="addMenuItem()">
+                <mat-icon class="!w-6 !h-6 !text-2xl">add</mat-icon>
+                Agregar
+              </button>
+            </div>
           </div>
 
-          <!-- Filtro de búsqueda para el menú -->
-          <div class="mb-3">
-            <h2 for="searchMenu" class="form-label">Buscar ítem del menú:</h2>
-            <input
-              id="searchMenu"
-              class="form-control"
-              [(ngModel)]="searchTerm"
-              placeholder="Buscar por nombre"
-            />
+          <!-- Filtro de búsqueda -->
+          <div class="mb-6 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
+            <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <mat-icon class="!w-6 !h-6 !text-2xl text-purple-600">search</mat-icon>
+              Buscar en el menú
+            </h3>
+            <input class="w-full px-5 py-4 border-2 border-purple-300 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all text-gray-700 font-semibold" [(ngModel)]="searchTerm" placeholder="Buscar por nombre..." />
           </div>
 
-          <h2>Lista del Menú</h2>
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead class="table-dark">
+          <!-- Lista del menú -->
+          <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <mat-icon class="!w-7 !h-7 !text-3xl text-red-600">list</mat-icon>
+            Lista del Menú
+          </h3>
+          <div class="overflow-x-auto rounded-2xl shadow-xl bg-white">
+            <table class="w-full">
+              <thead class="bg-gradient-to-r from-gray-800 to-gray-900">
                 <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Precio</th>
-                  <th>Acciones</th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
+                      Nombre
+                    </div>
+                  </th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">attach_money</mat-icon>
+                      Precio
+                    </div>
+                  </th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">settings</mat-icon>
+                      Acciones
+                    </div>
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr *ngFor="let item of filteredMenuItems">
-                  <td>{{ item._id }}</td>
-                  <td>{{ item.name }}</td>
-                  <td>${{ item.price }}</td>
-                  <td>
-                    <div class="d-flex gap-2">
-                      <button
-                        class="btn btn-warning btn-sm"
-                        (click)="startEditingMenu(item)"
-                      >
+              <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let item of filteredMenuItems; let i = index" 
+                    class="hover:bg-gradient-to-r hover:from-gray-50 hover:to-orange-50 transition-all duration-300"
+                    [class.bg-gray-50]="i % 2 === 0">
+              
+                  <td class="px-6 py-4 text-gray-900 font-bold text-lg">{{ item.name }}</td>
+                  <td class="px-6 py-4">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                      <mat-icon class="!w-5 !h-5 !text-xl text-green-600">payments</mat-icon>
+                      <span class="text-green-700 font-bold text-lg">${{ item.price }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="startEditingMenu(item)">
+                        <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
                         Editar
                       </button>
-                      <button
-                        class="btn btn-danger btn-sm"
-                        (click)="deleteMenuItem(item._id)"
-                      >
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="deleteMenuItem(item._id)">
+                        <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
                         Eliminar
                       </button>
                     </div>
@@ -173,76 +235,103 @@
           </div>
 
           <!-- Editar Ítem del Menú -->
-          <div *ngIf="editItemId !== undefined" class="mt-3">
-            <h2>Editar Ítem del Menú</h2>
-            <input
-              class="form-control mb-2"
-              [(ngModel)]="editItemName"
-              placeholder="Nuevo nombre"
-            />
-            <input
-              class="form-control mb-2"
-              type="number"
-              [(ngModel)]="editItemPrice"
-              placeholder="Nuevo precio"
-            />
-            <button class="btn btn-success mt-2" (click)="saveMenuItemEdit()">Guardar</button>
+          <div *ngIf="editItemId !== undefined" class="mt-6 p-6 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border-2 border-yellow-400 shadow-xl">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-yellow-600">edit_note</mat-icon>
+              Editar Ítem del Menú
+            </h3>
+            <div class="space-y-4">
+              <input class="w-full px-5 py-4 border-2 border-yellow-400 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 text-gray-700 font-semibold" [(ngModel)]="editItemName" placeholder="Nuevo nombre" />
+              <input class="w-full px-5 py-4 border-2 border-yellow-400 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 text-gray-700 font-semibold" type="number" [(ngModel)]="editItemPrice" placeholder="Nuevo precio" />
+              <div class="flex gap-3">
+                <button class="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="saveMenuItemEdit()">
+                  <mat-icon class="!w-6 !h-6 !text-2xl">save</mat-icon>
+                  Guardar Cambios
+                </button>
+                <button class="px-6 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" (click)="editItemId = undefined">
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
 
-  <!-- ADMINISTRAR MOZOS -->
+    <!-- ADMINISTRAR MOZOS -->
+    <mat-accordion class="mb-6">
+      <mat-expansion-panel class="!rounded-2xl !shadow-xl overflow-hidden !bg-white">
+        <mat-expansion-panel-header class="!bg-gradient-to-r !from-blue-600 !via-indigo-600 !to-blue-600 !text-white !py-6">
+          <mat-panel-title class="!font-bold !text-xl flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <mat-icon class="!w-6 !h-6 !text-2xl">person</mat-icon>
+            </div>
+            <span>Administrar Mozos</span>
+          </mat-panel-title>
+          <mat-panel-description class="!text-white/90 !text-base">
+            Agrega, edita o elimina mozos
+          </mat-panel-description>
+        </mat-expansion-panel-header>
 
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title> Administrar lista de mozos </mat-panel-title>
-        <mat-panel-description>
-          Agrega, edita o elimina los datos de tus mozos
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <!-- Sección de Meseros -->
-      <div class="col-md-12">
-        <div class="card p-3 shadow">
-          <h2>Agregar Mesero</h2>
-          <div class="input-group mb-3">
-            <input
-              class="form-control"
-              [(ngModel)]="newWaiterName"
-              placeholder="Nombre del mesero"
-            />
-            <button class="btn btn-primary" (click)="addWaiter()">Agregar</button>
+        <div class="p-6 sm:p-8 bg-gradient-to-br from-white to-gray-50">
+          <!-- Agregar Mesero -->
+          <div class="mb-8 p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-200">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-indigo-600">add_circle</mat-icon>
+              Agregar Nuevo Mesero
+            </h3>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input class="flex-1 px-5 py-4 border-2 border-indigo-300 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all text-gray-700 font-semibold" [(ngModel)]="newWaiterName" placeholder="Nombre del mesero (ej: Juan Pérez)" />
+              <button class="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="addWaiter()">
+                <mat-icon class="!w-6 !h-6 !text-2xl">add</mat-icon>
+                Agregar
+              </button>
+            </div>
           </div>
 
-          <h2>Lista de Meseros</h2>
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead class="table-dark">
+          <!-- Lista de Meseros -->
+          <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <mat-icon class="!w-7 !h-7 !text-3xl text-indigo-600">list</mat-icon>
+            Lista de Meseros
+          </h3>
+          <div class="overflow-x-auto rounded-2xl shadow-xl bg-white">
+            <table class="w-full">
+              <thead class="bg-gradient-to-r from-gray-800 to-gray-900">
                 <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Acciones</th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">person</mat-icon>
+                      Nombre
+                    </div>
+                  </th>
+                  <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+                    <div class="flex items-center gap-2">
+                      <mat-icon class="!w-5 !h-5 !text-xl">settings</mat-icon>
+                      Acciones
+                    </div>
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr *ngFor="let waiter of waiters">
-                  <td>{{ waiter._id }}</td>
-                  <td>{{ waiter.name }}</td>
-                  <td>
-                    <div class="d-flex gap-2">
-                      <button
-                        class="btn btn-warning btn-sm"
-                        (click)="startEditingWaiter(waiter)"
-                      >
+              <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let waiter of waiters; let i = index" 
+                    class="hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 transition-all duration-300"
+                    [class.bg-gray-50]="i % 2 === 0">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">{{ waiter.name.charAt(0).toUpperCase() }}</span>
+                      </div>
+                      <span class="text-gray-900 font-bold text-lg">{{ waiter.name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="startEditingWaiter(waiter)">
+                        <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
                         Editar
                       </button>
-                      <button
-                        class="btn btn-danger btn-sm"
-                        (click)="deleteWaiter(waiter._id)"
-                      >
+                      <button class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold rounded-xl text-sm transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1" (click)="deleteWaiter(waiter._id)">
+                        <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
                         Eliminar
                       </button>
                     </div>
@@ -253,24 +342,39 @@
           </div>
 
           <!-- Editar Mesero -->
-          <div *ngIf="editWaiterId !== undefined" class="mt-3">
-            <h3>Editar Mesero</h3>
-            <input
-              class="form-control mb-2"
-              [(ngModel)]="editWaiterName"
-              placeholder="Nuevo nombre"
-            />
-            <button class="btn btn-success mt-2" (click)="saveWaiterEdit()">Guardar</button>
+          <div *ngIf="editWaiterId !== undefined" class="mt-6 p-6 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border-2 border-yellow-400 shadow-xl">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="!w-7 !h-7 !text-3xl text-yellow-600">edit_note</mat-icon>
+              Editar Mesero
+            </h3>
+            <div class="space-y-4">
+              <input class="w-full px-5 py-4 border-2 border-yellow-400 rounded-xl bg-white focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 text-gray-700 font-semibold" [(ngModel)]="editWaiterName" placeholder="Nuevo nombre" />
+              <div class="flex gap-3">
+                <button class="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2" (click)="saveWaiterEdit()">
+                  <mat-icon class="!w-6 !h-6 !text-2xl">save</mat-icon>
+                  Guardar Cambios
+                </button>
+                <button class="px-6 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" (click)="editWaiterId = undefined">
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 </div>
 
 <ng-template #accessDenied>
-  <div class="text-center text-danger">
-    <h1>ACCESO DENEGADO</h1>
-    <p>No tienes los permisos suficientes para visualizar el contenido de esta página.</p>
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-rose-50 p-8">
+    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center mb-6 shadow-2xl">
+      <mat-icon class="!w-16 !h-16 !text-6xl text-white">block</mat-icon>
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-bold text-red-600 mb-4 text-center">ACCESO DENEGADO</h1>
+    <p class="text-xl text-gray-700 text-center max-w-md">No tienes los permisos suficientes para visualizar el contenido de esta página.</p>
+    <button class="mt-8 px-8 py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105" routerLink="/">
+      Volver al Inicio
+    </button>
   </div>
 </ng-template>

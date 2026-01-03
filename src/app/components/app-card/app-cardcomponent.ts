@@ -97,6 +97,7 @@ addMenuItems(table: Table): void {
     const waiterDialogRef = this.dialog.open(WaiterDialogComponent, {
       width: '500px',
       maxWidth: '95vw',
+      height: 'auto',
       data: { table }
     });
 
@@ -142,7 +143,7 @@ addMenuItems(table: Table): void {
   openTableInfoDialog(table: Table): void {
     if (table && Array.isArray(table.orders)) {  // Validamos que orders sea un array
       const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
-        width: '600px',
+        width: '500px',
         data: table
       });
   
@@ -156,7 +157,8 @@ addMenuItems(table: Table): void {
   openTotalDialog(table: Table): void {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
-        width: '600px',
+        width: '450px',
+        panelClass: 'custom-dialog-container',
         data: { tableId: table.id,
             orders: table.orders,
             tableName: table.name,        // Asegúrate de pasar el nombre de la mesa

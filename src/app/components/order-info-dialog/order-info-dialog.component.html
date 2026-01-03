@@ -1,60 +1,111 @@
-<h2 mat-dialog-title>Órdenes Asignadas</h2>
-<mat-dialog-content>
-  <!-- Lista de órdenes con controles de cantidad -->
-  <div class="orders-list">
-    <div *ngFor="let order of table?.orders" class="order-item mb-3 p-3 border rounded">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="order-name flex-grow-1">
-          <strong>{{ order.name || 'Nombre no disponible' }}</strong>
-        </div>
-        <div class="quantity-controls d-flex align-items-center gap-2">
-          <button 
-            mat-mini-fab 
-            color="primary" 
-            (click)="decreaseQuantity(order)"
-            [disabled]="(order.quantity || 1) <= 1"
-            class="quantity-btn"
-          >
-            <mat-icon>remove</mat-icon>
-          </button>
-          <span class="quantity-display px-3 fw-bold">{{ order.quantity || 1 }}</span>
-          <button 
-            mat-mini-fab 
-            color="primary" 
-            (click)="increaseQuantity(order)"
-            class="quantity-btn"
-          >
-            <mat-icon>add</mat-icon>
-          </button>
-          <button 
-            *ngIf="(role$ | async) === 'admin'"
-            mat-mini-fab 
-            color="warn" 
-            (click)="removeOrder(order)"
-            class="ms-2"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
+<div class="relative w-[90vw] sm:w-[500px] max-w-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden">
+  <!-- Decorative background pattern -->
+  <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-400 to-pink-400 opacity-5 rounded-full -translate-y-32 translate-x-32"></div>
+  <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-400 to-indigo-400 opacity-5 rounded-full translate-y-24 -translate-x-24"></div>
+  
+  <!-- Header con diseño Fuse -->
+  <div class="relative bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-3 sm:p-4">
+    <div class="flex items-center gap-2.5">
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm">
+        <mat-icon class="!w-6 !h-6 !text-2xl text-white">shopping_bag</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-lg sm:text-xl font-bold text-white">Gestión de Órdenes</h2>
+        <p class="text-white/80 text-xs mt-0.5">Administra las cantidades y productos</p>
       </div>
     </div>
   </div>
+  
+  <mat-dialog-content class="relative max-h-[55vh] overflow-y-auto p-3 sm:p-4">
+    <!-- Lista de órdenes con diseño mejorado -->
+    <div class="space-y-2">
+   <div *ngFor="let order of table?.orders"
+     class="group relative p-3 bg-gradient-to-br from-white to-gray-50
+            border border-gray-200 rounded-xl shadow-sm
+            hover:shadow-md transition-all duration-200">
 
-  <p *ngIf="!table?.orders || table?.orders?.length === 0" class="text-center text-muted mt-4">
-    No hay órdenes asignadas
-  </p>
-</mat-dialog-content>
+  <!-- Producto -->
+  <div class="flex justify-between items-center gap-3 mb-2">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+        <mat-icon class="!text-purple-600 !text-lg">restaurant_menu</mat-icon>
+      </div>
+      <div>
+        <strong class="text-base text-gray-900 block leading-tight">
+          {{ order.name || 'Nombre no disponible' }}
+        </strong>
+        <span class="text-xs text-gray-500 font-semibold">
+          {{ order.price | currency }}
+        </span>
+      </div>
+    </div>
 
-<mat-dialog-actions align="end">
-  <button mat-raised-button mat-dialog-close>
-    Cerrar
-  </button>
-  <button 
-    *ngIf="hasChanges" 
-    mat-raised-button 
-    color="primary" 
-    (click)="saveChanges()"
-  >
-    Guardar Cambios
-  </button>
-</mat-dialog-actions>
+    <div class="px-3 py-1 bg-green-50 rounded-lg border border-green-200">
+      <span class="text-green-700 font-bold text-sm">
+        {{ (order.price * (order.quantity || 1)) | currency }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Cantidad -->
+  <div class="flex items-center justify-between gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+    <span class="text-blue-900 text-sm font-semibold">Cantidad</span>
+
+    <div class="flex items-center gap-1.5">
+      <button mat-mini-fab
+        class="!w-9 !h-9 !bg-gradient-to-r !from-blue-600 !to-indigo-600"
+        (click)="decreaseQuantity(order)"
+        [disabled]="(order.quantity || 1) <= 1">
+        <mat-icon class="!text-white !text-lg">remove</mat-icon>
+      </button>
+
+      <div class="min-w-[56px] px-3 py-1.5 bg-yellow-400 text-gray-900 font-bold text-lg rounded-lg text-center">
+        {{ order.quantity || 1 }}
+      </div>
+
+      <button mat-mini-fab
+        class="!w-9 !h-9 !bg-gradient-to-r !from-blue-600 !to-indigo-600"
+        (click)="increaseQuantity(order)">
+        <mat-icon class="!text-white !text-lg">add</mat-icon>
+      </button>
+
+      <button *ngIf="(role$ | async) === 'admin'"
+        mat-mini-fab
+        class="!w-9 !h-9 !bg-gradient-to-r !from-red-600 !to-rose-600 ml-1"
+        (click)="removeOrder(order)">
+        <mat-icon class="!text-white !text-lg">delete</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
+
+    </div>
+
+    <!-- Empty state mejorado -->
+    <div *ngIf="!table?.orders || table?.orders?.length === 0" 
+         class="flex flex-col items-center justify-center py-8 px-4">
+      <div class="w-16 h-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-3">
+        <mat-icon class="!w-10 !h-10 !text-4xl text-gray-400">inbox</mat-icon>
+      </div>
+      <p class="text-center text-gray-500 text-base font-semibold">No hay órdenes asignadas</p>
+      <p class="text-center text-gray-400 text-xs mt-1">Agrega productos desde el menú</p>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Footer con acciones -->
+  <mat-dialog-actions class="relative flex flex-wrap gap-2 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-purple-50 border-t-2 border-gray-200">
+    <button mat-raised-button mat-dialog-close 
+            class="flex-1 min-w-[100px] !px-4 !py-2.5 !bg-gradient-to-r !from-gray-500 !to-gray-600 hover:!from-gray-600 hover:!to-gray-700 !text-white !font-bold !text-sm !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-300 transform hover:!scale-105 flex items-center justify-center gap-1.5">
+      Cerrar
+    </button>
+    <button 
+      *ngIf="hasChanges" 
+      mat-raised-button 
+      (click)="saveChanges()"
+      class="flex-1 min-w-[100px] !px-4 !py-2.5 !bg-gradient-to-r !from-purple-600 !to-pink-600 hover:!from-purple-700 hover:!to-pink-700 !text-white !font-bold !text-sm !rounded-lg !shadow-lg hover:!shadow-xl !transition-all !duration-300 transform hover:!scale-105 flex items-center justify-center gap-1.5"
+    >
+      <mat-icon class="!w-4 !h-4 !text-lg">save</mat-icon>
+      Guardar Cambios
+    </button>
+  </mat-dialog-actions>
+</div>
