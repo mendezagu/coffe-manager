@@ -1,16 +1,32 @@
-<h2 class="mb-4 text-center">Asignar Mozo</h2>
+<div class="waiter-dialog-container">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">person</mat-icon>
+    <h2 mat-dialog-title>Asignar Mozo</h2>
+  </div>
 
-<div class="mb-3">
-  <label for="waiterSelect" class="form-label">Seleccionar Mozo</label>
-  <select id="waiterSelect" class="form-select form-select-lg shadow-sm" [(ngModel)]="selectedWaiterId">
-    <option value="" disabled selected>Seleccione un mozo...</option>
-    <option *ngFor="let waiter of waiters" [value]="waiter._id">
-      {{ waiter.name }}
-    </option>
-  </select>
-</div>
+  <mat-dialog-content>
+    <div class="waiter-selection-box">
+      <label for="waiterSelect" class="selection-label">
+        <mat-icon>badge</mat-icon>
+        Seleccionar Mozo
+      </label>
+      <select id="waiterSelect" class="waiter-select" [(ngModel)]="selectedWaiterId">
+        <option value="" disabled selected>Seleccione un mozo...</option>
+        <option *ngFor="let waiter of waiters" [value]="waiter._id">
+          {{ waiter.name }}
+        </option>
+      </select>
+    </div>
+  </mat-dialog-content>
 
-<div class="d-flex justify-content-between mt-4">
-  <button class="btn btn-outline-danger btn-lg" (click)="onCancel()">Cancelar</button>
-  <button class="btn btn-success btn-lg" (click)="onConfirm()">Asignar</button>
+  <mat-dialog-actions class="dialog-actions">
+    <button class="btn btn-cancel" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+    <button class="btn btn-confirm" (click)="onConfirm()" [disabled]="!selectedWaiterId">
+      <mat-icon>check_circle</mat-icon>
+      Asignar
+    </button>
+  </mat-dialog-actions>
 </div>

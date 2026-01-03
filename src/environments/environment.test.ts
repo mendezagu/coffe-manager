@@ -1,6 +1,3 @@
-
-
-
 export const environment = {
   production: false,
   firebase: {
@@ -12,5 +9,5 @@ export const environment = {
     appId: "1:1013495355496:web:fdaaf0fb143f3f2c0303dd",
     measurementId: "G-L1Q71BEWLK"
   },
-  apiUrl: "http://localhost:3000/api"  // backend local
+  apiUrl: "http://localhost:3000/api" 
 };

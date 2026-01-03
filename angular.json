@@ -36,7 +36,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
@@ -75,7 +75,35 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.ts"
+                },
+                {
+                  "replace": "src/environments/environmentMongo.ts",
+                  "with": "src/environments/environmentMongo.ts"
+                }
+              ]
+            },
+            "test": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.test.ts"
+                },
+                {
+                  "replace": "src/environments/environmentMongo.ts",
+                  "with": "src/environments/environmentMongo.test.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -88,6 +116,9 @@
             },
             "development": {
               "browserTarget": "coffe-manager:build:development"
+            },
+            "test": {
+              "browserTarget": "coffe-manager:build:test"
             }
           },
           "defaultConfiguration": "development"

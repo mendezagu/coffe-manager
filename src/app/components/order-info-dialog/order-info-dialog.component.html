@@ -1,27 +1,60 @@
 <h2 mat-dialog-title>Órdenes Asignadas</h2>
 <mat-dialog-content>
-  <!-- Lista de órdenes agrupadas -->
-  <mat-selection-list #orders>
-    <mat-list-option *ngFor="let order of table?.orders" [value]="order._id">
-      <div class="order-info">
-        <span>{{ order.name || 'Nombre no disponible' }} x ({{ order.quantity }})</span>
+  <!-- Lista de órdenes con controles de cantidad -->
+  <div class="orders-list">
+    <div *ngFor="let order of table?.orders" class="order-item mb-3 p-3 border rounded">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="order-name flex-grow-1">
+          <strong>{{ order.name || 'Nombre no disponible' }}</strong>
+        </div>
+        <div class="quantity-controls d-flex align-items-center gap-2">
+          <button 
+            mat-mini-fab 
+            color="primary" 
+            (click)="decreaseQuantity(order)"
+            [disabled]="(order.quantity || 1) <= 1"
+            class="quantity-btn"
+          >
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="quantity-display px-3 fw-bold">{{ order.quantity || 1 }}</span>
+          <button 
+            mat-mini-fab 
+            color="primary" 
+            (click)="increaseQuantity(order)"
+            class="quantity-btn"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+          <button 
+            *ngIf="(role$ | async) === 'admin'"
+            mat-mini-fab 
+            color="warn" 
+            (click)="removeOrder(order)"
+            class="ms-2"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
-    </mat-list-option>
-  </mat-selection-list>
+    </div>
+  </div>
 
-  <p *ngIf="orders.selectedOptions.selected.length > 0">
-    Total de ítems seleccionados: {{ orders.selectedOptions.selected.length }}
+  <p *ngIf="!table?.orders || table?.orders?.length === 0" class="text-center text-muted mt-4">
+    No hay órdenes asignadas
   </p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button  *ngIf="(role$ | async) === 'admin'" mat-raised-button color="warn" (click)="removeSelectedOrders(orders.selectedOptions.selected)">
-    Eliminar Seleccionados
-  </button>
   <button mat-raised-button mat-dialog-close>
     Cerrar
   </button>
-  <button *ngIf="table?.orders?.length === 0" mat-raised-button color="primary" (click)="releaseTable()">
-    Liberar Mesa
+  <button 
+    *ngIf="hasChanges" 
+    mat-raised-button 
+    color="primary" 
+    (click)="saveChanges()"
+  >
+    Guardar Cambios
   </button>
 </mat-dialog-actions>

@@ -149,6 +149,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
                 <div class="header">
                   <h2 style="font-size: 14px;">🍽️ NUOVO CAFFE</h2>
                   <p style="font-size: 14px;">Mesa: <strong>${this.data.name}</strong></p>
+                  <p style="font-size: 14px;">Solicitado por: <strong>${this.data.waiter?.name}</strong></p>
                   <p>${new Date().toLocaleString()}</p>
                 </div>
                 <div class="line"></div>
@@ -222,6 +223,18 @@ updateQuantity(menu: MenuItem, event: Event): void {
     this.canPrint = this.selectedItems.length > 0; // Habilitar botón de imprimir si hay elementos
   }
 
+  removeSelectedItem(item: MenuItem): void {
+    const index = this.selectedItems.findIndex(selected => selected._id === item._id);
+    if (index > -1) {
+      this.selectedItems.splice(index, 1);
+    }
+    
+    // Actualizar el estado del botón de imprimir
+    this.canPrint = this.selectedItems.length > 0;
+    
+    // Resetear el estado "agregado" del botón
+    this.addedItems[item._id] = false;
+  }
 
   // Cancela la operación
   cancel(): void {

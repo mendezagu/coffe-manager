@@ -1,20 +1,287 @@
-.shadow-box {
-    max-width: 400px;
-    background: white;
-    padding: 20px;
-    border: 1px solid #ccc; /* Borde gris */
-    border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); /* Sombra 3D */
+/* Fondo general con gradiente elegante */
+.login-background {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 40%, var(--primary-light) 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  
+  /* Efecto de partículas de fondo */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: moveBackground 20s linear infinite;
+  }
+}
+
+@keyframes moveBackground {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(50px, 50px);
+  }
+}
+
+/* Container del login moderno */
+.login-container {
+  max-width: 450px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 3rem 2.5rem;
+  position: relative;
+  z-index: 1;
+  animation: slideInUp 0.6s ease-out;
+  
+  /* Borde con gradiente */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título principal elegante */
+.login-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.login-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+/* Imagen con efecto moderno */
+.image-container {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  
+  img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--secondary-color);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    transition: all 0.3s ease;
+    object-fit: cover;
+    
+    &:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 32px rgba(212, 175, 55, 0.5);
+    }
+  }
+}
+
+/* Material Form Fields modernos */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: white;
+      border-radius: 12px;
+    }
+    
+    .mat-mdc-form-field-focus-overlay {
+      background-color: transparent;
+    }
+    
+    .mdc-text-field--outlined {
+      .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--border-color);
+          border-width: 2px;
+        }
+      }
+      
+      &:hover .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--primary-light);
+        }
+      }
+      
+      &.mdc-text-field--focused .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--primary-color) !important;
+        }
+      }
+    }
+    
+    .mat-mdc-form-field-infix {
+      padding: 1rem 0.75rem;
+    }
+    
+    label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+  }
+}
+
+/* Botones modernos y elegantes */
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 20px rgba(111, 78, 55, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
   }
   
-  .image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 2rem;
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(111, 78, 55, 0.4);
+    
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.login-btn-outline {
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(111, 78, 55, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(-1px);
+  }
+}
+
+/* Espaciado de botones */
+.text-center {
+  margin-top: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .login-container {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .login-title {
+    font-size: 1.75rem;
   }
   
   .image-container img {
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
   }
+}
+
+/* Animación de loading */
+button[type="submit"]:disabled {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

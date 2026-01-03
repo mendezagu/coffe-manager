@@ -1,99 +1,176 @@
 .card {
   color: white !important;
-  border: 1px solid #ccc !important; /* Borde gris */
-  border-radius: 10px !important; /* Bordes redondeados */
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2) !important; /* Efecto 3D */
-  transition: transform 0.2s ease-in-out; /* Suaviza el hover */
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid rgba(255, 255, 255, 0.1) !important;
+  min-height: auto;
 }
 
-/* Efecto 3D al pasar el mouse */
+/* Efecto moderno al pasar el mouse */
 .card:hover {
-  transform: scale(1.08); /* Agranda ligeramente para un mejor efecto */
-  box-shadow: 7px 7px 20px rgba(0, 0, 0, 0.3) !important; /* Sombra más intensa */
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
 }
 
-/* Fondo verde para mesas disponibles */
+/* Fondo verde moderno para mesas disponibles */
 .card.bg-free {
-  background-color: #4CAF50 !important; /* Verde para disponible */
+  background: linear-gradient(135deg, #43A047 0%, #66BB6A 100%) !important;
 }
 
-/* Fondo rojo para mesas ocupadas */
+/* Fondo rojo sofisticado para mesas ocupadas */
 .card.bg-bussy {
-  background-color: #D32F2F !important; /* Rojo para ocupada */
+  background: linear-gradient(135deg, #D32F2F 0%, #EF5350 100%) !important;
 }
 
-/* Texto */
+/* Texto con mejor contraste */
 .card.text-info {
-  color: #ffffff !important; /* Color de texto blanco */
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .card-text.text-success {
-  color: #49d93d; /* Verde para el texto de disponible */
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .card-text.text-danger {
-  color: #dc3545; /* Rojo para el texto de ocupada */
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Botones dentro de la tarjeta */
+/* Texto dentro de cards - MEJOR CONTRASTE */
+.card p,
+.card strong {
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Imagen mejorada */
+.image-container img {
+  border: 3px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Botones modernos con ALTO CONTRASTE */
 .card button {
-  border-color: white !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  transition: all 0.3s ease !important;
+  text-shadow: none !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
+  overflow: visible !important;
+  white-space: nowrap;
 }
 
-.card .btn-primary,
-.card .btn-warning,
-.card .btn-danger,
-.card .btn-secondary,
+.card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Botones con colores oscuros para mejor contraste */
 .card .btn-success {
+  background: #2E7D32 !important;
   color: white !important;
 }
 
+.card .btn-danger {
+  background: #C62828 !important;
+  color: white !important;
+}
+
+.card .btn-primary {
+  background: #1976D2 !important;
+  color: white !important;
+}
+
+.card .btn-warning {
+  background: #F57C00 !important;
+  color: white !important;
+}
+
+.card .btn-secondary {
+  background: #455A64 !important;
+  color: white !important;
+}
+
+/* Iconos con mejor visibilidad y tamaño aumentado */
+.card button mat-icon {
+  font-size: 22px !important;
+  width: 22px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+  color: white !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  margin-right: 6px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  overflow: visible !important;
+}
+
+/* Footer con mejor espaciado */
 .card-footer {
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem; /* Espaciado uniforme entre botones */
-}
-
-/* Elimina el borde de los card-footer */
-.card-footer {
+  gap: 0.5rem;
   border: none !important;
-  background: transparent !important; /* Asegura que no haya un fondo sólido */
-  padding: 0.5rem 0; /* Ajusta el espacio sin afectar la alineación */
+  background: transparent !important;
+  padding: 0.75rem !important;
 }
-
 
 .card-footer .btn {
-  width: 100px; /* Ajusta el ancho de los botones */
-  height: 40px; /* Ajusta la altura de los botones */
+  min-width: 115px;
+  height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 14px; /* Tamaño del texto uniforme */
-}
-
-.card-footer .btn mat-icon {
-  font-size: 18px; /* Tamaño de los íconos dentro del botón */
-  margin-right: 5px; /* Espaciado entre el ícono y el texto */
+  font-size: 14px;
+  gap: 0.4rem;
+  font-weight: 700 !important;
+  padding: 0.7rem 0.9rem !important;
+  overflow: visible !important;
+  line-height: 1.2 !important;
 }
 
 .btn.w-100 {
-  height: 40px; /* Para botones que ocupan todo el ancho */
+  height: 48px;
+  font-weight: 700 !important;
+  font-size: 14px;
+  overflow: visible !important;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Espaciado entre el ícono y el texto */
+  gap: 0.4rem;
+  line-height: 1.2 !important;
 }
 
 .btn mat-icon {
-  font-size: 18px; /* Ajusta el tamaño del icono */
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
 }
 
-.center-button {
-  display: flex;
-  justify-content: center;
-  align-items: center; /* opcional, si quieres centrar también verticalmente */
-  height: 100%; /* asegúrate de que el contenedor tenga altura */
+/* Información con mejor contraste */
+.text-info, .text-warning {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }

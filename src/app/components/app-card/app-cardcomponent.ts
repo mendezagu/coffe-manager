@@ -95,7 +95,8 @@ addMenuItems(table: Table): void {
   } else {
     // 👉 No tiene mozo: primero asignar mozo, luego mostrar menú
     const waiterDialogRef = this.dialog.open(WaiterDialogComponent, {
-      width: '400px',
+      width: '500px',
+      maxWidth: '95vw',
       data: { table }
     });
 
@@ -178,7 +179,8 @@ addMenuItems(table: Table): void {
   // Método para abrir el diálogo de asignación de mozo
 openWaiterDialog(table: Table): void {
   const dialogRef = this.dialog.open(WaiterDialogComponent, {
-    width: '400px',
+    width: '500px',
+    maxWidth: '95vw',
     data: { table }
   });
 

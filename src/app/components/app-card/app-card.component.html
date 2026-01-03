@@ -54,27 +54,27 @@
             'btn-danger': !table.available || table.controlledBy
           }"
           [disabled]="table.controlledBy">
-    <mat-icon fontIcon="add_circle"></mat-icon> Ordenar
+    <mat-icon>restaurant_menu</mat-icon> Ordenar
   </button>
 
-  <button class="btn btn-sm"
+  <!-- <button class="btn btn-sm"
           (click)="openLinkTablesDialog(table)" 
           [ngClass]="{
             'btn-success': table.available && !table.controlledBy,
             'btn-danger': !table.available || table.controlledBy
           }"
           [disabled]="table.controlledBy || table.orders.length > 0">
-    <mat-icon fontIcon="link"></mat-icon> Vincular
-  </button>
+    <mat-icon>link</mat-icon> Vincular
+  </button> -->
 </div>
 
 <!-- Botón de Desvincular (centrado con icono y texto) -->
-<button class="btn btn-success btn-sm w-100 my-2"
+<!-- <button class="btn btn-success btn-sm w-100 my-2"
         *ngIf="!table.orders || table.orders.length === 0 && table.linkedTables.length > 0"
         (click)="unlinkTables(table)"
         [disabled]="table.controlledBy">
-  <mat-icon fontIcon="link_off"></mat-icon> Desvincular
-</button>
+  <mat-icon>link_off</mat-icon> Desvincular
+</button> -->
 
 <!-- Botones de Órdenes y Total alineados -->
 <div class="card-footer d-flex justify-content-between" *ngIf="table.orders && table.orders.length > 0">
@@ -82,7 +82,7 @@
   *ngIf="(role$ | async) === 'admin'"
           (click)="openTableInfoDialog(table)" 
           [disabled]="table.controlledBy">
-    <mat-icon fontIcon="local_cafe"></mat-icon> Ordenes
+    <mat-icon>receipt_long</mat-icon> Ordenes
   </button>
 
   <!--otro ordenes-->
@@ -92,7 +92,7 @@
     <button class="btn btn-danger btn-sm d-flex justify-content-center w-100" *ngIf="(role$ | async) === 'user'"
             (click)="openTableInfoDialog(table)" 
             [disabled]="table.controlledBy">
-      <mat-icon fontIcon="local_cafe"></mat-icon> Ordenes
+      <mat-icon>receipt_long</mat-icon> Ordenes
     </button>
 
 
@@ -105,7 +105,7 @@
             'btn-danger': !table.available || table.controlledBy
           }"
           [disabled]="table.controlledBy">
-    <mat-icon fontIcon="paid"></mat-icon> Total
+    <mat-icon>payments</mat-icon> Total
   </button>
 </div>
 
@@ -113,7 +113,7 @@
 <button class="btn btn-danger btn-sm w-100 my-2"
         *ngIf="table.orders && table.orders.length > 0"
         (click)="printTicket(table.id)">
-  <mat-icon fontIcon="print"></mat-icon>
+  <mat-icon>print</mat-icon>
    Imprimir Comanda
 </button>
 

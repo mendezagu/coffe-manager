@@ -111,7 +111,9 @@ export class AdminPanelComponent {
   addMenuItem() {
     if (this.newItemName.trim() && this.newItemPrice > 0) {
       this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice).subscribe(() => {
-        this.loadMenuItems();
+        this.gestionService.refreshMenu().subscribe((menuItems) => {
+          this.menuItems = menuItems;
+        });
         this.newItemName = '';
         this.newItemPrice = 0;
       });
@@ -127,7 +129,9 @@ export class AdminPanelComponent {
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
       this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice).subscribe(() => {
-        this.loadMenuItems();
+        this.gestionService.refreshMenu().subscribe((menuItems) => {
+          this.menuItems = menuItems;
+        });
         this.editItemId = undefined;
       });
     }
@@ -135,7 +139,9 @@ export class AdminPanelComponent {
 
   deleteMenuItem(itemId: string) {
     this.gestionService.deleteMenuItem(itemId).subscribe(() => {
-      this.loadMenuItems();
+      this.gestionService.refreshMenu().subscribe((menuItems) => {
+        this.menuItems = menuItems;
+      });
     });
   }
 

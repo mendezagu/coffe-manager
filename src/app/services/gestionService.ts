@@ -228,18 +228,21 @@ refreshMenu(): Observable<MenuItem[]> {
 
   addMenuItem(name: string, price: number): Observable<MenuItem> {
     return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1 }).pipe(
+      tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
   }
 
   editMenuItem(itemId: string, newName: string, newPrice: number): Observable<MenuItem> {
     return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice }).pipe(
+      tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
   }
 
   deleteMenuItem(itemId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/menu/${itemId}`).pipe(
+      tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
   }

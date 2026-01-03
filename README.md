@@ -26,7 +26,19 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 
-PARA CORRER Y DEPLOYAR EN GITPAGE: 
+## COMANDOS PARA CORRER EN  DISTINTOS ENTORNOS 
+
+# ng serve --configuration=development (Usa los archivos environment.ts y environmentMongo.ts. No optimiza ni minifica el código.)
+
+# ng serve --configuration=test (Usa environment.test.ts y environmentMongo.test.ts. Mantiene la aplicación sin optimizaciones pero lista para probar con datos de test.)
+
+# ng serve --configuration=production ( Usa environment.prod.ts y environmentMongo.prod.ts. Optimiza y minimiza el código para que cargue más rápido.)
+
+
+
+## PARA CORRER Y DEPLOYAR EN GITPAGE: 
 LIMPIAR CACHE: ng cache clean
 PRIMERO: npm run build,
 SEGUNDO: npm run deploy
+
+

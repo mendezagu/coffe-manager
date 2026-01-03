@@ -59,6 +59,19 @@
       <strong>{{ discountedTotal | currency }}</strong>
     </div>
   </div>
+
+  <!-- Selector de método de pago -->
+  <div class="mt-4">
+    <h5>Método de Pago</h5>
+    <div class="form-group">
+      <select class="form-select" [(ngModel)]="paymentMethod">
+        <option value="efectivo">💵 Efectivo</option>
+        <option value="transferencia">🏦 Transferencia</option>
+        <option value="qr">📱 Código QR</option>
+        <option value="tarjeta">💳 Tarjeta Crédito/Débito</option>
+      </select>
+    </div>
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

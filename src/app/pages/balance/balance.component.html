@@ -5,6 +5,7 @@
       <tr>
         <th>Mesa</th>
         <th>Mozo</th>
+        <th>Método de Pago</th>
         <th>Total Ingresado</th>
       </tr>
     </thead>
@@ -12,6 +13,13 @@
       <tr *ngFor="let entry of balanceData">
         <td>{{ entry.tableName }}</td>  <!-- Mostrar nombre de la mesa -->
         <td>{{ entry.waiterName }}</td> <!-- Mostrar nombre del mozo -->
+        <td>
+          <span *ngIf="entry.paymentMethod === 'efectivo'">💵 Efectivo</span>
+          <span *ngIf="entry.paymentMethod === 'transferencia'">🏦 Transferencia</span>
+          <span *ngIf="entry.paymentMethod === 'qr'">📱 Código QR</span>
+          <span *ngIf="entry.paymentMethod === 'tarjeta'">💳 Tarjeta</span>
+          <span *ngIf="!entry.paymentMethod">-</span>
+        </td>
         <td>${{ entry.totalAmount.toFixed(2) }}</td> <!-- Mostrar total ingresado -->
       </tr>
     </tbody>

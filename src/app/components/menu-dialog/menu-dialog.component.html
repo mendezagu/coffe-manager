@@ -2,6 +2,30 @@
   <mat-icon fontIcon="restaurant_menu"></mat-icon> Selecciona Menús
 </h2>
 
+<!-- Ítems seleccionados -->
+<div *ngIf="selectedItems.length > 0" class="selected-items-container mb-3 p-3 border rounded bg-light">
+  <h6 class="fw-bold mb-2">
+    <mat-icon fontIcon="shopping_cart" class="align-middle me-1"></mat-icon>
+    Ítems agregados ({{ selectedItems.length }})
+  </h6>
+  <div class="d-flex flex-wrap gap-2">
+    <div 
+      *ngFor="let item of selectedItems" 
+      class="badge bg-primary d-flex align-items-center gap-2 py-2 px-3"
+      style="font-size: 0.9rem;"
+    >
+      <span>{{ item.name }}</span>
+      <span class="badge bg-light text-dark">x{{ item.quantity }}</span>
+      <button 
+        class="btn-close btn-close-white btn-sm ms-1" 
+        (click)="removeSelectedItem(item)"
+        style="font-size: 0.6rem;"
+        aria-label="Eliminar"
+      ></button>
+    </div>
+  </div>
+</div>
+
 <!-- Campo de búsqueda -->
 <input
   type="text"

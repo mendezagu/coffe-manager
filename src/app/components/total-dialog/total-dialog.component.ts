@@ -16,6 +16,7 @@ export class TotalDialogComponent implements OnInit {
   tableName: string = ''; // Nueva propiedad para almacenar el nombre de la mesa
   waiterName: string = ''; // Nueva propiedad para almacenar el nombre del mozo
   isTicketPrinted: boolean = false;
+  paymentMethod: string = 'efectivo'; // Método de pago por defecto
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -119,32 +120,53 @@ export class TotalDialogComponent implements OnInit {
       return;
     }
 
-    this.gestionService.resetTable(this.data.tableId).subscribe({
-      next: (response) => {
-        console.log('Mesa liberada correctamente:', response);
+    // Guardar la información del balance ANTES de resetear la mesa
+    const balanceEntry = {
+      tableName: this.data.tableName || this.tableName || 'Mesa sin nombre', // Nombre de la mesa
+      waiterName: this.data.waiterName || this.waiterName || 'Sin mozo asignado', // Nombre del mozo
+      totalAmount: this.discountedTotal, // Total de la mesa con descuento
+      paymentMethod: this.paymentMethod, // Método de pago
+    };
 
-        // Guardar la información del balance
-        const balanceEntry = {
-          tableName: this.data.tableName, // Nombre de la mesa
-          waiterName: this.data.waiterName || 'Desconocido', // Nombre del mozo
-          totalAmount: this.discountedTotal, // Total de la mesa
-        };
+    console.log('Método de pago seleccionado:', this.paymentMethod);
+    console.log('Guardando balance:', balanceEntry);
 
-        this.gestionService.addBalanceEntry(balanceEntry).subscribe({
-          next: () => console.log('Balance actualizado'),
-          error: (error) =>
-            console.error('Error al actualizar balance:', error),
+    this.gestionService.addBalanceEntry(balanceEntry).subscribe({
+      next: (balanceResponse) => {
+        console.log('Balance guardado exitosamente:', balanceResponse);
+
+        // Guardar también en localStorage para mantener el método de pago
+        const localBalances = JSON.parse(localStorage.getItem('localBalances') || '[]');
+        localBalances.push({
+          ...balanceEntry,
+          timestamp: new Date().toISOString(),
+          id: balanceResponse._id || Date.now().toString()
         });
+        localStorage.setItem('localBalances', JSON.stringify(localBalances));
 
-        this.dialogRef.close({
-          status: 'mesa_liberada',
-          tableId: this.data.tableId,
+        // Ahora resetear la mesa
+        this.gestionService.resetTable(this.data.tableId).subscribe({
+          next: (response) => {
+            console.log('Mesa liberada correctamente:', response);
+
+            const logMessage = `Se liberó la mesa <strong>${balanceEntry.tableName}</strong> atendida por <strong>${balanceEntry.waiterName}</strong> con un total de <strong>$${balanceEntry.totalAmount.toFixed(2)}</strong>`;
+            this.gestionService.saveLog(logMessage);
+
+            this.dialogRef.close({
+              status: 'mesa_liberada',
+              tableId: this.data.tableId,
+            });
+            location.reload();
+          },
+          error: (error) => {
+            console.error('Error al liberar la mesa:', error);
+            alert('Hubo un error al liberar la mesa. Inténtalo nuevamente.');
+          },
         });
-        location.reload();
       },
       error: (error) => {
-        console.error('Error al liberar la mesa:', error);
-        alert('Hubo un error al liberar la mesa. Inténtalo nuevamente.');
+        console.error('Error al guardar balance:', error);
+        alert('Error al registrar el balance. Por favor, inténtalo nuevamente.');
       },
     });
   }
