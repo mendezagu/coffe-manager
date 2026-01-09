@@ -135,15 +135,6 @@ export class TotalDialogComponent implements OnInit {
       next: (balanceResponse) => {
         console.log('Balance guardado exitosamente:', balanceResponse);
 
-        // Guardar también en localStorage para mantener el método de pago
-        const localBalances = JSON.parse(localStorage.getItem('localBalances') || '[]');
-        localBalances.push({
-          ...balanceEntry,
-          timestamp: new Date().toISOString(),
-          id: balanceResponse._id || Date.now().toString()
-        });
-        localStorage.setItem('localBalances', JSON.stringify(localBalances));
-
         // Ahora resetear la mesa
         this.gestionService.resetTable(this.data.tableId).subscribe({
           next: (response) => {
