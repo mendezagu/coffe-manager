@@ -191,7 +191,7 @@ getBalance(): Observable<any[]> {
 }
 
 // Agregar una entrada al balance
-addBalanceEntry(entry: { tableName: string; waiterName: string; totalAmount: number }): Observable<any> {
+addBalanceEntry(entry: { tableName: string; waiterName: string; totalAmount: number; paymentMethod: string }): Observable<any> {
   return this.http.post<any>(`${this.apiUrl}/balances`, entry).pipe(
     catchError(this.handleError)
   );

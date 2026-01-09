@@ -121,15 +121,15 @@ export class TotalDialogComponent implements OnInit {
     }
 
     // Guardar la información del balance ANTES de resetear la mesa
+    console.log('Valor actual de paymentMethod antes de guardar:', this.paymentMethod);
     const balanceEntry = {
       tableName: this.data.tableName || this.tableName || 'Mesa sin nombre', // Nombre de la mesa
       waiterName: this.data.waiterName || this.waiterName || 'Sin mozo asignado', // Nombre del mozo
       totalAmount: this.discountedTotal, // Total de la mesa con descuento
-      paymentMethod: this.paymentMethod, // Método de pago
+      paymentMethod: this.paymentMethod // Método de pago
     };
 
-    console.log('Método de pago seleccionado:', this.paymentMethod);
-    console.log('Guardando balance:', balanceEntry);
+    console.log('Objeto balanceEntry enviado al backend:', balanceEntry);
 
     this.gestionService.addBalanceEntry(balanceEntry).subscribe({
       next: (balanceResponse) => {

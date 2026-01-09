@@ -10,7 +10,8 @@
     storageBucket: "nuovo-caffe.appspot.com",
     messagingSenderId: "1013495355496",
     appId: "1:1013495355496:web:fdaaf0fb143f3f2c0303dd",
-    measurementId: "G-L1Q71BEWLK"
+    measurementId: "G-L1Q71BEWLK",
   },
-  apiUrl: "https://coffe-manager-api-1.onrender.com/api"  // backend en producción
+  //apiUrl: "https://coffe-manager-api-1.onrender.com/api"  // backend en producción
+ apiUrl: "https://coffe-manager-api-nestjs.onrender.com/api"
 };
