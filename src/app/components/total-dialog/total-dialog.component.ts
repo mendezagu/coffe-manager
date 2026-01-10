@@ -8,6 +8,9 @@ import { GestionService } from 'src/app/services/gestionService';
   styleUrls: ['./total-dialog.component.scss'],
 })
 export class TotalDialogComponent implements OnInit {
+      // Generar un orderId único al abrir el diálogo
+      orderId: string = '';
+    isProcessing: boolean = false;
   total: number = 0;
   discountedTotal: number = 0;
   discountPercentage: number = 0;
@@ -25,8 +28,10 @@ export class TotalDialogComponent implements OnInit {
   ) {
     this.orders = data.orders || [];
     this.table = data.table || [];
-    this.tableName = data.tableName || ''; // Recibe el nombre de la mesa
-    this.waiterName = data.waiterName || ''; // Recibe el nombre del mozo
+    this.tableName = data.tableName || '';
+    this.waiterName = data.waiterName || '';
+    // Generar un orderId único (puedes usar Date.now + mesa + mozo)
+    this.orderId = `${Date.now()}_${this.tableName}_${this.waiterName}`;
     this.calculateTotal();
   }
 
@@ -63,9 +68,11 @@ export class TotalDialogComponent implements OnInit {
           if (menuItem) {
             order.name = menuItem.name;
             order.price = menuItem.price;
+            order.discount = order.discount ?? 0; // descuento por ítem (porcentaje)
           } else {
             order.name = 'No encontrado';
             order.price = 0;
+            order.discount = order.discount ?? 0;
           }
 
           pricesAssignedCount++;
@@ -95,9 +102,11 @@ export class TotalDialogComponent implements OnInit {
       );
     });
 
+    // Total antes de aplicar el descuento global: ya incluye descuentos por ítem
     this.total = this.orders.reduce((sum, item) => {
       const qty = item.quantity ?? 1;
-      const subtotal = item.price * qty;
+      const itemDiscount = Number(item.discount) || 0;
+      const subtotal = item.price * qty * (1 - itemDiscount / 100);
       return sum + subtotal;
     }, 0);
 
@@ -110,23 +119,27 @@ export class TotalDialogComponent implements OnInit {
   }
 
   calculateDiscountedTotal() {
-    this.discountedTotal =
-      this.total - (this.total * this.discountPercentage) / 100;
+    // Primero se consideran los descuentos por ítem (ya en `this.total`),
+    // luego se aplica un posible descuento global adicional
+    this.discountedTotal = this.total - (this.total * this.discountPercentage) / 100;
   }
 
   liberarMesa() {
+    if (this.isProcessing) return;
     if (!this.data.tableId) {
       console.error('No se pudo liberar la mesa: ID de la mesa no encontrado.');
       return;
     }
-
+    this.isProcessing = true;
     // Guardar la información del balance ANTES de resetear la mesa
     console.log('Valor actual de paymentMethod antes de guardar:', this.paymentMethod);
     const balanceEntry = {
-      tableName: this.data.tableName || this.tableName || 'Mesa sin nombre', // Nombre de la mesa
-      waiterName: this.data.waiterName || this.waiterName || 'Sin mozo asignado', // Nombre del mozo
-      totalAmount: this.discountedTotal, // Total de la mesa con descuento
-      paymentMethod: this.paymentMethod // Método de pago
+      tableName: this.data.tableName || this.tableName || 'Mesa sin nombre',
+      waiterName: this.data.waiterName || this.waiterName || 'Sin mozo asignado',
+      totalAmount: this.discountedTotal,
+      orders: this.orders,
+      paymentMethod: this.paymentMethod,
+      orderId: this.orderId // Nuevo identificador único de orden
     };
 
     console.log('Objeto balanceEntry enviado al backend:', balanceEntry);
@@ -143,21 +156,26 @@ export class TotalDialogComponent implements OnInit {
             const logMessage = `Se liberó la mesa <strong>${balanceEntry.tableName}</strong> atendida por <strong>${balanceEntry.waiterName}</strong> con un total de <strong>$${balanceEntry.totalAmount.toFixed(2)}</strong>`;
             this.gestionService.saveLog(logMessage);
 
-            this.dialogRef.close({
-              status: 'mesa_liberada',
-              tableId: this.data.tableId,
-            });
-            location.reload();
+            setTimeout(() => {
+              this.dialogRef.close({
+                status: 'mesa_liberada',
+                tableId: this.data.tableId,
+              });
+              location.reload();
+              this.isProcessing = false;
+            }, 1500); // Espera 1.5 segundos para mostrar el spinner y el texto
           },
           error: (error) => {
             console.error('Error al liberar la mesa:', error);
             alert('Hubo un error al liberar la mesa. Inténtalo nuevamente.');
+            this.isProcessing = false;
           },
         });
       },
       error: (error) => {
         console.error('Error al guardar balance:', error);
         alert('Error al registrar el balance. Por favor, inténtalo nuevamente.');
+        this.isProcessing = false;
       },
     });
   }
@@ -215,12 +233,13 @@ export class TotalDialogComponent implements OnInit {
               ${this.orders
                 .map((order) => {
                   const qty = order.quantity ?? 1;
-                  const subtotal = order.price * qty;
+                  const itemDiscount = Number(order.discount) || 0;
+                  const discountedSubtotal = order.price * qty * (1 - itemDiscount / 100);
                   return `
                     <div class="order-item">
-                      <p style="font-size: 12px">${order.name}</p>
+                      <p style="font-size: 12px">${order.name} ${itemDiscount > 0 ? `(${itemDiscount}% off)` : ''}</p>
                       <p style="font-size: 12px">x${qty}</p>
-                      <p style="font-size: 12px">$${subtotal.toFixed(2)}</p>
+                      <p style="font-size: 12px">$${discountedSubtotal.toFixed(2)}</p>
                     </div>
                   `;
                 })

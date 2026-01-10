@@ -30,6 +30,7 @@ import { DatePipe } from '@angular/common';
 import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.component';
 import { LoginComponent } from './pages/login/login.component';
 import { MatTableModule } from '@angular/material/table';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { environment } from 'src/environments/environment';
 import {getAuth, provideAuth} from '@angular/fire/auth'
@@ -84,6 +85,7 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     MatIconModule,
     MatToolbarModule,
     MatTableModule,
+    MatProgressSpinnerModule,
     
     HttpClientModule,
     AngularFirestoreModule,

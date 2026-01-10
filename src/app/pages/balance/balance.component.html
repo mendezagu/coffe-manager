@@ -15,29 +15,29 @@
     
     <!-- Tabla con diseño Fuse -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
         <table class="w-full">
           <thead>
             <tr class="bg-gradient-to-r from-gray-800 to-gray-900">
-              <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+              <th class="px-4 py-2 text-left font-bold text-base text-white uppercase tracking-wider">
                 <div class="flex items-center gap-2">
                   <mat-icon class="!w-5 !h-5 !text-xl">table_restaurant</mat-icon>
                   Mesa
                 </div>
               </th>
-              <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+              <th class="px-4 py-2 text-left font-bold text-base text-white uppercase tracking-wider">
                 <div class="flex items-center gap-2">
                   <mat-icon class="!w-5 !h-5 !text-xl">person</mat-icon>
                   Mozo
                 </div>
               </th>
-              <th class="px-6 py-5 text-left font-bold text-base text-white uppercase tracking-wider">
+              <th class="px-4 py-2 text-left font-bold text-base text-white uppercase tracking-wider">
                 <div class="flex items-center gap-2">
                   <mat-icon class="!w-5 !h-5 !text-xl">payment</mat-icon>
                   Método de Pago
                 </div>
               </th>
-              <th class="px-6 py-5 text-right font-bold text-base text-white uppercase tracking-wider">
+              <th class="px-4 py-2 text-right font-bold text-base text-white uppercase tracking-wider">
                 <div class="flex items-center justify-end gap-2">
                   <mat-icon class="!w-5 !h-5 !text-xl">attach_money</mat-icon>
                   Total
@@ -49,7 +49,7 @@
             <tr *ngFor="let entry of balanceData; let i = index" 
                 class="hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300"
                 [class.bg-gray-50]="i % 2 === 0">
-              <td class="px-6 py-5">
+              <td class="px-4 py-2">
                 <div class="flex items-center gap-3">
                   <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100">
                     <mat-icon class="!w-5 !h-5 !text-xl text-blue-600">restaurant</mat-icon>
@@ -57,7 +57,7 @@
                   <span class="text-gray-900 font-bold text-base">{{ entry.tableName }}</span>
                 </div>
               </td>
-              <td class="px-6 py-5">
+              <td class="px-4 py-2">
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                     <span class="text-white font-bold text-sm">{{ entry.waiterName.charAt(0).toUpperCase() }}</span>
@@ -65,7 +65,7 @@
                   <span class="text-gray-700 font-semibold">{{ entry.waiterName }}</span>
                 </div>
               </td>
-              <td class="px-6 py-5">
+              <td class="px-4 py-2">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm shadow-sm"
                      [ngClass]="{
                        'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-2 border-green-200': entry.paymentMethod === 'efectivo',
@@ -85,7 +85,7 @@
                   <span *ngIf="!entry.paymentMethod">-</span>
                 </div>
               </td>
-              <td class="px-6 py-5 text-right">
+              <td class="px-4 py-2 text-right">
                 <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
                   <mat-icon class="!w-5 !h-5 !text-xl text-green-600">payments</mat-icon>
                   <span class="text-green-700 font-bold text-lg">${{ entry.totalAmount.toFixed(2) }}</span>
@@ -132,7 +132,19 @@
 
     
     <!-- Botón de nuevo turno con diseño Fuse -->
- <div class="flex justify-center">
+        <!-- Gráficos: Mesas y Mozos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-2xl shadow-xl p-4">
+            <h3 class="text-sm font-bold text-gray-900 mb-3">Mesas más ocupadas</h3>
+            <canvas #tableChart width="400" height="200"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl shadow-xl p-4">
+            <h3 class="text-sm font-bold text-gray-900 mb-3">Mozos - mesas atendidas</h3>
+            <canvas #waiterChart width="400" height="200"></canvas>
+          </div>
+        </div>
+
+     <div class="flex justify-center">
   <button
     (click)="deleteBalance()"
     class="group flex items-center gap-2 px-6 py-3

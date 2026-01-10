@@ -33,19 +33,25 @@
 
       <!-- Items -->
       <div class="space-y-1">
-        <div *ngFor="let order of data.orders" 
+        <div *ngFor="let order of orders" 
              class="grid grid-cols-12 gap-2 px-2 py-1.5 bg-gradient-to-r from-white to-gray-50 rounded-lg hover:shadow-md transition-all duration-200 border border-gray-200">
           <div class="col-span-6 flex items-center gap-1.5">
             <div class="flex items-center justify-center w-6 h-6 rounded bg-green-100">
               <span class="text-green-700 font-bold text-xs">{{ order.quantity || 1 }}x</span>
             </div>
-            <span class="text-gray-800 font-semibold text-xs">{{ order.name }}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-800 font-semibold text-xs">{{ order.name }}</span>
+              <div class="ml-2">
+                <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-16 text-xs p-1 border rounded text-center" />
+                <div class="text-xs text-gray-500 text-center">% descuento</div>
+              </div>
+            </div>
           </div>
           <div class="col-span-3 text-center text-blue-600 font-semibold text-sm flex items-center justify-center">
             {{ order.price | currency }}
           </div>
           <div class="col-span-3 text-right text-green-600 font-bold text-base flex items-center justify-end">
-            {{ (order.price * (order.quantity || 1)) | currency }}
+            {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | currency }}
           </div>
         </div>
       </div>
@@ -162,9 +168,13 @@
       <mat-icon class="!w-4 !h-4 !text-lg">print</mat-icon>
       Imprimir
     </button>
-    <button class="flex-1 min-w-[85px] px-3 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1.5" [disabled]="!isTicketPrinted" (click)="liberarMesa()">
+    <button class="flex-1 min-w-[85px] px-3 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1.5" [disabled]="!isTicketPrinted || isProcessing" (click)="liberarMesa()">
       <mat-icon class="!w-4 !h-4 !text-lg">check_circle</mat-icon>
-      Liberar Mesa
+      <span *ngIf="!isProcessing">Liberar Mesa</span>
+      <span *ngIf="isProcessing">
+        <mat-spinner diameter="18" color="accent" style="display:inline-block;vertical-align:middle;margin-right:6px;"></mat-spinner>
+        Procesando...
+      </span>
     </button>
   </mat-dialog-actions>
 </div>
