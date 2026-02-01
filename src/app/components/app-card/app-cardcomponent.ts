@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { PasswordDialogComponent } from '../password-dialog/password-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
 import { OrderInfoDialogComponent } from '../order-info-dialog/order-info-dialog.component';
 import { GestionService, MenuItem, Table, Waiter } from 'src/app/services/gestionService';
@@ -20,11 +22,13 @@ export class CardComponent implements OnInit {
    selectedItems: MenuItem[] = [];
    menuItems: MenuItem[] = [];
      role$: Observable<string | null>;
+    roleValue: string | null = null;
 
   constructor(
     private gestionService: GestionService,
     private dialog: MatDialog,
     private userService: UserService,
+    private snackBar: MatSnackBar,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -44,6 +48,9 @@ export class CardComponent implements OnInit {
         console.error('Error al cargar los mozos:', error);
       }
     });
+
+    // Suscribirse al rol para uso en handlers sin pipes en templates
+    this.role$.subscribe(role => this.roleValue = role);
   }
 
   loadMenu(): void {
@@ -381,5 +388,32 @@ printTicket(tableId: string): void {
   this.gestionService.saveLog(logMessage);
 }
 
+  // Abre el diálogo de contraseña para acciones de admin antes de ordenar
+  openPasswordDialog(table: Table): void {
+    const dialogRef = this.dialog.open(PasswordDialogComponent, {
+      width: '400px',
+      maxWidth: '95vw',
+      data: { purpose: 'authorize-admin-action' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      const correctPassword = 'cafe123';
+      if (result === correctPassword) {
+        this.addMenuItems(table);
+      } else if (result !== null) {
+        // result === null means the user cancelled
+        this.snackBar.open('Contraseña incorrecta', 'Cerrar', { duration: 3000, panelClass: ['snackbar-error'] });
+      }
+    });
+  }
+
+  // Handler del botón Ordenar (evita usar pipes en template)
+  orderButtonClicked(table: Table): void {
+    if (this.roleValue === 'admin') {
+      this.openPasswordDialog(table);
+    } else {
+      this.addMenuItems(table);
+    }
+  }
 
 }
