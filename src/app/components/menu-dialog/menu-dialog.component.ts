@@ -141,8 +141,8 @@ updateQuantity(menu: MenuItem, event: Event): void {
                 .header { text-align: left; margin-bottom: 5px; }
                 .order-list { text-align: left; word-wrap: break-word; }
                 .order-item { display: flex; justify-content: space-between; width: 100%; }
-                .order-item p { margin: 0; padding-right: 5px; }
-                .totals { margin-top: 5px; text-align: left; }
+                .order-item p { margin: 0; padding-right: 5px; font-size: 18px; }
+                .totals { margin-top: 5px; text-align: left; font-size: 18px; }
                 .line { border-top: 1px dashed #000; margin: 3px 0; }
                 .logo { text-align: center; margin-bottom: 10px; }
                 .logo img { width: 70px; max-width: 58mm; height: auto; }
@@ -173,8 +173,8 @@ updateQuantity(menu: MenuItem, event: Event): void {
                 <div class="totals">
                   <p>Aclaración:</p>
                   ${this.selectedItems.filter(item => item.note).map(item => `
-                    <p style="font-size:12px;">- ${item.name}: ${item.note}</p>
-                  `).join('') || '<p style="font-size:12px;">-</p>'}
+                    <p>- ${item.name}: ${item.note}</p>
+                  `).join('') || '<p>-</p>'}
                 </div>
                 <div class="line"></div>
                 <p style="text-align:center; font-size:8px;"><br></p>
