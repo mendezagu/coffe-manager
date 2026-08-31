@@ -64,12 +64,20 @@ export class MenuDialogComponent {
     const index = this.selectedItems.findIndex(item => item._id === menu._id);
     if (event.target.checked) {
       if (index === -1) {
-        this.selectedItems.push({ ...menu, quantity: 1 });
+        this.selectedItems.push({ ...menu, quantity: 1, note: '' });
       }
     } else {
       if (index > -1) {
         this.selectedItems.splice(index, 1);
       }
+    }
+  }
+
+  updateNote(item: MenuItem, event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const index = this.selectedItems.findIndex(selected => selected._id === item._id);
+    if (index > -1) {
+      this.selectedItems[index].note = inputElement.value;
     }
   }
 
@@ -111,7 +119,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
 
  // Construir log detallado con cantidades, nombres y mozo
       const itemsDescription = this.selectedItems
-        .map(item => `${item.quantity}x ${item.name}`)
+        .map(item => `${item.quantity}x ${item.name}${item.note ? ' (' + item.note + ')' : ''}`)
         .join(', ');
 
       const mozo = this.waiterName || (this.data.waiter?.name ?? 'Desconocido');
@@ -162,9 +170,12 @@ updateQuantity(menu: MenuItem, event: Event): void {
                   `).join('')}
                 </div>
                 <div class="line"></div>
-                <div class="totals"><p>Aclaracion:</p></div>
-                <div class="line"></div>
-                <br><br>
+                <div class="totals">
+                  <p>Aclaración:</p>
+                  ${this.selectedItems.filter(item => item.note).map(item => `
+                    <p style="font-size:12px;">- ${item.name}: ${item.note}</p>
+                  `).join('') || '<p style="font-size:12px;">-</p>'}
+                </div>
                 <div class="line"></div>
                 <p style="text-align:center; font-size:8px;"><br></p>
               </div>
@@ -206,7 +217,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
     
     if (index === -1) {
       // Si el ítem no está en la lista, lo agregamos con cantidad mínima 1
-      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1 });
+      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1, note: '' });
     } else {
       // Si ya está en la lista, incrementamos la cantidad asegurándonos de que no sea undefined
       this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + 1;

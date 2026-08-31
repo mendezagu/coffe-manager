@@ -361,9 +361,13 @@ printTicket(tableId: string): void {
             }).join('')}
           </div>
           <div class="line"></div>
-          <div class="totals"><p>Aclaración:</p></div>
-          <div class="line"></div>
-          <br><br>
+          <div class="totals">
+            <p>Aclaración:</p>
+            ${table.orders.filter(order => order.note).map(order => {
+              const menuItem = this.menuItems.find(item => item._id === order.menuItem);
+              return `<p style="font-size:12px;">- ${menuItem ? menuItem.name : 'Producto desconocido'}: ${order.note}</p>`;
+            }).join('') || '<p style="font-size:12px;">-</p>'}
+          </div>
           <div class="line"></div>
           <p style="text-align:center; font-size:8px;"><br></p>
         </div>

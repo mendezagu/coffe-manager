@@ -32,6 +32,9 @@
               <span class="text-xs text-coffee-500 font-semibold">
                 {{ order.price | currency }}
               </span>
+              <p *ngIf="order.note" class="text-xs text-coffee-600 italic mt-0.5">
+                ↳ {{ order.note }}
+              </p>
             </div>
           </div>
 

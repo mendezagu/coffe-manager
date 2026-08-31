@@ -10,6 +10,7 @@ export interface MenuItem {
   name: string;
   price: number;
   quantity?: number;
+  note?: string;
 }
 
 export interface Table {
@@ -88,7 +89,8 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
     const formattedItems = items.map(item => ({
       id: item._id,
       quantity: item.quantity || 1,
-      name: item.name
+      name: item.name,
+      note: item.note || ''
     }));
 
     return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems }).pipe(
