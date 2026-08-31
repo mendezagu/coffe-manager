@@ -100,6 +100,17 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
     );
   }
 
+  // Actualizar cantidades de órdenes puntuales (sin tocar el resto de la mesa)
+  updateOrderQuantities(tableId: string, updates: { orderId: string; quantity: number }[]): Observable<Table> {
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/update-quantities`, { updates }).pipe(
+      map((table: Table) => {
+        table.available = table.orders.length === 0;
+        return table;
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   // Eliminar órdenes de la mesa
 deleteOrdersFromTable(tableId: string, orderIds: string[]): Observable<Table> {
   return this.http.put<{ message: string; table: Table }>(

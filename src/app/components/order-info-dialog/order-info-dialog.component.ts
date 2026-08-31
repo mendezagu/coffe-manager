@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestionService, MenuItem } from '../../services/gestionService';
 import { Table } from '../../services/gestionService';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
@@ -16,6 +16,7 @@ export class OrderInfoDialogComponent implements OnInit {
   role$: Observable<string | null>;
   hasChanges: boolean = false;
   originalOrders: any[] = [];
+  removedOrdersCache: any[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<OrderInfoDialogComponent>,
@@ -111,54 +112,48 @@ export class OrderInfoDialogComponent implements OnInit {
   removeOrder(order: any): void {
     const index = this.orders.findIndex(o => o._id === order._id);
     if (index > -1) {
+      // Guardar una copia (con el nombre ya resuelto) para poder loguearla al guardar
+      this.removedOrdersCache.push({ ...order });
       this.orders.splice(index, 1);
       this.table.orders = this.orders;
       this.hasChanges = true;
     }
   }
 
-  // Guardar los cambios realizados
+  // Guardar los cambios realizados: solo envía lo que cambió, no reemplaza toda la mesa
   saveChanges(): void {
-    // Primero, eliminar todas las órdenes actuales de la mesa
-    const allOrderIds = this.originalOrders.map(o => o._id);
-    
-    this.gestionService.deleteOrdersFromTable(this.table.id, allOrderIds).subscribe(
-      () => {
-        // Luego, agregar las órdenes actualizadas (si quedan algunas)
-        if (this.orders.length > 0) {
-          const itemsToAdd = this.orders.map(order => ({
-            _id: order.menuItem,
-            quantity: order.quantity,
-            name: order.name,
-            menuItem: order.menuItem,
-            price: 0
-          }));
+    const removedOrderIds = this.removedOrdersCache.map(o => o._id);
 
-          this.gestionService.addItemsToTable(this.table.id, itemsToAdd as any).subscribe(
-            () => {
-              // Registrar cambios en el log
-              const changesLog = this.buildChangesLog();
-              if (changesLog) {
-                this.gestionService.saveLog(changesLog);
-              }
-              
-              this.finishSaving();
-            },
-            (error) => {
-              console.error('Error agregando órdenes actualizadas:', error);
-              alert('Error al actualizar las órdenes. Por favor, inténtalo de nuevo.');
-            }
-          );
-        } else {
-          // Si no quedan órdenes, solo registrar la eliminación
-          this.gestionService.saveLog(
-            `<strong style="color: red;">Se eliminaron todas las órdenes</strong> de la mesa <strong>${this.table.name}</strong>`
-          );
-          this.finishSaving();
+    const quantityUpdates = this.orders
+      .filter(curr => {
+        const orig = this.originalOrders.find(o => o._id === curr._id);
+        return orig && orig.quantity !== curr.quantity;
+      })
+      .map(curr => ({ orderId: curr._id, quantity: curr.quantity }));
+
+    if (removedOrderIds.length === 0 && quantityUpdates.length === 0) {
+      this.finishSaving();
+      return;
+    }
+
+    const removeOrders$ = removedOrderIds.length > 0
+      ? this.gestionService.deleteOrdersFromTable(this.table.id, removedOrderIds)
+      : of(null);
+
+    const updateQuantities$ = quantityUpdates.length > 0
+      ? this.gestionService.updateOrderQuantities(this.table.id, quantityUpdates)
+      : of(null);
+
+    forkJoin([removeOrders$, updateQuantities$]).subscribe(
+      () => {
+        const changesLog = this.buildChangesLog();
+        if (changesLog) {
+          this.gestionService.saveLog(changesLog);
         }
+        this.finishSaving();
       },
       (error) => {
-        console.error('Error eliminando órdenes:', error);
+        console.error('Error guardando cambios:', error);
         alert('Error al actualizar las órdenes. Por favor, inténtalo de nuevo.');
       }
     );
@@ -166,10 +161,6 @@ export class OrderInfoDialogComponent implements OnInit {
 
   // Construir mensaje de log con los cambios
   private buildChangesLog(): string {
-    const removedOrders = this.originalOrders.filter(
-      orig => !this.orders.find(curr => curr._id === orig._id)
-    );
-
     const modifiedOrders = this.orders.filter(curr => {
       const orig = this.originalOrders.find(o => o._id === curr._id);
       return orig && orig.quantity !== curr.quantity;
@@ -177,8 +168,8 @@ export class OrderInfoDialogComponent implements OnInit {
 
     let logParts: string[] = [];
 
-    if (removedOrders.length > 0) {
-      const itemsDeleted = removedOrders.map(o => o.name || 'Item desconocido').join(', ');
+    if (this.removedOrdersCache.length > 0) {
+      const itemsDeleted = this.removedOrdersCache.map(o => o.name || 'Item desconocido').join(', ');
       logParts.push(`<strong style="color: red;">Eliminados:</strong> ${itemsDeleted}`);
     }
 
