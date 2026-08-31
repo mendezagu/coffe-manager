@@ -247,13 +247,6 @@ export class TotalDialogComponent implements OnInit {
             </div>
             <div class="line"></div>
             <div class="totals">
-              <p>Aclaración:</p>
-              ${this.orders.filter((order) => order.note).map((order) => `
-                <p style="font-size:12px;">- ${order.name}: ${order.note}</p>
-              `).join('') || '<p style="font-size:12px;">-</p>'}
-            </div>
-            <div class="line"></div>
-            <div class="totals">
               <p><strong>Total:</strong> $${this.total.toFixed(2)}</p>
               ${
                 this.discountPercentage > 0
