@@ -85,6 +85,7 @@ addMenuItems(table: Table): void {
     // 👉 Ya tiene mozo asignado: ir directo al menú
     const menuDialogRef = this.dialog.open(MenuDialogComponent, {
       width: '400px',
+      maxWidth: '95vw',
       data: {
         ...table,
         waiter: this.waiters.find(w => w._id === table.waiterId) || null
@@ -122,6 +123,7 @@ addMenuItems(table: Table): void {
 
             const menuDialogRef = this.dialog.open(MenuDialogComponent, {
               width: '400px',
+              maxWidth: '95vw',
               data: {
                 ...table,
                 waiter: this.waiters.find(w => w._id === waiterId) || null
@@ -151,6 +153,7 @@ addMenuItems(table: Table): void {
     if (table && Array.isArray(table.orders)) {  // Validamos que orders sea un array
       const dialogRef = this.dialog.open(OrderInfoDialogComponent, {
         width: '500px',
+        maxWidth: '95vw',
         data: table
       });
   
@@ -165,6 +168,7 @@ addMenuItems(table: Table): void {
     if (table && table.orders && table.orders.length > 0) {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
         width: '450px',
+        maxWidth: '95vw',
         panelClass: 'custom-dialog-container',
         data: { tableId: table.id,
             orders: table.orders,
@@ -211,6 +215,7 @@ openWaiterDialog(table: Table): void {
           // Abre el diálogo de menú después de asignar el mozo
           const menuDialogRef = this.dialog.open(MenuDialogComponent, {
             width: '400px',
+            maxWidth: '95vw',
             data: {
               ...table,
               waiter: this.waiters.find(w => w._id === table.waiterId) || null
@@ -239,6 +244,7 @@ openWaiterDialog(table: Table): void {
 openLinkTablesDialog(table: Table): void {
   const dialogRef = this.dialog.open(LinkTableDialogComponent, {
     width: '400px',
+    maxWidth: '95vw',
     data: { table }
   });
 

@@ -1,124 +1,114 @@
-<div class="relative w-[90vw] sm:w-[450px] max-w-[520px] bg-white rounded-2xl shadow-2xl overflow-hidden">
-  <!-- Decorative background pattern -->
-  <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-400 to-emerald-400 opacity-5 rounded-full -translate-y-32 translate-x-32"></div>
-  <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-400 to-indigo-400 opacity-5 rounded-full translate-y-24 -translate-x-24"></div>
-  
-  <!-- Header con diseño Fuse -->
-  <div class="relative bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 p-3 sm:p-4">
-    <div class="flex items-center gap-2">
-      <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm">
+<div class="relative w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+  <!-- Header -->
+  <div class="relative bg-coffee-800 p-3 sm:p-4">
+    <div class="flex items-center gap-2.5">
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15">
         <mat-icon class="!w-6 !h-6 !text-2xl text-white">receipt_long</mat-icon>
       </div>
       <div>
         <h2 class="text-lg sm:text-xl font-bold text-white">Detalle de la Orden</h2>
-        <p class="text-white/80 text-xs mt-0.5">Resumen de consumo y pago</p>
+        <p class="text-white/70 text-xs mt-0.5">Resumen de consumo y pago</p>
       </div>
     </div>
   </div>
 
   <mat-dialog-content class="relative max-h-[55vh] overflow-y-auto p-3 sm:p-4">
-    <!-- Lista de items con diseño mejorado -->
+    <!-- Lista de items -->
     <div class="mb-3">
-      <h3 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-lg text-blue-600">shopping_cart</mat-icon>
+      <h3 class="text-sm font-bold text-coffee-900 mb-2 flex items-center gap-1.5">
+        <mat-icon class="!w-4 !h-4 !text-base text-coffee-600">shopping_cart</mat-icon>
         Productos Ordenados
       </h3>
-      
-      <!-- Header de tabla -->
-      <div class="grid grid-cols-12 gap-2 mb-1.5 px-2 py-1 bg-gray-100 rounded-lg font-bold text-gray-700 text-xs">
-        <div class="col-span-6">Producto</div>
-        <div class="col-span-3 text-center">Precio Unit.</div>
-        <div class="col-span-3 text-right">Subtotal</div>
-      </div>
 
       <!-- Items -->
-      <div class="space-y-1">
-        <div *ngFor="let order of orders" 
-             class="grid grid-cols-12 gap-2 px-2 py-1.5 bg-gradient-to-r from-white to-gray-50 rounded-lg hover:shadow-md transition-all duration-200 border border-gray-200">
-          <div class="col-span-6 flex items-center gap-1.5">
-            <div class="flex items-center justify-center w-6 h-6 rounded bg-green-100">
-              <span class="text-green-700 font-bold text-xs">{{ order.quantity || 1 }}x</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-gray-800 font-semibold text-xs">{{ order.name }}</span>
-              <div class="ml-2">
-                <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-16 text-xs p-1 border rounded text-center" />
-                <div class="text-xs text-gray-500 text-center">% descuento</div>
+      <div class="space-y-2">
+        <div *ngFor="let order of orders"
+             class="p-2.5 bg-white rounded-lg hover:shadow-md transition-all duration-200 border border-coffee-100 hover:border-coffee-200">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <div class="flex items-center justify-center w-6 h-6 rounded bg-coffee-100 flex-shrink-0">
+                <span class="text-coffee-700 font-bold text-xs">{{ order.quantity || 1 }}x</span>
               </div>
+              <span class="text-coffee-800 font-semibold text-xs truncate">{{ order.name }}</span>
             </div>
+            <span class="text-cafe-green-700 font-bold text-sm flex-shrink-0">
+              {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | currency }}
+            </span>
           </div>
-          <div class="col-span-3 text-center text-blue-600 font-semibold text-sm flex items-center justify-center">
-            {{ order.price | currency }}
-          </div>
-          <div class="col-span-3 text-right text-green-600 font-bold text-base flex items-center justify-end">
-            {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | currency }}
+          <div class="flex items-center justify-between gap-2 pl-1">
+            <span class="text-coffee-500 text-xs">Precio unit.: <strong class="text-coffee-700">{{ order.price | currency }}</strong></span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-coffee-500 text-xs">% desc.</span>
+              <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-coffee-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-coffee-500" />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Total original -->
-    <div class="mb-3 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+    <div class="mb-3 p-3 bg-coffee-50 rounded-lg border border-coffee-200">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 shadow-lg">
-            <mat-icon class="!w-5 !h-5 !text-lg text-white">calculate</mat-icon>
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-coffee-700">
+            <mat-icon class="!w-5 !h-5 !text-xl text-white">calculate</mat-icon>
           </div>
-          <span class="text-blue-900 font-bold text-sm">Total:</span>
+          <span class="text-coffee-900 font-bold text-sm">Total:</span>
         </div>
-        <span class="text-xl font-bold text-blue-900">{{ total | currency }}</span>
+        <span class="text-xl font-bold text-coffee-900">{{ total | currency }}</span>
       </div>
     </div>
 
-    <!-- Panel de descuento con estilo Fuse -->
+    <!-- Panel de descuento -->
     <div class="mb-3">
-      <h3 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-lg text-purple-600">local_offer</mat-icon>
+      <h3 class="text-sm font-bold text-coffee-900 mb-2 flex items-center gap-1.5">
+        <mat-icon class="!w-4 !h-4 !text-base text-coffee-600">local_offer</mat-icon>
         Aplicar Descuento
       </h3>
       <mat-accordion>
-        <mat-expansion-panel class="!rounded-lg !shadow-lg overflow-hidden">
-          <mat-expansion-panel-header class="!bg-gradient-to-r !from-purple-50 !to-pink-50 !border-2 !border-purple-200">
-            <mat-panel-title class="!font-bold !text-purple-700 flex items-center gap-1.5 !text-xs">
-              <mat-icon class="!w-3 !h-3 !text-base">sell</mat-icon>
+        <mat-expansion-panel class="!rounded-lg !shadow-sm overflow-hidden">
+          <mat-expansion-panel-header class="!bg-coffee-50 !border !border-coffee-100">
+            <mat-panel-title class="!font-bold !text-coffee-700 flex items-center gap-1.5 !text-xs">
+              <mat-icon class="!w-3 !h-3 !text-xs">sell</mat-icon>
               Escoge un descuento
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 p-2 bg-gradient-to-br from-gray-50 to-purple-50">
-            <button class="group px-2 py-2 bg-gradient-to-br from-orange-100 to-red-100 hover:from-orange-200 hover:to-red-200 text-orange-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-orange-400" (click)="applyDiscount(0)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">block</mat-icon>
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 p-2 bg-coffee-50">
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(0)">
+              <mat-icon class="!w-4 !h-4 !text-base">block</mat-icon>
               <span class="text-xs mt-0.5 block">0%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 text-blue-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-blue-400" (click)="applyDiscount(5)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">redeem</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(5)">
+              <mat-icon class="!w-4 !h-4 !text-base">redeem</mat-icon>
               <span class="text-xs mt-0.5 block">5%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-green-100 to-emerald-100 hover:from-green-200 hover:to-emerald-200 text-green-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-green-400" (click)="applyDiscount(10)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">loyalty</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(10)">
+              <mat-icon class="!w-4 !h-4 !text-base">loyalty</mat-icon>
               <span class="text-xs mt-0.5 block">10%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 text-purple-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-purple-400" (click)="applyDiscount(15)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">card_giftcard</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(15)">
+              <mat-icon class="!w-4 !h-4 !text-base">card_giftcard</mat-icon>
               <span class="text-xs mt-0.5 block">15%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-yellow-100 to-orange-100 hover:from-yellow-200 hover:to-orange-200 text-yellow-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-yellow-400" (click)="applyDiscount(20)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">stars</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(20)">
+              <mat-icon class="!w-4 !h-4 !text-base">stars</mat-icon>
               <span class="text-xs mt-0.5 block">20%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-pink-100 to-rose-100 hover:from-pink-200 hover:to-rose-200 text-pink-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-pink-400" (click)="applyDiscount(25)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">celebration</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(25)">
+              <mat-icon class="!w-4 !h-4 !text-base">celebration</mat-icon>
               <span class="text-xs mt-0.5 block">25%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-indigo-100 to-purple-100 hover:from-indigo-200 hover:to-purple-200 text-indigo-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-indigo-400" (click)="applyDiscount(30)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">workspace_premium</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(30)">
+              <mat-icon class="!w-4 !h-4 !text-base">workspace_premium</mat-icon>
               <span class="text-xs mt-0.5 block">30%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-red-100 to-rose-100 hover:from-red-200 hover:to-rose-200 text-red-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-red-400" (click)="applyDiscount(35)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">emoji_events</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(35)">
+              <mat-icon class="!w-4 !h-4 !text-base">emoji_events</mat-icon>
               <span class="text-xs mt-0.5 block">35%</span>
             </button>
-            <button class="group px-2 py-2 bg-gradient-to-br from-amber-100 to-yellow-100 hover:from-amber-200 hover:to-yellow-200 text-amber-800 font-bold rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2 border-transparent hover:border-amber-400" (click)="applyDiscount(50)">
-              <mat-icon class="!w-4 !h-4 !text-lg group-hover:scale-110 transition-transform">military_tech</mat-icon>
+            <button class="px-2 py-2 bg-white hover:bg-coffee-100 text-coffee-700 font-bold rounded-lg transition-all duration-200 border border-coffee-200 hover:border-coffee-300" (click)="applyDiscount(50)">
+              <mat-icon class="!w-4 !h-4 !text-base">military_tech</mat-icon>
               <span class="text-xs mt-0.5 block">50%</span>
             </button>
           </div>
@@ -127,49 +117,49 @@
     </div>
 
     <!-- Total con descuento -->
-    <div class="mb-3 p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-300 shadow-lg">
+    <div class="mb-3 p-3 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1.5">
-          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-green-600 shadow-lg">
+          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-cafe-green-700">
             <mat-icon class="!w-5 !h-5 !text-xl text-white">payments</mat-icon>
           </div>
-          <span class="text-green-900 font-bold text-sm">Total con Descuento:</span>
+          <span class="text-cafe-green-900 font-bold text-sm">Total con Descuento:</span>
         </div>
-        <span class="text-xl font-bold text-green-700">{{ discountedTotal | currency }}</span>
+        <span class="text-xl font-bold text-cafe-green-700">{{ discountedTotal | currency }}</span>
       </div>
     </div>
 
-    <!-- Selector de método de pago mejorado -->
-    <div class="p-3 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg border-2 border-orange-200">
-      <h3 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-lg text-orange-600">payment</mat-icon>
+    <!-- Selector de método de pago -->
+    <div class="p-3 bg-coffee-50 rounded-lg border border-coffee-200">
+      <h3 class="text-sm font-bold text-coffee-900 mb-2 flex items-center gap-1.5">
+        <mat-icon class="!w-4 !h-4 !text-base text-coffee-600">payment</mat-icon>
         Método de Pago
       </h3>
       <div class="relative">
-        <select class="w-full appearance-none px-3 py-2 border-2 border-orange-300 rounded-lg bg-white focus:outline-none focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 text-gray-700 font-semibold text-xs cursor-pointer pr-8" [(ngModel)]="paymentMethod">
+        <select class="w-full appearance-none px-3 py-2 border border-coffee-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all text-coffee-700 font-semibold text-xs cursor-pointer pr-8" [(ngModel)]="paymentMethod">
           <option value="efectivo">💵 Efectivo</option>
           <option value="transferencia">🏦 Transferencia</option>
           <option value="qr">📱 Código QR</option>
           <option value="tarjeta">💳 Tarjeta Crédito/Débito</option>
         </select>
-        <mat-icon class="absolute right-2 top-1/2 -translate-y-1/2 text-orange-600 pointer-events-none !w-4 !h-4 !text-lg">
+        <mat-icon class="absolute right-2 top-1/2 -translate-y-1/2 text-coffee-500 pointer-events-none !w-4 !h-4 !text-base">
           expand_more
         </mat-icon>
       </div>
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions class="relative flex flex-wrap gap-1.5 p-3 sm:p-3 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-200">
-    <button class="flex-1 min-w-[85px] px-3 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-1.5" mat-dialog-close>
-      <mat-icon class="!w-4 !h-4 !text-lg">close</mat-icon>
+  <mat-dialog-actions class="relative flex flex-wrap gap-2 p-3 sm:p-4 bg-coffee-50 border-t border-coffee-100">
+    <button class="flex-1 min-w-[85px] !px-4 !py-2.5 !bg-white !text-coffee-700 !border !border-coffee-200 !font-bold !text-xs !rounded-lg !shadow-sm hover:!shadow-md !transition-all !duration-200 flex items-center justify-center gap-1.5" mat-dialog-close>
+      <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
       Cerrar
     </button>
-    <button class="flex-1 min-w-[85px] px-3 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-1.5" (click)="printTicket()">
-      <mat-icon class="!w-4 !h-4 !text-lg">print</mat-icon>
+    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-coffee-700 hover:bg-coffee-800 text-white font-bold text-xs rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5" (click)="printTicket()">
+      <mat-icon class="!w-4 !h-4 !text-base">print</mat-icon>
       Imprimir
     </button>
-    <button class="flex-1 min-w-[85px] px-3 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold text-xs rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1.5" [disabled]="!isTicketPrinted || isProcessing" (click)="liberarMesa()">
-      <mat-icon class="!w-4 !h-4 !text-lg">check_circle</mat-icon>
+    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5" [disabled]="!isTicketPrinted || isProcessing" (click)="liberarMesa()">
+      <mat-icon class="!w-4 !h-4 !text-base">check_circle</mat-icon>
       <span *ngIf="!isProcessing">Liberar Mesa</span>
       <span *ngIf="isProcessing">
         <mat-spinner diameter="18" color="accent" style="display:inline-block;vertical-align:middle;margin-right:6px;"></mat-spinner>

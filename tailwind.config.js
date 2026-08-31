@@ -30,6 +30,20 @@ module.exports = {
           800: '#145214',
           900: '#0d3d0d',
         },
+        // Rojo sobrio para mesas ocupadas / estados de alerta, pensado
+        // para tener el mismo peso visual que 'cafe-green'.
+        'cafe-red': {
+          50: '#fbebe8',
+          100: '#f3cdc5',
+          200: '#e5a89a',
+          300: '#d3806d',
+          400: '#c15f47',
+          500: '#a8432b',
+          600: '#8f3521',
+          700: '#742a1a',
+          800: '#571f13',
+          900: '#3d150c',
+        },
       },
       fontFamily: {
         sans: ['Roboto', 'system-ui', '-apple-system', 'sans-serif'],

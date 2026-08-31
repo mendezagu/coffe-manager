@@ -14,7 +14,8 @@ export class AdminPasswordGuard implements CanActivate {
 
   canActivate(): Observable<boolean> {
     const dialogRef = this.dialog.open(PasswordDialogComponent, {
-      width: '300px',
+      width: '380px',
+      maxWidth: '95vw',
       disableClose: true,
     });
 

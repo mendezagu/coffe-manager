@@ -1,113 +1,60 @@
-<div class="container-fluid vh-100 d-flex justify-content-center align-items-center login-background">
-  <div class="login-container p-5 rounded shadow">
-    
-    <!-- Título principal -->
-    <h2 class="text-center fw-bold login-title">Nuovo caffé</h2>
-    <p class="text-center text-muted login-subtitle">Bienvenido</p>
+<div class="w-full min-h-screen flex items-center justify-center bg-coffee-50 px-4 py-10">
+  <div class="w-full max-w-[400px] bg-white rounded-2xl shadow-elegant-lg p-6 sm:p-8">
 
-    <!-- Imagen centrada -->
-    <div class="text-center my-4">
+    <!-- Logo -->
+    <div class="flex justify-center mb-4">
       <img
-        class="rounded-circle login-image"
+        class="w-20 h-20 rounded-full object-cover ring-4 ring-coffee-100 shadow-md"
         src="./assets/nuovo-cafe.jpg"
-        alt="Cafe Logo"
+        alt="Nuovo Caffe"
       />
     </div>
 
-    <!-- Formulario de Login -->
-    <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-100">
-      
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" required>
-      </mat-form-field>
+    <!-- Título -->
+    <h2 class="text-center text-2xl font-bold text-coffee-900">Nuovo Caffé</h2>
+    <p class="text-center text-coffee-500 text-sm mt-1 mb-6">Bienvenido</p>
 
-      <mat-form-field appearance="fill" class="w-100 mb-4">
-        <mat-label>Contraseña</mat-label>
-        <input matInput type="password" formControlName="password" required>
-      </mat-form-field>
+    <!-- Formulario -->
+    <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold uppercase tracking-wide text-coffee-500 mb-1.5">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          required
+          class="w-full px-4 py-2.5 border border-coffee-200 rounded-lg text-sm text-coffee-900 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all"
+        />
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-xs font-bold uppercase tracking-wide text-coffee-500 mb-1.5">Contraseña</label>
+        <input
+          type="password"
+          formControlName="password"
+          required
+          class="w-full px-4 py-2.5 border border-coffee-200 rounded-lg text-sm text-coffee-900 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all"
+        />
+      </div>
 
       <!-- Botón de Iniciar Sesión -->
-      <div class="text-center">
-        <button type="submit" class="btn login-btn" [disabled]="formLogin.invalid">
-          Login
-        </button>
-      </div>
+      <button
+        type="submit"
+        [disabled]="formLogin.invalid"
+        class="w-full py-2.5 bg-coffee-700 hover:bg-coffee-800 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Login
+      </button>
 
       <!-- Botón para ir a Registro -->
-      <div class="text-center mt-3">
-        <button class="btn login-btn-outline" routerLink="/register">
-          Sign Up
-        </button>
-      </div>
+      <button
+        type="button"
+        routerLink="/register"
+        class="w-full mt-3 py-2.5 bg-white hover:bg-coffee-50 text-coffee-700 font-bold text-sm rounded-lg border border-coffee-200 transition-all duration-200"
+      >
+        Sign Up
+      </button>
 
     </form>
   </div>
 </div>
-
-<!-- Estilos CSS -->
-<style>
-  /* Fondo general similar a la imagen */
-  .login-background {
-    background: linear-gradient(to right, #d2a679, #c0936b);
-  }
-
-  /* Contenedor del login con sombra y bordes redondeados */
-  .login-container {
-    max-width: 400px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Imagen de usuario */
-  .login-image {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-  }
-
-  /* Estilos para los títulos */
-  .login-title {
-    font-size: 28px;
-    color: #5a3e2b;
-  }
-
-  .login-subtitle {
-    font-size: 16px;
-    color: #7a5e47;
-  }
-
-  /* Botón principal de Login */
-  .login-btn {
-    width: 100%;
-    padding: 10px;
-    background: #5a3e2b;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: 0.3s;
-  }
-
-  .login-btn:hover {
-    background: #3e2b1c;
-  }
-
-  /* Botón secundario de Sign Up */
-  .login-btn-outline {
-    width: 100%;
-    padding: 10px;
-    background: transparent;
-    border: 2px solid #5a3e2b;
-    color: #5a3e2b;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: 0.3s;
-  }
-
-  .login-btn-outline:hover {
-    background: #5a3e2b;
-    color: white;
-  }
-</style>

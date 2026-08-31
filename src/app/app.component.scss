@@ -1,27 +1,26 @@
 html, body {
   height: 100%;
   margin: 0;
-  background-color: #f3e498 !important;
-  color: white !important;
+  background-color: #f9f5f0; /* coffee-50 */
 }
 
 :host {
   display: block;
   min-height: 100vh;
-  background-color:  #f6efcc !important;
-  color: white;
+  background-color: #f9f5f0; /* coffee-50 */
 }
 
 mat-drawer-container {
-  background-color:  #f6efcc !important;
+  background-color: #f9f5f0; /* coffee-50 */
 }
 
 mat-drawer {
-  background-color: #f6efcc !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid #e7d3b9; /* coffee-200 */
 }
 
 mat-drawer-content {
-  background-color: #f6efcc !important;
+  background-color: #f9f5f0; /* coffee-50 */
 }
 
 .example-container {
@@ -31,17 +30,15 @@ mat-drawer-content {
 .example-sidenav {
   width: 250px;
   padding: 20px;
+  display: flex;
 }
 
 .custom-toolbar {
   width: 100%;
   margin-bottom: 1rem;
   margin-top: 0rem;
-  border: solid #aa7e67 1px;
-  border-right: none;
-  border-left: none;
-  border-top: none;
-  background-color: #f6efcc !important;
+  border-bottom: 1px solid #e7d3b9; /* coffee-200 */
+  background-color: #ffffff !important;
 }
 
 .example-spacer {
@@ -52,5 +49,5 @@ mat-drawer-content {
   display: block;
   width: 100%;
   text-align: left;
-  margin-bottom: 10px; /* Espacio entre botones */
+  margin-bottom: 4px;
 }

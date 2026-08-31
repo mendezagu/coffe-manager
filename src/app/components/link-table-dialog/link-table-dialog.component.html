@@ -1,47 +1,44 @@
-<h2 class="text-center mb-3">Vincular Mesas</h2>
-
-<div>
-  <p class="fw-bold text-center">
-    Selecciona las mesas que deseas vincular con la <span class="text-primary">{{ data.table.name }}</span>:
-  </p>
-  
-  <!-- Contenedor con scroll -->
-  <div class="table-list-container border rounded p-3 overflow-auto" style="max-height: 300px;">
-    <div class="form-check d-flex align-items-center gap-2" *ngFor="let table of tables">
-      <input class="form-check-input cursor-pointer" type="checkbox" id="table-{{ table.id }}" (change)="onTableSelectionChange($event, table.id)">
-      <label class="form-check-label fs-5 table-hover" for="table-{{ table.id }}">
-        {{ table.name }}
-      </label>
+<div class="w-full bg-white rounded-2xl overflow-hidden shadow-2xl">
+  <!-- Header -->
+  <div class="relative bg-coffee-800 p-3 sm:p-4">
+    <div class="flex items-center gap-2.5">
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15">
+        <mat-icon class="!w-6 !h-6 !text-2xl text-white">link</mat-icon>
+      </div>
+      <div>
+        <h2 class="text-lg sm:text-xl font-bold text-white m-0">Vincular Mesas</h2>
+        <p class="text-white/70 text-xs mt-0.5">Selecciona las mesas para vincular con {{ data.table.name }}</p>
+      </div>
     </div>
   </div>
+
+  <mat-dialog-content class="p-3 sm:p-4">
+    <div class="max-h-[300px] overflow-y-auto rounded-xl border border-coffee-200 bg-coffee-50 p-2">
+      <div *ngFor="let table of tables" class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white transition-colors">
+        <input class="w-4 h-4 accent-coffee-700 cursor-pointer" type="checkbox" id="table-{{ table.id }}" (change)="onTableSelectionChange($event, table.id)">
+        <label class="text-coffee-800 font-semibold text-sm cursor-pointer" for="table-{{ table.id }}">
+          {{ table.name }}
+        </label>
+      </div>
+      <p *ngIf="tables.length === 0" class="text-center text-coffee-400 text-sm py-3">No hay mesas disponibles para vincular</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="flex flex-wrap gap-2 p-3 sm:p-4 bg-coffee-50 border-t border-coffee-100">
+    <button
+      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-white text-coffee-700 border border-coffee-200 shadow-sm hover:shadow-md transition-all duration-200"
+      (click)="onCancel()"
+    >
+      <mat-icon class="!w-4 !h-4 !text-base">cancel</mat-icon>
+      <span>Cancelar</span>
+    </button>
+
+    <button
+      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-coffee-700 hover:bg-coffee-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+      (click)="onConfirm()"
+    >
+      <mat-icon class="!w-4 !h-4 !text-base">link</mat-icon>
+      <span>Vincular</span>
+    </button>
+  </mat-dialog-actions>
 </div>
-
-<!-- Acciones del diálogo -->
-<div class="d-flex justify-content-end mt-4 gap-2">
-  <button class="btn btn-outline-secondary d-flex align-items-center gap-2" (click)="onCancel()">
-    <mat-icon fontIcon="cancel"></mat-icon> Cancelar
-  </button>
-
-  <button class="btn btn-primary d-flex align-items-center gap-2" (click)="onConfirm()">
-    <mat-icon fontIcon="link"></mat-icon> Vincular
-  </button>
-</div>
-
-<!-- Estilos adicionales -->
-<style>
-  /* Efecto hover en los nombres de las mesas */
-  .table-hover {
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-  }
-  
-  .table-hover:hover {
-    color: #007bff; /* Azul Bootstrap */
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  /* Cursor pointer para checkboxes */
-  .cursor-pointer {
-    cursor: pointer;
-  }
-</style>

@@ -1,31 +1,37 @@
 <mat-drawer-container class="example-container" autosize>
-  
+
   <!-- Sidebar (solo visible si está autenticado) -->
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
-    <h2 style="color: #aa7e67; font-weight: bold;">Bienvenido</h2>
-    
-    <button mat-button routerLink="/home" style="color: #aa7e67;">
+    <h2 class="text-coffee-800 font-bold text-lg px-2 mb-1">Bienvenido</h2>
+    <span class="text-coffee-400 text-[11px] font-bold uppercase tracking-wide px-2 mb-3 block">Menú</span>
+
+    <button mat-button routerLink="/home" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
       <mat-icon fontIcon="storefront"></mat-icon>
       Inicio
     </button>
 
     <!-- ✅ Botón Administrar solo para Admin -->
-    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'" style="color: #aa7e67;">
+    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
       <mat-icon fontIcon="settings"></mat-icon>
       Administrar
     </button>
 
-    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" style="color: #aa7e67;">
+    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
       <mat-icon fontIcon="paid"></mat-icon>
       Balance
     </button>
 
-       <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" style="color: #aa7e67;">
+    <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
       <mat-icon fontIcon="visibility_lock"></mat-icon>
-        Logs
+      Logs
     </button>
-    
-    <button mat-flat-button color="warn" *ngIf="isLoggedIn" (click)="logout()">Cerrar sesión</button>
+
+    <div class="flex-1"></div>
+
+    <button mat-stroked-button *ngIf="isLoggedIn" (click)="logout()" class="!border-cafe-red-200 !text-cafe-red-600 !rounded-lg">
+      <mat-icon fontIcon="logout"></mat-icon>
+      Cerrar sesión
+    </button>
   </mat-drawer>
 
   <mat-drawer-content>
@@ -33,31 +39,29 @@
     <!-- ✅ Toolbar solo aparece si está autenticado -->
     <div *ngIf="isLoggedIn">
       <mat-toolbar class="custom-toolbar d-flex justify-content-between align-items-center">
-      
+
         <!-- Contenido a la izquierda -->
         <div class="cont-1 d-flex align-items-center gap-2">
           <!-- Botón de menú (solo visible si está autenticado) -->
           <button mat-icon-button (click)="sidenav.toggle()">
-            <mat-icon style="color: #aa7e67;">menu</mat-icon>
-          </button> 
-        
-          <span style="color: #aa7e67;">Nuovo Caffe</span>
-        
+            <mat-icon class="!text-coffee-600">menu</mat-icon>
+          </button>
+
           <img
-            class="rounded-circle"
-            style="width: 50px; height: 50px;"
-            mat-card-image
+            class="rounded-full"
+            style="width: 34px; height: 34px; object-fit: cover;"
             src="./assets/nuovo-cafe.jpg"
-            alt="table"
+            alt="Nuovo Caffe"
           />
+          <span class="text-coffee-800 font-bold text-lg">Nuovo Caffe</span>
         </div>
-      
+
         <!-- Contenido a la derecha -->
-        <div class="cont-2 d-flex align-items-center" style="gap: 0.5rem; color: #aa7e67;">
-          <mat-icon style="color: #aa7e67;" fontIcon="schedule"></mat-icon> 
-          <span style="color: #aa7e67;">{{ shift }}</span>
+        <div class="cont-2 d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-full bg-coffee-100">
+          <mat-icon class="!text-coffee-700 !text-lg" fontIcon="schedule"></mat-icon>
+          <span class="text-coffee-700 font-semibold text-sm">{{ shift }}</span>
         </div>
-      
+
       </mat-toolbar>
     </div>
 
