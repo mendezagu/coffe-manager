@@ -247,7 +247,7 @@ export class TotalDialogComponent implements OnInit {
             </div>
             <div class="line"></div>
             <div class="totals">
-              <p><strong>Total:</strong> $${this.total.toFixed(2)}</p>
+              <p style="font-size: 16px"><strong style="font-size: 16px">Total:</strong> $${this.total.toFixed(2)}</p>
               ${
                 this.discountPercentage > 0
                   ? `<p><strong>Descuento (${
