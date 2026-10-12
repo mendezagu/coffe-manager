@@ -36,6 +36,11 @@
       Balance
     </button>
 
+    <button mat-button routerLink="/reports" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <mat-icon fontIcon="bar_chart"></mat-icon>
+      Reportes
+    </button>
+
     <button mat-button routerLink="/settings" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="business"></mat-icon>
       Mi negocio

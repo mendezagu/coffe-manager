@@ -1,0 +1,144 @@
+<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl font-bold text-sage-900">Reportes</h1>
+        <p class="text-sage-600 text-sm mt-1">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
+      </div>
+      <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
+        <input type="checkbox" [(ngModel)]="showTables" class="accent-[#1d5b3e] w-4 h-4" />
+        Ver como tablas
+      </label>
+    </div>
+
+    <!-- Rango de fechas -->
+    <div class="flex flex-wrap items-center gap-2 mb-6">
+      <div class="inline-flex flex-wrap p-[3px] bg-white border border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Rango de fechas">
+        <button *ngFor="let p of presets" type="button" (click)="selectPreset(p.key)"
+          class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+          [ngClass]="preset === p.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
+          [attr.aria-pressed]="preset === p.key">{{ p.label }}</button>
+      </div>
+
+      <div *ngIf="preset === 'custom'" class="flex flex-wrap items-center gap-2">
+        <input type="date" [(ngModel)]="from" [max]="to" aria-label="Desde"
+          class="px-3 py-1.5 border border-sage-200 rounded-lg text-sm bg-white" />
+        <span class="text-sage-500 text-sm">a</span>
+        <input type="date" [(ngModel)]="to" [min]="from" aria-label="Hasta"
+          class="px-3 py-1.5 border border-sage-200 rounded-lg text-sm bg-white" />
+        <button type="button" (click)="applyCustom()" [disabled]="!from || !to || rangeInvalid"
+          class="px-4 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Ver</button>
+      </div>
+    </div>
+
+    <p *ngIf="error" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
+    <p *ngIf="loading" class="text-sage-600 text-sm mb-4">Cargando…</p>
+
+    <ng-container *ngIf="report">
+
+      <!-- Resumen -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div class="bg-white rounded-card shadow-soft p-4">
+          <p class="text-xs font-bold text-sage-500">Total vendido</p>
+          <p class="text-2xl font-bold text-cafe-green-700 mt-1">{{ report.summary.totalAmount | money }}</p>
+        </div>
+        <div class="bg-white rounded-card shadow-soft p-4">
+          <p class="text-xs font-bold text-sage-500">Ventas</p>
+          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.salesCount }}</p>
+          <p class="text-xs text-sage-500 mt-0.5">{{ report.summary.itemsSold }} platos</p>
+        </div>
+        <div class="bg-white rounded-card shadow-soft p-4">
+          <p class="text-xs font-bold text-sage-500">Ticket promedio</p>
+          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.averageTicket | money }}</p>
+        </div>
+        <div class="bg-white rounded-card shadow-soft p-4">
+          <p class="text-xs font-bold text-sage-500">Descuentos</p>
+          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.discountTotal | money }}</p>
+          <p class="text-xs text-sage-500 mt-0.5" *ngIf="report.summary.grossTotal > 0">
+            {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto
+          </p>
+        </div>
+      </div>
+
+      <p *ngIf="report.summary.salesWithoutDetail > 0" class="mb-4 text-xs text-sage-600">
+        {{ report.summary.salesWithoutDetail }}
+        {{ report.summary.salesWithoutDetail === 1 ? 'venta es del sistema anterior y no tiene' : 'ventas son del sistema anterior y no tienen' }}
+        detalle de platos: cuentan en los totales, pero no en el ranking de platos.
+      </p>
+
+      <div *ngIf="!hasSales && !loading" class="bg-white rounded-card shadow-soft p-10 text-center">
+        <p class="font-bold text-sage-800">No hay ventas en este rango</p>
+        <p class="text-sm text-sage-500 mt-1">Probá con otro período.</p>
+      </div>
+
+      <div *ngIf="hasSales" class="grid gap-4 lg:grid-cols-2">
+
+        <!-- Ventas por día -->
+        <section class="bg-white rounded-card shadow-soft p-4 lg:col-span-2">
+          <h2 class="font-bold text-sage-800 mb-3">Ventas por día</h2>
+          <div [hidden]="showTables" class="h-64"><canvas #dayChart aria-label="Gráfico de ventas por día"></canvas></div>
+          <div *ngIf="showTables" class="max-h-72 overflow-y-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Día</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let d of report.byDay"><td class="py-1.5">{{ dayLabel(d.date) }}</td><td class="py-1.5 text-right">{{ d.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ d.totalAmount | money }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Platos más vendidos -->
+        <section class="bg-white rounded-card shadow-soft p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 class="font-bold text-sage-800">Platos más vendidos</h2>
+            <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Ordenar platos por">
+              <button type="button" (click)="setItemsBy('amount')" class="px-2.5 py-1 rounded-md font-medium"
+                [ngClass]="itemsBy === 'amount' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'amount'">Por importe</button>
+              <button type="button" (click)="setItemsBy('quantity')" class="px-2.5 py-1 rounded-md font-medium"
+                [ngClass]="itemsBy === 'quantity' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'quantity'">Por cantidad</button>
+            </div>
+          </div>
+          <p *ngIf="report.items.length === 0" class="text-sm text-sage-500 py-8 text-center">Todavía no hay ventas con detalle de platos en este rango.</p>
+          <div [hidden]="showTables || report.items.length === 0" [style.height.px]="topItems.length * 34 + 50"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
+          <div *ngIf="showTables && report.items.length" class="max-h-80 overflow-y-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let i of topItems"><td class="py-1.5">{{ i.name }}</td><td class="py-1.5 text-right">{{ i.quantity }}</td><td class="py-1.5 text-right font-medium">{{ i.amount | money }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="grid gap-4 content-start">
+          <!-- Ventas por mozo -->
+          <section class="bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
+            <div [hidden]="showTables" [style.height.px]="report.byWaiter.length * 34 + 50"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
+            <table *ngIf="showTables" class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let w of report.byWaiter"><td class="py-1.5">{{ w.name }}</td><td class="py-1.5 text-right">{{ w.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ w.totalAmount | money }}</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <!-- Método de pago -->
+          <section class="bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-3">Método de pago</h2>
+            <div [hidden]="showTables" [style.height.px]="report.byPayment.length * 34 + 50"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
+            <table *ngIf="showTables" class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Método</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let p of report.byPayment"><td class="py-1.5">{{ paymentLabel(p.method) }}</td><td class="py-1.5 text-right">{{ p.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ p.totalAmount | money }}</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </div>
+</div>

@@ -9,6 +9,7 @@ import { LogsComponent } from './components/logs/logs.component';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { UsersComponent } from './pages/users/users.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { ReportsComponent } from './pages/reports/reports.component';
 import { guestGuard, roleGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'kitchen', component: KitchenComponent, canActivate: [roleGuard('admin', 'kitchen')] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
+  { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
   { path: 'settings', component: SettingsComponent, canActivate: [roleGuard('admin')] },
   { path: 'users', component: UsersComponent, canActivate: [roleGuard('admin')] },
   { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },

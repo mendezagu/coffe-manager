@@ -2,11 +2,32 @@ import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit } fr
 import { GestionService, Table } from 'src/app/services/gestionService';
 import Chart from 'chart.js/auto';
 
+interface SaleItem {
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  note: string;
+  isPromo: boolean;
+  discountPct: number;
+  lineTotal: number;
+}
+
 interface BalanceEntry {
+  _id?: string;
   tableName: string;
   waiterName: string;
   totalAmount: number;
   paymentMethod?: string;
+  date?: string;
+  cashierName?: string;
+  grossTotal?: number;
+  discountTotal?: number;
+  globalDiscountPct?: number;
+  items?: SaleItem[];
+  // solo de pantalla
+  expanded?: boolean;
+  loadingDetail?: boolean;
+  detailError?: boolean;
 }
 
 @Component({
@@ -51,6 +72,24 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al obtener el balance:', error);
+      },
+    });
+  }
+
+  // Abre o cierra el detalle de una venta (se pide al servidor la primera vez)
+  toggleDetail(entry: BalanceEntry): void {
+    entry.expanded = !entry.expanded;
+    if (!entry.expanded || entry.items || entry.loadingDetail || !entry._id) return;
+    entry.loadingDetail = true;
+    entry.detailError = false;
+    this.gestionService.getBalanceDetail(entry._id).subscribe({
+      next: (sale) => {
+        entry.items = sale.items ?? [];
+        entry.loadingDetail = false;
+      },
+      error: () => {
+        entry.loadingDetail = false;
+        entry.detailError = true;
       },
     });
   }

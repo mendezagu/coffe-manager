@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestionService } from 'src/app/services/gestionService';
 import { SettingsService } from 'src/app/services/settings.service';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-total-dialog',
@@ -23,20 +24,27 @@ export class TotalDialogComponent implements OnInit {
   tableName: string = ''; // Nueva propiedad para almacenar el nombre de la mesa
   waiterName: string = ''; // Nueva propiedad para almacenar el nombre del mozo
   isTicketPrinted: boolean = false;
+  isAdmin = false;
   paymentMethod: string = 'efectivo'; // Método de pago por defecto
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<TotalDialogComponent>,
     private gestionService: GestionService,
-    public settings: SettingsService
+    public settings: SettingsService,
+    private userService: UserService
   ) {
+    // Solo el administrador aplica descuentos (el servidor también lo exige)
+    this.isAdmin = this.userService.currentRole() === 'admin';
     this.orders = data.orders || [];
     this.table = data.table || [];
     this.tableName = data.tableName || '';
     this.waiterName = data.waiterName || '';
-    // Generar un orderId único (puedes usar Date.now + mesa + mozo)
-    this.orderId = `${Date.now()}_${this.tableName}_${this.waiterName}`;
+    // Identifica este cobro: si se reintenta (doble toque, corte de red) el servidor no lo duplica
+    this.orderId =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
     this.calculateTotal();
   }
 
@@ -157,53 +165,46 @@ export class TotalDialogComponent implements OnInit {
       return;
     }
     this.isProcessing = true;
-    // Guardar la información del balance ANTES de resetear la mesa
-    console.log('Valor actual de paymentMethod antes de guardar:', this.paymentMethod);
-    const balanceEntry = {
-      tableName: this.data.tableName || this.tableName || 'Mesa sin nombre',
-      waiterName: this.data.waiterName || this.waiterName || 'Sin mozo asignado',
-      totalAmount: this.discountedTotal,
-      orders: this.orders,
-      paymentMethod: this.paymentMethod,
-      orderId: this.orderId // Nuevo identificador único de orden
-    };
+    const tableName = this.data.tableName || this.tableName || 'Mesa sin nombre';
+    const waiterName = this.data.waiterName || this.waiterName || 'Sin mozo asignado';
 
-    console.log('Objeto balanceEntry enviado al backend:', balanceEntry);
+    // Cobrar y liberar es UNA sola llamada: o se guarda la venta y se libera la mesa, o no pasa nada.
+    // Solo se informan los descuentos pedidos; el total lo calcula y guarda el servidor.
+    const items = this.orders
+      .filter((o) => !o.isPromo && Number(o.discount) > 0)
+      .map((o) => ({ orderId: o._id, discount: Number(o.discount) }));
 
-    this.gestionService.addBalanceEntry(balanceEntry).subscribe({
-      next: (balanceResponse) => {
-        console.log('Balance guardado exitosamente:', balanceResponse);
+    this.gestionService
+      .checkout(this.data.tableId, {
+        checkoutId: this.orderId,
+        paymentMethod: this.paymentMethod,
+        globalDiscount: this.discountPercentage,
+        items,
+      })
+      .subscribe({
+        next: (sale) => {
+          const logMessage = `Se liberó la mesa <strong>${tableName}</strong> atendida por <strong>${waiterName}</strong> con un total de <strong>${this.settings.format(sale.totalAmount)}</strong>`;
+          this.gestionService.saveLog(logMessage);
 
-        // Ahora resetear la mesa
-        this.gestionService.resetTable(this.data.tableId).subscribe({
-          next: (response) => {
-            console.log('Mesa liberada correctamente:', response);
-
-            const logMessage = `Se liberó la mesa <strong>${balanceEntry.tableName}</strong> atendida por <strong>${balanceEntry.waiterName}</strong> con un total de <strong>${this.settings.format(balanceEntry.totalAmount)}</strong>`;
-            this.gestionService.saveLog(logMessage);
-
-            setTimeout(() => {
-              this.dialogRef.close({
-                status: 'mesa_liberada',
-                tableId: this.data.tableId,
-              });
-              location.reload();
-              this.isProcessing = false;
-            }, 1500); // Espera 1.5 segundos para mostrar el spinner y el texto
-          },
-          error: (error) => {
-            console.error('Error al liberar la mesa:', error);
-            alert('Hubo un error al liberar la mesa. Inténtalo nuevamente.');
+          setTimeout(() => {
+            this.dialogRef.close({
+              status: 'mesa_liberada',
+              tableId: this.data.tableId,
+            });
+            location.reload();
             this.isProcessing = false;
-          },
-        });
-      },
-      error: (error) => {
-        console.error('Error al guardar balance:', error);
-        alert('Error al registrar el balance. Por favor, inténtalo nuevamente.');
-        this.isProcessing = false;
-      },
-    });
+          }, 1500); // Espera 1.5 segundos para mostrar el spinner y el texto
+        },
+        error: (error) => {
+          console.error('Error al cobrar la mesa:', error);
+          const msg = error?.error?.message;
+          alert(
+            (Array.isArray(msg) ? msg.join('. ') : msg) ||
+              'No se pudo cobrar la mesa. Revisá la conexión e intentá de nuevo: no se registró ningún cobro.'
+          );
+          this.isProcessing = false;
+        },
+      });
   }
 
   // Logo del negocio para las ventanas de impresión (vacío si no tiene)

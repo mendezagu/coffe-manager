@@ -219,11 +219,19 @@ getBalance(): Observable<any[]> {
   );
 }
 
-// Agregar una entrada al balance
-addBalanceEntry(entry: { tableName: string; waiterName: string; totalAmount: number; paymentMethod: string }): Observable<any> {
-  return this.http.post<any>(`${this.apiUrl}/balances`, entry).pipe(
-    catchError(this.handleError)
-  );
+// Detalle de una venta (ítems, descuentos, quién cobró)
+getBalanceDetail(id: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/balances/${id}`);
+}
+
+// Cobra la mesa y la libera en una sola operación. El total lo calcula el servidor:
+// acá solo se informan el método de pago y los descuentos pedidos (solo admin).
+// Los errores del servidor se dejan pasar tal cual para poder mostrar su mensaje.
+checkout(
+  tableId: string,
+  body: { checkoutId: string; paymentMethod: string; globalDiscount: number; items: { orderId: string; discount: number }[] }
+): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/tables/${tableId}/checkout`, body);
 }
 
 // Eliminar todos los balances
