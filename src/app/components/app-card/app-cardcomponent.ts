@@ -11,6 +11,13 @@ import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog
 import { Observable } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 
+interface TableGroup {
+  key: string;
+  name: string | null;
+  position?: number; // orden definido por el usuario en Administrar Mesas
+  tables: Table[];
+}
+
 @Component({
   selector: 'app-card',
   templateUrl: './app-card.component.html',
@@ -18,6 +25,9 @@ import { UserService } from 'src/app/services/user.service';
 })
 export class CardComponent implements OnInit {
   tables: Table[] = [];
+  searchText: string = '';
+  viewMode: 'joint' | 'sector' = 'joint';
+  selectedGroupKey: string | null = null;
   waiters: Waiter[] = [];
    selectedItems: MenuItem[] = [];
    menuItems: MenuItem[] = [];
@@ -34,6 +44,7 @@ export class CardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restoreView();
     this.loadTables();
     this.loadMenu(); // 📌 Cargar los ítems del menú al iniciar
 
@@ -51,6 +62,104 @@ export class CardComponent implements OnInit {
 
     // Suscribirse al rol para uso en handlers sin pipes en templates
     this.role$.subscribe(role => this.roleValue = role);
+  }
+
+  // Mesas filtradas por nombre (sin distinguir mayúsculas ni tildes)
+  get filteredTables(): Table[] {
+    const query = this.normalizeText(this.searchText);
+    if (!query) return this.tables;
+    return this.tables.filter(table => this.normalizeText(table.name).includes(query));
+  }
+
+  // Mesas agrupadas por sector (ordenadas por nombre) y, al final, las que no tienen sector.
+  // Sin ningún sector creado devuelve un solo grupo sin título, o sea la grilla de siempre.
+  get tableGroups(): TableGroup[] {
+    const tables = this.filteredTables;
+    if (tables.length === 0) return [];
+
+    const bySector = new Map<string, TableGroup>();
+    const withoutSector: Table[] = [];
+    for (const table of tables) {
+      if (table.sectorId && table.sectorName) {
+        const group = bySector.get(table.sectorId) ?? {
+          key: table.sectorId,
+          name: table.sectorName,
+          position: table.sectorPosition ?? 0,
+          tables: [],
+        };
+        group.tables.push(table);
+        bySector.set(table.sectorId, group);
+      } else {
+        withoutSector.push(table);
+      }
+    }
+
+    // Sin ningún sector creado: una sola grilla sin título. (Se mira hasSectors y no solo el
+    // filtro actual, para que una búsqueda que deja solo mesas sin sector siga mostrando "Sin sector".)
+    if (!this.hasSectors) return [{ key: '__all__', name: null, tables }];
+
+    const groups: TableGroup[] = Array.from(bySector.values())
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || (a.name ?? '').localeCompare(b.name ?? '', 'es'));
+    if (withoutSector.length > 0) {
+      groups.push({ key: '__none__', name: 'Sin sector', tables: withoutSector });
+    }
+    return groups;
+  }
+
+  // Hay al menos una mesa con sector: recién ahí tiene sentido elegir tipo de vista
+  get hasSectors(): boolean {
+    return this.tables.some(table => !!table.sectorId);
+  }
+
+  // Grupo de la pestaña activa; si el elegido ya no existe (ej. la búsqueda lo dejó vacío), el primero
+  get activeGroupKey(): string | null {
+    const groups = this.tableGroups;
+    return (groups.find(g => g.key === this.selectedGroupKey) ?? groups[0])?.key ?? null;
+  }
+
+  // Vista conjunta: todos los sectores uno arriba del otro. Vista por sector: solo el de la pestaña activa.
+  get visibleGroups(): TableGroup[] {
+    const groups = this.tableGroups;
+    if (this.viewMode !== 'sector' || !this.hasSectors) return groups;
+    const active = groups.find(g => g.key === this.activeGroupKey);
+    return active ? [active] : [];
+  }
+
+  setViewMode(mode: 'joint' | 'sector'): void {
+    this.viewMode = mode;
+    this.persistView('tablesViewMode', mode);
+  }
+
+  selectGroup(key: string): void {
+    this.selectedGroupKey = key;
+    this.persistView('tablesSelectedGroup', key);
+  }
+
+  // Recuerda la vista elegida entre sesiones; si el navegador bloquea el storage, simplemente no se guarda
+  private persistView(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* sin persistencia */
+    }
+  }
+
+  private restoreView(): void {
+    try {
+      const mode = localStorage.getItem('tablesViewMode');
+      if (mode === 'joint' || mode === 'sector') this.viewMode = mode;
+      this.selectedGroupKey = localStorage.getItem('tablesSelectedGroup');
+    } catch {
+      /* sin persistencia */
+    }
+  }
+
+  private normalizeText(value: string | undefined | null): string {
+    return (value || '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .trim();
   }
 
   loadMenu(): void {

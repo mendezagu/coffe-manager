@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -78,6 +79,7 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     MatExpansionModule,
     MatCheckboxModule,
     MatSnackBarModule,
+    DragDropModule,
     MatInputModule,
     MatSidenavModule,
     MatSelectModule,

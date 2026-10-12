@@ -1,35 +1,35 @@
-<div class="flex flex-col h-full max-h-[75vh] bg-white rounded-2xl overflow-hidden shadow-2xl">
+<div class="flex flex-col h-full max-h-[75vh] bg-white rounded-dialog overflow-hidden shadow-dialog">
   <!-- Header -->
-  <div class="flex-shrink-0 px-4 sm:px-5 py-3 sm:py-4 bg-coffee-800">
+  <div class="flex-shrink-0 bg-white px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15">
-          <mat-icon class="!w-6 !h-6 !text-2xl text-white">restaurant_menu</mat-icon>
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cafe-green-50">
+          <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">restaurant_menu</mat-icon>
         </div>
         <div>
-          <h2 class="text-lg sm:text-xl font-bold text-white m-0">Selecciona Menús</h2>
-          <p class="text-white/70 text-xs mt-0.5">Agrega items a tu orden</p>
+          <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Selecciona Menús</h2>
+          <p class="text-sage-500 text-xs mt-0.5">Agrega items a tu orden</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Contenido principal -->
-  <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-3 sm:py-4 bg-coffee-50">
+  <div class="flex-1 overflow-y-auto px-4 sm:px-5 py-3 sm:py-4 bg-sage-50">
     <!-- Ítems seleccionados -->
     <div *ngIf="selectedItems.length > 0" class="mb-3 relative">
-      <div class="bg-white border border-coffee-200 rounded-xl p-3 shadow-sm">
-        <p class="text-[11px] font-bold uppercase tracking-wide text-coffee-400 mb-2">Seleccionado</p>
+      <div class="bg-white border border-sage-200 rounded-xl p-3 shadow-sm">
+        <p class="text-[11px] font-bold text-sage-400 mb-2">Seleccionado</p>
 
         <!-- Lista de items seleccionados -->
         <div class="max-h-40 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
           <div
             *ngFor="let item of selectedItems"
-            class="group bg-coffee-50 rounded-lg border border-coffee-100 px-2 py-1.5"
+            class="group bg-sage-50 rounded-lg border border-sage-100 px-2 py-1.5"
           >
             <div class="flex items-center gap-1.5">
-              <small class="text-xs font-semibold text-coffee-900 flex-1 min-w-0 truncate">{{ item.name }}</small>
-              <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-coffee-200 text-coffee-900 text-xs font-bold rounded flex-shrink-0">
+              <small class="text-xs font-semibold text-sage-900 flex-1 min-w-0 truncate">{{ item.name }}</small>
+              <span class="flex items-center justify-center min-w-[20px] h-5 px-1 bg-sage-200 text-sage-900 text-xs font-bold rounded flex-shrink-0">
                 x{{ item.quantity }}
               </span>
               <button
@@ -41,13 +41,13 @@
               </button>
             </div>
             <div class="relative mt-1">
-              <mat-icon class="!w-3.5 !h-3.5 !text-sm absolute left-1.5 top-1/2 -translate-y-1/2 text-coffee-400">edit_note</mat-icon>
+              <mat-icon class="!w-3.5 !h-3.5 !text-sm absolute left-1.5 top-1/2 -translate-y-1/2 text-sage-400">edit_note</mat-icon>
               <input
                 type="text"
                 [value]="item.note"
                 (input)="updateNote(item, $event)"
                 placeholder="Aclaración (ej: sin verduras)"
-                class="w-full pl-6 pr-2 py-1 bg-white border border-coffee-200 rounded text-xs focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all placeholder-coffee-300"
+                class="w-full pl-6 pr-2 py-1 bg-white border border-sage-200 rounded text-xs focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all placeholder-sage-300"
               />
             </div>
           </div>
@@ -59,11 +59,11 @@
     <div class="mb-3 relative">
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <mat-icon class="!w-5 !h-5 !text-xl text-coffee-400">search</mat-icon>
+          <mat-icon class="!w-5 !h-5 !text-xl text-sage-400">search</mat-icon>
         </div>
         <input
           type="text"
-          class="w-full pl-10 pr-3 py-2 bg-white border border-coffee-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all placeholder-coffee-400 shadow-sm"
+          class="w-full pl-10 pr-3 py-2 bg-white border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all placeholder-sage-400 shadow-sm"
           placeholder="Buscar menú..."
           [(ngModel)]="filterText"
         />
@@ -74,13 +74,13 @@
     <div class="space-y-2 max-h-[45vh] overflow-y-auto custom-scrollbar pr-2">
       <div
         *ngFor="let menu of filteredMenuItems"
-        class="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-coffee-100 hover:border-coffee-300"
+        class="group bg-white rounded-lg transition-all duration-300 overflow-hidden border border-sage-100 hover:border-sage-300"
       >
         <div class="p-2.5 sm:p-3">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <!-- Info del producto -->
             <div class="flex-1 min-w-0">
-              <small class="font-semibold text-coffee-900 mb-1">{{ menu.name }}</small>
+              <small class="font-semibold text-sage-900 mb-1">{{ menu.name }}</small>
               <div class="flex items-center gap-1">
                 <small class="font-semibold text-cafe-green-700">{{ menu.price }}</small>
               </div>
@@ -89,9 +89,9 @@
             <!-- Controles -->
             <div class="flex items-center gap-1.5 w-full sm:w-auto">
               <!-- Control de cantidad -->
-              <div class="flex items-center gap-1 bg-coffee-50 rounded px-1.5 py-1 border border-coffee-200">
+              <div class="flex items-center gap-1 bg-sage-50 rounded px-1.5 py-1 border border-sage-200">
                 <input
-                  class="w-12 px-1 py-0.5 bg-white border border-coffee-200 rounded text-center text-xs font-bold focus:outline-none focus:ring-2 focus:ring-coffee-500"
+                  class="w-12 px-1 py-0.5 bg-white border border-sage-200 rounded text-center text-xs font-bold focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25"
                   type="number"
                   min="1"
                   [value]="menu.quantity"
@@ -101,10 +101,10 @@
 
               <!-- Botón Agregar -->
               <button
-                class="flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-200 shadow-sm hover:shadow-md"
+                class="flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-200"
                 [ngClass]="addedItems[menu._id] ?
                   'bg-cafe-green-700 text-white' :
-                  'bg-coffee-700 hover:bg-coffee-800 text-white'"
+                  'bg-cafe-green-700 hover:bg-cafe-green-800 text-white'"
                 (click)="addItem(menu)"
               >
                 <mat-icon class="!w-3.5 !h-3.5 !text-sm" *ngIf="!addedItems[menu._id]">add_circle</mat-icon>
@@ -119,9 +119,9 @@
   </div>
 
   <!-- Footer con acciones -->
-  <div class="flex-shrink-0 flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 px-3 sm:px-4 py-3 bg-white border-t border-coffee-100">
+  <div class="flex-shrink-0 flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 px-3 sm:px-4 py-3 bg-white border-t border-sage-100">
     <button
-      class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold bg-coffee-50 hover:bg-coffee-100 text-coffee-700 transition-all duration-200"
+      class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold bg-sage-50 hover:bg-sage-100 text-sage-700 transition-all duration-200"
       (click)="cancel()">
       <mat-icon class="!w-4 !h-4 !text-base">cancel</mat-icon>
       <span>Cancelar</span>
@@ -129,9 +129,9 @@
 
     <button
       class="flex items-center justify-center gap-1 px-4 py-2.5 rounded-lg text-sm font-bold
-             bg-coffee-800 hover:bg-coffee-900
+             bg-cafe-green-700 hover:bg-cafe-green-800
              text-white transition-all duration-200
-             shadow-md hover:shadow-lg
+            
              disabled:opacity-50 disabled:cursor-not-allowed
              disabled:shadow-sm"
       (click)="printTicket()"
@@ -150,14 +150,14 @@
     height: 8px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f9f5f0;
+    background: #edf1ea;
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #8b6f47;
+    background: #86958b;
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #6f4e37;
+    background: #6a7a70;
   }
 </style>

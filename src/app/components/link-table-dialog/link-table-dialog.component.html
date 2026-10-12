@@ -1,32 +1,32 @@
-<div class="w-full bg-white rounded-2xl overflow-hidden shadow-2xl">
+<div class="w-full bg-white rounded-dialog overflow-hidden shadow-dialog">
   <!-- Header -->
-  <div class="relative bg-coffee-800 p-3 sm:p-4">
+  <div class="relative bg-white px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
     <div class="flex items-center gap-2.5">
-      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15">
-        <mat-icon class="!w-6 !h-6 !text-2xl text-white">link</mat-icon>
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cafe-green-50">
+        <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">link</mat-icon>
       </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-white m-0">Vincular Mesas</h2>
-        <p class="text-white/70 text-xs mt-0.5">Selecciona las mesas para vincular con {{ data.table.name }}</p>
+        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Vincular Mesas</h2>
+        <p class="text-sage-500 text-xs mt-0.5">Selecciona las mesas para vincular con {{ data.table.name }}</p>
       </div>
     </div>
   </div>
 
   <mat-dialog-content class="p-3 sm:p-4">
-    <div class="max-h-[300px] overflow-y-auto rounded-xl border border-coffee-200 bg-coffee-50 p-2">
+    <div class="max-h-[300px] overflow-y-auto rounded-xl border border-sage-200 bg-sage-50 p-2">
       <div *ngFor="let table of tables" class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white transition-colors">
-        <input class="w-4 h-4 accent-coffee-700 cursor-pointer" type="checkbox" id="table-{{ table.id }}" (change)="onTableSelectionChange($event, table.id)">
-        <label class="text-coffee-800 font-semibold text-sm cursor-pointer" for="table-{{ table.id }}">
+        <input class="w-4 h-4 accent-cafe-green-700 cursor-pointer" type="checkbox" id="table-{{ table.id }}" (change)="onTableSelectionChange($event, table.id)">
+        <label class="text-sage-800 font-semibold text-sm cursor-pointer" for="table-{{ table.id }}">
           {{ table.name }}
         </label>
       </div>
-      <p *ngIf="tables.length === 0" class="text-center text-coffee-400 text-sm py-3">No hay mesas disponibles para vincular</p>
+      <p *ngIf="tables.length === 0" class="text-center text-sage-400 text-sm py-3">No hay mesas disponibles para vincular</p>
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions class="flex flex-wrap gap-2 p-3 sm:p-4 bg-coffee-50 border-t border-coffee-100">
+  <mat-dialog-actions class="flex flex-wrap gap-2 p-3 sm:p-4 bg-white border-t border-sage-200">
     <button
-      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-white text-coffee-700 border border-coffee-200 shadow-sm hover:shadow-md transition-all duration-200"
+      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-white text-sage-700 border border-sage-200 transition-all duration-200"
       (click)="onCancel()"
     >
       <mat-icon class="!w-4 !h-4 !text-base">cancel</mat-icon>
@@ -34,7 +34,7 @@
     </button>
 
     <button
-      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-coffee-700 hover:bg-coffee-800 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200"
       (click)="onConfirm()"
     >
       <mat-icon class="!w-4 !h-4 !text-base">link</mat-icon>

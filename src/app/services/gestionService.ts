@@ -11,6 +11,8 @@ export interface MenuItem {
   price: number;
   quantity?: number;
   note?: string;
+  isPromo?: boolean;
+  discount?: number;
 }
 
 export interface Table {
@@ -23,11 +25,20 @@ export interface Table {
   waiterId?: any;
   waiterName?: string;
   waiter?: Waiter;
+  sectorId?: string | null;
+  sectorName?: string | null;
+  sectorPosition?: number | null;
 }
 
 export interface Waiter {
   _id: string;
   name: string;
+}
+
+export interface Sector {
+  _id: string;
+  name: string;
+  position?: number;
 }
 
 @Injectable({
@@ -69,13 +80,18 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
     );
   }
 
-  addTable(name: string): Observable<Table> {
-    return this.http.post<Table>(`${this.apiUrl}/tables`, { name, available: true, orders: [], linkedTables: [] })
+  addTable(name: string, sectorId?: string | null): Observable<Table> {
+    return this.http.post<Table>(`${this.apiUrl}/tables`, { name, available: true, orders: [], linkedTables: [], sectorId: sectorId || null })
       .pipe(catchError(this.handleError));
   }
 
-  editTable(tableId: string, newName: string, newAvailability: boolean): Observable<Table> {
-    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}`, { name: newName, available: newAvailability })
+  // sectorId: undefined = no cambiar el sector, null = dejar la mesa sin sector
+  editTable(tableId: string, newName: string, newAvailability: boolean, sectorId?: string | null): Observable<Table> {
+    const body: any = { name: newName, available: newAvailability };
+    if (sectorId !== undefined) {
+      body.sectorId = sectorId;
+    }
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}`, body)
       .pipe(catchError(this.handleError));
   }
 
@@ -239,15 +255,15 @@ refreshMenu(): Observable<MenuItem[]> {
   );
 }
 
-  addMenuItem(name: string, price: number): Observable<MenuItem> {
-    return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1 }).pipe(
+  addMenuItem(name: string, price: number, isPromo: boolean = false): Observable<MenuItem> {
+    return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1, isPromo }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
   }
 
-  editMenuItem(itemId: string, newName: string, newPrice: number): Observable<MenuItem> {
-    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice }).pipe(
+  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
@@ -261,6 +277,45 @@ refreshMenu(): Observable<MenuItem[]> {
   }
 
   // 📌 Waiters
+  // 📌 Sectores
+  // El backend responde 409 si el nombre ya existe; se conserva su mensaje para mostrarlo al usuario.
+  private handleSectorError(error: HttpErrorResponse): Observable<never> {
+    const message = error.error?.message || 'Ocurrió un error inesperado';
+    console.error(`Error ${error.status}: ${message}`);
+    return throwError(() => new Error(Array.isArray(message) ? message.join(', ') : message));
+  }
+
+  getSectors(): Observable<Sector[]> {
+    return this.http.get<Sector[]>(`${this.apiUrl}/sectors`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  addSector(name: string): Observable<Sector> {
+    return this.http.post<Sector>(`${this.apiUrl}/sectors`, { name }).pipe(
+      catchError(err => this.handleSectorError(err))
+    );
+  }
+
+  editSector(sectorId: string, newName: string): Observable<Sector> {
+    return this.http.put<Sector>(`${this.apiUrl}/sectors/${sectorId}`, { name: newName }).pipe(
+      catchError(err => this.handleSectorError(err))
+    );
+  }
+
+  // Recibe los ids de todos los sectores en el orden deseado
+  reorderSectors(ids: string[]): Observable<Sector[]> {
+    return this.http.put<Sector[]>(`${this.apiUrl}/sectors/reorder`, { ids }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteSector(sectorId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/sectors/${sectorId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getWaiters(): Observable<Waiter[]> {
     return this.http.get<Waiter[]>(`${this.apiUrl}/waiters`).pipe(
       catchError(this.handleError)

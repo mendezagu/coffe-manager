@@ -1,60 +1,137 @@
-<div class="w-full min-h-screen bg-coffee-50 px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+<div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 py-[20px] sm:py-6 lg:py-8">
   <div class="max-w-[1920px] mx-auto">
-    <!-- Grid de cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 sm:gap-6 lg:gap-8">
-      <div *ngFor="let table of tables" class="group">
-        <!-- Card Principal -->
-        <div class="relative rounded-2xl overflow-visible transition-all duration-300 ease-out hover:-translate-y-1 shadow-elegant hover:shadow-elegant-xl p-4 flex flex-col"
-             [class.bg-cafe-green-700]="table.available && !table.controlledBy"
-             [class.bg-cafe-red-700]="!table.available || table.controlledBy">
+    <!-- Barra superior: buscador (solo por nombre) + tipo de vista -->
+    <div class="flex flex-wrap items-center justify-between gap-[12px] mb-[16px]">
+    <div class="relative w-full sm:max-w-[420px]">
+      <div class="absolute inset-y-0 left-0 pl-[14px] flex items-center pointer-events-none">
+        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">search</mat-icon>
+      </div>
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+        placeholder="Buscar mesa..."
+        class="w-full pl-[44px] pr-[40px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 placeholder-sage-400 shadow-soft focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
+      />
+      <button
+        *ngIf="searchText"
+        type="button"
+        aria-label="Limpiar búsqueda"
+        class="absolute inset-y-0 right-0 pr-[12px] flex items-center text-sage-500 hover:text-sage-800"
+        (click)="searchText = ''">
+        <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+      </button>
+    </div>
 
-          <!-- Header con nombre, estado y logo -->
-          <div class="flex items-start justify-between gap-2 mb-3">
-            <div class="flex flex-col gap-1.5">
-              <h3 class="text-xl font-bold text-white leading-none">
+      <!-- Tipo de vista: solo si hay sectores creados -->
+      <div *ngIf="hasSectors" class="inline-flex p-[3px] bg-white border-[1px] border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Tipo de vista">
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-[12px] py-[7px] rounded-[9px] text-sm font-medium transition-colors duration-200"
+          [ngClass]="viewMode === 'joint' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'"
+          [attr.aria-pressed]="viewMode === 'joint'"
+          (click)="setViewMode('joint')">
+          <mat-icon class="!w-5 !h-5 !text-xl">view_agenda</mat-icon>
+          <span>Vista conjunta</span>
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-[12px] py-[7px] rounded-[9px] text-sm font-medium transition-colors duration-200"
+          [ngClass]="viewMode === 'sector' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'"
+          [attr.aria-pressed]="viewMode === 'sector'"
+          (click)="setViewMode('sector')">
+          <mat-icon class="!w-5 !h-5 !text-xl">tab</mat-icon>
+          <span>Por sector</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pestañas por sector (solo en "Por sector") -->
+    <div *ngIf="viewMode === 'sector' && hasSectors && tableGroups.length > 0"
+         class="flex gap-2 overflow-x-auto pb-[4px] mb-[16px]" role="tablist">
+      <button
+        *ngFor="let group of tableGroups"
+        type="button"
+        role="tab"
+        class="flex-shrink-0 flex items-center gap-2 px-[16px] py-[8px] rounded-full border-[1px] text-sm font-semibold transition-colors duration-200"
+        [ngClass]="activeGroupKey === group.key
+          ? 'bg-cafe-green-700 border-cafe-green-700 text-white'
+          : 'bg-white border-sage-300 text-sage-700 hover:bg-sage-50'"
+        [attr.aria-selected]="activeGroupKey === group.key"
+        (click)="selectGroup(group.key)">
+        <span>{{ group.name }}</span>
+        <span class="min-w-[20px] px-1.5 rounded-full text-xs font-bold leading-[20px] text-center"
+              [ngClass]="activeGroupKey === group.key ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ group.tables.length }}</span>
+      </button>
+    </div>
+
+    <!-- Sin resultados -->
+    <div *ngIf="searchText && filteredTables.length === 0"
+         class="flex flex-col items-center justify-center py-[48px] text-sage-600">
+      <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300 mb-2">search_off</mat-icon>
+      <p class="text-base font-medium m-0">No hay mesas que coincidan con "{{ searchText }}"</p>
+    </div>
+
+    <!-- Grid de cards: 4 columnas desde 640px de ancho (sm) y una sola en celulares; filas del mismo alto -->
+    <!-- Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a
+         Tailwind; por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
+    <!-- Una sección por sector (con título); si no hay sectores se muestra una sola grilla sin título -->
+    <section *ngFor="let group of visibleGroups" class="mb-[28px] last:mb-0">
+      <!-- En "Por sector" el nombre ya está en la pestaña, así que el título solo se muestra en la vista conjunta -->
+      <div *ngIf="group.name && viewMode === 'joint'" class="flex items-center gap-[10px] mb-[12px]">
+        <h2 class="text-lg font-bold text-sage-800 m-0">{{ group.name }}</h2>
+        <span class="px-2 py-0.5 rounded-full bg-white border-[1px] border-sage-200 text-sage-600 text-xs font-semibold">{{ group.tables.length }}</span>
+        <div class="flex-1 h-px bg-sage-300"></div>
+      </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-4 auto-rows-fr gap-[12px] sm:gap-[16px]">
+      <div *ngFor="let table of group.tables" class="group min-w-0">
+        <!-- Card principal: ambas llenas; libre = verde botella, ocupada = ladrillo. Alto mínimo fijo = el de una mesa ocupada con órdenes -->
+        <div class="relative h-full min-h-[250px] rounded-[18px] p-[14px] flex flex-col text-white transition-transform duration-200 ease-out hover:-translate-y-0.5"
+             [ngClass]="(table.available && !table.controlledBy)
+               ? 'bg-cafe-green-700 shadow-green'
+               : 'bg-cafe-red-700 shadow-brick'">
+
+          <!-- Header: nombre + estado a la izquierda, logo a la derecha -->
+          <div class="flex items-start justify-between gap-2 mb-[10px]">
+            <div class="flex flex-col items-start gap-1.5 min-w-0">
+              <h3 class="text-xl font-medium tracking-tight leading-none m-0 truncate max-w-full">
                 {{ table.name }}
               </h3>
-              <span class="inline-flex items-center gap-1.5 w-fit px-2.5 py-0.5 rounded-full bg-white/15 text-[11px] font-semibold uppercase tracking-wide text-white">
-                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/15 text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                 <ng-container *ngIf="table.available && !table.controlledBy; else ocupadaLabel">Libre</ng-container>
                 <ng-template #ocupadaLabel>Ocupada</ng-template>
               </span>
             </div>
-
-            <!-- Logo pequeño -->
-            <div class="relative w-9 h-9 rounded-full overflow-hidden shadow-md flex-shrink-0 ring-2 ring-white/30">
-              <img
-                class="w-full h-full object-cover"
-                src="./assets/nuovo-cafe.jpg"
-                alt="table"
-              />
-            </div>
+            <img
+              class="w-9 h-9 rounded-full object-cover ring-2 ring-white/30 flex-shrink-0"
+              src="./assets/nuovo-cafe.jpg"
+              alt="Nuovo Caffe"
+            />
           </div>
 
-          <!-- Sección de Mozo -->
-          <div class="mb-2">
-            <div class="px-3 py-2 bg-black/20 rounded-xl">
-              <p class="text-[11px] font-bold uppercase tracking-wide text-white/65 mb-0.5">Mozo</p>
-              <p class="font-semibold text-white text-sm" *ngIf="table.waiterName?.trim()">{{ table.waiterName }}</p>
-              <p class="font-semibold text-white text-sm" *ngIf="!table.waiterName?.trim()">No asignado</p>
-            </div>
+          <!-- Mozo -->
+          <div class="flex items-center gap-1.5 text-xs mb-1.5">
+            <mat-icon class="!w-4 !h-4 !text-base opacity-70">person</mat-icon>
+            <span class="font-medium truncate" *ngIf="table.waiterName?.trim()">{{ table.waiterName }}</span>
+            <span class="opacity-70" *ngIf="!table.waiterName?.trim()">Sin mozo asignado</span>
           </div>
 
           <!-- Mesa controlada -->
-          <div *ngIf="table.controlledBy" class="mb-2">
-            <div class="px-3 py-2 bg-black/20 rounded-xl">
-              <p class="text-[11px] font-bold uppercase tracking-wide text-white/65 mb-0.5">Administrada por</p>
-              <p class="text-xs font-semibold text-white">{{ getTableNameById(table.controlledBy) }}</p>
+          <div *ngIf="table.controlledBy" class="mb-1.5">
+            <div class="px-2 py-1.5 rounded-lg bg-black/20 text-white">
+              <p class="text-[11px] font-medium opacity-70 mb-0.5">Administrada por</p>
+              <p class="text-xs font-medium m-0">{{ getTableNameById(table.controlledBy) }}</p>
             </div>
           </div>
 
           <!-- Mesas vinculadas -->
-          <div *ngIf="table.linkedTables && table.linkedTables.length > 0" class="mb-2">
-            <div class="px-3 py-2 bg-black/20 rounded-xl">
-              <p class="text-[11px] font-bold uppercase tracking-wide text-white/65 mb-1.5">Vinculada con</p>
+          <div *ngIf="table.linkedTables && table.linkedTables.length > 0" class="mb-1.5">
+            <div class="px-2 py-1.5 rounded-lg bg-black/20 text-white">
+              <p class="text-[11px] font-medium opacity-70 mb-1">Vinculada con</p>
               <div class="flex flex-wrap gap-1">
                 <span *ngFor="let linkedTableId of table.linkedTables"
-                      class="inline-flex items-center px-2 py-0.5 bg-white/20 text-white rounded-lg text-xs font-semibold">
+                      class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium bg-white/20 text-white">
                   {{ getTableNameById(linkedTableId) }}
                 </span>
               </div>
@@ -62,50 +139,55 @@
           </div>
 
           <!-- Spacer para empujar acciones al fondo -->
-          <div class="flex-1"></div>
+          <div class="flex-1 min-h-[8px]"></div>
 
           <!-- Botón Ordenar -->
           <button
-            class="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg mb-2"
-            [ngClass]="(table.orders && table.orders.length > 0) ? 'bg-white text-coffee-800 hover:bg-coffee-50' : 'bg-white/15 hover:bg-white/25 text-white border border-white/30'"
+            class="w-full flex items-center justify-center gap-1.5 px-2 py-[9px] text-sm font-bold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            [ngClass]="(table.available && !table.controlledBy)
+              ? 'bg-white hover:bg-sage-50 text-cafe-green-700'
+              : ((table.orders && table.orders.length > 0) ? 'bg-white hover:bg-sage-50 text-cafe-red-700' : 'bg-white/15 hover:bg-white/25 text-white')"
             (click)="orderButtonClicked(table)"
             [disabled]="table.controlledBy">
             <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
             <span>Ordenar</span>
           </button>
 
-          <!-- Botones de gestión (cuando hay órdenes) -->
-          <div *ngIf="table.orders && table.orders.length > 0" class="space-y-2">
-            <!-- Fila de botones Órdenes y Total -->
-            <div class="flex gap-2">
-              <button
-                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                (click)="openTableInfoDialog(table)"
-                [disabled]="table.controlledBy">
-                <mat-icon class="!w-4 !h-4 !text-base">receipt_long</mat-icon>
-                <span>Órdenes</span>
-              </button>
-
-              <button
-                *ngIf="(role$ | async) === 'admin'"
-                class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                (click)="openTotalDialog(table)"
-                [disabled]="table.controlledBy">
-                <mat-icon class="!w-4 !h-4 !text-base">payments</mat-icon>
-                <span>Total</span>
-              </button>
-            </div>
-
-            <!-- Botón Imprimir -->
+          <!-- Botones de gestión (cuando hay órdenes): cuadrados, icono arriba y texto abajo -->
+          <div *ngIf="table.orders && table.orders.length > 0" class="flex gap-1.5 mt-[8px]">
             <button
-              class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/30 transition-all duration-200"
+              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              (click)="openTableInfoDialog(table)"
+              [disabled]="table.controlledBy">
+              <span class="flex items-center gap-1">
+                <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">receipt_long</mat-icon>
+                <span class="min-w-[18px] px-1 rounded-full text-[11px] font-bold leading-[18px] text-center"
+                      [ngClass]="(table.available && !table.controlledBy) ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">{{ table.orders.length }}</span>
+              </span>
+              <span>Órdenes</span>
+            </button>
+
+            <button
+              *ngIf="(role$ | async) === 'admin'"
+              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              (click)="openTotalDialog(table)"
+              [disabled]="table.controlledBy">
+              <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">payments</mat-icon>
+              <span>Total</span>
+            </button>
+
+            <!-- Botón Imprimir Comanda -->
+            <button
+              title="Imprimir Comanda"
+              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200"
               (click)="printTicket(table.id)">
-              <mat-icon class="!w-4 !h-4 !text-base">print</mat-icon>
+              <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">print</mat-icon>
               <span>Imprimir Comanda</span>
             </button>
           </div>
         </div>
       </div>
     </div>
+    </section>
   </div>
 </div>

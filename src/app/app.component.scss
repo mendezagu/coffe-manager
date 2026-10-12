@@ -1,26 +1,26 @@
 html, body {
   height: 100%;
   margin: 0;
-  background-color: #f9f5f0; /* coffee-50 */
+  background-color: #edf1ea; /* sage-100 */
 }
 
 :host {
   display: block;
   min-height: 100vh;
-  background-color: #f9f5f0; /* coffee-50 */
+  background-color: #edf1ea; /* sage-100 */
 }
 
 mat-drawer-container {
-  background-color: #f9f5f0; /* coffee-50 */
+  background-color: #edf1ea; /* sage-100 */
 }
 
 mat-drawer {
   background-color: #ffffff !important;
-  border-right: 1px solid #e7d3b9; /* coffee-200 */
+  border-right: 1px solid #e0e7dc; /* sage-200 */
 }
 
 mat-drawer-content {
-  background-color: #f9f5f0; /* coffee-50 */
+  background-color: #edf1ea; /* sage-100 */
 }
 
 .example-container {
@@ -37,7 +37,7 @@ mat-drawer-content {
   width: 100%;
   margin-bottom: 1rem;
   margin-top: 0rem;
-  border-bottom: 1px solid #e7d3b9; /* coffee-200 */
+  border-bottom: 1px solid #e0e7dc; /* sage-200 */
   background-color: #ffffff !important;
 }
 

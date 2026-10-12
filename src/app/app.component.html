@@ -2,33 +2,39 @@
 
   <!-- Sidebar (solo visible si está autenticado) -->
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
-    <h2 class="text-coffee-800 font-bold text-lg px-2 mb-1">Bienvenido</h2>
-    <span class="text-coffee-400 text-[11px] font-bold uppercase tracking-wide px-2 mb-3 block">Menú</span>
+    <div class="flex items-center gap-3 px-2 mb-6">
+      <img
+        class="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-[0_0_0_3px_#cfd8cb]"
+        src="./assets/nuovo-cafe.jpg"
+        alt="Nuovo Caffe"
+      />
+      <span class="text-sage-800 font-bold text-lg leading-tight">Nuovo<br>Caffé</span>
+    </div>
 
-    <button mat-button routerLink="/home" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
+    <button mat-button routerLink="/home" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="storefront"></mat-icon>
       Inicio
     </button>
 
     <!-- ✅ Botón Administrar solo para Admin -->
-    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
+    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="settings"></mat-icon>
       Administrar
     </button>
 
-    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
+    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="paid"></mat-icon>
       Balance
     </button>
 
-    <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="bg-coffee-100 !text-coffee-800" class="!text-coffee-600 !rounded-lg !mb-1">
+    <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="visibility_lock"></mat-icon>
       Logs
     </button>
 
     <div class="flex-1"></div>
 
-    <button mat-stroked-button *ngIf="isLoggedIn" (click)="logout()" class="!border-cafe-red-200 !text-cafe-red-600 !rounded-lg">
+    <button mat-button *ngIf="isLoggedIn" (click)="logout()" class="!bg-cafe-red-50 !text-cafe-red-700 !rounded-xl !h-11 !font-bold">
       <mat-icon fontIcon="logout"></mat-icon>
       Cerrar sesión
     </button>
@@ -37,14 +43,14 @@
   <mat-drawer-content>
 
     <!-- ✅ Toolbar solo aparece si está autenticado -->
-    <div *ngIf="isLoggedIn">
+    <div *ngIf="isLoggedIn" class="sticky top-0 z-10">
       <mat-toolbar class="custom-toolbar d-flex justify-content-between align-items-center">
 
         <!-- Contenido a la izquierda -->
         <div class="cont-1 d-flex align-items-center gap-2">
           <!-- Botón de menú (solo visible si está autenticado) -->
           <button mat-icon-button (click)="sidenav.toggle()">
-            <mat-icon class="!text-coffee-600">menu</mat-icon>
+            <mat-icon class="!text-sage-600">menu</mat-icon>
           </button>
 
           <img
@@ -53,13 +59,13 @@
             src="./assets/nuovo-cafe.jpg"
             alt="Nuovo Caffe"
           />
-          <span class="text-coffee-800 font-bold text-lg">Nuovo Caffe</span>
+          <span class="text-sage-800 font-bold text-lg">Nuovo Caffe</span>
         </div>
 
         <!-- Contenido a la derecha -->
-        <div class="cont-2 d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-full bg-coffee-100">
-          <mat-icon class="!text-coffee-700 !text-lg" fontIcon="schedule"></mat-icon>
-          <span class="text-coffee-700 font-semibold text-sm">{{ shift }}</span>
+        <div class="cont-2 d-flex align-items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-sage-300">
+          <span class="w-2 h-2 rounded-full bg-cafe-green-700"></span>
+          <span class="text-sage-800 font-medium text-sm">{{ shift }}</span>
         </div>
 
       </mat-toolbar>

@@ -7,6 +7,7 @@ export interface MenuItem {
   name: string;
   price: number;
   quantity?: number; // Opcional, ya que no siempre se proporciona
+  isPromo?: boolean;
 }
 
 export interface Table {

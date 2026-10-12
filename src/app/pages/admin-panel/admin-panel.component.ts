@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Observable } from 'rxjs';
 import { CoffeService, MenuItem} from 'src/app/models/coffe.service';
 import { GestionService } from 'src/app/services/gestionService';
 import { UserService } from 'src/app/services/user.service';
 import { Waiter } from 'src/app/services/gestionService';
 import { Table } from 'src/app/services/gestionService';
+import { Sector } from 'src/app/services/gestionService';
 
 @Component({
   selector: 'app-admin-panel',
@@ -20,14 +24,24 @@ export class AdminPanelComponent {
   editTableId?: string;
   editTableName: string = '';
   editTableAvailability: boolean = true;
+  newTableSectorId: string = ''; // '' = sin sector
+  editTableSectorId: string = '';
+
+  // SECTORS
+  sectors: Sector[] = [];
+  newSectorName: string = '';
+  editSectorId?: string;
+  editSectorName: string = '';
 
   // MENU
   menuItems: MenuItem[] = [];
   newItemName: string = '';
   newItemPrice: number = 0;
+  newItemIsPromo: boolean = false;
   editItemId?: string;
   editItemName: string = '';
   editItemPrice: number = 0;
+  editItemIsPromo: boolean = false;
 
   // WAITERS
   waiters: Waiter[] = [];
@@ -37,14 +51,24 @@ export class AdminPanelComponent {
 
 
   // Para el buscador
-  searchTerm: string 
+  searchTerm: string
+
+  // Diálogos de edición (templates definidos al final del HTML)
+  @ViewChild('editTableDialog', { static: true }) editTableDialog!: TemplateRef<any>;
+  @ViewChild('editMenuDialog', { static: true }) editMenuDialog!: TemplateRef<any>;
+  @ViewChild('editWaiterDialog', { static: true }) editWaiterDialog!: TemplateRef<any>;
+  @ViewChild('editSectorDialog', { static: true }) editSectorDialog!: TemplateRef<any>;
+  private editDialogRef?: MatDialogRef<any>;
 
   constructor(
     private userService: UserService,
-    private gestionService: GestionService
+    private gestionService: GestionService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.role$ = this.userService.getRoleState();
     this.loadTables();
+    this.loadSectors();
     this.loadMenuItems();
     this.loadWaiters();
     
@@ -71,26 +95,136 @@ export class AdminPanelComponent {
 
   addTable() {
     if (this.newTableName.trim()) {
-      this.gestionService.addTable(this.newTableName.trim()).subscribe(() => {
+      this.gestionService.addTable(this.newTableName.trim(), this.newTableSectorId || null).subscribe(() => {
         this.loadTables();
         this.newTableName = '';
       });
     }
   }
 
+  // SECTORS
+  loadSectors() {
+    this.gestionService.getSectors().subscribe((sectors) => {
+      this.sectors = sectors;
+    });
+  }
+
+  // Misma regla que el backend: sin tildes, sin mayúsculas y con espacios colapsados
+  private normalizeName(value: string): string {
+    return (value || '')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  isSectorNameTaken(name: string, excludeId?: string): boolean {
+    const target = this.normalizeName(name);
+    if (!target) return false;
+    return this.sectors.some(s => s._id !== excludeId && this.normalizeName(s.name) === target);
+  }
+
+  get newSectorNameTaken(): boolean {
+    return this.isSectorNameTaken(this.newSectorName);
+  }
+
+  get editSectorNameTaken(): boolean {
+    return this.isSectorNameTaken(this.editSectorName, this.editSectorId);
+  }
+
+  tablesInSector(sectorId: string): number {
+    return this.tables.filter(t => t.sectorId === sectorId).length;
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Cerrar', { duration: 4000 });
+  }
+
+  addSector() {
+    const name = this.newSectorName.trim();
+    if (!name || this.newSectorNameTaken) return;
+    this.gestionService.addSector(name).subscribe({
+      next: () => {
+        this.newSectorName = '';
+        this.loadSectors();
+      },
+      error: (err) => this.showError(err.message),
+    });
+  }
+
+  // Reordena con drag & drop: se mueve en pantalla al instante y se guarda el nuevo orden;
+  // si falla, se vuelve a pedir la lista para no mostrar un orden que no quedó guardado.
+  dropSector(event: CdkDragDrop<Sector[]>) {
+    if (event.previousIndex === event.currentIndex) return;
+    moveItemInArray(this.sectors, event.previousIndex, event.currentIndex);
+    this.gestionService.reorderSectors(this.sectors.map(s => s._id)).subscribe({
+      error: () => {
+        this.showError('No se pudo guardar el nuevo orden');
+        this.loadSectors();
+      },
+    });
+  }
+
+  startEditingSector(sector: Sector) {
+    this.editSectorId = sector._id;
+    this.editSectorName = sector.name;
+    this.openEditDialog(this.editSectorDialog, () => (this.editSectorId = undefined));
+  }
+
+  saveSectorEdit() {
+    const name = this.editSectorName.trim();
+    if (this.editSectorId === undefined || !name || this.editSectorNameTaken) return;
+    this.gestionService.editSector(this.editSectorId, name).subscribe({
+      next: () => {
+        this.editSectorId = undefined;
+        this.loadSectors();
+        this.loadTables(); // las mesas muestran el nombre del sector
+        this.closeEditDialog();
+      },
+      error: (err) => this.showError(err.message),
+    });
+  }
+
+  deleteSector(sector: Sector) {
+    const count = this.tablesInSector(sector._id);
+    const detail = count > 0 ? ` Sus ${count} mesa(s) quedarán sin sector.` : '';
+    if (!confirm(`¿Eliminar el sector "${sector.name}"?${detail}`)) return;
+    this.gestionService.deleteSector(sector._id).subscribe(() => {
+      this.loadSectors();
+      this.loadTables();
+    });
+  }
+
+  // Abre un template como diálogo; al cerrarse (por guardar, cancelar, Esc o clic afuera) ejecuta onClose
+  private openEditDialog(template: TemplateRef<any>, onClose: () => void) {
+    this.editDialogRef = this.dialog.open(template, {
+      width: '440px',
+      maxWidth: '95vw',
+    });
+    this.editDialogRef.afterClosed().subscribe(() => onClose());
+  }
+
+  closeEditDialog() {
+    this.editDialogRef?.close();
+  }
+
   startEditingTable(table: Table) {
     this.editTableId = table.id;
     this.editTableName = table.name;
     this.editTableAvailability = table.available;
+    this.editTableSectorId = table.sectorId || '';
+    this.openEditDialog(this.editTableDialog, () => (this.editTableId = undefined));
   }
 
   saveTableEdit() {
     if (this.editTableId !== undefined) {
       this.gestionService
-        .editTable(this.editTableId, this.editTableName, this.editTableAvailability)
+        .editTable(this.editTableId, this.editTableName, this.editTableAvailability, this.editTableSectorId || null)
         .subscribe(() => {
           this.loadTables();
           this.editTableId = undefined;
+          this.closeEditDialog();
         });
     }
   }
@@ -110,12 +244,13 @@ export class AdminPanelComponent {
 
   addMenuItem() {
     if (this.newItemName.trim() && this.newItemPrice > 0) {
-      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice).subscribe(() => {
+      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice, this.newItemIsPromo).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });
         this.newItemName = '';
         this.newItemPrice = 0;
+        this.newItemIsPromo = false;
       });
     }
   }
@@ -124,15 +259,18 @@ export class AdminPanelComponent {
     this.editItemId = item._id;
     this.editItemName = item.name;
     this.editItemPrice = item.price;
+    this.editItemIsPromo = !!item.isPromo;
+    this.openEditDialog(this.editMenuDialog, () => (this.editItemId = undefined));
   }
 
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
-      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice).subscribe(() => {
+      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });
         this.editItemId = undefined;
+        this.closeEditDialog();
       });
     }
   }
@@ -164,6 +302,7 @@ export class AdminPanelComponent {
   startEditingWaiter(waiter: Waiter) {
     this.editWaiterId = waiter._id;
     this.editWaiterName = waiter.name;
+    this.openEditDialog(this.editWaiterDialog, () => (this.editWaiterId = undefined));
   }
 
   saveWaiterEdit() {
@@ -171,6 +310,7 @@ export class AdminPanelComponent {
       this.gestionService.editWaiter(this.editWaiterId, this.editWaiterName).subscribe(() => {
         this.loadWaiters();
         this.editWaiterId = undefined;
+        this.closeEditDialog();
       });
     }
   }

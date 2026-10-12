@@ -13,6 +13,9 @@ export class TotalDialogComponent implements OnInit {
     isProcessing: boolean = false;
   total: number = 0;
   discountedTotal: number = 0;
+  discountableTotal: number = 0;
+  promoTotal: number = 0;
+  globalDiscountAmount: number = 0;
   discountPercentage: number = 0;
   orders: any[] = [];
   table: any = {};
@@ -68,10 +71,13 @@ export class TotalDialogComponent implements OnInit {
           if (menuItem) {
             order.name = menuItem.name;
             order.price = menuItem.price;
-            order.discount = order.discount ?? 0; // descuento por ítem (porcentaje)
+            order.isPromo = !!menuItem.isPromo;
+            // Los ítems en promo no admiten descuento (ni por ítem ni general)
+            order.discount = order.isPromo ? 0 : (order.discount ?? 0); // descuento por ítem (porcentaje)
           } else {
             order.name = 'No encontrado';
             order.price = 0;
+            order.isPromo = false;
             order.discount = order.discount ?? 0;
           }
 
@@ -89,6 +95,9 @@ export class TotalDialogComponent implements OnInit {
     if (this.orders.length === 0) {
       console.warn('No hay órdenes disponibles.');
       this.total = 0;
+      this.discountableTotal = 0;
+      this.promoTotal = 0;
+      this.globalDiscountAmount = 0;
       this.discountedTotal = 0;
       return;
     }
@@ -103,12 +112,21 @@ export class TotalDialogComponent implements OnInit {
     });
 
     // Total antes de aplicar el descuento global: ya incluye descuentos por ítem
-    this.total = this.orders.reduce((sum, item) => {
+    this.total = 0;
+    this.discountableTotal = 0; // parte del total sobre la que aplica el descuento global (sin promos)
+    this.promoTotal = 0; // parte del total correspondiente a promos (nunca lleva descuento)
+    this.orders.forEach((item) => {
       const qty = item.quantity ?? 1;
-      const itemDiscount = Number(item.discount) || 0;
+      // Las promos nunca llevan descuento por ítem, aunque tengan un valor cargado
+      const itemDiscount = item.isPromo ? 0 : Number(item.discount) || 0;
       const subtotal = item.price * qty * (1 - itemDiscount / 100);
-      return sum + subtotal;
-    }, 0);
+      this.total += subtotal;
+      if (item.isPromo) {
+        this.promoTotal += subtotal;
+      } else {
+        this.discountableTotal += subtotal;
+      }
+    });
 
     this.calculateDiscountedTotal();
   }
@@ -121,7 +139,13 @@ export class TotalDialogComponent implements OnInit {
   calculateDiscountedTotal() {
     // Primero se consideran los descuentos por ítem (ya en `this.total`),
     // luego se aplica un posible descuento global adicional
-    this.discountedTotal = this.total - (this.total * this.discountPercentage) / 100;
+    // El descuento global solo aplica a los ítems que no son promo
+    this.globalDiscountAmount = (this.discountableTotal * this.discountPercentage) / 100;
+    this.discountedTotal = this.total - this.globalDiscountAmount;
+  }
+
+  get hasPromoItems(): boolean {
+    return this.orders.some((order) => order.isPromo);
   }
 
   liberarMesa() {
@@ -233,11 +257,11 @@ export class TotalDialogComponent implements OnInit {
               ${this.orders
                 .map((order) => {
                   const qty = order.quantity ?? 1;
-                  const itemDiscount = Number(order.discount) || 0;
+                  const itemDiscount = order.isPromo ? 0 : Number(order.discount) || 0;
                   const discountedSubtotal = order.price * qty * (1 - itemDiscount / 100);
                   return `
                     <div class="order-item">
-                      <p style="font-size: 12px">${order.name} ${itemDiscount > 0 ? `(${itemDiscount}% off)` : ''}</p>
+                      <p style="font-size: 12px">${order.name} ${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 ? `(${itemDiscount}% off)` : ''}</p>
                       <p style="font-size: 12px">x${qty}</p>
                       <p style="font-size: 12px">$${discountedSubtotal.toFixed(2)}</p>
                     </div>
@@ -252,10 +276,7 @@ export class TotalDialogComponent implements OnInit {
                 this.discountPercentage > 0
                   ? `<p><strong>Descuento (${
                       this.discountPercentage
-                    }%):</strong> -$${(
-                      (this.total * this.discountPercentage) /
-                      100
-                    ).toFixed(2)}</p>
+                    }%${this.hasPromoItems ? ' sin promos' : ''}):</strong> -$${this.globalDiscountAmount.toFixed(2)}</p>
                      <p><strong>Total con descuento:</strong> $${this.discountedTotal.toFixed(
                        2
                      )}</p>`

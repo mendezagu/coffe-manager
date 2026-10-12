@@ -1,39 +1,39 @@
-<div class="w-full min-h-screen flex items-center justify-center bg-coffee-50 px-4 py-10">
-  <div class="w-full max-w-[400px] bg-white rounded-2xl shadow-elegant-lg p-6 sm:p-8">
+<div class="w-full min-h-screen flex items-center justify-center bg-sage-50 px-4 py-10">
+  <div class="w-full max-w-[400px] bg-white rounded-card shadow-soft-lg p-6 sm:p-8">
 
     <!-- Logo -->
     <div class="flex justify-center mb-4">
       <img
-        class="w-20 h-20 rounded-full object-cover ring-4 ring-coffee-100 shadow-md"
+        class="w-20 h-20 rounded-full object-cover ring-4 ring-sage-100 shadow-md"
         src="./assets/nuovo-cafe.jpg"
         alt="Nuovo Caffe"
       />
     </div>
 
     <!-- Título -->
-    <h2 class="text-center text-2xl font-bold text-coffee-900">Nuovo Caffé</h2>
-    <p class="text-center text-coffee-500 text-sm mt-1 mb-6">Bienvenido</p>
+    <h2 class="text-center text-2xl font-bold text-sage-900">Nuovo Caffé</h2>
+    <p class="text-center text-sage-500 text-sm mt-1 mb-6">Bienvenido</p>
 
     <!-- Formulario -->
     <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
 
       <div class="mb-4">
-        <label class="block text-xs font-bold uppercase tracking-wide text-coffee-500 mb-1.5">Email</label>
+        <label class="block text-xs font-bold text-sage-500 mb-1.5">Email</label>
         <input
           type="email"
           formControlName="email"
           required
-          class="w-full px-4 py-2.5 border border-coffee-200 rounded-lg text-sm text-coffee-900 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
         />
       </div>
 
       <div class="mb-6">
-        <label class="block text-xs font-bold uppercase tracking-wide text-coffee-500 mb-1.5">Contraseña</label>
+        <label class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña</label>
         <input
           type="password"
           formControlName="password"
           required
-          class="w-full px-4 py-2.5 border border-coffee-200 rounded-lg text-sm text-coffee-900 focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent transition-all"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
         />
       </div>
 
@@ -41,7 +41,7 @@
       <button
         type="submit"
         [disabled]="formLogin.invalid"
-        class="w-full py-2.5 bg-coffee-700 hover:bg-coffee-800 text-white font-bold text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Login
       </button>
@@ -50,7 +50,7 @@
       <button
         type="button"
         routerLink="/register"
-        class="w-full mt-3 py-2.5 bg-white hover:bg-coffee-50 text-coffee-700 font-bold text-sm rounded-lg border border-coffee-200 transition-all duration-200"
+        class="w-full mt-3 py-2.5 bg-white hover:bg-sage-50 text-sage-700 font-bold text-sm rounded-lg border border-sage-200 transition-all duration-200"
       >
         Sign Up
       </button>
