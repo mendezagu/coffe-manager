@@ -81,7 +81,7 @@
               <td class="px-4 py-3 text-right">
                 <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
                   <mat-icon class="!w-4 !h-4 !text-base text-cafe-green-600">payments</mat-icon>
-                  <span class="text-cafe-green-700 font-bold">${{ entry.totalAmount.toFixed(2) }}</span>
+                  <span class="text-cafe-green-700 font-bold">{{ entry.totalAmount | money }}</span>
                 </div>
               </td>
             </tr>
@@ -102,7 +102,7 @@
               Total Recaudado
             </p>
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight text-white leading-tight">
-              ${{ totalRevenue.toFixed(2) }}
+              {{ totalRevenue | money }}
             </h2>
           </div>
         </div>

@@ -105,8 +105,9 @@
             </div>
             <img
               class="w-9 h-9 rounded-full object-cover ring-2 ring-white/30 flex-shrink-0"
-              src="./assets/nuovo-cafe.jpg"
-              alt="Nuovo Caffe"
+              *ngIf="(settings.settings$ | async)?.logoUrl"
+              [src]="(settings.settings$ | async)?.logoUrl || ''"
+              [alt]="(settings.settings$ | async)?.name"
             />
           </div>
 

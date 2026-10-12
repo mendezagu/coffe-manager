@@ -3,6 +3,7 @@ import { CoffeService, Table } from './models/coffe.service';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
 import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
+import { SettingsService } from './services/settings.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
@@ -32,10 +33,12 @@ export class AppComponent {
     private datePipe: DatePipe,
     private userService: UserService,
     private router: Router,
-    private gestionService: GestionService
+    private gestionService: GestionService,
+    public settings: SettingsService
   ) {
     this.currentDate = this.getFormattedDate();
-    this.shift = this.getShift();
+    this.shift = this.settings.shiftLabel();
+    this.settings.settings$.subscribe(() => (this.shift = this.settings.shiftLabel()));
     this.role$ = this.userService.getRoleState();
     this.user$ = this.userService.getAuthState();
   }

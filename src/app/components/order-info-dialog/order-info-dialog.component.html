@@ -30,7 +30,7 @@
                 {{ order.name || 'Nombre no disponible' }}
               </strong>
               <span class="text-xs text-sage-500 font-semibold">
-                {{ order.price | currency }}
+                {{ order.price | money }}
               </span>
               <p *ngIf="order.note" class="text-xs text-sage-600 italic mt-0.5">
                 ↳ {{ order.note }}
@@ -40,7 +40,7 @@
 
           <div class="px-3 py-1 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
             <span class="text-cafe-green-700 font-bold text-sm">
-              {{ (order.price * (order.quantity || 1)) | currency }}
+              {{ (order.price * (order.quantity || 1)) | money }}
             </span>
           </div>
         </div>

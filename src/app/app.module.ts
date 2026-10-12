@@ -38,6 +38,8 @@ import { environment } from 'src/environments/environment';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { UsersComponent } from './pages/users/users.component';
+import { SettingsComponent } from './pages/settings/settings.component';
+import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
@@ -59,6 +61,8 @@ import { LogsComponent } from './components/logs/logs.component';
     WaiterDialogComponent,
     LoginComponent,
     UsersComponent,
+    SettingsComponent,
+    MoneyPipe,
     KitchenComponent,
     AdminPanelComponent,
     StadisticsComponent,

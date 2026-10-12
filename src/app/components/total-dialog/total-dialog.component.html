@@ -34,12 +34,12 @@
               <span *ngIf="order.isPromo" class="px-1.5 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold flex-shrink-0">Promo</span>
             </div>
             <span class="text-cafe-green-700 font-bold text-sm flex-shrink-0">
-              {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | currency }}
+              {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | money }}
             </span>
           </div>
           <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
           <div class="flex items-center justify-between gap-2 pl-1">
-            <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ order.price | currency }}</strong></span>
+            <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ order.price | money }}</strong></span>
             <div *ngIf="!order.isPromo" class="flex items-center gap-1.5">
               <span class="text-sage-500 text-xs">% desc.</span>
               <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-sage-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
@@ -59,7 +59,7 @@
           </div>
           <span class="text-sage-900 font-bold text-sm">Total:</span>
         </div>
-        <span class="text-xl font-bold text-sage-900">{{ total | currency }}</span>
+        <span class="text-xl font-bold text-sage-900">{{ total | money }}</span>
       </div>
     </div>
 
@@ -129,21 +129,21 @@
           </div>
           <span class="text-cafe-green-900 font-bold text-sm">Total con Descuento:</span>
         </div>
-        <span class="text-xl font-bold text-cafe-green-700">{{ discountedTotal | currency }}</span>
+        <span class="text-xl font-bold text-cafe-green-700">{{ discountedTotal | money }}</span>
       </div>
       <!-- Detalle del descuento general: aclara sobre qué parte se aplicó -->
       <div *ngIf="discountPercentage > 0" class="mt-2 pt-2 border-t border-cafe-green-200 text-xs text-cafe-green-900 space-y-0.5">
         <div class="flex justify-between gap-2">
           <span>{{ hasPromoItems ? 'Productos sin promo' : 'Subtotal' }}</span>
-          <span>{{ discountableTotal | currency }}</span>
+          <span>{{ discountableTotal | money }}</span>
         </div>
         <div class="flex justify-between gap-2 font-bold">
           <span>Descuento {{ discountPercentage }}%{{ hasPromoItems ? ' (solo sin promo)' : '' }}</span>
-          <span>-{{ globalDiscountAmount | currency }}</span>
+          <span>-{{ globalDiscountAmount | money }}</span>
         </div>
         <div *ngIf="hasPromoItems" class="flex justify-between gap-2">
           <span>Productos en promo (sin descuento)</span>
-          <span>{{ promoTotal | currency }}</span>
+          <span>{{ promoTotal | money }}</span>
         </div>
       </div>
     </div>
