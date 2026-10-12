@@ -7,11 +7,36 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Observable } from 'rxjs';
 import { CoffeService, MenuItem} from 'src/app/models/coffe.service';
 import { GestionService } from 'src/app/services/gestionService';
-import { UserService } from 'src/app/services/user.service';
+import { AppUser, UserService } from 'src/app/services/user.service';
 import { Waiter } from 'src/app/services/gestionService';
 import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
 import { Category } from 'src/app/services/gestionService';
+
+export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'waiters' | 'users';
+
+interface AdminSectionInfo {
+  key: AdminSection;
+  title: string;
+  description: string;
+  icon: string;
+  singular: string;
+  plural: string;
+}
+
+interface SectionCard extends AdminSectionInfo {
+  count: number;
+  hint: string;
+}
+
+const SECTIONS: AdminSectionInfo[] = [
+  { key: 'tables', title: 'Mesas', description: 'Agrega, edita o elimina tus mesas', icon: 'table_restaurant', singular: 'mesa', plural: 'mesas' },
+  { key: 'sectors', title: 'Sectores', description: 'Agrupa tus mesas por zona (Salón, Terraza…)', icon: 'grid_view', singular: 'sector', plural: 'sectores' },
+  { key: 'menu', title: 'Menú', description: 'Platos y bebidas, con su precio y categoría', icon: 'restaurant_menu', singular: 'plato', plural: 'platos' },
+  { key: 'categories', title: 'Categorías', description: 'Ordena el menú en secciones (Cafés, Tortas…)', icon: 'category', singular: 'categoría', plural: 'categorías' },
+  { key: 'waiters', title: 'Mozos', description: 'Los nombres que se asignan a las mesas', icon: 'person', singular: 'mozo', plural: 'mozos' },
+  { key: 'users', title: 'Usuarios', description: 'Cuentas del personal y qué puede hacer cada una', icon: 'group', singular: 'usuario', plural: 'usuarios' },
+];
 
 @Component({
   selector: 'app-admin-panel',
@@ -56,8 +81,24 @@ export class AdminPanelComponent {
   editWaiterName: string = '';
 
 
-  // Panel que se abre al entrar (?panel=tables|sectors|menu|categories|waiters)
-  openPanel: string | null = null;
+  // Usuarios (solo se cuentan acá; se gestionan en <app-users>)
+  users: AppUser[] = [];
+
+  // Sección abierta (ruta /admin/:section); null = pantalla de inicio con las tarjetas
+  section: AdminSection | null = null;
+
+  // Tarjetas del inicio. El contador sale de los datos que ya carga este componente.
+  get cards(): SectionCard[] {
+    const uncategorized = this.categories.length > 0 ? this.menuItems.filter((m) => !m.categoryId).length : 0;
+    return SECTIONS.map((s) => {
+      const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, waiters: this.waiters.length, users: this.users.length }[s.key];
+      return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : '' };
+    });
+  }
+
+  get current(): AdminSectionInfo | null {
+    return SECTIONS.find((s) => s.key === this.section) ?? null;
+  }
 
   // Panel de categorías: se refresca cuando cambian los platos (cantidad de platos por categoría)
   @ViewChild(CategoriesComponent) categoriesPanel?: CategoriesComponent;
@@ -79,12 +120,16 @@ export class AdminPanelComponent {
     private snackBar: MatSnackBar,
     route: ActivatedRoute
   ) {
-    this.openPanel = route.snapshot.queryParamMap.get('panel');
+    route.paramMap.subscribe((params) => {
+      const key = params.get('section');
+      this.section = SECTIONS.some((s) => s.key === key) ? (key as AdminSection) : null;
+    });
     this.role$ = this.userService.getRoleState();
     this.loadTables();
     this.loadSectors();
     this.loadMenuItems();
     this.loadCategories();
+    this.loadUsers();
     this.loadWaiters();
     
     this.searchTerm = '';
@@ -251,6 +296,10 @@ export class AdminPanelComponent {
   }
 
   // MENU
+  loadUsers() {
+    this.userService.listUsers().subscribe({ next: (u) => (this.users = u), error: () => {} });
+  }
+
   loadCategories() {
     this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
   }

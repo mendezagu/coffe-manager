@@ -1,25 +1,30 @@
-<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-6">
-  <div class="max-w-7xl mx-auto">
-
-    <div class="flex items-center justify-between gap-3 mb-5">
-      <div>
-        <h1 class="text-2xl font-bold text-sage-900">{{ title }}</h1>
-        <p class="text-sage-600 text-sm mt-0.5">Se actualiza sola cada pocos segundos.</p>
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner max-w-7xl">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>soup_kitchen</mat-icon></div>
+        <div class="min-w-0">
+          <h1 class="page-title">{{ title }}</h1>
+          <p class="page-sub">Se actualiza sola cada pocos segundos.</p>
+        </div>
       </div>
-      <span *ngIf="offline" role="alert" class="px-3 py-1.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">
-        Sin conexión · reintentando…
-      </span>
+      <span *ngIf="offline" role="alert" class="rounded-full bg-cafe-red-50 px-3 py-1.5 text-xs font-bold text-cafe-red-700">Sin conexión · reintentando…</span>
+      <span *ngIf="!offline && loaded" class="inline-flex items-center gap-2 rounded-full bg-cafe-green-50 px-3 py-1.5 text-xs font-bold text-cafe-green-700"><span class="h-1.5 w-1.5 rounded-full bg-cafe-green-700"></span>En vivo</span>
+      <div *ngIf="isAdmin && splitActive" class="w-full">
+        <div class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Sector">
+          <button type="button" (click)="setTab('ALL')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+            [ngClass]="tab === 'ALL' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'ALL'">Todo</button>
+          <button type="button" (click)="setTab('KITCHEN')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+            [ngClass]="tab === 'KITCHEN' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'KITCHEN'">Cocina</button>
+          <button type="button" (click)="setTab('BAR')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+            [ngClass]="tab === 'BAR' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'BAR'">Barra</button>
+        </div>
+      </div>
     </div>
+  </header>
 
-    <!-- El admin ve cocina y barra por separado cuando el negocio las separa -->
-    <div *ngIf="isAdmin && splitActive" class="inline-flex p-[3px] mb-4 bg-white border border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Sector">
-      <button type="button" (click)="setTab('ALL')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
-        [ngClass]="tab === 'ALL' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'ALL'">Todo</button>
-      <button type="button" (click)="setTab('KITCHEN')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
-        [ngClass]="tab === 'KITCHEN' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'KITCHEN'">Cocina</button>
-      <button type="button" (click)="setTab('BAR')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
-        [ngClass]="tab === 'BAR' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'BAR'">Barra</button>
-    </div>
+  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <div class="max-w-7xl mx-auto">
 
     <p *ngIf="barDisabled" class="px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
       La barra no está activada en este negocio, así que todos los pedidos van a la cocina.
@@ -91,5 +96,6 @@
       </section>
     </div>
 
+  </div>
   </div>
 </div>

@@ -1,11 +1,6 @@
-<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
-  <div class="max-w-4xl mx-auto">
-
-    <h1 class="text-2xl font-bold text-sage-900">Usuarios</h1>
-    <p class="text-sage-600 text-sm mt-1 mb-6">Creá las cuentas del personal y definí qué puede hacer cada una.</p>
-
+<div>
     <!-- Alta -->
-    <form (ngSubmit)="create()" #f="ngForm" class="bg-white rounded-card shadow-soft p-5 mb-6 grid gap-3 sm:grid-cols-2">
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-card p-5 mb-6 grid gap-3 sm:grid-cols-2">
       <h2 class="sm:col-span-2 font-bold text-sage-800">Nuevo usuario</h2>
 
       <label class="block">
@@ -43,7 +38,7 @@
     </form>
 
     <!-- Listado -->
-    <div class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div class="bg-white border border-sage-200 rounded-card overflow-hidden">
       <p *ngIf="loading" class="p-5 text-sage-600 text-sm">Cargando…</p>
       <p *ngIf="!loading && users.length === 0" class="p-5 text-sage-600 text-sm">No hay usuarios.</p>
 
@@ -77,5 +72,4 @@
       </ul>
     </div>
 
-  </div>
 </div>

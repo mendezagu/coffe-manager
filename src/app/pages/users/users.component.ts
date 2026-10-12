@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppRole, AppUser, ROLE_LABELS, UserService } from 'src/app/services/user.service';
 
@@ -16,6 +16,9 @@ export class UsersComponent implements OnInit {
   roleLabel = (role: AppRole) => ROLE_LABELS[role];
 
   form = { name: '', email: '', password: '', role: 'waiter' as AppRole };
+
+  // Avisa al panel de administración que cambió la lista (para actualizar el contador de la tarjeta)
+  @Output() changed = new EventEmitter<void>();
 
   constructor(private userService: UserService, private snackBar: MatSnackBar) {}
 
@@ -47,6 +50,7 @@ export class UsersComponent implements OnInit {
         this.form = { name: '', email: '', password: '', role: 'waiter' };
         this.notify('Usuario creado');
         this.load();
+        this.changed.emit();
       },
       error: (err) => {
         this.saving = false;
@@ -79,6 +83,7 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.notify('Usuario eliminado');
         this.load();
+        this.changed.emit();
       },
       error: (err) => this.notify(this.errorMessage(err, 'No se pudo eliminar el usuario')),
     });
@@ -89,6 +94,7 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.notify(okMessage);
         this.load();
+        this.changed.emit();
       },
       error: (err) => {
         this.notify(this.errorMessage(err, 'No se pudo actualizar el usuario'));

@@ -46,11 +46,6 @@
       Mi negocio
     </button>
 
-    <button mat-button routerLink="/users" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="group"></mat-icon>
-      Usuarios
-    </button>
-
     <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="visibility_lock"></mat-icon>
       Logs

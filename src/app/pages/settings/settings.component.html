@@ -1,9 +1,18 @@
-<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner max-w-5xl">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>store</mat-icon></div>
+        <div class="min-w-0">
+          <h1 class="page-title">Mi negocio</h1>
+          <p class="page-sub">Estos datos aparecen en la app, en las comandas y en los tickets.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-5xl mx-auto">
-
-    <h1 class="text-2xl font-bold text-sage-900">Mi negocio</h1>
-    <p class="text-sage-600 text-sm mt-1 mb-6">Estos datos aparecen en la app, en las comandas y en los tickets.</p>
-
     <p *ngIf="!form" class="text-sage-600 text-sm">Cargando…</p>
 
     <form *ngIf="form" (ngSubmit)="save()" #f="ngForm" class="grid gap-6 lg:grid-cols-[1fr_320px] items-start">
@@ -142,7 +151,7 @@
               <span class="block font-bold text-sage-900">Separar cocina y barra</span>
               <span *ngIf="canSplit" class="block text-xs text-sage-500">
                 Después elegí el destino de cada categoría en
-                <a routerLink="/admin" [queryParams]="{ panel: 'categories' }" class="text-cafe-green-700 font-medium underline">Categorías</a>.
+                <a routerLink="/admin/categories" class="text-cafe-green-700 font-medium underline">Categorías</a>.
                 Los usuarios con rol "Barra" ven solo lo que va a la barra.
               </span>
               <span *ngIf="!canSplit" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
@@ -171,5 +180,6 @@
       </aside>
     </form>
 
+  </div>
   </div>
 </div>

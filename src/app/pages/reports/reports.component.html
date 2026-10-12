@@ -1,20 +1,19 @@
-<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
-  <div class="max-w-6xl mx-auto">
-
-    <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
-      <div>
-        <h1 class="text-2xl font-bold text-sage-900">Reportes</h1>
-        <p class="text-sage-600 text-sm mt-1">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner max-w-6xl">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>insights</mat-icon></div>
+        <div class="min-w-0">
+          <h1 class="page-title">Reportes</h1>
+          <p class="page-sub">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
+        </div>
       </div>
       <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
         <input type="checkbox" [(ngModel)]="showTables" class="accent-[#1d5b3e] w-4 h-4" />
         Ver como tablas
       </label>
-    </div>
-
-    <!-- Rango de fechas -->
-    <div class="flex flex-wrap items-center gap-2 mb-6">
-      <div class="inline-flex flex-wrap p-[3px] bg-white border border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Rango de fechas">
+      <div class="flex w-full flex-wrap items-center gap-2">
+      <div class="inline-flex flex-wrap p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Rango de fechas">
         <button *ngFor="let p of presets" type="button" (click)="selectPreset(p.key)"
           class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
           [ngClass]="preset === p.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
@@ -30,7 +29,12 @@
         <button type="button" (click)="applyCustom()" [disabled]="!from || !to || rangeInvalid"
           class="px-4 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Ver</button>
       </div>
+      </div>
     </div>
+  </header>
+
+  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <div class="max-w-6xl mx-auto">
 
     <p *ngIf="error" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
     <p *ngIf="loading" class="text-sage-600 text-sm mb-4">Cargando…</p>
@@ -140,5 +144,6 @@
       </div>
     </ng-container>
 
+  </div>
   </div>
 </div>
