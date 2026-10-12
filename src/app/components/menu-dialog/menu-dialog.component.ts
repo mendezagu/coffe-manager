@@ -1,7 +1,9 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ModifierPickerDialogComponent } from '../modifier-picker-dialog/modifier-picker-dialog.component';
+import { OrderModifier, lineKey, modifiersText } from 'src/app/utils/modifiers';
 import { SettingsService } from 'src/app/services/settings.service';
-import { Category } from 'src/app/services/gestionService';
+import { Category, ModifierGroup } from 'src/app/services/gestionService';
 import { GestionService, MenuItem, Table } from 'src/app/services/gestionService';
 
 @Component({
@@ -23,6 +25,7 @@ export class MenuDialogComponent {
   constructor(
     private gestionService: GestionService,
     private settings: SettingsService,
+    private dialog: MatDialog,
     public dialogRef: MatDialogRef<MenuDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Table  // Se pasa la información de la mesa si es necesario
   ) {}
@@ -38,10 +41,36 @@ export class MenuDialogComponent {
     return this.settings.escape(this.settings.value.name.toUpperCase());
   }
 
+  // Modificadores (tamaño, leche, extras…) que ofrece cada plato
+  modifierGroups: ModifierGroup[] = [];
+
+  // Los grupos de un plato, en el orden del plato y solo con las opciones disponibles
+  groupsFor(menu: MenuItem): ModifierGroup[] {
+    return (menu.modifierGroupIds ?? [])
+      .map(id => this.modifierGroups.find(g => g._id === id))
+      .filter((g): g is ModifierGroup => !!g)
+      .map(g => ({ ...g, options: g.options.filter(o => o.active) }))
+      .filter(g => g.options.length > 0);
+  }
+
+  hasModifiers(menu: MenuItem): boolean {
+    return this.groupsFor(menu).length > 0;
+  }
+
+  modifiersText = modifiersText;
+
+  // Opciones elegidas, ya escapadas, como renglón de la comanda impresa
+  private modsLine(item: MenuItem): string {
+    return item.selectedModifiers?.length
+      ? `<div style="font-size: 14px; margin-left: 8px">+ ${this.settings.escape(modifiersText(item.selectedModifiers))}</div>`
+      : '';
+  }
+
   ngOnInit(): void {
      console.log('Datos recibidos en MenuDialogComponent:', this.data);
     this.loadMenu();
     this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
+    this.gestionService.getModifiers().subscribe({ next: (g) => (this.modifierGroups = g), error: () => {} });
     // Verificamos si 'this.data.waiter' es un objeto de tipo Waiter y accedemos al nombre del mozo
   if (this.data && this.data.waiter) {
     if (typeof this.data.waiter === 'object' && this.data.waiter.name) {
@@ -100,7 +129,7 @@ export class MenuDialogComponent {
 
   updateNote(item: MenuItem, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const index = this.selectedItems.findIndex(selected => selected._id === item._id);
+    const index = this.selectedItems.findIndex(selected => (selected.lineKey ?? selected._id) === (item.lineKey ?? item._id));
     if (index > -1) {
       this.selectedItems[index].note = inputElement.value;
     }
@@ -111,7 +140,9 @@ updateQuantity(menu: MenuItem, event: Event): void {
   const quantity = parseInt(inputElement.value, 10);
   menu.quantity = quantity;
 
-  const index = this.selectedItems.findIndex(item => item._id === menu._id);
+  // Un plato con opciones puede estar varias veces (cada una con las suyas): ahí la cantidad se toca
+  // en la línea seleccionada, no desde la lista del menú.
+  const index = this.hasModifiers(menu) ? -1 : this.selectedItems.findIndex(item => item._id === menu._id);
   if (index > -1) {
     this.selectedItems[index].quantity = quantity;
 
@@ -144,7 +175,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
 
  // Construir log detallado con cantidades, nombres y mozo
       const itemsDescription = this.selectedItems
-        .map(item => `${item.quantity}x ${item.name}${item.note ? ' (' + item.note + ')' : ''}`)
+        .map(item => `${item.quantity}x ${item.name}${item.selectedModifiers?.length ? ' [' + modifiersText(item.selectedModifiers) + ']' : ''}${item.note ? ' (' + item.note + ')' : ''}`)
         .join(', ');
 
       const mozo = this.waiterName || (this.data.waiter?.name ?? 'Desconocido');
@@ -188,7 +219,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
                     <div class="order-item">
                       <p>${item.name}</p>
                       <p>x${item.quantity}</p>
-                    </div>
+                    </div>${this.modsLine(item)}
                   `).join('')}
                 </div>
                 <div class="line"></div>
@@ -234,14 +265,34 @@ updateQuantity(menu: MenuItem, event: Event): void {
   }
 
 
+  // Agregar un plato. Si ofrece opciones (tamaño, leche, extras…) primero se eligen.
   addItem(menu: MenuItem): void {
-    const index = this.selectedItems.findIndex(item => item._id === menu._id);
-    
+    const groups = this.groupsFor(menu);
+    if (!groups.length) {
+      this.commitAdd(menu, []);
+      return;
+    }
+    this.dialog
+      .open<ModifierPickerDialogComponent, any, OrderModifier[]>(ModifierPickerDialogComponent, {
+        width: '440px',
+        maxWidth: '95vw',
+        data: { item: menu, groups },
+      })
+      .afterClosed()
+      .subscribe(mods => {
+        if (mods) this.commitAdd(menu, mods);
+      });
+  }
+
+  private commitAdd(menu: MenuItem, mods: OrderModifier[]): void {
+    const key = lineKey(menu._id, mods);
+    const index = this.selectedItems.findIndex(item => (item.lineKey ?? item._id) === key);
+
     if (index === -1) {
-      // Si el ítem no está en la lista, lo agregamos con cantidad mínima 1
-      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1, note: '' });
+      // Si esa combinación no está en la lista, la agregamos con cantidad mínima 1
+      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1, note: '', selectedModifiers: mods, lineKey: key });
     } else {
-      // Si ya está en la lista, incrementamos la cantidad asegurándonos de que no sea undefined
+      // Si ya está, incrementamos la cantidad asegurándonos de que no sea undefined
       this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + 1;
     }
 
@@ -257,16 +308,18 @@ updateQuantity(menu: MenuItem, event: Event): void {
   }
 
   removeSelectedItem(item: MenuItem): void {
-    const index = this.selectedItems.findIndex(selected => selected._id === item._id);
+    const index = this.selectedItems.findIndex(selected => (selected.lineKey ?? selected._id) === (item.lineKey ?? item._id));
     if (index > -1) {
       this.selectedItems.splice(index, 1);
     }
-    
+
     // Actualizar el estado del botón de imprimir
     this.canPrint = this.selectedItems.length > 0;
-    
-    // Resetear el estado "agregado" del botón
-    this.addedItems[item._id] = false;
+
+    // Resetear el estado "agregado" del botón solo si ya no queda ninguna línea de ese plato
+    if (!this.selectedItems.some(s => s._id === item._id)) {
+      this.addedItems[item._id] = false;
+    }
   }
 
   // Cancela la operación

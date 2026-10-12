@@ -9,6 +9,7 @@ export interface MenuItem {
   quantity?: number; // Opcional, ya que no siempre se proporciona
   isPromo?: boolean;
   categoryId?: string | null;
+  modifierGroupIds?: string[];
 }
 
 export interface Table {

@@ -106,6 +106,7 @@
                       <span class="font-semibold text-sage-900">{{ item.quantity }}× {{ item.name }}</span>
                       <span *ngIf="item.isPromo" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold">Promo</span>
                       <span *ngIf="item.discountPct > 0" class="ml-1.5 text-xs text-cafe-red-700">-{{ item.discountPct }}%</span>
+                      <p *ngIf="item.modifiers?.length" class="text-xs text-cafe-green-700 font-medium">+ {{ modifierNames(item) }}</p>
                       <p *ngIf="item.note" class="text-xs text-sage-500 italic">↳ {{ item.note }}</p>
                     </div>
                     <span class="shrink-0 font-bold text-sage-800">{{ item.lineTotal | money }}</span>

@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestionService } from 'src/app/services/gestionService';
 import { SettingsService } from 'src/app/services/settings.service';
 import { UserService } from 'src/app/services/user.service';
+import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
 
 @Component({
   selector: 'app-total-dialog',
@@ -25,6 +26,7 @@ export class TotalDialogComponent implements OnInit {
   waiterName: string = ''; // Nueva propiedad para almacenar el nombre del mozo
   isTicketPrinted: boolean = false;
   isAdmin = false;
+  modifiersText = modifiersText;
   paymentMethod: string = 'efectivo'; // Método de pago por defecto
 
   constructor(
@@ -80,7 +82,8 @@ export class TotalDialogComponent implements OnInit {
           );
           if (menuItem) {
             order.name = menuItem.name;
-            order.price = menuItem.price;
+            // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
+            order.price = menuItem.price + modifiersTotal(order.modifiers);
             order.isPromo = !!menuItem.isPromo;
             // Los ítems en promo no admiten descuento (ni por ítem ni general)
             order.discount = order.isPromo ? 0 : (order.discount ?? 0); // descuento por ítem (porcentaje)
@@ -272,7 +275,7 @@ export class TotalDialogComponent implements OnInit {
                       <p style="font-size: 12px">${order.name} ${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 ? `(${itemDiscount}% off)` : ''}</p>
                       <p style="font-size: 12px">x${qty}</p>
                       <p style="font-size: 12px">${this.settings.format(discountedSubtotal)}</p>
-                    </div>
+                    </div>${order.modifiers?.length ? `<div style="font-size: 10px; margin-left: 6px">+ ${this.settings.escape(modifiersText(order.modifiers))}</div>` : ''}
                   `;
                 })
                 .join('')}

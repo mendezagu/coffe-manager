@@ -10,6 +10,7 @@ import { LinkTableDialogComponent } from '../link-table-dialog/link-table-dialog
 import { Observable } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
+import { modifiersText } from 'src/app/utils/modifiers';
 
 interface TableGroup {
   key: string;
@@ -477,7 +478,7 @@ printTicket(tableId: string): void {
                 <div class="order-item">
                   <p>${menuItem ? menuItem.name : 'Producto desconocido'}</p>
                   <p>x${order.quantity}</p>
-                </div>
+                </div>${this.modsLine(order)}
               `;
             }).join('')}
           </div>
@@ -529,6 +530,13 @@ printTicket(tableId: string): void {
   // Nombre del negocio ya escapado para meterlo en HTML
   private ticketBusinessName(): string {
     return this.settings.escape(this.settings.value.name.toUpperCase());
+  }
+
+  // Opciones elegidas (ya escapadas) como renglón de la comanda impresa
+  private modsLine(order: any): string {
+    return order.modifiers?.length
+      ? `<div style="font-size: 14px; margin-left: 8px">+ ${this.settings.escape(modifiersText(order.modifiers))}</div>`
+      : '';
   }
 
   // Handler del botón Ordenar (evita usar pipes en template)

@@ -10,6 +10,7 @@ interface SaleItem {
   isPromo: boolean;
   discountPct: number;
   lineTotal: number;
+  modifiers?: { group: string; name: string; priceDelta: number }[];
 }
 
 interface BalanceEntry {
@@ -74,6 +75,10 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
         console.error('Error al obtener el balance:', error);
       },
     });
+  }
+
+  modifierNames(item: SaleItem): string {
+    return (item.modifiers ?? []).map((m) => m.name).join(', ');
   }
 
   // Abre o cierra el detalle de una venta (se pide al servidor la primera vez)

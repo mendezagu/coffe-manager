@@ -4,6 +4,7 @@ import { GestionService, MenuItem } from '../../services/gestionService';
 import { Table } from '../../services/gestionService';
 import { forkJoin, Observable, of } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
+import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
 
 @Component({
   selector: 'app-order-info-dialog',
@@ -16,6 +17,7 @@ export class OrderInfoDialogComponent implements OnInit {
   role$: Observable<string | null>;
   hasChanges: boolean = false;
   originalOrders: any[] = [];
+  modifiersText = modifiersText;
   removedOrdersCache: any[] = [];
 
   constructor(
@@ -44,6 +46,8 @@ export class OrderInfoDialogComponent implements OnInit {
           const menuItem = menuItems.find(item => item._id === order.menuItem);
           if (menuItem) {
             order.name = menuItem.name; // Asignar el nombre directamente a la orden
+            // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
+            order.price = menuItem.price + modifiersTotal(order.modifiers);
           } else {
             order.name = 'No encontrado';
           }

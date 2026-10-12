@@ -40,6 +40,7 @@
                 <mat-icon class="!w-3 !h-3 !text-xs">close</mat-icon>
               </button>
             </div>
+            <p *ngIf="item.selectedModifiers?.length" class="text-[11px] text-cafe-green-700 font-medium m-0 mt-0.5">+ {{ modifiersText(item.selectedModifiers) }}</p>
             <div class="relative mt-1">
               <mat-icon class="!w-3.5 !h-3.5 !text-sm absolute left-1.5 top-1/2 -translate-y-1/2 text-sage-400">edit_note</mat-icon>
               <input
@@ -97,6 +98,7 @@
             <!-- Info del producto -->
             <div class="flex-1 min-w-0">
               <small class="font-semibold text-sage-900 mb-1">{{ menu.name }}</small>
+              <span *ngIf="hasModifiers(menu)" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">Opciones</span>
               <div class="flex items-center gap-1">
                 <small class="font-semibold text-cafe-green-700">{{ menu.price }}</small>
               </div>

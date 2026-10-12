@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environmentMongo } from 'src/environments/environmentMongo';
 import { map, Observable, catchError, throwError, BehaviorSubject, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { OrderModifier } from 'src/app/utils/modifiers';
 
 export interface MenuItem {
   menuItem: any;
@@ -14,6 +15,40 @@ export interface MenuItem {
   isPromo?: boolean;
   discount?: number;
   categoryId?: string | null;
+  // ids de los modificadores que ofrece el plato (el detalle está en getModifiers())
+  modifierGroupIds?: string[];
+  // opciones elegidas al pedirlo (solo en la selección del mozo) y en las órdenes ya hechas
+  selectedModifiers?: OrderModifier[];
+  modifiers?: OrderModifier[];
+  // identifica un plato con sus opciones dentro de la selección del mozo
+  lineKey?: string;
+}
+
+export type ModifierSelection = 'SINGLE' | 'MULTIPLE';
+
+export interface ModifierOption {
+  _id: string;
+  name: string;
+  priceDelta: number;
+  position: number;
+  active: boolean;
+}
+
+export interface ModifierGroup {
+  _id: string;
+  name: string;
+  selection: ModifierSelection;
+  required: boolean;
+  position: number;
+  options: ModifierOption[];
+  itemsCount?: number;
+}
+
+export interface ModifierGroupInput {
+  name?: string;
+  selection?: ModifierSelection;
+  required?: boolean;
+  options?: { id?: string; name: string; priceDelta?: number; active?: boolean }[];
 }
 
 export type Destination = 'KITCHEN' | 'BAR';
@@ -117,7 +152,9 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
       id: item._id,
       quantity: item.quantity || 1,
       name: item.name,
-      note: item.note || ''
+      note: item.note || '',
+      // solo se envían los ids: el servidor valida y pone los precios
+      modifiers: (item.selectedModifiers ?? []).map(m => m.optionId)
     }));
 
     return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems }).pipe(
@@ -252,6 +289,31 @@ deleteAllBalances(): Observable<{ message: string }> {
   );
 }
 
+  // 📌 Modificadores (tamaño, leche, extras…). Los errores del servidor pasan tal cual.
+  getModifiers(): Observable<ModifierGroup[]> {
+    return this.http.get<ModifierGroup[]>(`${this.apiUrl}/modifiers`);
+  }
+
+  addModifierGroup(input: ModifierGroupInput): Observable<ModifierGroup> {
+    return this.http.post<ModifierGroup>(`${this.apiUrl}/modifiers`, input);
+  }
+
+  editModifierGroup(id: string, input: ModifierGroupInput): Observable<ModifierGroup> {
+    return this.http.put<ModifierGroup>(`${this.apiUrl}/modifiers/${id}`, input);
+  }
+
+  deleteModifierGroup(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/modifiers/${id}`);
+  }
+
+  reorderModifierGroups(ids: string[]): Observable<ModifierGroup[]> {
+    return this.http.put<ModifierGroup[]>(`${this.apiUrl}/modifiers/reorder`, { ids });
+  }
+
+  applyModifierToCategory(id: string, categoryId: string): Observable<{ assigned: number; categoryItems: number }> {
+    return this.http.post<{ assigned: number; categoryItems: number }>(`${this.apiUrl}/modifiers/${id}/apply-to-category`, { categoryId });
+  }
+
   // 📌 Categorías del menú. Los errores del servidor pasan tal cual para poder mostrar su mensaje.
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.apiUrl}/categories`);
@@ -303,8 +365,9 @@ refreshMenu(): Observable<MenuItem[]> {
   }
 
   // categoryId: id para asignarla, null para quitarla
-  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false, categoryId: string | null = null): Observable<MenuItem> {
-    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo, categoryId }).pipe(
+  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false, categoryId: string | null = null, modifierGroupIds?: string[]): Observable<MenuItem> {
+    // modifierGroupIds: lista completa de lo que ofrece el plato; sin enviarla no se tocan
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo, categoryId, modifierGroupIds }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );

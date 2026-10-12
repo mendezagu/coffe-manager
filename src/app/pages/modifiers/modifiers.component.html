@@ -1,0 +1,130 @@
+<div>
+  <p class="text-sm text-sage-600 mt-0 mb-5">
+    Son las opciones que se ofrecen al pedir un plato: <strong>Tamaño</strong> (Chico, Grande), <strong>Leche</strong> (entera, almendras),
+    <strong>Extras</strong> (shot extra, queso). Cada opción puede sumar al precio. Después elegís en qué platos se ofrece desde
+    <a routerLink="/admin/menu" class="text-cafe-green-700 font-medium underline">Menú</a>, o de una vez para toda una categoría.
+  </p>
+
+  <!-- Editor -->
+  <form *ngIf="editor" (ngSubmit)="save()" class="mb-6 p-5 bg-sage-50 border border-sage-200 rounded-card space-y-4">
+    <h3 class="text-lg font-bold text-sage-900 m-0">{{ editor.id ? 'Editar modificador' : 'Nuevo modificador' }}</h3>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</span>
+        <input name="name" [(ngModel)]="editor.name" maxlength="60" placeholder="Ej: Tamaño"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      </label>
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Se puede elegir</span>
+        <select name="selection" [(ngModel)]="editor.selection"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
+          <option value="SINGLE">Una sola opción (ej: tamaño)</option>
+          <option value="MULTIPLE">Varias opciones (ej: extras)</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="flex items-start gap-3 select-none cursor-pointer">
+      <input type="checkbox" name="required" [(ngModel)]="editor.required" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+      <span class="text-sm">
+        <span class="block font-bold text-sage-900">Obligatorio</span>
+        <span class="block text-xs text-sage-500">El mozo no puede agregar el plato sin elegir una opción (ej: el punto de la carne).</span>
+      </span>
+    </label>
+
+    <div>
+      <span class="block text-xs font-bold text-sage-500 mb-1.5">Opciones</span>
+      <div cdkDropList (cdkDropListDropped)="dropOption($event)" class="space-y-2">
+        <div *ngFor="let o of editor.options; let i = index" cdkDrag class="flex flex-wrap items-center gap-2 p-2 bg-white border border-sage-200 rounded-xl">
+          <span cdkDragHandle class="w-7 h-8 flex items-center justify-center text-sage-400 cursor-grab" aria-hidden="true">
+            <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
+          </span>
+          <input [name]="'optname' + i" [(ngModel)]="o.name" maxlength="60" placeholder="Nombre de la opción" [attr.aria-label]="'Nombre de la opción ' + (i + 1)"
+            class="flex-1 min-w-[140px] px-3 py-2 border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          <label class="flex items-center gap-1.5 text-xs text-sage-500">
+            Suma
+            <input [name]="'optprice' + i" type="number" step="any" [(ngModel)]="o.priceDelta" [attr.aria-label]="'Precio extra de la opción ' + (i + 1)"
+              class="w-28 px-3 py-2 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          </label>
+          <label *ngIf="editor.id && o.id" class="flex items-center gap-1.5 text-xs text-sage-500 cursor-pointer" title="Desactivala si hoy no la tenés: no se ofrece, pero no se borra">
+            <input [name]="'optactive' + i" type="checkbox" [(ngModel)]="o.active" class="w-4 h-4 accent-[#1d5b3e]" />
+            Disponible
+          </label>
+          <button type="button" (click)="removeOption(i)" [disabled]="editor.options.length === 1" aria-label="Quitar opción"
+            class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700 disabled:opacity-30 disabled:cursor-not-allowed">
+            <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button type="button" (click)="addOption()" class="mt-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50">+ Agregar opción</button>
+      <p class="text-xs text-sage-500 mt-2 mb-0">"Suma" es lo que se agrega al precio del plato. Dejalo en 0 si no cambia el precio; podés usar un número negativo para un descuento.</p>
+    </div>
+
+    <div class="flex gap-2">
+      <button type="submit" [disabled]="!editorValid || saving"
+        class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ saving ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button type="button" (click)="editor = null" class="px-5 py-2.5 border border-sage-200 text-sage-700 font-medium text-sm rounded-lg bg-white hover:bg-sage-50">Cancelar</button>
+    </div>
+  </form>
+
+  <div *ngIf="!editor" class="mb-5">
+    <button type="button" (click)="startNew()" class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg">+ Nuevo modificador</button>
+  </div>
+
+  <!-- Lista -->
+  <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+
+  <div *ngIf="!loading && groups.length === 0 && !editor" class="p-6 text-center bg-sage-50 border border-dashed border-sage-300 rounded-card">
+    <p class="font-bold text-sage-800 m-0">Todavía no creaste ningún modificador</p>
+    <p class="text-sm text-sage-500 mt-1 mb-4">Arrancá con uno de estos y ajustalo a tu carta:</p>
+    <div class="flex flex-wrap justify-center gap-2">
+      <button *ngFor="let t of templates" type="button" (click)="startNew(t.editor)"
+        class="px-4 py-2 text-sm font-bold rounded-lg border border-cafe-green-700 text-cafe-green-700 bg-white hover:bg-cafe-green-50">{{ t.label }}</button>
+    </div>
+  </div>
+
+  <p *ngIf="groups.length > 1" class="mb-2 text-xs text-sage-500 flex items-center gap-1">
+    <mat-icon class="!w-4 !h-4 !text-base">drag_indicator</mat-icon>
+    Arrastrá para cambiar el orden en que el mozo ve las opciones.
+  </p>
+
+  <div cdkDropList (cdkDropListDropped)="drop($event)" class="space-y-2">
+    <div *ngFor="let g of groups" cdkDrag class="p-3 bg-white border border-sage-200 rounded-xl">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span cdkDragHandle class="w-8 h-8 flex items-center justify-center text-sage-400 cursor-grab" aria-hidden="true">
+          <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="m-0 text-sm font-bold text-sage-900 truncate">
+            {{ g.name }}
+            <span *ngIf="g.required" class="ml-1 px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold align-middle">Obligatorio</span>
+            <span class="ml-1 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-[10px] font-bold align-middle">{{ g.selection === 'SINGLE' ? 'Una opción' : 'Varias' }}</span>
+          </p>
+          <p class="m-0 text-xs text-sage-500 truncate">{{ summary(g) }}</p>
+        </div>
+        <span class="text-xs text-sage-500 whitespace-nowrap">{{ g.itemsCount || 0 }} {{ g.itemsCount === 1 ? 'plato' : 'platos' }}</span>
+        <button type="button" (click)="startApply(g)" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50">Aplicar a categoría</button>
+        <button type="button" (click)="startEdit(g)" aria-label="Editar modificador" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600">
+          <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
+        </button>
+        <button type="button" (click)="remove(g)" aria-label="Eliminar modificador" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
+          <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+        </button>
+      </div>
+
+      <div *ngIf="applyingId === g._id" class="mt-3 pt-3 border-t border-sage-100 flex flex-wrap items-center gap-2">
+        <span class="text-sm text-sage-700">Ofrecerlo en todos los platos de:</span>
+        <select [(ngModel)]="applyCategoryId" aria-label="Categoría" class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+          <option value="">Elegí una categoría</option>
+          <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
+        </select>
+        <button type="button" (click)="apply(g)" [disabled]="!applyCategoryId"
+          class="px-4 py-2 bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Aplicar</button>
+        <p *ngIf="categories.length === 0" class="w-full text-xs text-sage-500 m-0">Todavía no tenés categorías. Creálas en Categorías.</p>
+      </div>
+    </div>
+  </div>
+</div>

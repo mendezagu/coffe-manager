@@ -1,0 +1,50 @@
+<div class="flex flex-col max-h-[80vh] bg-white rounded-dialog overflow-hidden shadow-dialog">
+
+  <div class="flex-shrink-0 px-5 pt-5 pb-3">
+    <h2 class="text-lg font-bold text-sage-900 m-0">{{ data.item.name }}</h2>
+    <p class="text-sage-500 text-xs mt-0.5 mb-0">Elegí las opciones</p>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-5 pb-3 space-y-4">
+    <section *ngFor="let group of data.groups">
+      <div class="flex items-center gap-2 mb-2">
+        <h3 class="text-sm font-bold text-sage-800 m-0">{{ group.name }}</h3>
+        <span *ngIf="group.required" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Obligatorio</span>
+        <span *ngIf="!group.required" class="text-xs text-sage-500">Opcional</span>
+        <span *ngIf="group.selection === 'MULTIPLE'" class="text-xs text-sage-500">· podés elegir varias</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2" role="group" [attr.aria-label]="group.name">
+        <button *ngFor="let option of group.options" type="button" (click)="toggle(group, option)"
+          class="flex items-center justify-between gap-2 px-3 py-3 rounded-xl border text-left text-sm font-medium transition-colors min-h-[48px]"
+          [ngClass]="isSelected(group, option)
+            ? 'bg-cafe-green-700 border-cafe-green-700 text-white'
+            : 'bg-white border-sage-200 text-sage-800 hover:bg-sage-50'"
+          [attr.aria-pressed]="isSelected(group, option)">
+          <span class="truncate">{{ option.name }}</span>
+          <span *ngIf="option.priceDelta !== 0" class="shrink-0 text-xs font-bold"
+            [ngClass]="isSelected(group, option) ? 'text-white/90' : 'text-cafe-green-700'">
+            {{ option.priceDelta > 0 ? '+' : '' }}{{ option.priceDelta | money }}
+          </span>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="flex-shrink-0 flex items-center justify-between gap-3 px-5 py-3 border-t border-sage-100 bg-white">
+    <div>
+      <p class="text-[11px] font-bold text-sage-400 m-0">Precio por unidad</p>
+      <p class="text-lg font-bold text-cafe-green-700 m-0">{{ unitPrice | money }}</p>
+    </div>
+    <div class="flex gap-2">
+      <button type="button" (click)="cancel()" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Cancelar</button>
+      <button type="button" (click)="confirm()" [disabled]="missing.length > 0"
+        class="px-4 py-2.5 rounded-lg text-sm font-bold bg-cafe-green-700 hover:bg-cafe-green-800 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+        Agregar
+      </button>
+    </div>
+  </div>
+  <p *ngIf="missing.length" role="alert" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
+    Falta elegir: {{ missing[0].name }}
+  </p>
+</div>

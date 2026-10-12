@@ -11,9 +11,9 @@ import { AppUser, UserService } from 'src/app/services/user.service';
 import { Waiter } from 'src/app/services/gestionService';
 import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
-import { Category } from 'src/app/services/gestionService';
+import { Category, ModifierGroup } from 'src/app/services/gestionService';
 
-export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'waiters' | 'users';
+export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users';
 
 interface AdminSectionInfo {
   key: AdminSection;
@@ -34,6 +34,7 @@ const SECTIONS: AdminSectionInfo[] = [
   { key: 'sectors', title: 'Sectores', description: 'Agrupa tus mesas por zona (Salón, Terraza…)', icon: 'grid_view', singular: 'sector', plural: 'sectores' },
   { key: 'menu', title: 'Menú', description: 'Platos y bebidas, con su precio y categoría', icon: 'restaurant_menu', singular: 'plato', plural: 'platos' },
   { key: 'categories', title: 'Categorías', description: 'Ordena el menú en secciones (Cafés, Tortas…)', icon: 'category', singular: 'categoría', plural: 'categorías' },
+  { key: 'modifiers', title: 'Modificadores', description: 'Tamaños, leches y extras con precio', icon: 'tune', singular: 'modificador', plural: 'modificadores' },
   { key: 'waiters', title: 'Mozos', description: 'Los nombres que se asignan a las mesas', icon: 'person', singular: 'mozo', plural: 'mozos' },
   { key: 'users', title: 'Usuarios', description: 'Cuentas del personal y qué puede hacer cada una', icon: 'group', singular: 'usuario', plural: 'usuarios' },
 ];
@@ -68,11 +69,13 @@ export class AdminPanelComponent {
   newItemIsPromo: boolean = false;
   newItemCategoryId: string = '';
   categories: Category[] = [];
+  modifierGroups: ModifierGroup[] = [];
   editItemId?: string;
   editItemName: string = '';
   editItemPrice: number = 0;
   editItemIsPromo: boolean = false;
   editItemCategoryId: string = '';
+  editItemGroupIds: string[] = [];
 
   // WAITERS
   waiters: Waiter[] = [];
@@ -91,7 +94,7 @@ export class AdminPanelComponent {
   get cards(): SectionCard[] {
     const uncategorized = this.categories.length > 0 ? this.menuItems.filter((m) => !m.categoryId).length : 0;
     return SECTIONS.map((s) => {
-      const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, waiters: this.waiters.length, users: this.users.length }[s.key];
+      const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, modifiers: this.modifierGroups.length, waiters: this.waiters.length, users: this.users.length }[s.key];
       return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : '' };
     });
   }
@@ -129,6 +132,7 @@ export class AdminPanelComponent {
     this.loadSectors();
     this.loadMenuItems();
     this.loadCategories();
+    this.loadModifierGroups();
     this.loadUsers();
     this.loadWaiters();
     
@@ -300,6 +304,17 @@ export class AdminPanelComponent {
     this.userService.listUsers().subscribe({ next: (u) => (this.users = u), error: () => {} });
   }
 
+  loadModifierGroups() {
+    this.gestionService.getModifiers().subscribe({ next: (g) => (this.modifierGroups = g), error: () => {} });
+  }
+
+  // Marca o desmarca un modificador en el plato que se está editando
+  toggleEditGroup(id: string) {
+    this.editItemGroupIds = this.editItemGroupIds.includes(id)
+      ? this.editItemGroupIds.filter((g) => g !== id)
+      : [...this.editItemGroupIds, id];
+  }
+
   loadCategories() {
     this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
   }
@@ -335,12 +350,13 @@ export class AdminPanelComponent {
     this.editItemPrice = item.price;
     this.editItemIsPromo = !!item.isPromo;
     this.editItemCategoryId = item.categoryId ?? '';
+    this.editItemGroupIds = [...(item.modifierGroupIds ?? [])];
     this.openEditDialog(this.editMenuDialog, () => (this.editItemId = undefined));
   }
 
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
-      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo, this.editItemCategoryId || null).subscribe(() => {
+      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo, this.editItemCategoryId || null, this.editItemGroupIds).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });

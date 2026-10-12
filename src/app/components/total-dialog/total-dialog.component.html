@@ -37,6 +37,7 @@
               {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | money }}
             </span>
           </div>
+          <p *ngIf="order.modifiers?.length" class="text-xs text-cafe-green-700 font-medium pl-1 mb-1">+ {{ modifiersText(order.modifiers) }}</p>
           <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
           <div class="flex items-center justify-between gap-2 pl-1">
             <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ order.price | money }}</strong></span>

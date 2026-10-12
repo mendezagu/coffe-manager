@@ -14,6 +14,7 @@ export interface KitchenOrder {
   itemName: string;
   quantity: number;
   note: string;
+  modifiers: string[]; // opciones elegidas (ej: Grande, Leche de almendras)
   status: KitchenStatus;
   destination: KitchenDestination;
   createdAt: string;

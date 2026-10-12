@@ -32,6 +32,9 @@
               <span class="text-xs text-sage-500 font-semibold">
                 {{ order.price | money }}
               </span>
+              <p *ngIf="order.modifiers?.length" class="text-xs text-cafe-green-700 font-medium mt-0.5">
+                + {{ modifiersText(order.modifiers) }}
+              </p>
               <p *ngIf="order.note" class="text-xs text-sage-600 italic mt-0.5">
                 ↳ {{ order.note }}
               </p>

@@ -8,6 +8,8 @@ export class MoneyPipe implements PipeTransform {
   constructor(private settings: SettingsService) {}
 
   transform(value: number | null | undefined): string {
+    // Sin dato (o no numérico) no se muestra nada, en vez de inventar un $ 0,00
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return '';
     return this.settings.format(value);
   }
 }

@@ -73,6 +73,7 @@
                     <span class="text-cafe-green-700">{{ l.quantity }}×</span> {{ l.itemName }}
                     <span *ngIf="splitActive && isAdmin && tab === 'ALL' && l.destination === 'BAR'" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">Barra</span>
                   </p>
+                  <p *ngIf="l.modifiers?.length" class="mt-0.5 text-sm font-semibold text-cafe-green-700">{{ l.modifiers.join(' · ') }}</p>
                   <p *ngIf="l.note" class="mt-1 px-2.5 py-1 rounded-lg bg-sage-100 text-sage-800 text-sm font-medium">↳ {{ l.note }}</p>
                 </div>
               </li>
