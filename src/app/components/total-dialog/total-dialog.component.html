@@ -34,13 +34,22 @@
               <span *ngIf="order.isPromo" class="px-1.5 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold flex-shrink-0">Promo</span>
             </div>
             <span class="text-cafe-green-700 font-bold text-sm flex-shrink-0">
-              {{ (order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | money }}
+              {{ (order.modifiers?.length ? (order.basePrice ?? order.price) * (order.quantity || 1) : order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | money }}
             </span>
           </div>
-          <p *ngIf="order.modifiers?.length" class="text-xs text-cafe-green-700 font-medium pl-1 mb-1">+ {{ modifiersText(order.modifiers) }}</p>
+          <div *ngIf="order.modifiers?.length" class="pl-1 mb-1">
+            <p *ngFor="let m of order.modifiers" class="flex items-center justify-between gap-2 text-xs text-cafe-green-700 font-medium m-0">
+              <span class="truncate">+ {{ m.name }}<span *ngIf="(order.quantity || 1) > 1 && m.priceDelta" class="text-sage-500 font-normal"> ×{{ order.quantity }}</span></span>
+              <span *ngIf="m.priceDelta" class="flex-shrink-0">{{ m.priceDelta > 0 ? '+' : '-' }}{{ (m.priceDelta < 0 ? -m.priceDelta : m.priceDelta) * (order.quantity || 1) | money }}</span>
+            </p>
+            <p *ngIf="!order.isPromo && order.discount > 0" class="flex items-center justify-between gap-2 text-xs text-cafe-red-700 font-medium m-0">
+              <span>Descuento {{ order.discount }}%</span>
+              <span class="flex-shrink-0">-{{ order.price * (order.quantity || 1) * order.discount / 100 | money }}</span>
+            </p>
+          </div>
           <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
           <div class="flex items-center justify-between gap-2 pl-1">
-            <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ order.price | money }}</strong></span>
+            <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</strong></span>
             <div *ngIf="!order.isPromo && isAdmin" class="flex items-center gap-1.5">
               <span class="text-sage-500 text-xs">% desc.</span>
               <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-sage-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />

@@ -22,6 +22,8 @@ export interface MenuItem {
   modifiers?: OrderModifier[];
   // identifica un plato con sus opciones dentro de la selección del mozo
   lineKey?: string;
+  // solo en pantallas de cobro: precio del plato sin los extras (price incluye los extras)
+  basePrice?: number;
 }
 
 export type ModifierSelection = 'SINGLE' | 'MULTIPLE';

@@ -40,7 +40,9 @@
                 <mat-icon class="!w-3 !h-3 !text-xs">close</mat-icon>
               </button>
             </div>
-            <p *ngIf="item.selectedModifiers?.length" class="text-[11px] text-cafe-green-700 font-medium m-0 mt-0.5">+ {{ modifiersText(item.selectedModifiers) }}</p>
+            <p *ngIf="item.selectedModifiers?.length" class="text-[11px] text-cafe-green-700 font-medium m-0 mt-0.5">
+              <span *ngFor="let m of item.selectedModifiers; let last = last">+ {{ m.name }}<ng-container *ngIf="m.priceDelta"> ({{ m.priceDelta > 0 ? '+' : '' }}{{ m.priceDelta | money }})</ng-container><ng-container *ngIf="!last"> · </ng-container></span>
+            </p>
             <div class="relative mt-1">
               <mat-icon class="!w-3.5 !h-3.5 !text-sm absolute left-1.5 top-1/2 -translate-y-1/2 text-sage-400">edit_note</mat-icon>
               <input

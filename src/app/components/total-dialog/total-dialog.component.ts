@@ -84,6 +84,8 @@ export class TotalDialogComponent implements OnInit {
             order.name = menuItem.name;
             // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
             order.price = menuItem.price + modifiersTotal(order.modifiers);
+            // precio del plato solo (sin extras): es lo que se muestra en su renglón
+            order.basePrice = menuItem.price;
             order.isPromo = !!menuItem.isPromo;
             // Los ítems en promo no admiten descuento (ni por ítem ni general)
             order.discount = order.isPromo ? 0 : (order.discount ?? 0); // descuento por ítem (porcentaje)
@@ -269,13 +271,35 @@ export class TotalDialogComponent implements OnInit {
                 .map((order) => {
                   const qty = order.quantity ?? 1;
                   const itemDiscount = order.isPromo ? 0 : Number(order.discount) || 0;
-                  const discountedSubtotal = order.price * qty * (1 - itemDiscount / 100);
+                  const grossLine = order.price * qty;
+                  const discountedSubtotal = grossLine * (1 - itemDiscount / 100);
+                  const mods: any[] = order.modifiers ?? [];
+                  const fmt = (n: number) => this.settings.format(n);
+                  // Con extras, el plato muestra su precio base y cada extra su propio importe; el descuento
+                  // va en un renglón aparte. Así los renglones de la línea suman lo que se cobra.
+                  const itemAmount = mods.length ? (order.basePrice ?? order.price) * qty : discountedSubtotal;
+                  const nameSuffix = `${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 && !mods.length ? `(${itemDiscount}% off)` : ''}`;
+                  const modLines = mods
+                    .map(
+                      (m) => `<div class="order-item">
+                        <p style="font-size: 11px; margin-left: 6px">+ ${this.settings.escape(m.name)}${qty > 1 && m.priceDelta ? ` x${qty}` : ''}</p>
+                        <p style="font-size: 11px">${m.priceDelta ? `${m.priceDelta > 0 ? '+' : '-'}${fmt(Math.abs(m.priceDelta * qty))}` : ''}</p>
+                      </div>`
+                    )
+                    .join('');
+                  const discountLine =
+                    mods.length && itemDiscount > 0
+                      ? `<div class="order-item">
+                        <p style="font-size: 11px; margin-left: 6px">Desc. ${itemDiscount}%</p>
+                        <p style="font-size: 11px">-${fmt(grossLine - discountedSubtotal)}</p>
+                      </div>`
+                      : '';
                   return `
                     <div class="order-item">
-                      <p style="font-size: 12px">${order.name} ${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 ? `(${itemDiscount}% off)` : ''}</p>
+                      <p style="font-size: 12px">${order.name} ${nameSuffix}</p>
                       <p style="font-size: 12px">x${qty}</p>
-                      <p style="font-size: 12px">${this.settings.format(discountedSubtotal)}</p>
-                    </div>${order.modifiers?.length ? `<div style="font-size: 10px; margin-left: 6px">+ ${this.settings.escape(modifiersText(order.modifiers))}</div>` : ''}
+                      <p style="font-size: 12px">${fmt(itemAmount)}</p>
+                    </div>${modLines}${discountLine}
                   `;
                 })
                 .join('')}

@@ -30,10 +30,10 @@
                 {{ order.name || 'Nombre no disponible' }}
               </strong>
               <span class="text-xs text-sage-500 font-semibold">
-                {{ order.price | money }}
+                {{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}
               </span>
-              <p *ngIf="order.modifiers?.length" class="text-xs text-cafe-green-700 font-medium mt-0.5">
-                + {{ modifiersText(order.modifiers) }}
+              <p *ngFor="let m of order.modifiers" class="text-xs text-cafe-green-700 font-medium m-0 mt-0.5">
+                + {{ m.name }}<ng-container *ngIf="m.priceDelta"> ({{ m.priceDelta > 0 ? '+' : '' }}{{ m.priceDelta | money }})</ng-container>
               </p>
               <p *ngIf="order.note" class="text-xs text-sage-600 italic mt-0.5">
                 ↳ {{ order.note }}

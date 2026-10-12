@@ -48,6 +48,8 @@ export class OrderInfoDialogComponent implements OnInit {
             order.name = menuItem.name; // Asignar el nombre directamente a la orden
             // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
             order.price = menuItem.price + modifiersTotal(order.modifiers);
+            // precio del plato solo (sin extras), para mostrarlo aparte de los extras
+            order.basePrice = menuItem.price;
           } else {
             order.name = 'No encontrado';
           }
