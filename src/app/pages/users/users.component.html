@@ -1,0 +1,81 @@
+<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
+  <div class="max-w-4xl mx-auto">
+
+    <h1 class="text-2xl font-bold text-sage-900">Usuarios</h1>
+    <p class="text-sage-600 text-sm mt-1 mb-6">Creá las cuentas del personal y definí qué puede hacer cada una.</p>
+
+    <!-- Alta -->
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-white rounded-card shadow-soft p-5 mb-6 grid gap-3 sm:grid-cols-2">
+      <h2 class="sm:col-span-2 font-bold text-sage-800">Nuevo usuario</h2>
+
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</span>
+        <input name="name" [(ngModel)]="form.name" required
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      </label>
+
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Email</span>
+        <input name="email" type="email" [(ngModel)]="form.email" required email
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      </label>
+
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña (mín. 8)</span>
+        <input name="password" type="password" [(ngModel)]="form.password" required minlength="8" autocomplete="new-password"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      </label>
+
+      <label class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Rol</span>
+        <select name="role" [(ngModel)]="form.role"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
+          <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </label>
+
+      <div class="sm:col-span-2">
+        <button type="submit" [disabled]="f.invalid || saving"
+          class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ saving ? 'Creando…' : 'Crear usuario' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Listado -->
+    <div class="bg-white rounded-card shadow-soft overflow-hidden">
+      <p *ngIf="loading" class="p-5 text-sage-600 text-sm">Cargando…</p>
+      <p *ngIf="!loading && users.length === 0" class="p-5 text-sage-600 text-sm">No hay usuarios.</p>
+
+      <ul class="divide-y divide-sage-200">
+        <li *ngFor="let u of users" class="p-4 flex flex-wrap items-center gap-3" [class.opacity-60]="!u.active">
+          <div class="min-w-0 flex-1 basis-48">
+            <p class="font-bold text-sage-900 truncate">
+              {{ u.name }}
+              <span *ngIf="u.id === currentUserId" class="ml-1 text-xs font-medium text-cafe-green-700">(vos)</span>
+              <span *ngIf="!u.active" class="ml-1 text-xs font-medium text-cafe-red-700">Inactivo</span>
+            </p>
+            <p class="text-sm text-sage-600 truncate">{{ u.email }}</p>
+          </div>
+
+          <select [ngModel]="u.role" (ngModelChange)="changeRole(u, $event)" [attr.aria-label]="'Rol de ' + u.name"
+            class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+            <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+          </select>
+
+          <div class="flex gap-2">
+            <button type="button" (click)="resetPassword(u)"
+              class="px-3 py-2 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50">Contraseña</button>
+            <button type="button" (click)="toggleActive(u)" [disabled]="u.id === currentUserId"
+              class="px-3 py-2 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              {{ u.active ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button type="button" (click)="remove(u)" [disabled]="u.id === currentUserId"
+              class="px-3 py-2 text-sm font-medium rounded-lg bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100 disabled:opacity-40 disabled:cursor-not-allowed">Eliminar</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</div>

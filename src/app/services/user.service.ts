@@ -1,84 +1,141 @@
 import { Injectable } from '@angular/core';
-import {
-  Auth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  signInWithPopup,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  User,
-} from '@angular/fire/auth';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
+import { map, tap } from 'rxjs/operators';
+import { environmentMongo } from 'src/environments/environmentMongo';
+
+export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen';
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: AppRole;
+  active?: boolean;
+  createdAt?: string;
+}
+
+export const ROLE_LABELS: Record<AppRole, string> = {
+  admin: 'Administrador',
+  cashier: 'Cajero',
+  waiter: 'Mozo',
+  kitchen: 'Cocina',
+};
+
+// Pantalla de inicio según el rol: cocina trabaja en su tablero, el resto en las mesas.
+export const homeFor = (role: AppRole | null) => (role === 'kitchen' ? '/kitchen' : '/home');
+
+const TOKEN_KEY = 'auth_token';
+const USER_KEY = 'auth_user';
+
+// El backend maneja los roles en mayúsculas (ADMIN, CASHIER, ...); acá se usan en minúsculas.
+const fromApi = (u: any): AppUser => ({ ...u, role: String(u.role).toLowerCase() as AppRole });
+const toApiRole = (role: AppRole) => role.toUpperCase();
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-    private authState = new BehaviorSubject<User | null>(null);
-    private roleState = new BehaviorSubject<string | null>(null);
-    
-  constructor(
-    private auth: Auth, 
-    private firestore: Firestore
-) {
+  private readonly baseUrl = environmentMongo.apiUrl;
+  private authState = new BehaviorSubject<AppUser | null>(this.readStoredUser());
 
-    onAuthStateChanged(this.auth, async (user) => {
-        this.authState.next(user);
-        if (user) {
-          const role = await this.getUserRole(user.uid);
-          this.roleState.next(role);
-        } else {
-          this.roleState.next(null);
-        }
+  constructor(private http: HttpClient) {
+    // Si hay sesión guardada se revalida contra el servidor (rol actual, usuario activo).
+    // Un 401 lo maneja el interceptor cerrando la sesión.
+    if (this.getToken()) {
+      this.http.get<any>(`${this.baseUrl}/auth/me`).subscribe({
+        next: (u) => this.setUser(fromApi(u)),
+        error: () => {},
       });
-  }
-
-  async register({ email, password }: any, role: string = 'user') {
-    const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-    if (userCredential.user) {
-      await this.setUserRole(userCredential.user.uid, role);
     }
-    return userCredential;
   }
 
-  login({ email, password }: any) {
-    return signInWithEmailAndPassword(this.auth, email, password);
+  login({ email, password }: { email: string; password: string }): Observable<AppUser> {
+    return this.http
+      .post<{ accessToken: string; user: any }>(`${this.baseUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((res) => this.storeToken(res.accessToken)),
+        map((res) => fromApi(res.user)),
+        tap((user) => this.setUser(user)),
+      );
   }
 
-  loginWithGoogle(){
-    return signInWithPopup(this.auth,  new GoogleAuthProvider());
+  logout(): void {
+    this.storeToken(null);
+    this.setUser(null);
   }
 
-  logout() {
-    return signOut(this.auth);
+  getToken(): string | null {
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
   }
 
-    // Devuelve un observable para detectar si el usuario está logueado
-    getAuthState(): Observable<User | null> {
-        return this.authState.asObservable();
-      }
-    
-      // Devuelve true si el usuario está autenticado
-      isAuthenticated(): boolean {
-        return this.authState.value !== null;
-      }
+  getAuthState(): Observable<AppUser | null> {
+    return this.authState.asObservable();
+  }
 
-      getRoleState(): Observable<string | null> {
-        return this.roleState.asObservable();
-      }
+  getRoleState(): Observable<AppRole | null> {
+    return this.authState.pipe(map((u) => u?.role ?? null));
+  }
 
-      async getUserRole(uid: string): Promise<string | null> {
-        const userDocRef = doc(this.firestore, `users/${uid}`);
-        const userDoc = await getDoc(userDocRef);
-        return userDoc.exists() ? (userDoc.data() as any).role : null;
-      }
-    
-      async setUserRole(uid: string, role: string): Promise<void> {
-        console.log(uid,'uuid');
-        
-        const userDocRef = doc(this.firestore, `users/${uid}`);
-        await setDoc(userDocRef, { role }, { merge: true });
-      }
+  isAuthenticated(): boolean {
+    return this.authState.value !== null && !!this.getToken();
+  }
+
+  currentRole(): AppRole | null {
+    return this.authState.value?.role ?? null;
+  }
+
+  // ---- Administración de usuarios (solo admin) ----
+
+  listUsers(): Observable<AppUser[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/users`).pipe(map((list) => list.map(fromApi)));
+  }
+
+  createUser(data: { email: string; name: string; password: string; role: AppRole }): Observable<AppUser> {
+    return this.http
+      .post<any>(`${this.baseUrl}/users`, { ...data, role: toApiRole(data.role) })
+      .pipe(map(fromApi));
+  }
+
+  updateUser(
+    id: string,
+    data: { name?: string; role?: AppRole; active?: boolean; password?: string },
+  ): Observable<AppUser> {
+    const body = { ...data, role: data.role ? toApiRole(data.role) : undefined };
+    return this.http.put<any>(`${this.baseUrl}/users/${id}`, body).pipe(map(fromApi));
+  }
+
+  deleteUser(id: string): Observable<unknown> {
+    return this.http.delete(`${this.baseUrl}/users/${id}`);
+  }
+
+  // ---- Persistencia de sesión ----
+
+  private setUser(user: AppUser | null) {
+    try {
+      if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
+      else localStorage.removeItem(USER_KEY);
+    } catch {}
+    this.authState.next(user);
+  }
+
+  private storeToken(token: string | null) {
+    try {
+      if (token) localStorage.setItem(TOKEN_KEY, token);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch {}
+  }
+
+  private readStoredUser(): AppUser | null {
+    try {
+      const raw = localStorage.getItem(USER_KEY);
+      return raw && localStorage.getItem(TOKEN_KEY) ? (JSON.parse(raw) as AppUser) : null;
+    } catch {
+      return null;
+    }
+  }
 }

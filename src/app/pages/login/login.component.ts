@@ -1,50 +1,38 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from 'src/app/services/user.service';
+import { UserService, homeFor } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit{
-    formLogin: FormGroup; 
+export class LoginComponent {
+  formLogin = new FormGroup({
+    email: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required]),
+  });
+  loading = false;
+  error = '';
 
-    constructor(
-        private userService: UserService,
-        private router: Router
-      ){
-    
-        this.formLogin = new FormGroup({
-          email: new FormControl(),
-          password: new FormControl()
-        })
-      }
+  constructor(private userService: UserService, private router: Router) {}
 
-      ngOnInit(): void {
-      
-      }
-    
-      onSubmit(){
-         this.userService.login(this.formLogin.value)
-         .then(response =>{
-          console.log(response,'respuesta');
-          this.router.navigate([''])
-          
-    
-         }).catch(error=>{
-          console.log(error,'este es el error');
-          
-         })
-      }
+  onSubmit() {
+    if (this.formLogin.invalid || this.loading) return;
+    this.loading = true;
+    this.error = '';
+    const { email, password } = this.formLogin.value;
 
-      loginWithGoogle(){
-        this.userService.loginWithGoogle()
-        .then(()=>{
-          this.router.navigate(['/home'])
-        })
-        .then(error=> console.log(error))
-      }
-
+    this.userService.login({ email: email!, password: password! }).subscribe({
+      next: (user) => this.router.navigate([homeFor(user.role)]),
+      error: (err) => {
+        this.loading = false;
+        this.error =
+          err?.status === 401
+            ? 'Email o contraseña incorrectos'
+            : 'No se pudo conectar con el servidor. Intentá de nuevo.';
+      },
+    });
+  }
 }

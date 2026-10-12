@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { PasswordDialogComponent } from '../password-dialog/password-dialog.component';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
@@ -23,7 +22,8 @@ interface TableGroup {
   templateUrl: './app-card.component.html',
   styleUrls: ['./app-card.component.scss']
 })
-export class CardComponent implements OnInit {
+export class CardComponent implements OnInit, OnDestroy {
+  private refresh?: ReturnType<typeof setInterval>;
   tables: Table[] = [];
   searchText: string = '';
   viewMode: 'joint' | 'sector' = 'joint';
@@ -46,6 +46,8 @@ export class CardComponent implements OnInit {
   ngOnInit(): void {
     this.restoreView();
     this.loadTables();
+    // Refresca las mesas para que el mozo vea cuándo cocina marca algo como listo.
+    this.refresh = setInterval(() => this.loadTables(), 10000);
     this.loadMenu(); // 📌 Cargar los ítems del menú al iniciar
 
      // Cargar los mozos al iniciar el componente
@@ -62,6 +64,15 @@ export class CardComponent implements OnInit {
 
     // Suscribirse al rol para uso en handlers sin pipes en templates
     this.role$.subscribe(role => this.roleValue = role);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refresh) clearInterval(this.refresh);
+  }
+
+  // Cantidad de líneas que cocina ya terminó y esperan ser servidas
+  readyCount(table: any): number {
+    return (table.orders || []).filter((o: any) => o.status === 'READY').length;
   }
 
   // Mesas filtradas por nombre (sin distinguir mayúsculas ni tildes)
@@ -507,32 +518,9 @@ printTicket(tableId: string): void {
   this.gestionService.saveLog(logMessage);
 }
 
-  // Abre el diálogo de contraseña para acciones de admin antes de ordenar
-  openPasswordDialog(table: Table): void {
-    const dialogRef = this.dialog.open(PasswordDialogComponent, {
-      width: '400px',
-      maxWidth: '95vw',
-      data: { purpose: 'authorize-admin-action' }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      const correctPassword = 'cafe123';
-      if (result === correctPassword) {
-        this.addMenuItems(table);
-      } else if (result !== null) {
-        // result === null means the user cancelled
-        this.snackBar.open('Contraseña incorrecta', 'Cerrar', { duration: 3000, panelClass: ['snackbar-error'] });
-      }
-    });
-  }
-
   // Handler del botón Ordenar (evita usar pipes en template)
   orderButtonClicked(table: Table): void {
-    if (this.roleValue === 'admin') {
-      this.openPasswordDialog(table);
-    } else {
-      this.addMenuItems(table);
-    }
+    this.addMenuItems(table);
   }
 
 }

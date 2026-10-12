@@ -8,12 +8,20 @@
         src="./assets/nuovo-cafe.jpg"
         alt="Nuovo Caffe"
       />
-      <span class="text-sage-800 font-bold text-lg leading-tight">Nuovo<br>Caffé</span>
+      <div>
+        <span class="block text-sage-800 font-bold text-lg leading-tight">Nuovo<br>Caffé</span>
+        <span *ngIf="user$ | async as user" class="sm:hidden inline-block mt-1 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
+      </div>
     </div>
 
-    <button mat-button routerLink="/home" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+    <button mat-button routerLink="/home" *ngIf="(role$ | async) !== 'kitchen'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="storefront"></mat-icon>
       Inicio
+    </button>
+
+    <button mat-button routerLink="/kitchen" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'kitchen'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <mat-icon fontIcon="restaurant"></mat-icon>
+      Cocina
     </button>
 
     <!-- ✅ Botón Administrar solo para Admin -->
@@ -22,9 +30,14 @@
       Administrar
     </button>
 
-    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="paid"></mat-icon>
       Balance
+    </button>
+
+    <button mat-button routerLink="/users" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <mat-icon fontIcon="group"></mat-icon>
+      Usuarios
     </button>
 
     <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
@@ -63,9 +76,15 @@
         </div>
 
         <!-- Contenido a la derecha -->
+        <div class="d-flex align-items-center gap-2">
+        <!-- Usuario y rol -->
+        <!-- En pantallas chicas el rol va en el sidebar -->
+        <span *ngIf="user$ | async as user" class="hidden sm:inline-block px-3 py-1 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
+
         <div class="cont-2 d-flex align-items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-sage-300">
           <span class="w-2 h-2 rounded-full bg-cafe-green-700"></span>
           <span class="text-sage-800 font-medium text-sm">{{ shift }}</span>
+        </div>
         </div>
 
       </mat-toolbar>

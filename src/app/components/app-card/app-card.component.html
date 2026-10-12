@@ -141,8 +141,9 @@
           <!-- Spacer para empujar acciones al fondo -->
           <div class="flex-1 min-h-[8px]"></div>
 
-          <!-- Botón Ordenar -->
+          <!-- Botón Ordenar (cocina solo consulta) -->
           <button
+            *ngIf="(role$ | async) !== 'kitchen'"
             class="w-full flex items-center justify-center gap-1.5 px-2 py-[9px] text-sm font-bold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             [ngClass]="(table.available && !table.controlledBy)
               ? 'bg-white hover:bg-sage-50 text-cafe-green-700'
@@ -163,12 +164,16 @@
                 <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">receipt_long</mat-icon>
                 <span class="min-w-[18px] px-1 rounded-full text-[11px] font-bold leading-[18px] text-center"
                       [ngClass]="(table.available && !table.controlledBy) ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">{{ table.orders.length }}</span>
+                <span *ngIf="readyCount(table) > 0" title="Listos para servir"
+                      class="inline-flex items-center gap-0.5 min-w-[18px] px-1 rounded-full text-[11px] font-bold leading-[18px] bg-white text-cafe-green-700">
+                  <mat-icon class="!w-3 !h-3 !text-[12px] !leading-3">check</mat-icon>{{ readyCount(table) }}
+                </span>
               </span>
               <span>Órdenes</span>
             </button>
 
             <button
-              *ngIf="(role$ | async) === 'admin'"
+              *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'"
               class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               (click)="openTotalDialog(table)"
               [disabled]="table.controlledBy">

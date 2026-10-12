@@ -26,7 +26,8 @@ import { HomeComponent } from './pages/home/home.component';
 import { OrderInfoDialogComponent } from './components/order-info-dialog/order-info-dialog.component';
 import { LinkTableDialogComponent } from './components/link-table-dialog/link-table-dialog.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './services/auth.interceptor';
 import { DatePipe } from '@angular/common';
 import { WaiterDialogComponent } from './components/waiter-dialog/waiter-dialog.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -34,9 +35,9 @@ import { MatTableModule } from '@angular/material/table';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { environment } from 'src/environments/environment';
-import {getAuth, provideAuth} from '@angular/fire/auth'
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { RegisterComponent } from './pages/register/register.component';
+import { KitchenComponent } from './pages/kitchen/kitchen.component';
+import { UsersComponent } from './pages/users/users.component';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
@@ -44,7 +45,6 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
-import { PasswordDialogComponent } from './components/password-dialog/password-dialog.component';
 
 
 @NgModule({
@@ -58,12 +58,12 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     LinkTableDialogComponent,
     WaiterDialogComponent,
     LoginComponent,
-    RegisterComponent,
+    UsersComponent,
+    KitchenComponent,
     AdminPanelComponent,
     StadisticsComponent,
     BalanceComponent,
     LogsComponent,
-    PasswordDialogComponent,
 
   ],
   imports: [
@@ -94,7 +94,6 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
     AngularFireModule.initializeApp(environment.firebase),
 
     provideFirebaseApp(()=> initializeApp(environment.firebase)),
-    provideAuth(()=> getAuth()),
     provideFirestore(() => getFirestore()),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
@@ -103,7 +102,7 @@ import { PasswordDialogComponent } from './components/password-dialog/password-d
       registrationStrategy: 'registerWhenStable:30000'
     })
   ],
-  providers: [DatePipe],
+  providers: [DatePipe, { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

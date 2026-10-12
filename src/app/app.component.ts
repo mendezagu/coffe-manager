@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CoffeService, Table } from './models/coffe.service';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
-import { UserService } from './services/user.service';
+import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
@@ -17,6 +17,8 @@ export class AppComponent {
   showFiller = false;
   isLoggedIn: boolean = false;
   role$: Observable<string | null>;
+  user$: Observable<AppUser | null>;
+  roleLabels = ROLE_LABELS;
 
   // Variables para fecha y turno
   currentDate: string;
@@ -35,6 +37,7 @@ export class AppComponent {
     this.currentDate = this.getFormattedDate();
     this.shift = this.getShift();
     this.role$ = this.userService.getRoleState();
+    this.user$ = this.userService.getAuthState();
   }
 
   ngOnInit() {
@@ -72,10 +75,7 @@ export class AppComponent {
   }
 
   logout(){
-    this.userService.logout()
-    .then(()=>{
-      this.router.navigate(['/login'])
-    })
-    .catch(error=> console.log(error))
+    this.userService.logout();
+    this.router.navigate(['/login']);
   }
 }

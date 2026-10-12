@@ -1,0 +1,80 @@
+<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-6">
+  <div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl font-bold text-sage-900">Cocina</h1>
+        <p class="text-sage-600 text-sm mt-0.5">Se actualiza sola cada pocos segundos.</p>
+      </div>
+      <span *ngIf="offline" role="alert" class="px-3 py-1.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">
+        Sin conexión · reintentando…
+      </span>
+    </div>
+
+    <p *ngIf="!loaded && !offline" class="text-sage-600 text-sm">Cargando pedidos…</p>
+
+    <div class="grid gap-4 lg:grid-cols-3" *ngIf="loaded || offline">
+      <section *ngFor="let col of columns" class="bg-sage-200/50 rounded-card p-3">
+        <h2 class="flex items-center justify-between px-1 mb-3 font-bold text-sage-800">
+          {{ col.title }}
+          <span class="min-w-[26px] px-2 py-0.5 rounded-full bg-white text-sage-700 text-sm text-center">{{ ticketsBy(col.status).length }}</span>
+        </h2>
+
+        <p *ngIf="ticketsBy(col.status).length === 0" class="px-1 py-6 text-center text-sm text-sage-500">{{ col.empty }}</p>
+
+        <ul class="space-y-3">
+          <li *ngFor="let t of ticketsBy(col.status); trackBy: trackByKey"
+              class="bg-white rounded-xl shadow-soft p-3 border-l-4"
+              [ngClass]="isLate(t) ? 'border-cafe-red-700' : t.status === 'READY' ? 'border-cafe-green-700' : 'border-sage-300'">
+
+            <!-- Encabezado de la comanda -->
+            <div class="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-sage-200">
+              <div class="min-w-0">
+                <p class="text-lg font-bold text-sage-900 leading-tight truncate">{{ t.tableName }}</p>
+                <p *ngIf="t.waiterName" class="text-xs font-medium text-sage-500 truncate">{{ t.waiterName }}</p>
+              </div>
+              <div class="shrink-0 text-right">
+                <p class="text-xs font-bold" [ngClass]="isLate(t) ? 'text-cafe-red-700' : 'text-sage-500'">{{ timeLabel(t) }}</p>
+                <p *ngIf="t.status === 'PREPARING'" class="text-xs font-medium text-sage-500">{{ readyCount(t) }} de {{ t.lines.length }} listos</p>
+              </div>
+            </div>
+
+            <!-- Platos -->
+            <ul class="space-y-1.5">
+              <li *ngFor="let l of t.lines; trackBy: trackById" class="flex items-start gap-2.5">
+                <button type="button" (click)="toggleLine(l)"
+                  [attr.aria-label]="l.status === 'READY' ? 'Deshacer ' + l.itemName : 'Marcar listo ' + l.itemName"
+                  [attr.aria-pressed]="l.status === 'READY'"
+                  class="mt-0.5 w-7 h-7 shrink-0 rounded-lg border flex items-center justify-center text-sm font-bold transition-colors"
+                  [ngClass]="l.status === 'READY'
+                    ? 'bg-cafe-green-700 border-cafe-green-700 text-white'
+                    : 'bg-white border-sage-300 text-transparent hover:border-cafe-green-700 hover:text-cafe-green-700'">✓</button>
+                <div class="min-w-0 flex-1" [class.opacity-50]="l.status === 'READY' && t.status !== 'READY'">
+                  <p class="font-bold text-sage-900 leading-snug" [class.line-through]="l.status === 'READY' && t.status !== 'READY'">
+                    <span class="text-cafe-green-700">{{ l.quantity }}×</span> {{ l.itemName }}
+                  </p>
+                  <p *ngIf="l.note" class="mt-1 px-2.5 py-1 rounded-lg bg-sage-100 text-sage-800 text-sm font-medium">↳ {{ l.note }}</p>
+                </div>
+              </li>
+            </ul>
+
+            <!-- Acciones de toda la comanda -->
+            <div class="flex gap-2 mt-3">
+              <button type="button" (click)="mainAction(t)"
+                class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors"
+                [ngClass]="t.status === 'READY'
+                  ? 'bg-white border border-sage-200 text-sage-700 hover:bg-sage-50'
+                  : 'bg-cafe-green-700 hover:bg-cafe-green-800 text-white'">
+                {{ mainActionLabel(t) }}
+              </button>
+              <button *ngIf="t.status === 'PREPARING'" type="button" (click)="backToPending(t)"
+                class="px-3 py-2.5 rounded-lg text-sm font-medium border border-sage-200 text-sage-700 hover:bg-sage-50"
+                title="Devolver la comanda a pendientes">↩</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+  </div>
+</div>
