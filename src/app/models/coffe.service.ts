@@ -8,6 +8,7 @@ export interface MenuItem {
   price: number;
   quantity?: number; // Opcional, ya que no siempre se proporciona
   isPromo?: boolean;
+  categoryId?: string | null;
 }
 
 export interface Table {

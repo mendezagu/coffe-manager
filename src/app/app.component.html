@@ -15,14 +15,14 @@
       </div>
     </div>
 
-    <button mat-button routerLink="/home" *ngIf="(role$ | async) !== 'kitchen'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+    <button mat-button routerLink="/home" *ngIf="(role$ | async) !== 'kitchen' && (role$ | async) !== 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="storefront"></mat-icon>
       Inicio
     </button>
 
-    <button mat-button routerLink="/kitchen" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'kitchen'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+    <button mat-button routerLink="/kitchen" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'kitchen' || (role$ | async) === 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="restaurant"></mat-icon>
-      Cocina
+      {{ (role$ | async) === 'bar' ? 'Barra' : 'Cocina' }}
     </button>
 
     <!-- ✅ Botón Administrar solo para Admin -->

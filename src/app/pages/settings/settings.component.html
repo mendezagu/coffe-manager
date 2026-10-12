@@ -126,6 +126,30 @@
           </p>
         </section>
 
+        <!-- Cocina y barra -->
+        <section class="bg-white rounded-card shadow-soft p-5">
+          <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>
+          <p class="text-sm text-sage-600 mb-3">
+            Si lo activás, cada categoría del menú va a la pantalla de la cocina o a la de la barra, según el destino que le pongas.
+            Si no, todos los pedidos van a la cocina.
+          </p>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canSplit ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="splitKitchenBar" [(ngModel)]="form.splitKitchenBar" [disabled]="!canSplit"
+              class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Separar cocina y barra</span>
+              <span *ngIf="canSplit" class="block text-xs text-sage-500">
+                Después elegí el destino de cada categoría en
+                <a routerLink="/admin" [queryParams]="{ panel: 'categories' }" class="text-cafe-green-700 font-medium underline">Categorías</a>.
+                Los usuarios con rol "Barra" ven solo lo que va a la barra.
+              </span>
+              <span *ngIf="!canSplit" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+            </span>
+          </label>
+        </section>
+
         <div>
           <button type="submit" [disabled]="f.invalid || !shiftsValid || saving"
             class="px-6 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">

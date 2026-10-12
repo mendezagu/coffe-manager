@@ -40,6 +40,7 @@ import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { UsersComponent } from './pages/users/users.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { ReportsComponent } from './pages/reports/reports.component';
+import { CategoriesComponent } from './pages/categories/categories.component';
 import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -64,6 +65,7 @@ import { LogsComponent } from './components/logs/logs.component';
     UsersComponent,
     SettingsComponent,
     ReportsComponent,
+    CategoriesComponent,
     MoneyPipe,
     KitchenComponent,
     AdminPanelComponent,

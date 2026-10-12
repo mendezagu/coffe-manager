@@ -80,6 +80,11 @@ export class SettingsComponent implements OnInit {
     return logo ?? null;
   }
 
+  // ¿El plan del negocio incluye separar cocina y barra?
+  get canSplit(): boolean {
+    return (this.form?.features ?? []).includes('kitchen_bar_split');
+  }
+
   get shiftsValid(): boolean {
     const f = this.form;
     return !!f && f.shiftMorningStart < f.shiftAfternoonStart && f.shiftAfternoonStart < f.shiftNightStart;

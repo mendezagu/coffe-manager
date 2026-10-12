@@ -1,0 +1,74 @@
+<div>
+    <!-- Cocina y barra: depende del plan -->
+    <div *ngIf="canSplit && !splitActive" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+      Podés mandar categorías a la <strong>barra</strong>, pero todavía no está activada.
+      Activala en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a> para que cada plato vaya a su pantalla.
+    </div>
+    <div *ngIf="!canSplit" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+      Con tu plan todos los pedidos van a la <strong>cocina</strong>.
+      Un plan superior permite enviar bebidas y otros platos a una barra con su propia pantalla.
+    </div>
+
+    <!-- Alta -->
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-card p-4 mb-5 flex flex-wrap items-end gap-3">
+      <label class="block flex-1 min-w-[180px]">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Nueva categoría</span>
+        <input name="name" [(ngModel)]="newName" required maxlength="60" placeholder="Ej: Cafés"
+          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      </label>
+      <label *ngIf="canSplit" class="block">
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Va a</span>
+        <select name="destination" [(ngModel)]="newDestination"
+          class="px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
+          <option value="KITCHEN">Cocina</option>
+          <option value="BAR">Barra</option>
+        </select>
+      </label>
+      <button type="submit" [disabled]="f.invalid || saving"
+        class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ saving ? 'Agregando…' : 'Agregar' }}
+      </button>
+    </form>
+
+    <!-- Lista ordenable: es el orden en que el mozo ve las categorías -->
+    <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+    <p *ngIf="!loading && categories.length === 0" class="text-sage-600 text-sm">Todavía no creaste ninguna categoría.</p>
+    <p *ngIf="categories.length > 1" class="mb-2 text-xs text-sage-500 flex items-center gap-1">
+      <mat-icon class="!w-4 !h-4 !text-base">drag_indicator</mat-icon>
+      Arrastrá una categoría para cambiar el orden en que se muestran.
+    </p>
+
+    <div cdkDropList (cdkDropListDropped)="drop($event)" class="space-y-2">
+      <div *ngFor="let c of categories" cdkDrag class="flex flex-wrap items-center gap-2.5 pl-2 pr-3 py-2 bg-white border border-sage-200 rounded-xl">
+        <span cdkDragHandle class="w-8 h-8 flex items-center justify-center text-sage-400 cursor-grab" aria-hidden="true">
+          <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
+        </span>
+
+        <ng-container *ngIf="!c.editing">
+          <span class="flex-1 min-w-0 truncate text-sm font-semibold text-sage-800">{{ c.name }}</span>
+          <span *ngIf="canSplit" class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+            [ngClass]="c.destination === 'BAR' ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-sage-100 text-sage-700'">{{ destinationLabel(c.destination) }}</span>
+          <span class="text-xs text-sage-500 whitespace-nowrap">{{ c.itemsCount || 0 }} {{ c.itemsCount === 1 ? 'plato' : 'platos' }}</span>
+          <button type="button" (click)="startEdit(c)" aria-label="Editar categoría" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600">
+            <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
+          </button>
+          <button type="button" (click)="remove(c)" aria-label="Eliminar categoría" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
+            <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="c.editing">
+          <input [(ngModel)]="c.editName" (keydown.enter)="saveEdit(c)" maxlength="60" aria-label="Nombre de la categoría"
+            class="flex-1 min-w-[140px] px-3 py-1.5 border border-sage-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          <select *ngIf="canSplit" [(ngModel)]="c.editDestination" aria-label="Destino"
+            class="px-3 py-1.5 border border-sage-300 rounded-lg text-sm bg-white">
+            <option value="KITCHEN">Cocina</option>
+            <option value="BAR">Barra</option>
+          </select>
+          <button type="button" (click)="saveEdit(c)" class="px-3 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold rounded-lg">Guardar</button>
+          <button type="button" (click)="cancelEdit(c)" class="px-3 py-1.5 border border-sage-200 text-sage-700 text-sm font-medium rounded-lg hover:bg-sage-50">Cancelar</button>
+        </ng-container>
+      </div>
+    </div>
+
+</div>

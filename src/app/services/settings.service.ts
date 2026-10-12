@@ -23,6 +23,11 @@ export interface TenantSettings {
   shiftMorningStart: number;
   shiftAfternoonStart: number;
   shiftNightStart: number;
+  // plan y funciones habilitadas
+  plan: string;
+  features: string[];
+  splitKitchenBar: boolean; // lo que el negocio eligió
+  splitActive: boolean; // lo que rige (elegido y permitido por el plan)
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -47,6 +52,10 @@ const DEFAULTS: TenantSettings = {
   shiftMorningStart: 6,
   shiftAfternoonStart: 12,
   shiftNightStart: 18,
+  plan: 'pro',
+  features: [],
+  splitKitchenBar: false,
+  splitActive: false,
 };
 
 @Injectable({ providedIn: 'root' })

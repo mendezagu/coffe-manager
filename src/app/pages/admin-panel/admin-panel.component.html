@@ -8,14 +8,14 @@
         </div>
         <div>
           <h2 class="text-3xl sm:text-4xl font-bold text-sage-900">Panel de Administrador</h2>
-          <p class="text-sage-500 text-sm sm:text-base mt-1">Gestiona mesas, menú y mozos</p>
+          <p class="text-sage-500 text-sm sm:text-base mt-1">Gestiona mesas, sectores, menú, categorías y mozos</p>
         </div>
       </div>
     </div>
 
     <!-- ADMINISTRAR MESAS -->
     <mat-accordion class="block mb-6">
-      <mat-expansion-panel class="!rounded-card !shadow-soft overflow-hidden !bg-white">
+      <mat-expansion-panel [expanded]="openPanel === 'tables'" class="!rounded-card !shadow-soft overflow-hidden !bg-white">
         <mat-expansion-panel-header class="!bg-white hover:!bg-sage-50 !py-6">
           <mat-panel-title class="!font-bold !text-xl !text-sage-900 flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
@@ -29,54 +29,6 @@
         </mat-expansion-panel-header>
 
         <div class="p-6 sm:p-8">
-          <!-- Sectores -->
-          <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
-            <h3 class="text-xl font-bold text-sage-900 mb-1 flex items-center gap-2">
-              <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">category</mat-icon>
-              Sectores
-            </h3>
-            <p class="text-sm text-sage-500 mt-0 mb-[16px]">Agrupa tus mesas por zona (ej: Salón, Terraza). Después asignás cada mesa a un sector.</p>
-            <div class="flex flex-col sm:flex-row gap-3">
-              <div class="flex-1">
-                <input
-                  class="w-full px-4 py-3 border rounded-xl bg-white focus:outline-none focus:ring-2 transition-all text-sage-800 font-semibold"
-                  [ngClass]="newSectorNameTaken ? 'border-cafe-red-500 focus:ring-cafe-red-500/25' : 'border-sage-200 focus:ring-cafe-green-700/25 focus:border-cafe-green-700'"
-                  [(ngModel)]="newSectorName"
-                  (keydown.enter)="addSector()"
-                  placeholder="Nombre del sector (ej: Salón)"
-                />
-                <p *ngIf="newSectorNameTaken" class="mt-1.5 mb-0 text-xs font-medium text-cafe-red-700">Ya existe un sector con ese nombre</p>
-              </div>
-              <button class="self-start px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      [disabled]="!newSectorName.trim() || newSectorNameTaken" (click)="addSector()">
-                <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
-                Agregar sector
-              </button>
-            </div>
-
-            <!-- Lista ordenable: el orden de acá es el orden en que se ven los sectores en la pantalla de mesas -->
-            <p *ngIf="sectors.length > 1" class="mt-[16px] mb-0 text-xs text-sage-500 flex items-center gap-1">
-              <mat-icon class="!w-4 !h-4 !text-base">drag_indicator</mat-icon>
-              Arrastrá un sector para cambiar el orden en que se muestran.
-            </p>
-            <div *ngIf="sectors.length > 0" cdkDropList (cdkDropListDropped)="dropSector($event)" class="mt-[12px] space-y-[8px]">
-              <div *ngFor="let sector of sectors" cdkDrag class="flex items-center gap-[10px] pl-[6px] pr-[8px] py-[6px] bg-white border border-sage-200 rounded-xl">
-                <span cdkDragHandle class="w-8 h-8 flex items-center justify-center rounded-lg text-sage-400 hover:text-sage-700 hover:bg-sage-100 cursor-grab active:cursor-grabbing touch-none" title="Arrastrar para reordenar">
-                  <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
-                </span>
-                <span class="flex-1 min-w-0 truncate text-sm font-semibold text-sage-800">{{ sector.name }}</span>
-                <span class="text-xs text-sage-500 whitespace-nowrap">{{ tablesInSector(sector._id) }} {{ tablesInSector(sector._id) === 1 ? 'mesa' : 'mesas' }}</span>
-                <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600" aria-label="Editar sector" (click)="startEditingSector(sector)">
-                  <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
-                </button>
-                <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700" aria-label="Eliminar sector" (click)="deleteSector(sector)">
-                  <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
-                </button>
-              </div>
-            </div>
-            <p *ngIf="sectors.length === 0" class="mt-[16px] mb-0 text-sm text-sage-500">Todavía no creaste ningún sector.</p>
-          </div>
-
           <!-- Agregar Mesa -->
           <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
             <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
@@ -174,9 +126,76 @@
       </mat-expansion-panel>
     </mat-accordion>
 
+    <!-- ADMINISTRAR SECTORES -->
+    <mat-accordion class="block mb-6">
+      <mat-expansion-panel [expanded]="openPanel === 'sectors'" class="!rounded-card !shadow-soft overflow-hidden !bg-white">
+        <mat-expansion-panel-header class="!bg-white hover:!bg-sage-50 !py-6">
+          <mat-panel-title class="!font-bold !text-xl !text-sage-900 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
+              <mat-icon class="!w-6 !h-6 !text-2xl">grid_view</mat-icon>
+            </div>
+            <span>Administrar Sectores</span>
+          </mat-panel-title>
+          <mat-panel-description class="!text-sage-500 !text-base">
+            Agrupa tus mesas por zona (Salón, Terraza…)
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="p-6 sm:p-8">
+          <!-- Sectores -->
+          <div class="p-6 bg-sage-50 rounded-card border border-sage-200">
+            <h3 class="text-xl font-bold text-sage-900 mb-1 flex items-center gap-2">
+              <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">category</mat-icon>
+              Sectores
+            </h3>
+            <p class="text-sm text-sage-500 mt-0 mb-[16px]">Agrupa tus mesas por zona (ej: Salón, Terraza). Después asignás cada mesa a un sector.</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex-1">
+                <input
+                  class="w-full px-4 py-3 border rounded-xl bg-white focus:outline-none focus:ring-2 transition-all text-sage-800 font-semibold"
+                  [ngClass]="newSectorNameTaken ? 'border-cafe-red-500 focus:ring-cafe-red-500/25' : 'border-sage-200 focus:ring-cafe-green-700/25 focus:border-cafe-green-700'"
+                  [(ngModel)]="newSectorName"
+                  (keydown.enter)="addSector()"
+                  placeholder="Nombre del sector (ej: Salón)"
+                />
+                <p *ngIf="newSectorNameTaken" class="mt-1.5 mb-0 text-xs font-medium text-cafe-red-700">Ya existe un sector con ese nombre</p>
+              </div>
+              <button class="self-start px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      [disabled]="!newSectorName.trim() || newSectorNameTaken" (click)="addSector()">
+                <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
+                Agregar sector
+              </button>
+            </div>
+
+            <!-- Lista ordenable: el orden de acá es el orden en que se ven los sectores en la pantalla de mesas -->
+            <p *ngIf="sectors.length > 1" class="mt-[16px] mb-0 text-xs text-sage-500 flex items-center gap-1">
+              <mat-icon class="!w-4 !h-4 !text-base">drag_indicator</mat-icon>
+              Arrastrá un sector para cambiar el orden en que se muestran.
+            </p>
+            <div *ngIf="sectors.length > 0" cdkDropList (cdkDropListDropped)="dropSector($event)" class="mt-[12px] space-y-[8px]">
+              <div *ngFor="let sector of sectors" cdkDrag class="flex items-center gap-[10px] pl-[6px] pr-[8px] py-[6px] bg-white border border-sage-200 rounded-xl">
+                <span cdkDragHandle class="w-8 h-8 flex items-center justify-center rounded-lg text-sage-400 hover:text-sage-700 hover:bg-sage-100 cursor-grab active:cursor-grabbing touch-none" title="Arrastrar para reordenar">
+                  <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
+                </span>
+                <span class="flex-1 min-w-0 truncate text-sm font-semibold text-sage-800">{{ sector.name }}</span>
+                <span class="text-xs text-sage-500 whitespace-nowrap">{{ tablesInSector(sector._id) }} {{ tablesInSector(sector._id) === 1 ? 'mesa' : 'mesas' }}</span>
+                <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600" aria-label="Editar sector" (click)="startEditingSector(sector)">
+                  <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
+                </button>
+                <button type="button" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700" aria-label="Eliminar sector" (click)="deleteSector(sector)">
+                  <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <p *ngIf="sectors.length === 0" class="mt-[16px] mb-0 text-sm text-sage-500">Todavía no creaste ningún sector.</p>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
     <!-- ADMINISTRAR MENU -->
     <mat-accordion class="block mb-6">
-      <mat-expansion-panel class="!rounded-card !shadow-soft overflow-hidden !bg-white">
+      <mat-expansion-panel [expanded]="openPanel === 'menu'" class="!rounded-card !shadow-soft overflow-hidden !bg-white">
         <mat-expansion-panel-header class="!bg-white hover:!bg-sage-50 !py-6">
           <mat-panel-title class="!font-bold !text-xl !text-sage-900 flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
@@ -199,6 +218,10 @@
             <div class="flex flex-col sm:flex-row gap-3">
               <input class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" [(ngModel)]="newItemName" placeholder="Nombre del ítem (ej: Café Americano)" />
               <input class="w-full sm:w-40 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" type="number" [(ngModel)]="newItemPrice" placeholder="Precio" (change)="formatPrice()" />
+              <select *ngIf="categories.length" class="w-full sm:w-48 px-4 py-3 border border-sage-200 rounded-xl bg-white text-sage-800 font-semibold focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" [(ngModel)]="newItemCategoryId" aria-label="Categoría">
+                <option value="">Sin categoría</option>
+                <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
+              </select>
               <label class="flex items-center gap-2 px-3 text-sage-800 font-semibold cursor-pointer select-none">
                 <input type="checkbox" class="w-5 h-5 accent-cafe-green-700" [(ngModel)]="newItemIsPromo" />
                 Es promo
@@ -257,6 +280,7 @@
                   <td class="px-6 py-4 text-sage-900 font-bold">
                     {{ item.name }}
                     <span *ngIf="item.isPromo" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold align-middle">Promo</span>
+                    <span *ngIf="categoryName(item.categoryId)" class="ml-2 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-[10px] font-bold align-middle">{{ categoryName(item.categoryId) }}</span>
                   </td>
                   <td class="px-6 py-4">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
@@ -284,9 +308,30 @@
       </mat-expansion-panel>
     </mat-accordion>
 
+    <!-- ADMINISTRAR CATEGORÍAS -->
+    <mat-accordion class="block mb-6">
+      <mat-expansion-panel [expanded]="openPanel === 'categories'" class="!rounded-card !shadow-soft overflow-hidden !bg-white">
+        <mat-expansion-panel-header class="!bg-white hover:!bg-sage-50 !py-6">
+          <mat-panel-title class="!font-bold !text-xl !text-sage-900 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
+              <mat-icon class="!w-6 !h-6 !text-2xl">category</mat-icon>
+            </div>
+            <span>Administrar Categorías</span>
+          </mat-panel-title>
+          <mat-panel-description class="!text-sage-500 !text-base">
+            Ordena el menú en secciones (Cafés, Tortas…)
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="p-6 sm:p-8">
+          <app-categories (changed)="loadCategories()"></app-categories>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
     <!-- ADMINISTRAR MOZOS -->
     <mat-accordion class="block mb-6">
-      <mat-expansion-panel class="!rounded-card !shadow-soft overflow-hidden !bg-white">
+      <mat-expansion-panel [expanded]="openPanel === 'waiters'" class="!rounded-card !shadow-soft overflow-hidden !bg-white">
         <mat-expansion-panel-header class="!bg-white hover:!bg-sage-50 !py-6">
           <mat-panel-title class="!font-bold !text-xl !text-sage-900 flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
@@ -483,6 +528,13 @@
           <label class="block text-xs font-bold text-sage-500 mb-1.5">Precio</label>
           <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
                  type="number" [(ngModel)]="editItemPrice" (keydown.enter)="saveMenuItemEdit()" placeholder="Precio" />
+        </div>
+        <div *ngIf="categories.length">
+          <label class="block text-xs font-bold text-sage-500 mb-1.5">Categoría</label>
+          <select class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white text-sage-800 font-semibold focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" [(ngModel)]="editItemCategoryId">
+            <option value="">Sin categoría</option>
+            <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
+          </select>
         </div>
         <label class="flex items-start gap-[12px] px-[12px] py-[10px] bg-sage-50 rounded-xl border border-sage-200 cursor-pointer select-none">
           <input type="checkbox" class="w-5 h-5 mt-0.5 accent-cafe-green-700 cursor-pointer" [(ngModel)]="editItemIsPromo" />

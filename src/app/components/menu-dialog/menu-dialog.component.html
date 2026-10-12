@@ -70,6 +70,22 @@
       </div>
     </div>
 
+    <!-- Categorías -->
+    <div *ngIf="categories.length > 0" class="mb-3 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Categorías">
+      <button type="button" (click)="selectedCategory = 'all'"
+        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
+        [ngClass]="selectedCategory === 'all' ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="selectedCategory === 'all'">Todo</button>
+      <button *ngFor="let c of categories" type="button" (click)="selectedCategory = c._id"
+        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
+        [ngClass]="selectedCategory === c._id ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="selectedCategory === c._id">{{ c.name }}</button>
+      <button *ngIf="hasUncategorized" type="button" (click)="selectedCategory = 'none'"
+        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
+        [ngClass]="selectedCategory === 'none' ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="selectedCategory === 'none'">Sin categoría</button>
+    </div>
+
     <!-- Grid de items del menú -->
     <div class="space-y-2 max-h-[45vh] overflow-y-auto custom-scrollbar pr-2">
       <div

@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, of, timer } from 'rxjs';
+import { Subject, Subscription, merge, of, timer } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { KitchenOrder, KitchenService, KitchenStatus } from 'src/app/services/kitchen.service';
+import { KitchenDestination, KitchenOrder, KitchenService, KitchenStatus } from 'src/app/services/kitchen.service';
+import { SettingsService } from 'src/app/services/settings.service';
+import { UserService } from 'src/app/services/user.service';
 
 const POLL_MS = 5000;
 const LATE_MINUTES = 10;
@@ -43,19 +45,52 @@ export class KitchenComponent implements OnInit, OnDestroy {
   offline = false;
   now = Date.now();
 
+  // Cocina y barra: solo si el negocio las separa. El admin ve ambas con pestañas.
+  role: string | null = null;
+  splitActive = false;
+  tab: 'ALL' | KitchenDestination = 'ALL';
+  private reload$ = new Subject<void>();
+  private settingsSub?: Subscription;
+
   private polling?: Subscription;
   private clock?: ReturnType<typeof setInterval>;
   // Mientras hay cambios sin confirmar se ignoran las respuestas del refresco, para que
   // una lectura vieja no "des-haga" por un instante lo que cocina acaba de tocar.
   private inFlight = 0;
 
-  constructor(private kitchen: KitchenService) {}
+  constructor(private kitchen: KitchenService, private settings: SettingsService, private users: UserService) {}
+
+  get isAdmin(): boolean {
+    return this.role === 'admin';
+  }
+
+  get title(): string {
+    if (this.role === 'bar') return 'Barra';
+    return this.splitActive && this.isAdmin ? 'Cocina y barra' : 'Cocina';
+  }
+
+  // La barra existe como pantalla solo si el negocio separó cocina y barra
+  get barDisabled(): boolean {
+    return this.role === 'bar' && !this.splitActive;
+  }
+
+  setTab(tab: 'ALL' | KitchenDestination) {
+    this.tab = tab;
+    this.reload$.next();
+  }
 
   ngOnInit() {
-    this.polling = timer(0, POLL_MS)
+    this.role = this.users.currentRole();
+    this.settings.load();
+    this.settingsSub = this.settings.settings$.subscribe((s) => {
+      this.splitActive = !!s.splitActive;
+      if (!this.splitActive) this.tab = 'ALL';
+    });
+
+    this.polling = merge(timer(0, POLL_MS), this.reload$)
       .pipe(
         switchMap(() =>
-          this.kitchen.list().pipe(
+          this.kitchen.list(this.isAdmin && this.splitActive && this.tab !== 'ALL' ? this.tab : undefined).pipe(
             catchError(() => {
               this.offline = true;
               return of(null);
@@ -76,6 +111,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.polling?.unsubscribe();
+    this.settingsSub?.unsubscribe();
     if (this.clock) clearInterval(this.clock);
   }
 

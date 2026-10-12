@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { environmentMongo } from 'src/environments/environmentMongo';
 
-export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen';
+export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'bar';
 
 export interface AppUser {
   id: string;
@@ -20,10 +20,11 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   cashier: 'Cajero',
   waiter: 'Mozo',
   kitchen: 'Cocina',
+  bar: 'Barra',
 };
 
-// Pantalla de inicio según el rol: cocina trabaja en su tablero, el resto en las mesas.
-export const homeFor = (role: AppRole | null) => (role === 'kitchen' ? '/kitchen' : '/home');
+// Pantalla de inicio según el rol: cocina y barra trabajan en su tablero, el resto en las mesas.
+export const homeFor = (role: AppRole | null) => (role === 'kitchen' || role === 'bar' ? '/kitchen' : '/home');
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';

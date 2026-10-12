@@ -3,7 +3,7 @@
 
     <div class="flex items-center justify-between gap-3 mb-5">
       <div>
-        <h1 class="text-2xl font-bold text-sage-900">Cocina</h1>
+        <h1 class="text-2xl font-bold text-sage-900">{{ title }}</h1>
         <p class="text-sage-600 text-sm mt-0.5">Se actualiza sola cada pocos segundos.</p>
       </div>
       <span *ngIf="offline" role="alert" class="px-3 py-1.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">
@@ -11,9 +11,23 @@
       </span>
     </div>
 
-    <p *ngIf="!loaded && !offline" class="text-sage-600 text-sm">Cargando pedidos…</p>
+    <!-- El admin ve cocina y barra por separado cuando el negocio las separa -->
+    <div *ngIf="isAdmin && splitActive" class="inline-flex p-[3px] mb-4 bg-white border border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Sector">
+      <button type="button" (click)="setTab('ALL')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        [ngClass]="tab === 'ALL' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'ALL'">Todo</button>
+      <button type="button" (click)="setTab('KITCHEN')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        [ngClass]="tab === 'KITCHEN' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'KITCHEN'">Cocina</button>
+      <button type="button" (click)="setTab('BAR')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        [ngClass]="tab === 'BAR' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'" [attr.aria-pressed]="tab === 'BAR'">Barra</button>
+    </div>
 
-    <div class="grid gap-4 lg:grid-cols-3" *ngIf="loaded || offline">
+    <p *ngIf="barDisabled" class="px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+      La barra no está activada en este negocio, así que todos los pedidos van a la cocina.
+    </p>
+
+    <p *ngIf="!loaded && !offline && !barDisabled" class="text-sage-600 text-sm">Cargando pedidos…</p>
+
+    <div class="grid gap-4 lg:grid-cols-3" *ngIf="(loaded || offline) && !barDisabled">
       <section *ngFor="let col of columns" class="bg-sage-200/50 rounded-card p-3">
         <h2 class="flex items-center justify-between px-1 mb-3 font-bold text-sage-800">
           {{ col.title }}
@@ -52,6 +66,7 @@
                 <div class="min-w-0 flex-1" [class.opacity-50]="l.status === 'READY' && t.status !== 'READY'">
                   <p class="font-bold text-sage-900 leading-snug" [class.line-through]="l.status === 'READY' && t.status !== 'READY'">
                     <span class="text-cafe-green-700">{{ l.quantity }}×</span> {{ l.itemName }}
+                    <span *ngIf="splitActive && isAdmin && tab === 'ALL' && l.destination === 'BAR'" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">Barra</span>
                   </p>
                   <p *ngIf="l.note" class="mt-1 px-2.5 py-1 rounded-lg bg-sage-100 text-sage-800 text-sm font-medium">↳ {{ l.note }}</p>
                 </div>

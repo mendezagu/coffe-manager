@@ -15,7 +15,7 @@ import { guestGuard, roleGuard } from './guards/auth.guard';
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: '/home' },
   { path: 'home', component: HomeComponent, canActivate: [roleGuard('admin', 'cashier', 'waiter')] },
-  { path: 'kitchen', component: KitchenComponent, canActivate: [roleGuard('admin', 'kitchen')] },
+  { path: 'kitchen', component: KitchenComponent, canActivate: [roleGuard('admin', 'kitchen', 'bar')] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
@@ -24,7 +24,7 @@ const routes: Routes = [
   { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },
   { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
-  { path: '**', redirectTo: '/home' }, // kitchen rebota de /home a /kitchen (roleGuard)
+  { path: '**', redirectTo: '/home' }, // cocina y barra rebotan de /home a /kitchen (roleGuard)
 ];
 
 @NgModule({

@@ -1,4 +1,6 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { CategoriesComponent } from '../categories/categories.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -9,6 +11,7 @@ import { UserService } from 'src/app/services/user.service';
 import { Waiter } from 'src/app/services/gestionService';
 import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
+import { Category } from 'src/app/services/gestionService';
 
 @Component({
   selector: 'app-admin-panel',
@@ -38,10 +41,13 @@ export class AdminPanelComponent {
   newItemName: string = '';
   newItemPrice: number = 0;
   newItemIsPromo: boolean = false;
+  newItemCategoryId: string = '';
+  categories: Category[] = [];
   editItemId?: string;
   editItemName: string = '';
   editItemPrice: number = 0;
   editItemIsPromo: boolean = false;
+  editItemCategoryId: string = '';
 
   // WAITERS
   waiters: Waiter[] = [];
@@ -49,6 +55,12 @@ export class AdminPanelComponent {
   editWaiterId?: string;
   editWaiterName: string = '';
 
+
+  // Panel que se abre al entrar (?panel=tables|sectors|menu|categories|waiters)
+  openPanel: string | null = null;
+
+  // Panel de categorías: se refresca cuando cambian los platos (cantidad de platos por categoría)
+  @ViewChild(CategoriesComponent) categoriesPanel?: CategoriesComponent;
 
   // Para el buscador
   searchTerm: string
@@ -64,12 +76,15 @@ export class AdminPanelComponent {
     private userService: UserService,
     private gestionService: GestionService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    route: ActivatedRoute
   ) {
+    this.openPanel = route.snapshot.queryParamMap.get('panel');
     this.role$ = this.userService.getRoleState();
     this.loadTables();
     this.loadSectors();
     this.loadMenuItems();
+    this.loadCategories();
     this.loadWaiters();
     
     this.searchTerm = '';
@@ -236,6 +251,14 @@ export class AdminPanelComponent {
   }
 
   // MENU
+  loadCategories() {
+    this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
+  }
+
+  categoryName(id?: string | null): string {
+    return this.categories.find((c) => c._id === id)?.name ?? '';
+  }
+
   loadMenuItems() {
     this.gestionService.getMenu().subscribe((menuItems) => {
       this.menuItems = menuItems;
@@ -244,13 +267,15 @@ export class AdminPanelComponent {
 
   addMenuItem() {
     if (this.newItemName.trim() && this.newItemPrice > 0) {
-      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice, this.newItemIsPromo).subscribe(() => {
+      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice, this.newItemIsPromo, this.newItemCategoryId || null).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });
         this.newItemName = '';
         this.newItemPrice = 0;
         this.newItemIsPromo = false;
+        this.newItemCategoryId = '';
+        this.categoriesPanel?.load();
       });
     }
   }
@@ -260,16 +285,18 @@ export class AdminPanelComponent {
     this.editItemName = item.name;
     this.editItemPrice = item.price;
     this.editItemIsPromo = !!item.isPromo;
+    this.editItemCategoryId = item.categoryId ?? '';
     this.openEditDialog(this.editMenuDialog, () => (this.editItemId = undefined));
   }
 
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
-      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo).subscribe(() => {
+      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo, this.editItemCategoryId || null).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });
         this.editItemId = undefined;
+        this.categoriesPanel?.load();
         this.closeEditDialog();
       });
     }
@@ -277,6 +304,7 @@ export class AdminPanelComponent {
 
   deleteMenuItem(itemId: string) {
     this.gestionService.deleteMenuItem(itemId).subscribe(() => {
+      this.categoriesPanel?.load();
       this.gestionService.refreshMenu().subscribe((menuItems) => {
         this.menuItems = menuItems;
       });

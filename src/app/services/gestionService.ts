@@ -13,6 +13,17 @@ export interface MenuItem {
   note?: string;
   isPromo?: boolean;
   discount?: number;
+  categoryId?: string | null;
+}
+
+export type Destination = 'KITCHEN' | 'BAR';
+
+export interface Category {
+  _id: string;
+  name: string;
+  position: number;
+  destination: Destination;
+  itemsCount?: number;
 }
 
 export interface Table {
@@ -241,6 +252,27 @@ deleteAllBalances(): Observable<{ message: string }> {
   );
 }
 
+  // 📌 Categorías del menú. Los errores del servidor pasan tal cual para poder mostrar su mensaje.
+  getCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.apiUrl}/categories`);
+  }
+
+  addCategory(name: string, destination: Destination = 'KITCHEN'): Observable<Category> {
+    return this.http.post<Category>(`${this.apiUrl}/categories`, { name, destination });
+  }
+
+  editCategory(id: string, changes: { name?: string; destination?: Destination }): Observable<Category> {
+    return this.http.put<Category>(`${this.apiUrl}/categories/${id}`, changes);
+  }
+
+  deleteCategory(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/categories/${id}`);
+  }
+
+  reorderCategories(ids: string[]): Observable<Category[]> {
+    return this.http.put<Category[]>(`${this.apiUrl}/categories/reorder`, { ids });
+  }
+
   // 📌 Menu Items
 // Nueva versión de getMenu
 getMenu(): Observable<MenuItem[]> {
@@ -263,15 +295,16 @@ refreshMenu(): Observable<MenuItem[]> {
   );
 }
 
-  addMenuItem(name: string, price: number, isPromo: boolean = false): Observable<MenuItem> {
-    return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1, isPromo }).pipe(
+  addMenuItem(name: string, price: number, isPromo: boolean = false, categoryId: string | null = null): Observable<MenuItem> {
+    return this.http.post<MenuItem>(`${this.apiUrl}/menu`, { name, price, quantity: 1, isPromo, categoryId }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );
   }
 
-  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false): Observable<MenuItem> {
-    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo }).pipe(
+  // categoryId: id para asignarla, null para quitarla
+  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false, categoryId: string | null = null): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo, categoryId }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
     );

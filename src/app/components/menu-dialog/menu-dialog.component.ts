@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SettingsService } from 'src/app/services/settings.service';
+import { Category } from 'src/app/services/gestionService';
 import { GestionService, MenuItem, Table } from 'src/app/services/gestionService';
 
 @Component({
@@ -40,6 +41,7 @@ export class MenuDialogComponent {
   ngOnInit(): void {
      console.log('Datos recibidos en MenuDialogComponent:', this.data);
     this.loadMenu();
+    this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
     // Verificamos si 'this.data.waiter' es un objeto de tipo Waiter y accedemos al nombre del mozo
   if (this.data && this.data.waiter) {
     if (typeof this.data.waiter === 'object' && this.data.waiter.name) {
@@ -67,9 +69,19 @@ export class MenuDialogComponent {
       
     });
   }
+  // Categorías para filtrar: 'all' = todo, 'none' = platos sin categoría, o el id de una categoría
+  categories: Category[] = [];
+  selectedCategory: string = 'all';
+
+  get hasUncategorized(): boolean {
+    return this.categories.length > 0 && this.menuItems.some(m => !m.categoryId);
+  }
+
   get filteredMenuItems(): MenuItem[] {
-    return this.menuItems.filter(menu => 
-      menu.name.toLowerCase().includes(this.filterText.toLowerCase())
+    return this.menuItems.filter(menu =>
+      menu.name.toLowerCase().includes(this.filterText.toLowerCase()) &&
+      (this.selectedCategory === 'all' ||
+        (this.selectedCategory === 'none' ? !menu.categoryId : menu.categoryId === this.selectedCategory))
     );
   }
 
