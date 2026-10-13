@@ -65,6 +65,10 @@
         </div>
       </div>
 
+      <p *ngIf="report.summary.tipsTotal > 0" class="mb-2 text-xs text-sage-600">
+        Propinas del período: <strong class="text-sage-800">{{ report.summary.tipsTotal | money }}</strong>. No están incluidas en las ventas; el método de pago sí las cuenta, porque es lo que entró con cada uno.
+      </p>
+
       <p *ngIf="report.summary.salesWithoutDetail > 0" class="mb-4 text-xs text-sage-600">
         {{ report.summary.salesWithoutDetail }}
         {{ report.summary.salesWithoutDetail === 1 ? 'venta es del sistema anterior y no tiene' : 'ventas son del sistema anterior y no tienen' }}
@@ -121,9 +125,9 @@
             <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
             <div [hidden]="showTables" [style.height.px]="report.byWaiter.length * 34 + 50"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Propinas</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
-                <tr *ngFor="let w of report.byWaiter"><td class="py-1.5">{{ w.name }}</td><td class="py-1.5 text-right">{{ w.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ w.totalAmount | money }}</td></tr>
+                <tr *ngFor="let w of report.byWaiter"><td class="py-1.5">{{ w.name }}</td><td class="py-1.5 text-right">{{ w.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ w.totalAmount | money }}</td><td class="py-1.5 text-right">{{ w.tips | money }}</td></tr>
               </tbody>
             </table>
           </section>

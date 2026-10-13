@@ -25,6 +25,8 @@ interface BalanceEntry {
   discountTotal?: number;
   globalDiscountPct?: number;
   items?: SaleItem[];
+  tipAmount?: number;
+  payments?: { method: string; amount: number; tendered: number | null; change: number }[];
   // solo de pantalla
   expanded?: boolean;
   loadingDetail?: boolean;
@@ -77,6 +79,10 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  methodLabel(method: string): string {
+    return ({ efectivo: 'Efectivo', transferencia: 'Transferencia', qr: 'Código QR', tarjeta: 'Tarjeta', mixto: 'Mixto' } as Record<string, string>)[method] ?? method;
+  }
+
   modifierNames(item: SaleItem): string {
     return (item.modifiers ?? []).map((m) => m.name).join(', ');
   }
@@ -90,6 +96,7 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gestionService.getBalanceDetail(entry._id).subscribe({
       next: (sale) => {
         entry.items = sale.items ?? [];
+        entry.payments = sale.payments ?? [];
         entry.loadingDetail = false;
       },
       error: () => {

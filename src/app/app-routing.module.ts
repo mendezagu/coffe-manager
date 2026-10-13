@@ -9,6 +9,7 @@ import { LogsComponent } from './components/logs/logs.component';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { ReportsComponent } from './pages/reports/reports.component';
+import { CashComponent } from './pages/cash/cash.component';
 import { guestGuard, roleGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -18,10 +19,11 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'admin/:section', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
+  { path: 'cash', component: CashComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
   { path: 'settings', component: SettingsComponent, canActivate: [roleGuard('admin')] },
   { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },
-  { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin', 'cashier')] },
+  { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin')] },
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
   { path: '**', redirectTo: '/home' }, // cocina y barra rebotan de /home a /kitchen (roleGuard)
 ];

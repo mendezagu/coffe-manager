@@ -1,0 +1,108 @@
+<div class="space-y-3">
+
+  <!-- Propina (solo si el negocio la activó) -->
+  <div *ngIf="tipEnabled" class="p-3 bg-sage-50 rounded-lg border border-sage-200">
+    <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
+      <mat-icon class="!w-4 !h-4 !text-base text-sage-600">volunteer_activism</mat-icon>
+      Propina
+    </h3>
+    <div class="flex flex-wrap gap-1.5" role="group" aria-label="Propina">
+      <button type="button" (click)="setNoTip()" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+        [ngClass]="tipMode === 'none' ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="tipMode === 'none'">Sin propina</button>
+      <button *ngFor="let p of tipPresets" type="button" (click)="setTipPct(p)" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+        [ngClass]="tipMode === 'pct' && tipPct === p ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="tipMode === 'pct' && tipPct === p">{{ p }}%</button>
+      <button type="button" (click)="setTipCustom()" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
+        [ngClass]="tipMode === 'custom' ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'"
+        [attr.aria-pressed]="tipMode === 'custom'">Otro monto</button>
+    </div>
+    <div *ngIf="tipMode === 'custom'" class="mt-2">
+      <input type="number" min="0" step="any" [(ngModel)]="tipCustom" (ngModelChange)="setTipCustom()" aria-label="Monto de la propina" placeholder="Monto"
+        class="w-40 px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+    </div>
+    <p *ngIf="tip > 0" class="mt-2 mb-0 text-xs text-sage-600">
+      Propina <strong class="text-sage-900">{{ tip | money }}</strong> · Total a cobrar <strong class="text-cafe-green-700">{{ due | money }}</strong>
+      <span class="block text-sage-500">La propina no suma a las ventas: es del mozo.</span>
+    </p>
+  </div>
+
+  <!-- Pago -->
+  <div class="p-3 bg-sage-50 rounded-lg border border-sage-200">
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <h3 class="text-sm font-bold text-sage-900 m-0 flex items-center gap-1.5">
+        <mat-icon class="!w-4 !h-4 !text-base text-sage-600">payment</mat-icon>
+        Pago
+      </h3>
+      <span class="text-sm font-bold text-cafe-green-700">{{ due | money }}</span>
+    </div>
+
+    <div class="space-y-2">
+      <div *ngFor="let row of rows; let i = index" class="p-2 bg-white border border-sage-200 rounded-lg">
+        <div class="flex flex-wrap items-center gap-2">
+          <span *ngIf="splitN > 1" class="text-xs font-bold text-sage-500 w-full sm:w-auto">Persona {{ i + 1 }}</span>
+          <select [(ngModel)]="row.method" (ngModelChange)="onMethodChange(row)" [attr.aria-label]="'Método de pago ' + (i + 1)"
+            class="flex-1 min-w-[130px] px-2 py-2 border border-sage-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+            <option *ngFor="let m of methods" [value]="m.value">{{ m.label }}</option>
+          </select>
+          <label class="flex flex-col">
+            <span class="text-[10px] font-bold text-sage-500 leading-none mb-0.5">Importe a cobrar</span>
+            <input type="number" min="0" step="any" [(ngModel)]="row.amount" (ngModelChange)="onRowChange(i)" [attr.aria-label]="'Importe a cobrar con este método ' + (i + 1)"
+              [readOnly]="splitN > 1 || rows.length === 1"
+              class="w-28 px-2 py-2 border border-sage-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25"
+              [class.bg-sage-50]="splitN > 1 || rows.length === 1" />
+          </label>
+          <button *ngIf="rows.length > 1" type="button" (click)="removeRow(i)" aria-label="Quitar este pago"
+            class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
+            <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Efectivo: lo que entrega el cliente y el vuelto -->
+        <div *ngIf="row.method === 'efectivo'" class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <label class="flex items-center gap-1.5 text-sage-600" title="Solo sirve para calcular el vuelto. No cambia el importe a cobrar.">
+            El cliente entrega
+            <input type="number" min="0" step="any" [(ngModel)]="row.tendered" (ngModelChange)="onRowChange()" [attr.aria-label]="'Efectivo recibido ' + (i + 1)" placeholder="Para el vuelto"
+              class="w-28 px-2 py-1.5 border border-sage-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+          </label>
+          <span *ngIf="row.tendered !== null && !cashShort(row)" class="px-2 py-1 rounded-full bg-cafe-green-50 text-cafe-green-700 font-bold">
+            Vuelto {{ changeOf(row) | money }}
+          </span>
+          <span *ngIf="cashShort(row)" role="alert" class="px-2 py-1 rounded-full bg-cafe-red-50 text-cafe-red-700 font-bold">
+            Entrega {{ row.amount - (row.tendered || 0) | money }} de menos que el importe
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="rows.length > 1 && splitN === 1" class="mt-2 mb-0 text-xs text-sage-600">
+      Escribí el <strong>importe a cobrar</strong> con cada método: el último se completa solo con lo que falta.
+    </p>
+
+    <div class="mt-2 flex flex-wrap items-center gap-2">
+      <button type="button" (click)="addRow()" [disabled]="splitN > 1"
+        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+        + Pagar con otro método
+      </button>
+
+      <label class="flex items-center gap-1.5 text-xs text-sage-600 ml-auto">
+        Dividir en partes iguales
+        <select [ngModel]="splitN" (ngModelChange)="setSplit($event)" aria-label="Cantidad de personas"
+          class="px-2 py-1.5 border border-sage-200 rounded-lg bg-white text-sm">
+          <option [ngValue]="1">No dividir</option>
+          <option *ngFor="let n of [2,3,4,5,6,7,8,9,10]" [ngValue]="n">{{ n }} personas</option>
+        </select>
+      </label>
+    </div>
+
+    <p *ngIf="splitN > 1" class="mt-2 mb-0 text-xs text-sage-600">
+      Cada persona paga <strong class="text-sage-900">{{ rows[0].amount | money }}</strong>. Elegí cómo paga cada una.
+    </p>
+
+    <!-- Estado del pago -->
+    <p *ngIf="remaining > 0.004" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-red-700">Falta cobrar {{ remaining | money }}</p>
+    <p *ngIf="remaining < -0.004" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-red-700">Sobran {{ -remaining | money }}: los pagos superan el total</p>
+    <p *ngIf="remaining >= -0.004 && remaining <= 0.004 && due > 0" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-green-700">✓ El pago cubre el total</p>
+  </div>
+
+</div>

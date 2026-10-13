@@ -13,10 +13,11 @@ export interface SalesReport {
     discountTotal: number;
     itemsSold: number;
     salesWithoutDetail: number;
+    tipsTotal: number;
   };
   byDay: { date: string; salesCount: number; totalAmount: number }[];
   items: { name: string; quantity: number; amount: number }[];
-  byWaiter: { name: string; salesCount: number; totalAmount: number }[];
+  byWaiter: { name: string; salesCount: number; totalAmount: number; tips: number }[];
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
 }
 

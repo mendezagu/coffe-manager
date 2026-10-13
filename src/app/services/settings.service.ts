@@ -28,6 +28,10 @@ export interface TenantSettings {
   features: string[];
   splitKitchenBar: boolean; // lo que el negocio eligió
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)
+  // propinas y caja
+  tipEnabled: boolean;
+  tipSuggestedPct: number;
+  requireOpenRegister: boolean;
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -56,6 +60,9 @@ const DEFAULTS: TenantSettings = {
   features: [],
   splitKitchenBar: false,
   splitActive: false,
+  tipEnabled: false,
+  tipSuggestedPct: 10,
+  requireOpenRegister: true,
 };
 
 @Injectable({ providedIn: 'root' })

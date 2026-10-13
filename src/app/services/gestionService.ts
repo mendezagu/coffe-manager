@@ -279,7 +279,15 @@ getBalanceDetail(id: string): Observable<any> {
 // Los errores del servidor se dejan pasar tal cual para poder mostrar su mensaje.
 checkout(
   tableId: string,
-  body: { checkoutId: string; paymentMethod: string; globalDiscount: number; items: { orderId: string; discount: number }[] }
+  body: {
+    checkoutId: string;
+    payments: { method: string; amount: number; tendered?: number }[];
+    tip?: number;
+    globalDiscount: number;
+    items: { orderId: string; discount: number }[];
+    // cobrar solo una parte de la mesa (división por platos); sin esto se cobra todo
+    lines?: { orderId: string; quantity: number }[];
+  }
 ): Observable<any> {
   return this.http.post<any>(`${this.apiUrl}/tables/${tableId}/checkout`, body);
 }

@@ -42,6 +42,8 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { ReportsComponent } from './pages/reports/reports.component';
 import { CategoriesComponent } from './pages/categories/categories.component';
 import { ModifiersComponent } from './pages/modifiers/modifiers.component';
+import { CashComponent } from './pages/cash/cash.component';
+import { PaymentPanelComponent } from './components/payment-panel/payment-panel.component';
 import { ModifierPickerDialogComponent } from './components/modifier-picker-dialog/modifier-picker-dialog.component';
 import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
@@ -69,6 +71,8 @@ import { LogsComponent } from './components/logs/logs.component';
     ReportsComponent,
     CategoriesComponent,
     ModifiersComponent,
+    CashComponent,
+    PaymentPanelComponent,
     ModifierPickerDialogComponent,
     MoneyPipe,
     KitchenComponent,

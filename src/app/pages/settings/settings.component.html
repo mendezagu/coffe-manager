@@ -135,6 +135,36 @@
           </p>
         </section>
 
+        <!-- Cobro: propinas y caja -->
+        <section class="bg-white rounded-card shadow-soft p-5 space-y-3">
+          <h2 class="font-bold text-sage-800 mb-1">Cobro</h2>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="requireOpenRegister" [(ngModel)]="form.requireOpenRegister" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Exigir caja abierta para cobrar</span>
+              <span class="block text-xs text-sage-500">Cada cobro queda asociado a la caja del turno y a quien la maneja. Se abre y se cierra desde <a routerLink="/cash" class="text-cafe-green-700 font-medium underline">Caja</a>.</span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Ofrecer propina al cobrar</span>
+              <span class="block text-xs text-sage-500">La propina se suma a lo que paga el cliente pero no cuenta como venta: es del mozo que atendió la mesa.</span>
+            </span>
+          </label>
+
+          <label *ngIf="form.tipEnabled" class="block max-w-xs">
+            <span class="block text-xs font-bold text-sage-500 mb-1.5">Porcentaje sugerido</span>
+            <div class="flex items-center gap-2">
+              <input name="tipSuggestedPct" type="number" min="0" max="100" step="1" [(ngModel)]="form.tipSuggestedPct"
+                class="w-24 px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+              <span class="text-sm text-sage-600">%</span>
+            </div>
+          </label>
+        </section>
+
         <!-- Cocina y barra -->
         <section class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>

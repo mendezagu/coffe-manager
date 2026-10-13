@@ -4,6 +4,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
 import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
 import { SettingsService } from './services/settings.service';
+import { CashService } from './services/cash.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
@@ -34,7 +35,8 @@ export class AppComponent {
     private userService: UserService,
     private router: Router,
     private gestionService: GestionService,
-    public settings: SettingsService
+    public settings: SettingsService,
+    public cash: CashService
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
@@ -43,7 +45,19 @@ export class AppComponent {
     this.user$ = this.userService.getAuthState();
   }
 
+  private cashTimer?: ReturnType<typeof setInterval>;
+
   ngOnInit() {
+    // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
+    this.userService.getRoleState().subscribe((role) => {
+      if (this.cashTimer) clearInterval(this.cashTimer);
+      if (role === 'admin' || role === 'cashier') {
+        const refresh = () => this.cash.refresh().subscribe({ error: () => {} });
+        refresh();
+        this.cashTimer = setInterval(refresh, 60000);
+      }
+    });
+
     // Suscribirse a cambios en la autenticación
     this.userService.getAuthState().subscribe(user => {
       this.isLoggedIn = !!user; // Si hay usuario, true; si no, false

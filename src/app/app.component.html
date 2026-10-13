@@ -31,7 +31,12 @@
       Administrar
     </button>
 
-    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+    <button mat-button routerLink="/cash" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <mat-icon fontIcon="point_of_sale"></mat-icon>
+      Caja
+    </button>
+
+    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="paid"></mat-icon>
       Balance
     </button>
@@ -85,6 +90,14 @@
         <!-- Contenido a la derecha -->
         <div class="d-flex align-items-center gap-2">
         <!-- Usuario y rol -->
+        <!-- Estado de la caja (administrador y cajero) -->
+        <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
+          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline"
+          [ngClass]="c.open ? 'bg-cafe-green-50 border-cafe-green-200 text-cafe-green-700' : 'bg-cafe-red-50 border-cafe-red-200 text-cafe-red-700'"
+          [attr.aria-label]="c.open ? 'Caja abierta' : 'Caja cerrada'">
+          <span class="w-2 h-2 rounded-full" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
+          <span class="hidden sm:inline">{{ c.open ? 'Caja abierta' : 'Caja cerrada' }}</span>
+        </a>
         <!-- En pantallas chicas el rol va en el sidebar -->
         <span *ngIf="user$ | async as user" class="hidden sm:inline-block px-3 py-1 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
 

@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestionService } from 'src/app/services/gestionService';
 import { SettingsService } from 'src/app/services/settings.service';
 import { UserService } from 'src/app/services/user.service';
+import { CashService } from 'src/app/services/cash.service';
+import { PaymentValue } from '../payment-panel/payment-panel.component';
 import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
 
 @Component({
@@ -27,18 +29,23 @@ export class TotalDialogComponent implements OnInit {
   isTicketPrinted: boolean = false;
   isAdmin = false;
   modifiersText = modifiersText;
-  paymentMethod: string = 'efectivo'; // Método de pago por defecto
+  // Cómo se paga (lo arma el panel de pago): propina, pagos y vuelto
+  payment: PaymentValue | null = null;
+  // Cobrar solo una parte de la mesa (división de cuenta por platos)
+  partial = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<TotalDialogComponent>,
     private gestionService: GestionService,
     public settings: SettingsService,
-    private userService: UserService
+    private userService: UserService,
+    private cash: CashService
   ) {
     // Solo el administrador aplica descuentos (el servidor también lo exige)
     this.isAdmin = this.userService.currentRole() === 'admin';
-    this.orders = data.orders || [];
+    // Se trabaja sobre copias: elegir cuánto cobrar no debe tocar la mesa que se ve de fondo
+    this.orders = (data.orders || []).map((o: any) => ({ ...o, maxQuantity: o.quantity }));
     this.table = data.table || [];
     this.tableName = data.tableName || '';
     this.waiterName = data.waiterName || '';
@@ -57,6 +64,7 @@ export class TotalDialogComponent implements OnInit {
     console.log(this.orders, 'ORDENES EN TOTAL');
     console.log(this.table, 'TABLESS');
     this.getTable();
+    this.cash.refresh().subscribe({ error: () => {} });
   }
 
   getTable(): void {
@@ -163,8 +171,77 @@ export class TotalDialogComponent implements OnInit {
     return this.orders.some((order) => order.isPromo);
   }
 
+  // ---- cobrar solo una parte (división por platos) ----
+
+  // Platos que entran en este cobro (cantidad > 0)
+  get chargeLines(): any[] {
+    return this.orders.filter((o) => o.quantity > 0);
+  }
+
+  get partialIsFull(): boolean {
+    return this.orders.every((o) => o.quantity === o.maxQuantity);
+  }
+
+  // Lo que queda en la mesa (todavía sin cobrar) mientras se arma esta parte
+  get remainingLines(): any[] {
+    return this.orders.filter((o) => o.maxQuantity - o.quantity > 0);
+  }
+
+  // Valor de lo que queda en la mesa, a precio de lista (sin descuentos)
+  get remainingTotal(): number {
+    return this.orders.reduce((sum, o) => sum + (o.price || 0) * (o.maxQuantity - o.quantity), 0);
+  }
+
+  // Pasa unidades de "queda en la mesa" a "esta parte"
+  addToPart(order: any, count = 1) {
+    this.stepQuantity(order, count);
+  }
+
+  setPartial(on: boolean) {
+    this.partial = on;
+    // Al dividir se empieza sin platos elegidos: se marca lo de cada persona. Al volver, todo.
+    this.orders.forEach((o) => (o.quantity = on ? 0 : o.maxQuantity));
+    this.calculateTotal();
+  }
+
+  stepQuantity(order: any, delta: number) {
+    order.quantity = Math.max(0, Math.min(order.maxQuantity, (order.quantity ?? 0) + delta));
+    this.calculateTotal();
+  }
+
+  selectAll() {
+    this.orders.forEach((o) => (o.quantity = o.maxQuantity));
+    this.calculateTotal();
+  }
+
+  selectNone() {
+    this.orders.forEach((o) => (o.quantity = 0));
+    this.calculateTotal();
+  }
+
+  // ---- caja y cobro ----
+
+  // El negocio exige caja abierta y no hay una
+  get cashBlocked(): boolean {
+    const state = this.cash.value;
+    return !!state && state.requireOpenRegister && !state.open;
+  }
+
+  get canCharge(): boolean {
+    return (
+      !this.cashBlocked &&
+      !!this.payment?.valid &&
+      this.chargeLines.length > 0 &&
+      (this.discountedTotal > 0 || (this.payment?.due ?? 0) === 0)
+    );
+  }
+
+  get chargeLabel(): string {
+    return this.partial && !this.partialIsFull ? 'Cobrar esta parte' : 'Liberar Mesa';
+  }
+
   liberarMesa() {
-    if (this.isProcessing) return;
+    if (this.isProcessing || !this.canCharge || !this.payment) return;
     if (!this.data.tableId) {
       console.error('No se pudo liberar la mesa: ID de la mesa no encontrado.');
       return;
@@ -172,28 +249,33 @@ export class TotalDialogComponent implements OnInit {
     this.isProcessing = true;
     const tableName = this.data.tableName || this.tableName || 'Mesa sin nombre';
     const waiterName = this.data.waiterName || this.waiterName || 'Sin mozo asignado';
+    const isPartPayment = this.partial && !this.partialIsFull;
 
-    // Cobrar y liberar es UNA sola llamada: o se guarda la venta y se libera la mesa, o no pasa nada.
-    // Solo se informan los descuentos pedidos; el total lo calcula y guarda el servidor.
-    const items = this.orders
+    // Cobrar y liberar es UNA sola llamada: o se guarda la venta y se descuentan los platos, o no pasa nada.
+    // Solo se informan los descuentos pedidos y cómo se paga; el total lo calcula y guarda el servidor.
+    const items = this.chargeLines
       .filter((o) => !o.isPromo && Number(o.discount) > 0)
       .map((o) => ({ orderId: o._id, discount: Number(o.discount) }));
 
     this.gestionService
       .checkout(this.data.tableId, {
         checkoutId: this.orderId,
-        paymentMethod: this.paymentMethod,
+        payments: this.payment.payments,
+        tip: this.payment.tip,
         globalDiscount: this.discountPercentage,
         items,
+        lines: isPartPayment ? this.chargeLines.map((o) => ({ orderId: o._id, quantity: o.quantity })) : undefined,
       })
       .subscribe({
         next: (sale) => {
-          const logMessage = `Se liberó la mesa <strong>${tableName}</strong> atendida por <strong>${waiterName}</strong> con un total de <strong>${this.settings.format(sale.totalAmount)}</strong>`;
+          const logMessage = isPartPayment
+            ? `Se cobró una parte de la mesa <strong>${tableName}</strong> atendida por <strong>${waiterName}</strong> por <strong>${this.settings.format(sale.totalAmount)}</strong> (la mesa sigue abierta)`
+            : `Se liberó la mesa <strong>${tableName}</strong> atendida por <strong>${waiterName}</strong> con un total de <strong>${this.settings.format(sale.totalAmount)}</strong>`;
           this.gestionService.saveLog(logMessage);
 
           setTimeout(() => {
             this.dialogRef.close({
-              status: 'mesa_liberada',
+              status: isPartPayment ? 'parte_cobrada' : 'mesa_liberada',
               tableId: this.data.tableId,
             });
             location.reload();
@@ -207,9 +289,27 @@ export class TotalDialogComponent implements OnInit {
             (Array.isArray(msg) ? msg.join('. ') : msg) ||
               'No se pudo cobrar la mesa. Revisá la conexión e intentá de nuevo: no se registró ningún cobro.'
           );
+          this.cash.refresh().subscribe({ error: () => {} }); // por si el motivo fue una caja cerrada
           this.isProcessing = false;
         },
       });
+  }
+
+  // Propina, total a pagar, medios de pago y vuelto del ticket (según lo elegido en el panel de pago)
+  private ticketPaymentHtml(): string {
+    const p = this.payment;
+    const fmt = (n: number) => this.settings.format(n);
+    const labels: Record<string, string> = { efectivo: 'Efectivo', transferencia: 'Transferencia', qr: 'QR', tarjeta: 'Tarjeta' };
+    const rows: string[] = [];
+    if (this.partial && !this.partialIsFull) rows.push('<p><strong>Cuenta dividida: esta es una parte</strong></p>');
+    if (!p) return rows.join('');
+    if (p.tip > 0) {
+      rows.push(`<p><strong>Propina:</strong> ${fmt(p.tip)}</p>`);
+      rows.push(`<p style="font-size: 16px"><strong style="font-size: 16px">Total a pagar:</strong> ${fmt(p.due)}</p>`);
+    }
+    for (const x of p.payments) rows.push(`<p>${labels[x.method] ?? x.method}: ${fmt(x.amount)}</p>`);
+    if (p.change > 0) rows.push(`<p><strong>Vuelto:</strong> ${fmt(p.change)}</p>`);
+    return rows.join('');
   }
 
   // Logo del negocio para las ventanas de impresión (vacío si no tiene)
@@ -268,6 +368,7 @@ export class TotalDialogComponent implements OnInit {
             </div>
             <div class="order-list">
               ${this.orders
+                .filter((order) => order.quantity > 0)
                 .map((order) => {
                   const qty = order.quantity ?? 1;
                   const itemDiscount = order.isPromo ? 0 : Number(order.discount) || 0;
@@ -315,6 +416,7 @@ export class TotalDialogComponent implements OnInit {
                      <p><strong>Total con descuento:</strong> ${this.settings.format(this.discountedTotal)}</p>`
                   : ''
               }
+              ${this.ticketPaymentHtml()}
             </div>
             <div class="line"></div>
              <!-- Aquí agregamos el nombre de la mesa y del mozo -->

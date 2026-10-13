@@ -73,10 +73,12 @@
                   <span *ngIf="entry.paymentMethod === 'transferencia'">🏦</span>
                   <span *ngIf="entry.paymentMethod === 'qr'">📱</span>
                   <span *ngIf="entry.paymentMethod === 'tarjeta'">💳</span>
+                  <span *ngIf="entry.paymentMethod === 'mixto'">🔀</span>
                   <span *ngIf="entry.paymentMethod === 'efectivo'">Efectivo</span>
                   <span *ngIf="entry.paymentMethod === 'transferencia'">Transferencia</span>
                   <span *ngIf="entry.paymentMethod === 'qr'">Código QR</span>
                   <span *ngIf="entry.paymentMethod === 'tarjeta'">Tarjeta</span>
+                  <span *ngIf="entry.paymentMethod === 'mixto'">Mixto</span>
                   <span *ngIf="!entry.paymentMethod">-</span>
                 </div>
               </td>
@@ -93,8 +95,15 @@
                 <div class="text-xs text-sage-600 flex flex-wrap gap-x-5 gap-y-1 mb-2">
                   <span *ngIf="entry.date">{{ entry.date | date:'dd/MM/yyyy HH:mm' }}</span>
                   <span *ngIf="entry.cashierName">Cobró: <strong class="text-sage-800">{{ entry.cashierName }}</strong></span>
+                  <span *ngIf="entry.tipAmount">Propina: <strong class="text-sage-800">{{ entry.tipAmount | money }}</strong> (no incluida en el total)</span>
                   <span *ngIf="entry.discountTotal">Descuentos: <strong class="text-cafe-red-700">-{{ entry.discountTotal | money }}</strong></span>
                 </div>
+                <ul *ngIf="entry.payments?.length" class="m-0 p-0 mb-2 list-none text-xs text-sage-700 flex flex-wrap gap-x-4 gap-y-1">
+                  <li *ngFor="let p of entry.payments">
+                    {{ methodLabel(p.method) }}: <strong class="text-sage-900">{{ p.amount | money }}</strong>
+                    <span *ngIf="p.change > 0"> (recibió {{ p.tendered | money }}, vuelto {{ p.change | money }})</span>
+                  </li>
+                </ul>
                 <p *ngIf="entry.loadingDetail" class="text-xs text-sage-500">Cargando detalle…</p>
                 <p *ngIf="entry.detailError" class="text-xs text-cafe-red-700">No se pudo cargar el detalle.</p>
                 <p *ngIf="entry.items && entry.items.length === 0" class="text-xs text-sage-500">
