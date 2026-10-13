@@ -1,0 +1,283 @@
+<!-- Pantalla del cliente (QR de la mesa). Nota: Bootstrap global pisa p-3/4/5, gap-3/4/5, mb-3/4 y border con
+     !important, por eso acá se usan valores explícitos ([14px]) en esas escalas. -->
+<div class="min-h-screen bg-sage-100 text-sage-800 pb-[110px]">
+
+  <!-- Cargando -->
+  <div *ngIf="phase === 'loading'" class="flex items-center justify-center min-h-screen text-sage-500 text-sm">Cargando la carta…</div>
+
+  <!-- QR inválido o apagado -->
+  <div *ngIf="phase === 'notFound'" class="flex flex-col items-center justify-center min-h-screen px-[24px] text-center">
+    <mat-icon class="!w-14 !h-14 !text-5xl text-sage-300 mb-[12px]">qr_code_2</mat-icon>
+    <h1 class="text-xl font-bold m-0 mb-[8px]">Este QR no está disponible</h1>
+    <p class="text-sm text-sage-600 m-0">Pedile la carta al mozo, que con gusto te atiende.</p>
+  </div>
+
+  <!-- Error de conexión -->
+  <div *ngIf="phase === 'error'" class="flex flex-col items-center justify-center min-h-screen px-[24px] text-center">
+    <mat-icon class="!w-14 !h-14 !text-5xl text-sage-300 mb-[12px]">wifi_off</mat-icon>
+    <h1 class="text-xl font-bold m-0 mb-[8px]">No pudimos cargar la carta</h1>
+    <p class="text-sm text-sage-600 mb-[16px]">Revisá tu conexión e intentá de nuevo.</p>
+    <button type="button" (click)="phase = 'loading'; load()" class="px-[20px] py-[10px] rounded-xl bg-cafe-green-700 text-white font-bold text-sm">Reintentar</button>
+  </div>
+
+  <!-- Código de mesa -->
+  <div *ngIf="phase === 'pin' && info" class="flex flex-col items-center justify-center min-h-screen px-[24px] text-center">
+    <img *ngIf="info.business.logoUrl" [src]="info.business.logoUrl" [alt]="info.business.name" class="w-16 h-16 rounded-full object-cover mb-[12px]" />
+    <h1 class="text-xl font-bold m-0">{{ info.business.name }}</h1>
+    <p class="text-sage-600 text-sm mt-[4px] mb-[20px]">{{ info.table.name }}</p>
+    <form (ngSubmit)="submitPin()" class="w-full max-w-[280px]">
+      <label for="pin" class="block text-sm font-medium mb-[8px]">Ingresá el código de tu mesa</label>
+      <input id="pin" name="pin" [(ngModel)]="pinInput" inputmode="numeric" autocomplete="off" maxlength="4"
+        class="w-full text-center text-3xl tracking-[0.4em] font-bold py-[12px] rounded-xl border-[1px] border-sage-300 bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/30" />
+      <p *ngIf="pinError" class="text-cafe-red-700 text-sm mt-[8px] mb-0" role="alert">{{ pinError }}</p>
+      <button type="submit" [disabled]="pinInput.trim().length < 4"
+        class="w-full mt-[16px] py-[12px] rounded-xl bg-cafe-green-700 text-white font-bold disabled:opacity-40">Entrar</button>
+      <p class="text-xs text-sage-500 mt-[12px] mb-0">Si no lo tenés, pedíselo al mozo.</p>
+    </form>
+  </div>
+
+  <ng-container *ngIf="phase === 'ready' && info">
+
+    <!-- Encabezado -->
+    <header class="sticky top-0 z-20 bg-white border-b-[1px] border-sage-200">
+      <div class="max-w-[640px] mx-auto px-[16px] pt-[12px] pb-[10px]">
+        <div class="flex items-center gap-[12px]">
+          <img *ngIf="info.business.logoUrl" [src]="info.business.logoUrl" [alt]="info.business.name" class="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+          <div class="min-w-0 flex-1">
+            <h1 class="text-base font-bold leading-tight m-0 truncate">{{ info.business.name }}</h1>
+            <p class="text-xs text-sage-600 m-0">{{ info.table.name }}</p>
+          </div>
+        </div>
+
+        <!-- Llamar al mozo / pedir la cuenta -->
+        <div class="flex gap-[8px] mt-[10px]">
+          <button type="button" (click)="call('WAITER')" [disabled]="orders.calls.waiter || callBusy"
+            class="flex-1 flex items-center justify-center gap-[6px] py-[8px] rounded-xl border-[1px] border-sage-300 text-sm font-medium text-sage-800 disabled:opacity-60">
+            <mat-icon class="!w-5 !h-5 !text-xl">notifications_active</mat-icon>
+            {{ orders.calls.waiter ? 'Mozo avisado' : 'Llamar al mozo' }}
+          </button>
+          <button type="button" (click)="call('BILL')" [disabled]="orders.calls.bill || callBusy"
+            class="flex-1 flex items-center justify-center gap-[6px] py-[8px] rounded-xl border-[1px] border-sage-300 text-sm font-medium text-sage-800 disabled:opacity-60">
+            <mat-icon class="!w-5 !h-5 !text-xl">receipt_long</mat-icon>
+            {{ orders.calls.bill ? 'Cuenta pedida' : 'Pedir la cuenta' }}
+          </button>
+        </div>
+
+        <!-- Pestañas -->
+        <div class="flex gap-[4px] mt-[10px] p-[3px] bg-sage-100 rounded-xl" role="tablist">
+          <button type="button" role="tab" [attr.aria-selected]="tab === 'menu'" (click)="tab = 'menu'"
+            class="flex-1 py-[7px] rounded-[9px] text-sm font-bold transition-colors"
+            [ngClass]="tab === 'menu' ? 'bg-white text-cafe-green-700 shadow-soft' : 'text-sage-600'">Carta</button>
+          <button type="button" role="tab" [attr.aria-selected]="tab === 'orders'" (click)="tab = 'orders'"
+            class="flex-1 py-[7px] rounded-[9px] text-sm font-bold transition-colors"
+            [ngClass]="tab === 'orders' ? 'bg-white text-cafe-green-700 shadow-soft' : 'text-sage-600'">
+            Mis pedidos
+            <span *ngIf="activeCount > 0" class="ml-[4px] inline-block min-w-[18px] px-[5px] rounded-full bg-cafe-green-700 text-white text-[11px] leading-[18px]">{{ activeCount }}</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Aviso -->
+    <div *ngIf="banner" role="status" aria-live="polite"
+      class="fixed left-[16px] right-[16px] top-[12px] z-50 max-w-[608px] mx-auto px-[14px] py-[10px] rounded-xl text-sm font-medium shadow-soft-lg text-white"
+      [ngClass]="banner.kind === 'ok' ? 'bg-cafe-green-700' : 'bg-cafe-red-700'">{{ banner.text }}</div>
+
+    <main class="max-w-[640px] mx-auto px-[16px] pt-[14px]">
+
+      <!-- ===== CARTA ===== -->
+      <ng-container *ngIf="tab === 'menu'">
+        <div class="relative mb-[12px]">
+          <mat-icon class="!w-5 !h-5 !text-xl text-sage-500 absolute left-[12px] top-1/2 -translate-y-1/2 pointer-events-none">search</mat-icon>
+          <input type="search" [(ngModel)]="search" name="search" placeholder="Buscar en la carta" aria-label="Buscar en la carta"
+            class="w-full pl-[40px] pr-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+        </div>
+
+        <div *ngIf="categories.length > 1 && !search" class="flex gap-[8px] overflow-x-auto pb-[6px] mb-[8px] -mx-[16px] px-[16px]" role="tablist">
+          <button type="button" (click)="categoryId = 'all'"
+            class="flex-shrink-0 px-[14px] py-[6px] rounded-full text-sm font-medium border-[1px]"
+            [ngClass]="categoryId === 'all' ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-300 text-sage-700'">Todo</button>
+          <button *ngFor="let c of categories" type="button" (click)="categoryId = c.id"
+            class="flex-shrink-0 px-[14px] py-[6px] rounded-full text-sm font-medium border-[1px]"
+            [ngClass]="categoryId === c.id ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-300 text-sage-700'">{{ c.name }}</button>
+        </div>
+
+        <p *ngIf="grouped.length === 0" class="text-center text-sm text-sage-500 py-[32px]">No encontramos nada con ese nombre.</p>
+
+        <section *ngFor="let g of grouped" class="mb-[18px]">
+          <h2 class="text-sm font-bold text-sage-600 uppercase tracking-wide m-0 mb-[8px]">{{ g.name }}</h2>
+          <ul class="list-none p-0 m-0 bg-white rounded-2xl shadow-soft overflow-hidden">
+            <li *ngFor="let item of g.items" class="border-b-[1px] border-sage-100 last:border-b-0">
+              <div role="button" tabindex="0" (click)="openItem(item)" (keydown.enter)="openItem(item)"
+                class="flex items-center gap-[12px] px-[14px] py-[12px]"
+                [ngClass]="item.soldOut ? 'opacity-50' : 'cursor-pointer active:bg-sage-50'">
+                <div class="min-w-0 flex-1">
+                  <p class="font-medium m-0 leading-snug">{{ item.name }}</p>
+                  <p class="text-sm m-0 mt-[2px]">
+                    <span class="font-bold text-cafe-green-700">{{ money(item.price) }}</span>
+                    <span *ngIf="item.soldOut" class="ml-[8px] px-[8px] py-[1px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">Agotado</span>
+                    <span *ngIf="!item.soldOut && hasOptions(item)" class="ml-[8px] text-xs text-sage-500">Con opciones</span>
+                  </p>
+                </div>
+                <button *ngIf="!item.soldOut" type="button" (click)="hasOptions(item) ? openItem(item) : quickAdd(item, $event)"
+                  [attr.aria-label]="'Agregar ' + item.name"
+                  class="w-9 h-9 flex-shrink-0 rounded-full bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
+                  <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </ng-container>
+
+      <!-- ===== MIS PEDIDOS ===== -->
+      <ng-container *ngIf="tab === 'orders'">
+        <div *ngIf="orders.requests.length === 0" class="text-center py-[40px] text-sage-500">
+          <mat-icon class="!w-12 !h-12 !text-5xl text-sage-300">restaurant_menu</mat-icon>
+          <p class="text-sm mt-[8px] mb-0">Todavía no hiciste ningún pedido.</p>
+          <button type="button" (click)="tab = 'menu'" class="mt-[12px] px-[18px] py-[9px] rounded-xl bg-cafe-green-700 text-white text-sm font-bold">Ver la carta</button>
+        </div>
+
+        <article *ngFor="let r of orders.requests" class="bg-white rounded-2xl shadow-soft p-[14px] mb-[12px]">
+          <div class="flex items-center justify-between gap-[8px] mb-[8px]">
+            <span class="text-xs text-sage-500">{{ r.createdAt | date: 'HH:mm' }}<ng-container *ngIf="r.customerName"> · {{ r.customerName }}</ng-container></span>
+            <span class="font-bold text-sm">{{ money(r.total) }}</span>
+          </div>
+
+          <ul class="list-none p-0 m-0 mb-[10px] text-sm">
+            <li *ngFor="let l of r.items" class="py-[2px]">
+              <span class="font-medium">{{ l.quantity }}× {{ l.name }}</span>
+              <span *ngIf="l.extras.length" class="text-sage-600"> · {{ l.extras.join(', ') }}</span>
+              <span *ngIf="l.note" class="block text-xs text-sage-500">"{{ l.note }}"</span>
+            </li>
+          </ul>
+
+          <!-- Avance -->
+          <ol *ngIf="r.step !== 'REJECTED' && r.step !== 'CANCELLED'" class="list-none p-0 m-0 grid grid-cols-4 gap-[4px]" aria-label="Estado del pedido">
+            <li *ngFor="let s of steps; let i = index" class="text-center">
+              <div class="h-[6px] rounded-full" [ngClass]="i <= stepIndex(r.step) ? 'bg-cafe-green-700' : 'bg-sage-200'"></div>
+              <span class="block text-[11px] mt-[4px] leading-tight" [ngClass]="i === stepIndex(r.step) ? 'font-bold text-cafe-green-700' : 'text-sage-500'">{{ s.label }}</span>
+            </li>
+          </ol>
+
+          <p *ngIf="r.step === 'RECEIVED'" class="text-xs text-sage-600 m-0 mt-[10px]">Esperando que el mozo lo confirme…</p>
+          <p *ngIf="r.step === 'READY'" class="text-sm font-bold text-cafe-green-700 m-0 mt-[10px]">¡Tu pedido está listo! El mozo ya lo lleva.</p>
+
+          <div *ngIf="r.step === 'REJECTED'" class="px-[12px] py-[10px] rounded-xl bg-cafe-red-50 text-cafe-red-700 text-sm" role="alert">
+            <p class="font-bold m-0">El mozo no pudo tomar este pedido</p>
+            <p *ngIf="r.rejectReason" class="m-0 mt-[2px]">{{ r.rejectReason }}</p>
+          </div>
+          <p *ngIf="r.step === 'CANCELLED'" class="text-sm text-sage-500 m-0">Pedido cancelado</p>
+
+          <button *ngIf="r.step === 'RECEIVED'" type="button" (click)="cancelRequest(r)"
+            class="mt-[10px] text-sm font-medium text-cafe-red-700 underline">Cancelar pedido</button>
+        </article>
+      </ng-container>
+    </main>
+
+    <!-- Barra del pedido -->
+    <div *ngIf="tab === 'menu' && cartUnits > 0" class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 border-t-[1px] border-sage-200 px-[16px] py-[10px]">
+      <button type="button" (click)="cartOpen = true"
+        class="w-full max-w-[608px] mx-auto flex items-center justify-between px-[18px] py-[13px] rounded-2xl bg-cafe-green-700 text-white font-bold shadow-green">
+        <span class="flex items-center gap-[10px]">
+          <span class="min-w-[24px] h-6 px-[6px] rounded-full bg-white/20 text-sm leading-6 text-center">{{ cartUnits }}</span>
+          Ver mi pedido
+        </span>
+        <span>{{ money(cartTotal) }}</span>
+      </button>
+    </div>
+
+    <!-- ===== Hoja: armar un plato ===== -->
+    <div *ngIf="sheetItem" class="fixed inset-0 z-40 flex items-end justify-center bg-black/40" (click)="closeSheet()">
+      <div class="w-full max-w-[640px] max-h-[88vh] overflow-y-auto bg-white rounded-t-3xl p-[18px]" role="dialog" aria-modal="true" [attr.aria-label]="sheetItem.name" (click)="$event.stopPropagation()">
+        <div class="flex items-start justify-between gap-[12px] mb-[12px]">
+          <div>
+            <h2 class="text-lg font-bold m-0">{{ sheetItem.name }}</h2>
+            <p class="text-sm text-cafe-green-700 font-bold m-0">{{ money(sheetItem.price) }}</p>
+          </div>
+          <button type="button" (click)="closeSheet()" aria-label="Cerrar" class="w-9 h-9 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
+            <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+          </button>
+        </div>
+
+        <fieldset *ngFor="let g of sheetItem.groups" class="border-0 p-0 m-0 mb-[14px]">
+          <legend class="text-sm font-bold p-0 mb-[6px]">
+            {{ g.name }}
+            <span class="text-xs font-medium ml-[6px]" [ngClass]="g.required ? 'text-cafe-red-700' : 'text-sage-500'">{{ g.required ? 'Obligatorio' : (g.selection === 'MULTIPLE' ? 'Podés elegir varias' : 'Opcional') }}</span>
+          </legend>
+          <button *ngFor="let o of g.options" type="button" (click)="toggleOption(g, o.id)"
+            class="w-full flex items-center justify-between gap-[10px] px-[12px] py-[10px] mb-[6px] rounded-xl border-[1px] text-left text-sm"
+            [ngClass]="isChosen(g, o.id) ? 'border-cafe-green-700 bg-cafe-green-50' : 'border-sage-200'"
+            [attr.aria-pressed]="isChosen(g, o.id)">
+            <span class="flex items-center gap-[10px]">
+              <span class="w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1px]"
+                [ngClass]="[g.selection === 'SINGLE' ? 'rounded-full' : 'rounded-md', isChosen(g, o.id) ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'border-sage-300']">
+                <mat-icon *ngIf="isChosen(g, o.id)" class="!w-4 !h-4 !text-base !leading-4">check</mat-icon>
+              </span>
+              {{ o.name }}
+            </span>
+            <span *ngIf="o.priceDelta !== 0" class="text-sage-600 font-medium">{{ o.priceDelta > 0 ? '+' : '' }}{{ money(o.priceDelta) }}</span>
+          </button>
+        </fieldset>
+
+        <label class="block text-sm font-bold mb-[6px]" for="note">Aclaración <span class="text-xs font-medium text-sage-500">(opcional)</span></label>
+        <input id="note" name="note" [(ngModel)]="sheetNote" maxlength="140" placeholder="Ej: sin cebolla"
+          class="w-full px-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 text-sm mb-[14px] focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+
+        <p *ngIf="sheetError" class="text-cafe-red-700 text-sm font-medium m-0 mb-[10px]" role="alert">{{ sheetError }}</p>
+
+        <div class="flex items-center gap-[12px]">
+          <div class="flex items-center gap-[4px] border-[1px] border-sage-300 rounded-xl">
+            <button type="button" (click)="sheetQty = sheetQty > 1 ? sheetQty - 1 : 1" aria-label="Menos" class="w-10 h-11 flex items-center justify-center"><mat-icon>remove</mat-icon></button>
+            <span class="min-w-[24px] text-center font-bold">{{ sheetQty }}</span>
+            <button type="button" (click)="sheetQty = sheetQty < 30 ? sheetQty + 1 : 30" aria-label="Más" class="w-10 h-11 flex items-center justify-center"><mat-icon>add</mat-icon></button>
+          </div>
+          <button type="button" (click)="addFromSheet()" class="flex-1 h-11 rounded-xl bg-cafe-green-700 text-white font-bold">Agregar · {{ money(sheetUnit * sheetQty) }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Hoja: mi pedido ===== -->
+    <div *ngIf="cartOpen" class="fixed inset-0 z-40 flex items-end justify-center bg-black/40" (click)="cartOpen = false">
+      <div class="w-full max-w-[640px] max-h-[90vh] overflow-y-auto bg-white rounded-t-3xl p-[18px]" role="dialog" aria-modal="true" aria-label="Mi pedido" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between mb-[12px]">
+          <h2 class="text-lg font-bold m-0">Mi pedido</h2>
+          <button type="button" (click)="cartOpen = false" aria-label="Cerrar" class="w-9 h-9 rounded-full bg-sage-100 flex items-center justify-center">
+            <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+          </button>
+        </div>
+
+        <ul class="list-none p-0 m-0 mb-[12px]">
+          <li *ngFor="let l of cart" class="flex items-center gap-[10px] py-[10px] border-b-[1px] border-sage-100">
+            <div class="min-w-0 flex-1 text-sm">
+              <p class="font-medium m-0">{{ l.name }}</p>
+              <p *ngIf="l.extras.length" class="text-xs text-sage-600 m-0">{{ l.extras.join(', ') }}</p>
+              <p *ngIf="l.note" class="text-xs text-sage-500 m-0">"{{ l.note }}"</p>
+              <p class="font-bold text-cafe-green-700 m-0">{{ money(l.unitPrice * l.quantity) }}</p>
+            </div>
+            <div class="flex items-center border-[1px] border-sage-300 rounded-xl flex-shrink-0">
+              <button type="button" (click)="changeQty(l, -1)" [attr.aria-label]="'Quitar uno de ' + l.name" class="w-9 h-9 flex items-center justify-center"><mat-icon class="!w-5 !h-5 !text-xl">{{ l.quantity === 1 ? 'delete_outline' : 'remove' }}</mat-icon></button>
+              <span class="min-w-[22px] text-center font-bold text-sm">{{ l.quantity }}</span>
+              <button type="button" (click)="changeQty(l, 1)" [attr.aria-label]="'Agregar uno de ' + l.name" class="w-9 h-9 flex items-center justify-center"><mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon></button>
+            </div>
+          </li>
+        </ul>
+
+        <label class="block text-sm font-bold mb-[6px]" for="name">Tu nombre <span class="text-xs font-medium text-sage-500">(opcional, para que el mozo sepa quién pidió)</span></label>
+        <input id="name" name="customerName" [(ngModel)]="customerName" maxlength="40" autocomplete="given-name"
+          class="w-full px-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 text-sm mb-[14px] focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+
+        <div class="flex items-center justify-between font-bold mb-[6px]">
+          <span>Total</span><span class="text-lg">{{ money(cartTotal) }}</span>
+        </div>
+        <p class="text-xs text-sage-500 m-0 mb-[12px]">
+          {{ info.autoConfirm ? 'El pedido se envía directo a la cocina.' : 'El mozo va a confirmar tu pedido antes de prepararlo.' }}
+          El precio final lo confirma el local.
+        </p>
+
+        <button type="button" (click)="send()" [disabled]="sending"
+          class="w-full h-12 rounded-xl bg-cafe-green-700 text-white font-bold disabled:opacity-50">{{ sending ? 'Enviando…' : 'Enviar pedido' }}</button>
+      </div>
+    </div>
+  </ng-container>
+</div>

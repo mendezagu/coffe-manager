@@ -54,6 +54,9 @@ import { ModifierPickerDialogComponent } from './components/modifier-picker-dial
 import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { QrOrderComponent } from './pages/qr-order/qr-order.component';
+import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
+import { QrCodesComponent } from './pages/qr-codes/qr-codes.component';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireModule } from '@angular/fire/compat';
 import { StadisticsComponent } from './pages/stadistics/stadistics.component';
@@ -92,6 +95,9 @@ import { LogsComponent } from './components/logs/logs.component';
     StadisticsComponent,
     BalanceComponent,
     LogsComponent,
+    QrOrderComponent,
+    QrInboxDialogComponent,
+    QrCodesComponent,
 
   ],
   imports: [

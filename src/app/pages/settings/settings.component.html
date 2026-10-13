@@ -191,6 +191,61 @@
           </label>
         </section>
 
+        <!-- Pedido por QR -->
+        <section class="bg-white rounded-card shadow-soft p-5">
+          <h2 class="font-bold text-sage-800 mb-1">Pedido por QR en la mesa</h2>
+          <p class="text-sm text-sage-600 mb-3">
+            Cada mesa tiene un QR: el cliente lo escanea con su celular, ve la carta y manda su pedido. El mozo lo confirma desde el sistema y recién ahí pasa a la cocina.
+          </p>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canQr ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="qrEnabled" [(ngModel)]="form.qrEnabled" [disabled]="!canQr" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Permitir pedidos por QR</span>
+              <span *ngIf="canQr" class="block text-xs text-sage-500">Después imprimí los QR en <a routerLink="/admin/qr" class="text-cafe-green-700 font-medium underline">Administrar → Códigos QR</a>.</span>
+              <span *ngIf="!canQr" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+            </span>
+          </label>
+
+          <ng-container *ngIf="form.qrEnabled && canQr">
+            <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+              <input type="checkbox" name="qrAutoConfirm" [(ngModel)]="form.qrAutoConfirm" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <span class="text-sm">
+                <span class="block font-bold text-sage-900">Confirmar los pedidos automáticamente</span>
+                <span class="block text-xs text-sage-500">Si lo activás, los pedidos entran directo a la cocina sin que un mozo los apruebe. Recomendado solo si confiás en tus clientes o hay poco movimiento. Si lo dejás apagado, un mozo confirma cada pedido (más seguro).</span>
+              </span>
+            </label>
+
+            <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+              <input type="checkbox" name="qrRequirePin" [(ngModel)]="form.qrRequirePin" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <span class="text-sm">
+                <span class="block font-bold text-sage-900">Pedir un código de mesa de 4 dígitos</span>
+                <span class="block text-xs text-sage-500">Evita que alguien que sacó una foto del QR pida desde afuera. El mozo le da el código al cliente y cambia solo cuando la mesa se libera.</span>
+              </span>
+            </label>
+          </ng-container>
+
+          <!-- Sonido: se guarda solo en este dispositivo -->
+          <div *ngIf="canQr" class="mt-3 p-3 rounded-xl border border-sage-200 bg-sage-50">
+            <label class="flex items-center gap-3 select-none cursor-pointer">
+              <input type="checkbox" name="soundEnabled" [(ngModel)]="sound.enabled" (ngModelChange)="saveSound()" class="w-5 h-5 accent-[#1d5b3e]" />
+              <span class="text-sm font-bold text-sage-900">Sonido de aviso cuando llega un pedido</span>
+            </label>
+            <p class="text-xs text-sage-500 mt-1 mb-2">Se guarda en este dispositivo: cada tablet o compu puede tener su propio volumen.</p>
+            <div class="flex items-center gap-3" [class.opacity-50]="!sound.enabled">
+              <mat-icon class="text-sage-600">volume_down</mat-icon>
+              <input type="range" name="soundVolume" min="0" max="100" step="5" [(ngModel)]="sound.volume" (ngModelChange)="saveSound()" [disabled]="!sound.enabled"
+                aria-label="Volumen del aviso" class="flex-1 accent-[#1d5b3e]" />
+              <mat-icon class="text-sage-600">volume_up</mat-icon>
+              <span class="w-10 text-right text-sm font-bold text-sage-800">{{ sound.volume }}%</span>
+            </div>
+            <button type="button" (click)="testSound()" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-sage-300 text-sm font-bold text-sage-800">
+              <mat-icon class="!w-5 !h-5 !text-xl">play_arrow</mat-icon> Probar sonido
+            </button>
+          </div>
+        </section>
+
         <!-- Cocina y barra -->
         <section class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>

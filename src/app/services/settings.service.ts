@@ -36,6 +36,11 @@ export interface TenantSettings {
   inventoryEnabled: boolean;
   inventoryActive: boolean;
   blockOutOfStock: boolean;
+  // pedido por QR: lo que el negocio eligió, lo que rige (elegido y permitido por el plan), confirmación automática y código de mesa
+  qrEnabled: boolean;
+  qrActive: boolean;
+  qrAutoConfirm: boolean;
+  qrRequirePin: boolean;
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -70,6 +75,10 @@ const DEFAULTS: TenantSettings = {
   inventoryEnabled: false,
   inventoryActive: false,
   blockOutOfStock: true,
+  qrEnabled: false,
+  qrActive: false,
+  qrAutoConfirm: false,
+  qrRequirePin: false,
 };
 
 @Injectable({ providedIn: 'root' })

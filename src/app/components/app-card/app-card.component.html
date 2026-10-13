@@ -118,6 +118,20 @@
             <span class="opacity-70" *ngIf="!table.waiterName?.trim()">Sin mozo asignado</span>
           </div>
 
+          <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
+          <button *ngIf="qrRequestsOf(table) > 0 || qrCallsOf(table).waiter || qrCallsOf(table).bill" type="button" (click)="openQrInbox(table)"
+            class="w-full mb-1.5 flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white text-cafe-red-700 text-xs font-bold text-left animate-pulse"
+            [attr.aria-label]="'Atender pedidos QR de ' + table.name">
+            <mat-icon class="!w-4 !h-4 !text-base flex-shrink-0">qr_code_2</mat-icon>
+            <span class="min-w-0 truncate">
+              <ng-container *ngIf="qrRequestsOf(table) > 0">{{ qrRequestsOf(table) }} {{ qrRequestsOf(table) === 1 ? 'pedido por confirmar' : 'pedidos por confirmar' }}</ng-container>
+              <ng-container *ngIf="qrRequestsOf(table) > 0 && (qrCallsOf(table).waiter || qrCallsOf(table).bill)"> · </ng-container>
+              <ng-container *ngIf="qrCallsOf(table).bill">Pide la cuenta</ng-container>
+              <ng-container *ngIf="qrCallsOf(table).bill && qrCallsOf(table).waiter"> · </ng-container>
+              <ng-container *ngIf="qrCallsOf(table).waiter">Llama al mozo</ng-container>
+            </span>
+          </button>
+
           <!-- Mesa controlada -->
           <div *ngIf="table.controlledBy" class="mb-1.5">
             <div class="px-2 py-1.5 rounded-lg bg-black/20 text-white">

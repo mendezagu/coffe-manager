@@ -11,6 +11,9 @@ import { Observable } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { modifiersText } from 'src/app/utils/modifiers';
+import { QrInbox, QrService } from 'src/app/services/qr.service';
+import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
+import { Subscription } from 'rxjs';
 
 interface TableGroup {
   key: string;
@@ -42,6 +45,7 @@ export class CardComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private snackBar: MatSnackBar,
     public settings: SettingsService,
+    private qr: QrService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -65,12 +69,35 @@ export class CardComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Pedidos y avisos QR por mesa (badge en la tarjeta)
+    this.qrSub = this.qr.inbox$.subscribe((inbox) => (this.qrInbox = inbox));
+
     // Suscribirse al rol para uso en handlers sin pipes en templates
     this.role$.subscribe(role => this.roleValue = role);
   }
 
   ngOnDestroy(): void {
     if (this.refresh) clearInterval(this.refresh);
+    this.qrSub?.unsubscribe();
+  }
+
+  private qrSub?: Subscription;
+  qrInbox: QrInbox = { active: false, requests: [], calls: [] };
+
+  qrRequestsOf(table: any): number {
+    return this.qrInbox.requests.filter((r) => r.tableId === table.id).length;
+  }
+
+  qrCallsOf(table: any): { waiter: boolean; bill: boolean } {
+    const calls = this.qrInbox.calls.filter((c) => c.tableId === table.id);
+    return { waiter: calls.some((c) => c.type === 'WAITER'), bill: calls.some((c) => c.type === 'BILL') };
+  }
+
+  openQrInbox(table: any) {
+    this.dialog
+      .open(QrInboxDialogComponent, { data: { tableId: table.id }, width: '600px', maxWidth: '96vw', autoFocus: false })
+      .afterClosed()
+      .subscribe(() => this.loadTables()); // una confirmación abre la mesa
   }
 
   // Cantidad de líneas que cocina ya terminó y esperan ser servidas

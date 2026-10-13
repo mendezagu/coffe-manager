@@ -9,6 +9,9 @@ import { InventoryService, InventorySummary } from './services/inventory.service
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
+import { MatDialog } from '@angular/material/dialog';
+import { QrService } from './services/qr.service';
+import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -38,13 +41,16 @@ export class AppComponent {
     private gestionService: GestionService,
     public settings: SettingsService,
     public cash: CashService,
-    private inventory: InventoryService
+    private inventory: InventoryService,
+    public qr: QrService,
+    private dialog: MatDialog
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
     this.settings.settings$.subscribe(() => {
       this.shift = this.settings.shiftLabel();
       this.refreshStock(); // por si se activó o desactivó el inventario
+      this.refreshQrWatch(); // por si se activó o desactivó el pedido por QR
     });
     this.role$ = this.userService.getRoleState();
     this.user$ = this.userService.getAuthState();
@@ -56,6 +62,17 @@ export class AppComponent {
   stock: InventorySummary | null = null;
   private isAdminRole = false;
   private stockTimer?: ReturnType<typeof setInterval>;
+
+  // Pedidos por QR: el personal que atiende mesas recibe los pedidos y avisos de los clientes
+  private qrRole: string | null = null;
+  private refreshQrWatch() {
+    const staff = this.qrRole === 'admin' || this.qrRole === 'cashier' || this.qrRole === 'waiter';
+    this.qr.watch(staff && !!this.settings.value.qrActive);
+  }
+
+  openQrInbox() {
+    this.dialog.open(QrInboxDialogComponent, { data: null, width: '600px', maxWidth: '96vw', autoFocus: false });
+  }
 
   private refreshStock() {
     if (!this.isAdminRole || !this.settings.value.inventoryActive) {
@@ -69,6 +86,8 @@ export class AppComponent {
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
       this.isAdminRole = role === 'admin';
+      this.qrRole = role;
+      this.refreshQrWatch();
       if (this.stockTimer) clearInterval(this.stockTimer);
       this.refreshStock();
       if (this.isAdminRole) this.stockTimer = setInterval(() => this.refreshStock(), 300000);

@@ -1,0 +1,74 @@
+<div *ngIf="loading" class="text-sage-500 text-sm py-[24px]">Cargando…</div>
+
+<ng-container *ngIf="!loading && view">
+
+  <!-- Plan sin la función -->
+  <div *ngIf="!view.planIncluded" class="p-[18px] rounded-2xl bg-sage-100 text-sage-700 text-sm">
+    <p class="font-bold m-0 mb-[4px]">El pedido por QR no está incluido en tu plan</p>
+    <p class="m-0">Está disponible en un plan superior.</p>
+  </div>
+
+  <!-- Función apagada -->
+  <div *ngIf="view.planIncluded && !view.active" class="p-[18px] rounded-2xl bg-yellow-50 border-[1px] border-yellow-200 text-sm text-sage-800 mb-[16px]">
+    <p class="font-bold m-0 mb-[4px]">El pedido por QR está apagado</p>
+    <p class="m-0">Los QR no van a funcionar hasta que lo actives en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a>.</p>
+  </div>
+
+  <ng-container *ngIf="view.planIncluded">
+
+    <!-- Dirección -->
+    <section class="p-[16px] rounded-2xl bg-sage-50 border-[1px] border-sage-200 mb-[20px]">
+      <label for="qr-base" class="block text-sm font-bold text-sage-800 mb-[4px]">Dirección de tu sistema</label>
+      <p class="text-xs text-sage-600 m-0 mb-[10px]">
+        Es la dirección que lleva el QR. <strong>Tiene que ser la definitiva</strong> (la de tu app ya publicada): si la cambiás después, hay que volver a imprimir los QR.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-[8px]">
+        <input id="qr-base" name="qrBase" [(ngModel)]="baseUrl" (keydown.enter)="saveBase()" placeholder="https://mi-restaurante.com"
+          class="flex-1 px-[12px] py-[9px] rounded-xl border-[1px] border-sage-300 bg-white text-sm" />
+        <button type="button" (click)="saveBase()" class="px-[16px] py-[9px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold">Actualizar QR</button>
+      </div>
+      <p *ngIf="baseIsLocal" class="text-xs text-cafe-red-700 font-medium m-0 mt-[8px]" role="alert">
+        Esta dirección solo funciona en esta computadora o en tu red. Los clientes no van a poder abrirla: usá la dirección pública de tu sistema antes de imprimir.
+      </p>
+    </section>
+
+    <div class="flex flex-wrap items-center justify-between gap-[10px] mb-[14px]">
+      <p class="text-sm text-sage-600 m-0">
+        {{ cards.length }} {{ cards.length === 1 ? 'mesa' : 'mesas' }} con QR.
+        Imprimilos, pegalos o plastificalos en cada mesa.
+      </p>
+      <button type="button" (click)="print(cards)" [disabled]="cards.length === 0"
+        class="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-xl bg-cafe-green-700 text-white text-sm font-bold disabled:opacity-40">
+        <mat-icon class="!w-5 !h-5 !text-xl">print</mat-icon> Imprimir todos
+      </button>
+    </div>
+
+    <p *ngIf="cards.length === 0" class="text-sm text-sage-500">Todavía no hay mesas. Creá algunas en <a routerLink="/admin/tables" class="text-cafe-green-700 underline">Mesas</a>.</p>
+
+    <div class="grid gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
+      <article *ngFor="let c of cards" class="p-[16px] rounded-2xl border-[1px] border-sage-200 bg-white flex flex-col items-center text-center">
+        <h3 class="text-lg font-bold text-sage-900 m-0">{{ c.name }}</h3>
+        <p class="text-xs text-sage-500 m-0 mb-[8px]">{{ c.sector || 'Sin sector' }}</p>
+        <img [src]="c.image" [alt]="'QR de ' + c.name" class="w-[168px] h-[168px]" />
+        <p *ngIf="view.requirePin" class="text-xs text-sage-600 m-0 mt-[8px]">
+          Código de mesa actual: <strong class="text-sm tracking-widest text-sage-900">{{ c.pin }}</strong>
+        </p>
+        <div class="flex flex-wrap justify-center gap-[6px] mt-[12px]">
+          <button type="button" (click)="print([c])" class="inline-flex items-center gap-[4px] px-[12px] py-[7px] rounded-xl border-[1px] border-sage-300 text-xs font-bold">
+            <mat-icon class="!w-4 !h-4 !text-base">print</mat-icon> Imprimir
+          </button>
+          <button type="button" (click)="copy(c)" class="inline-flex items-center gap-[4px] px-[12px] py-[7px] rounded-xl border-[1px] border-sage-300 text-xs font-bold">
+            <mat-icon class="!w-4 !h-4 !text-base">link</mat-icon> Copiar dirección
+          </button>
+          <button type="button" (click)="regenerate(c)" [disabled]="busy" class="inline-flex items-center gap-[4px] px-[12px] py-[7px] rounded-xl bg-cafe-red-50 text-cafe-red-700 text-xs font-bold disabled:opacity-50">
+            <mat-icon class="!w-4 !h-4 !text-base">autorenew</mat-icon> Regenerar
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <p class="text-xs text-sage-500 mt-[18px] mb-0">
+      <strong>Regenerar</strong> sirve si alguien fotografió el QR o se perdió: el QR viejo deja de funcionar de inmediato.
+    </p>
+  </ng-container>
+</ng-container>

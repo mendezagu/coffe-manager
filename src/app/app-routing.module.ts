@@ -11,6 +11,7 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { ReportsComponent } from './pages/reports/reports.component';
 import { CashComponent } from './pages/cash/cash.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
+import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { guestGuard, roleGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -27,6 +28,8 @@ const routes: Routes = [
   { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },
   { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin')] },
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
+  // Pantalla pública del cliente (QR de la mesa): sin sesión; lo único que da acceso es el código del QR
+  { path: 'mesa/:token', component: QrOrderComponent },
   { path: '**', redirectTo: '/home' }, // cocina y barra rebotan de /home a /kitchen (roleGuard)
 ];
 

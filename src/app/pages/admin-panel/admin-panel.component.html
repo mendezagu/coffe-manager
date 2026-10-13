@@ -309,6 +309,13 @@
       </div>
     </div>
 
+    <!-- CÓDIGOS QR -->
+    <div *ngIf="section === 'qr'" class="bg-white rounded-card shadow-soft overflow-hidden">
+      <div class="p-6 sm:p-8">
+        <app-qr-codes></app-qr-codes>
+      </div>
+    </div>
+
     <!-- ADMINISTRAR USUARIOS -->
     <div *ngIf="section === 'users'" class="bg-white rounded-card shadow-soft overflow-hidden">
       <div class="p-6 sm:p-8">

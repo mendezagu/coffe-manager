@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Observable } from 'rxjs';
+import { SettingsService } from 'src/app/services/settings.service';
 import { CoffeService, MenuItem} from 'src/app/models/coffe.service';
 import { GestionService } from 'src/app/services/gestionService';
 import { AppUser, UserService } from 'src/app/services/user.service';
@@ -13,7 +14,7 @@ import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
 
-export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users';
+export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users' | 'qr';
 
 interface AdminSectionInfo {
   key: AdminSection;
@@ -36,6 +37,7 @@ const SECTIONS: AdminSectionInfo[] = [
   { key: 'categories', title: 'Categorías', description: 'Ordena el menú en secciones (Cafés, Tortas…)', icon: 'category', singular: 'categoría', plural: 'categorías' },
   { key: 'modifiers', title: 'Modificadores', description: 'Tamaños, leches y extras con precio', icon: 'tune', singular: 'modificador', plural: 'modificadores' },
   { key: 'waiters', title: 'Mozos', description: 'Los nombres que se asignan a las mesas', icon: 'person', singular: 'mozo', plural: 'mozos' },
+  { key: 'qr', title: 'Códigos QR', description: 'Imprimí el QR de cada mesa para que pidan desde el celular', icon: 'qr_code_2', singular: 'mesa con QR', plural: 'mesas con QR' },
   { key: 'users', title: 'Usuarios', description: 'Cuentas del personal y qué puede hacer cada una', icon: 'group', singular: 'usuario', plural: 'usuarios' },
 ];
 
@@ -94,8 +96,8 @@ export class AdminPanelComponent {
   get cards(): SectionCard[] {
     const uncategorized = this.categories.length > 0 ? this.menuItems.filter((m) => !m.categoryId).length : 0;
     return SECTIONS.map((s) => {
-      const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, modifiers: this.modifierGroups.length, waiters: this.waiters.length, users: this.users.length }[s.key];
-      return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : '' };
+      const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, modifiers: this.modifierGroups.length, waiters: this.waiters.length, users: this.users.length, qr: this.tables.length }[s.key];
+      return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : s.key === 'qr' && !this.settings.value.qrActive ? 'Desactivado' : '' };
     });
   }
 
@@ -121,6 +123,7 @@ export class AdminPanelComponent {
     private gestionService: GestionService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
+    private settings: SettingsService,
     route: ActivatedRoute
   ) {
     route.paramMap.subscribe((params) => {

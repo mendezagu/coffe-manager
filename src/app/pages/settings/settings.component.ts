@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
+import { QrService } from 'src/app/services/qr.service';
 
 interface Region {
   label: string;
@@ -37,7 +38,19 @@ export class SettingsComponent implements OnInit {
   saving = false;
   hours = Array.from({ length: 24 }, (_, h) => h);
 
-  constructor(private settings: SettingsService, private snackBar: MatSnackBar) {}
+  // Sonido de aviso de pedidos QR: se guarda en este dispositivo apenas se cambia
+  sound = { ...this.qr.sound };
+
+  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService) {}
+
+  saveSound() {
+    this.qr.saveSound(this.sound);
+  }
+
+  testSound() {
+    this.saveSound();
+    this.qr.testSound();
+  }
 
   ngOnInit() {
     // El formulario se llena con la versión del servidor (no con la guardada en el navegador).
@@ -83,6 +96,11 @@ export class SettingsComponent implements OnInit {
   // ¿El plan del negocio incluye el inventario?
   get canInventory(): boolean {
     return (this.form?.features ?? []).includes('inventory');
+  }
+
+  // ¿El plan del negocio incluye el pedido por QR?
+  get canQr(): boolean {
+    return (this.form?.features ?? []).includes('qr_ordering');
   }
 
   // ¿El plan del negocio incluye separar cocina y barra?

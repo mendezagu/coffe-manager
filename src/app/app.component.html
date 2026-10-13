@@ -102,6 +102,14 @@
           <mat-icon class="!w-4 !h-4 !text-base">inventory_2</mat-icon>
           <span>{{ stock.outCount + stock.lowCount }}<span class="hidden sm:inline"> {{ (stock.outCount + stock.lowCount) === 1 ? 'insumo' : 'insumos' }} por reponer</span></span>
         </a>
+        <!-- Pedidos y avisos que llegan por QR -->
+        <button *ngIf="(qr.inbox$ | async) as q" [hidden]="!q.active" type="button" (click)="openQrInbox()"
+          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold"
+          [ngClass]="(q.requests.length + q.calls.length) > 0 ? 'bg-cafe-red-700 border-cafe-red-700 text-white animate-pulse' : 'bg-white border-sage-300 text-sage-600'"
+          [attr.aria-label]="'Pedidos por QR: ' + q.requests.length + ' pedidos y ' + q.calls.length + ' avisos esperando'">
+          <mat-icon class="!w-4 !h-4 !text-base">qr_code_2</mat-icon>
+          <span>{{ q.requests.length + q.calls.length }}<span class="hidden sm:inline"> {{ (q.requests.length + q.calls.length) === 1 ? 'pedido QR' : 'pedidos QR' }}</span></span>
+        </button>
         <!-- Estado de la caja (administrador y cajero) -->
         <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
           class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline"
