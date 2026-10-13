@@ -24,7 +24,8 @@ export interface CashRegisterSummary {
   note: string;
   countedAmount: number | null;
   difference: number | null;
-  sales: { count: number; totalAmount: number; discountTotal: number; tipsTotal: number };
+  // los importes vienen en null para quien no es admin mientras la caja está abierta (conteo a ciegas)
+  sales: { count: number; totalAmount: number | null; discountTotal: number | null; tipsTotal: number | null };
   byMethod: { method: string; amount: number; count: number }[];
   tipsByWaiter: { waiterName: string; amount: number }[];
   // sales y expected vienen en null para quien no es admin mientras la caja está abierta (conteo a ciegas)

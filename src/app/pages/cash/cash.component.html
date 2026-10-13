@@ -95,19 +95,33 @@
           <p class="text-xs font-bold text-sage-500 m-0">Efectivo esperado</p>
           <p class="text-2xl font-bold text-cafe-green-700 mt-1 mb-0">{{ r.cash.expected | money }}</p>
         </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500 m-0">Ventas</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.totalAmount | money }}</p>
-          <p class="text-xs text-sage-500 m-0">{{ r.sales.count }} {{ r.sales.count === 1 ? 'cobro' : 'cobros' }}</p>
-        </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500 m-0">Propinas</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.tipsTotal | money }}</p>
-        </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500 m-0">Descuentos</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.discountTotal | money }}</p>
-        </div>
+        <ng-container *ngIf="!blind">
+          <div class="bg-white rounded-card shadow-soft p-4">
+            <p class="text-xs font-bold text-sage-500 m-0">Ventas</p>
+            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.totalAmount | money }}</p>
+            <p class="text-xs text-sage-500 m-0">{{ r.sales.count }} {{ r.sales.count === 1 ? 'cobro' : 'cobros' }}</p>
+          </div>
+          <div class="bg-white rounded-card shadow-soft p-4">
+            <p class="text-xs font-bold text-sage-500 m-0">Propinas</p>
+            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.tipsTotal | money }}</p>
+          </div>
+          <div class="bg-white rounded-card shadow-soft p-4">
+            <p class="text-xs font-bold text-sage-500 m-0">Descuentos</p>
+            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.discountTotal | money }}</p>
+          </div>
+        </ng-container>
+
+        <!-- Conteo a ciegas: solo lo que cargó la propia persona y cuántos cobros hubo, sin importes de lo vendido -->
+        <ng-container *ngIf="blind">
+          <div class="bg-white rounded-card shadow-soft p-4">
+            <p class="text-xs font-bold text-sage-500 m-0">Fondo inicial</p>
+            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.cash.opening | money }}</p>
+          </div>
+          <div class="bg-white rounded-card shadow-soft p-4">
+            <p class="text-xs font-bold text-sage-500 m-0">Cobros del turno</p>
+            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.count }}</p>
+          </div>
+        </ng-container>
       </div>
 
       <div class="grid gap-4 lg:grid-cols-2 mb-4">
@@ -126,7 +140,7 @@
           <ng-container *ngIf="blind">
             <h3 class="font-bold text-sage-800 mt-0 mb-2">Conteo a ciegas</h3>
             <p class="text-sm text-sage-600 m-0">
-              Mientras la caja está abierta no se muestra cuánto se cobró en efectivo ni por cada método.
+              Mientras la caja está abierta no se muestran los importes de lo vendido: ni el total, ni lo cobrado en efectivo o por cada método.
               Al cerrar, contás el efectivo del cajón y el sistema te dice si cierra justo, si faltan o si sobran.
             </p>
           </ng-container>
