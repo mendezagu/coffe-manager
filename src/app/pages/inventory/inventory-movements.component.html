@@ -1,0 +1,31 @@
+<div>
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <label class="flex items-center gap-2 text-sm text-sage-700">
+      Insumo
+      <select [(ngModel)]="stockItemId" (ngModelChange)="load()" class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+        <option value="">Todos</option>
+        <option *ngFor="let i of items" [value]="i._id">{{ i.name }}</option>
+      </select>
+    </label>
+    <span class="text-xs text-sage-500">Se muestran los últimos 200 movimientos.</span>
+  </div>
+
+  <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+  <p *ngIf="!loading && movements.length === 0" class="text-sm text-sage-600">Todavía no hay movimientos.</p>
+
+  <div *ngIf="movements.length" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <ul class="m-0 p-0 list-none divide-y divide-sage-100">
+      <li *ngFor="let m of movements" class="px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span class="text-xs text-sage-500 min-w-[110px]">{{ m.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+        <span class="flex-1 min-w-[150px] text-sm font-bold text-sage-900">{{ m.name }}</span>
+        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+          [ngClass]="m.type === 'PURCHASE' ? 'bg-cafe-green-50 text-cafe-green-700' : m.type === 'SALE' ? 'bg-sage-100 text-sage-700' : m.type === 'WASTE' ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-yellow-100 text-yellow-800'">{{ labels[m.type] }}</span>
+        <span class="min-w-[110px] text-right text-sm font-bold" [ngClass]="m.quantity < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">{{ m.quantity > 0 ? '+' : '' }}{{ formatQty(m.quantity, m.unit) }}</span>
+        <span class="min-w-[110px] text-right text-xs text-sage-500">queda {{ formatQty(m.balanceAfter, m.unit) }}</span>
+        <span class="w-full sm:w-auto sm:flex-1 text-xs text-sage-500">
+          <ng-container *ngIf="m.supplier">{{ m.supplier }} · </ng-container>{{ m.note }}<ng-container *ngIf="m.note || m.supplier"> · </ng-container>{{ m.createdBy }}
+        </span>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
+  <div class="max-w-6xl mx-auto">
+
+    <h1 class="text-2xl font-bold text-sage-900">Inventario</h1>
+    <p class="text-sage-600 text-sm mt-1 mb-5">Qué tenés, cuánto te queda y cuánto ganás con cada plato.</p>
+
+    <p *ngIf="!loaded" class="text-sage-600 text-sm">Cargando…</p>
+
+    <!-- Apagado -->
+    <div *ngIf="loaded && !enabled" class="bg-white rounded-card shadow-soft p-8 text-center">
+      <h2 class="text-lg font-bold text-sage-900 m-0">El inventario no está activado</h2>
+      <p class="text-sm text-sage-600 mt-2 mb-4">
+        <ng-container *ngIf="(settings.settings$ | async)?.features?.includes('inventory'); else noPlan">
+          Activalo en <strong>Mi negocio</strong> para controlar el stock, calcular costos y marcar como agotados los platos que no se pueden preparar.
+        </ng-container>
+        <ng-template #noPlan>El inventario no está incluido en tu plan actual. Está disponible en un plan superior.</ng-template>
+      </p>
+      <a routerLink="/settings" class="inline-block px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg no-underline">Ir a Mi negocio</a>
+    </div>
+
+    <ng-container *ngIf="loaded && enabled">
+      <div class="inline-flex flex-wrap p-[3px] mb-5 bg-white border border-sage-300 rounded-xl shadow-soft" role="tablist" aria-label="Secciones del inventario">
+        <button *ngFor="let t of tabs" type="button" role="tab" (click)="tab = t.key" [attr.aria-selected]="tab === t.key"
+          class="px-3.5 py-2 text-sm font-medium rounded-lg transition-colors inline-flex items-center gap-1.5"
+          [ngClass]="tab === t.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">
+          <mat-icon class="!w-4 !h-4 !text-base">{{ t.icon }}</mat-icon>
+          {{ t.label }}
+        </button>
+      </div>
+
+      <app-inventory-stock *ngIf="tab === 'stock'"></app-inventory-stock>
+      <app-inventory-recipes *ngIf="tab === 'recipes'"></app-inventory-recipes>
+      <app-inventory-count *ngIf="tab === 'count'"></app-inventory-count>
+      <app-inventory-movements *ngIf="tab === 'movements'"></app-inventory-movements>
+      <app-inventory-profit *ngIf="tab === 'profit'"></app-inventory-profit>
+    </ng-container>
+
+  </div>
+</div>

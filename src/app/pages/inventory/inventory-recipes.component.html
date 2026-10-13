@@ -1,0 +1,169 @@
+<div>
+  <p class="text-sm text-sage-600 mt-0 mb-4">
+    La receta dice qué gasta <strong>una unidad</strong> de cada plato. Con eso, cada venta descuenta los insumos solos, el sistema marca como
+    <strong>agotado</strong> lo que no se puede preparar y calcula cuánto te cuesta cada plato.
+  </p>
+
+  <div class="inline-flex p-[3px] mb-4 bg-white border border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Qué configurar">
+    <button type="button" (click)="setMode('dishes')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg"
+      [ngClass]="mode === 'dishes' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Platos</button>
+    <button type="button" (click)="setMode('options')" class="px-3.5 py-1.5 text-sm font-medium rounded-lg"
+      [ngClass]="mode === 'options' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Extras (modificadores)</button>
+  </div>
+
+  <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+
+  <div *ngIf="!loading && items.length === 0" class="p-6 mb-4 bg-white rounded-card shadow-soft text-center">
+    <p class="font-bold text-sage-800 m-0">Primero cargá tus insumos</p>
+    <p class="text-sm text-sage-500 mt-1 mb-0">Para armar una receta necesitás tener creados los insumos (café, leche, vasos…). Hacelo en la pestaña <strong>Stock</strong>.</p>
+  </div>
+
+  <div *ngIf="!loading && items.length > 0" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] items-start">
+
+    <!-- ========== PLATOS ========== -->
+    <ng-container *ngIf="mode === 'dishes'">
+      <section class="bg-white rounded-card shadow-soft p-4">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <input type="search" [(ngModel)]="search" placeholder="Buscar plato…" aria-label="Buscar plato"
+            class="flex-1 min-w-[160px] px-3 py-2 border border-sage-200 rounded-lg text-sm" />
+          <select [(ngModel)]="filter" aria-label="Filtrar" class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+            <option value="all">Todos ({{ dishes.length }})</option>
+            <option value="with">Con receta ({{ withRecipe }})</option>
+            <option value="without">Sin receta ({{ dishes.length - withRecipe }})</option>
+          </select>
+        </div>
+        <ul class="m-0 p-0 list-none max-h-[60vh] overflow-y-auto divide-y divide-sage-100">
+          <li *ngFor="let d of filteredDishes">
+            <button type="button" (click)="editDish(d)" class="w-full text-left px-2 py-2.5 flex items-center gap-2 hover:bg-sage-50 rounded-lg"
+              [class.bg-cafe-green-50]="dishId === d.menuItemId">
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-bold text-sage-900 truncate">{{ d.name }}</span>
+                <span class="block text-xs text-sage-500">{{ d.price | money }}<span *ngIf="d.cost !== null"> · costo {{ d.cost | money }}</span></span>
+              </span>
+              <span *ngIf="d.ingredients.length" class="px-2 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold">{{ d.ingredients.length }} {{ d.ingredients.length === 1 ? 'insumo' : 'insumos' }}</span>
+              <span *ngIf="!d.ingredients.length" class="px-2 py-0.5 rounded-full bg-sage-100 text-sage-500 text-[10px] font-bold">Sin receta</span>
+            </button>
+          </li>
+        </ul>
+        <p *ngIf="filteredDishes.length === 0" class="text-sm text-sage-500 m-0 py-4 text-center">No hay platos con ese filtro.</p>
+      </section>
+
+      <section class="bg-white rounded-card shadow-soft p-5 lg:sticky lg:top-20">
+        <p *ngIf="!selectedDish" class="text-sm text-sage-500 m-0 py-8 text-center">Elegí un plato de la lista para armar o ver su receta.</p>
+
+        <ng-container *ngIf="selectedDish as d">
+          <h3 class="text-lg font-bold text-sage-900 m-0">{{ d.name }}</h3>
+          <p class="text-sm text-sage-500 mt-1 mb-4">Precio de venta {{ d.price | money }}. Receta de <strong>una</strong> unidad.</p>
+
+          <div *ngIf="rows.length === 0" class="mb-4 p-4 bg-sage-50 border border-dashed border-sage-300 rounded-lg">
+            <p class="text-sm text-sage-700 m-0 mb-3"><strong>¿Es algo que se vende tal cual?</strong> Una gaseosa, un agua, un alfajor: se descuenta 1 unidad por cada venta.</p>
+            <button type="button" (click)="makeSimple(d)" [disabled]="busy"
+              class="px-4 py-2 border border-cafe-green-700 text-cafe-green-700 bg-white hover:bg-cafe-green-50 font-bold text-sm rounded-lg disabled:opacity-50">Es un producto que se vende tal cual</button>
+            <div *ngIf="unitItems.length" class="mt-3 pt-3 border-t border-sage-200 flex flex-wrap items-center gap-2 text-sm text-sage-700">
+              <span>o usá un insumo que ya creaste:</span>
+              <select [(ngModel)]="simpleItemId" aria-label="Insumo existente" class="px-2 py-1.5 border border-sage-200 rounded-lg text-sm bg-white">
+                <option value="">Elegí uno…</option>
+                <option *ngFor="let u of unitItems" [value]="u._id">{{ u.name }}</option>
+              </select>
+              <button type="button" (click)="linkSimple(d)" [disabled]="!simpleItemId || busy"
+                class="px-3 py-1.5 border border-cafe-green-700 text-cafe-green-700 bg-white hover:bg-cafe-green-50 font-bold text-xs rounded-lg disabled:opacity-50">Vincular (1 unidad por venta)</button>
+            </div>
+            <p class="text-xs text-sage-500 mt-3 mb-0">Si en cambio se prepara con varios insumos, agregalos abajo.</p>
+          </div>
+
+          <div class="space-y-2">
+            <div *ngFor="let r of rows; let i = index" class="flex flex-wrap items-center gap-2 p-2 bg-sage-50 border border-sage-200 rounded-lg">
+              <select [(ngModel)]="r.stockItemId" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+                <option *ngFor="let c of choices(r)" [value]="c._id">{{ c.name }}</option>
+              </select>
+              <input type="number" min="0" step="any" [(ngModel)]="r.quantity" [attr.aria-label]="'Cantidad ' + (i + 1)" placeholder="Cantidad"
+                class="w-28 px-2 py-2 border border-sage-200 rounded-lg text-sm text-right bg-white" />
+              <span class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
+              <button type="button" (click)="removeRow(i)" aria-label="Quitar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
+                <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" (click)="addRow()" class="mt-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50">+ Agregar insumo</button>
+
+          <div *ngIf="rows.length" class="mt-4 p-3 bg-cafe-green-50 border border-cafe-green-200 rounded-lg text-sm grid grid-cols-3 gap-2 text-center">
+            <div><p class="m-0 text-[11px] font-bold text-sage-500">Costo</p><p class="m-0 font-bold text-sage-900">{{ previewCost | money }}</p></div>
+            <div><p class="m-0 text-[11px] font-bold text-sage-500">Ganancia</p><p class="m-0 font-bold" [ngClass]="(previewMargin ?? 0) < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">{{ previewMargin | money }}</p></div>
+            <div><p class="m-0 text-[11px] font-bold text-sage-500">Margen</p><p class="m-0 font-bold text-sage-900">{{ d.price > 0 && previewMargin !== null ? ((previewMargin / d.price) | percent:'1.0-0') : '–' }}</p></div>
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <button type="button" (click)="saveDish()" [disabled]="busy"
+              class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50">{{ busy ? 'Guardando…' : 'Guardar receta' }}</button>
+            <button type="button" (click)="dishId = null" class="px-5 py-2.5 border border-sage-200 text-sage-700 font-medium text-sm rounded-lg hover:bg-sage-50">Cerrar</button>
+          </div>
+        </ng-container>
+      </section>
+    </ng-container>
+
+    <!-- ========== EXTRAS ========== -->
+    <ng-container *ngIf="mode === 'options'">
+      <section class="bg-white rounded-card shadow-soft p-4">
+        <p *ngIf="options.length === 0" class="text-sm text-sage-500 m-0 py-4 text-center">Todavía no tenés modificadores. Creálos en Administrar → Modificadores.</p>
+        <ul class="m-0 p-0 list-none max-h-[60vh] overflow-y-auto divide-y divide-sage-100">
+          <li *ngFor="let o of options">
+            <button type="button" (click)="editOption(o)" class="w-full text-left px-2 py-2.5 flex items-center gap-2 hover:bg-sage-50 rounded-lg"
+              [class.bg-cafe-green-50]="optionId === o.optionId">
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-bold text-sage-900 truncate">{{ o.name }}</span>
+                <span class="block text-xs text-sage-500">{{ o.groupName }}</span>
+              </span>
+              <span *ngIf="o.ingredients.length" class="px-2 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold">{{ o.ingredients.length }} {{ o.ingredients.length === 1 ? 'insumo' : 'insumos' }}</span>
+              <span *ngIf="!o.ingredients.length" class="px-2 py-0.5 rounded-full bg-sage-100 text-sage-500 text-[10px] font-bold">No consume</span>
+            </button>
+          </li>
+        </ul>
+      </section>
+
+      <section class="bg-white rounded-card shadow-soft p-5 lg:sticky lg:top-20">
+        <p *ngIf="!selectedOption" class="text-sm text-sage-500 m-0 py-8 text-center">Elegí un extra para indicar qué insumos consume.</p>
+
+        <ng-container *ngIf="selectedOption as o">
+          <h3 class="text-lg font-bold text-sage-900 m-0">{{ o.groupName }}: {{ o.name }}</h3>
+          <p class="text-sm text-sage-500 mt-1 mb-4">
+            Lo que consume cuando el cliente elige esta opción. Si <strong>reemplaza</strong> a un insumo de la receta (ej: leche de almendras en lugar de leche común),
+            indicalo y ese insumo deja de descontarse.
+          </p>
+
+          <div class="space-y-2">
+            <div *ngFor="let r of rows; let i = index" class="p-2 bg-sage-50 border border-sage-200 rounded-lg">
+              <div class="flex flex-wrap items-center gap-2">
+                <select [(ngModel)]="r.stockItemId" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+                  <option *ngFor="let c of choices(r)" [value]="c._id">{{ c.name }}</option>
+                </select>
+                <input type="number" min="0" step="any" [(ngModel)]="r.quantity" [attr.aria-label]="'Cantidad ' + (i + 1)" placeholder="Cantidad"
+                  class="w-28 px-2 py-2 border border-sage-200 rounded-lg text-sm text-right bg-white" />
+                <span class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
+                <button type="button" (click)="removeRow(i)" aria-label="Quitar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
+                  <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+                </button>
+              </div>
+              <label class="mt-2 flex flex-wrap items-center gap-2 text-xs text-sage-600">
+                Reemplaza a
+                <select [(ngModel)]="r.replacesStockItemId" [attr.aria-label]="'Reemplaza a ' + (i + 1)" class="px-2 py-1.5 border border-sage-200 rounded-lg text-sm bg-white">
+                  <option value="">Nada (se suma)</option>
+                  <option *ngFor="let c of items" [value]="c._id">{{ c.name }}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <button type="button" (click)="addRow()" class="mt-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50">+ Agregar insumo</button>
+
+          <div class="mt-4 flex gap-2">
+            <button type="button" (click)="saveOption()" [disabled]="busy"
+              class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50">{{ busy ? 'Guardando…' : 'Guardar' }}</button>
+            <button type="button" (click)="optionId = null" class="px-5 py-2.5 border border-sage-200 text-sage-700 font-medium text-sm rounded-lg hover:bg-sage-50">Cerrar</button>
+          </div>
+        </ng-container>
+      </section>
+    </ng-container>
+
+  </div>
+</div>

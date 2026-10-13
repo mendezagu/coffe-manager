@@ -63,7 +63,16 @@
             {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto
           </p>
         </div>
+        <div *ngIf="hasCosts" class="bg-white rounded-card shadow-soft p-4">
+          <p class="text-xs font-bold text-sage-500">Ganancia estimada</p>
+          <p class="text-2xl font-bold text-cafe-green-700 mt-1">{{ report.summary.profit | money }}</p>
+          <p *ngIf="report.summary.profitMarginPct !== null" class="text-xs text-sage-500 mt-0.5">{{ report.summary.profitMarginPct / 100 | percent:'1.0-0' }} de margen</p>
+        </div>
       </div>
+
+      <p *ngIf="hasCosts && report.summary.revenueWithoutCost > 0" class="mb-2 text-xs text-sage-600">
+        La ganancia se calcula sobre lo vendido con receta. Quedan fuera {{ report.summary.revenueWithoutCost | money }} de platos sin receta, de los que no se conoce el costo.
+      </p>
 
       <p *ngIf="report.summary.tipsTotal > 0" class="mb-2 text-xs text-sage-600">
         Propinas del período: <strong class="text-sage-800">{{ report.summary.tipsTotal | money }}</strong>. No están incluidas en las ventas; el método de pago sí las cuenta, porque es lo que entró con cada uno.
@@ -105,15 +114,17 @@
                 [ngClass]="itemsBy === 'amount' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'amount'">Por importe</button>
               <button type="button" (click)="setItemsBy('quantity')" class="px-2.5 py-1 rounded-md font-medium"
                 [ngClass]="itemsBy === 'quantity' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'quantity'">Por cantidad</button>
+              <button *ngIf="hasCosts" type="button" (click)="setItemsBy('profit')" class="px-2.5 py-1 rounded-md font-medium"
+                [ngClass]="itemsBy === 'profit' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'profit'">Por ganancia</button>
             </div>
           </div>
           <p *ngIf="report.items.length === 0" class="text-sm text-sage-500 py-8 text-center">Todavía no hay ventas con detalle de platos en este rango.</p>
           <div [hidden]="showTables || report.items.length === 0" [style.height.px]="topItems.length * 34 + 50"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
           <div *ngIf="showTables && report.items.length" class="max-h-80 overflow-y-auto">
             <table class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th><th *ngIf="hasCosts" class="py-1.5 text-right">Ganancia</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
-                <tr *ngFor="let i of topItems"><td class="py-1.5">{{ i.name }}</td><td class="py-1.5 text-right">{{ i.quantity }}</td><td class="py-1.5 text-right font-medium">{{ i.amount | money }}</td></tr>
+                <tr *ngFor="let i of topItems"><td class="py-1.5">{{ i.name }}</td><td class="py-1.5 text-right">{{ i.quantity }}</td><td class="py-1.5 text-right font-medium">{{ i.amount | money }}</td><td *ngIf="hasCosts" class="py-1.5 text-right">{{ i.profit === null ? '–' : (i.profit | money) }}</td></tr>
               </tbody>
             </table>
           </div>

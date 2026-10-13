@@ -165,6 +165,32 @@
           </label>
         </section>
 
+        <!-- Inventario -->
+        <section class="bg-white rounded-card shadow-soft p-5 space-y-3">
+          <h2 class="font-bold text-sage-800 mb-1">Inventario</h2>
+          <p class="text-sm text-sage-600 m-0">
+            Llevá la cuenta de insumos y productos: cada venta descuenta lo que consumió, los platos que no se pueden preparar aparecen como <strong>agotados</strong> y se calcula cuánto ganás con cada uno.
+          </p>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canInventory ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="inventoryEnabled" [(ngModel)]="form.inventoryEnabled" [disabled]="!canInventory" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Usar inventario y stock</span>
+              <span *ngIf="canInventory" class="block text-xs text-sage-500">Cuando lo actives vas a ver <a routerLink="/inventory" class="text-cafe-green-700 font-medium underline">Inventario</a> en el menú, para cargar insumos y recetas.</span>
+              <span *ngIf="!canInventory" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+            </span>
+          </label>
+
+          <label *ngIf="form.inventoryEnabled && canInventory" class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="blockOutOfStock" [(ngModel)]="form.blockOutOfStock" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">No dejar pedir lo que no hay</span>
+              <span class="block text-xs text-sage-500">Si falta un insumo, el mozo no puede agregar el plato. Si lo apagás, se puede pedir igual y el stock queda en negativo (solo se avisa).</span>
+            </span>
+          </label>
+        </section>
+
         <!-- Cocina y barra -->
         <section class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>

@@ -1,0 +1,60 @@
+<div>
+  <p class="text-sm text-sage-600 mt-0 mb-4">
+    Cuánto te cuesta preparar cada plato (según su receta y el costo de los insumos) y cuánto te queda de ganancia. Se calcula con los costos de hoy.
+  </p>
+
+  <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+
+  <div *ngIf="!loading && rows.length === 0" class="p-8 text-center bg-white rounded-card shadow-soft">
+    <p class="font-bold text-sage-800 m-0">Todavía no hay platos con receta</p>
+    <p class="text-sm text-sage-500 mt-1 mb-0">Armá la receta de tus platos en la pestaña <strong>Recetas</strong> y cargá el costo de cada insumo en <strong>Stock</strong>. Acá vas a ver cuáles te dejan más ganancia.</p>
+  </div>
+
+  <ng-container *ngIf="rows.length">
+    <div class="flex flex-wrap items-center gap-4 mb-4">
+      <div class="px-4 py-3 bg-white rounded-card shadow-soft">
+        <p class="m-0 text-xs font-bold text-sage-500">Margen promedio</p>
+        <p class="m-0 text-2xl font-bold text-cafe-green-700">{{ (averageMargin ?? 0) / 100 | percent:'1.0-0' }}</p>
+      </div>
+      <label class="flex items-center gap-2 text-sm text-sage-700 ml-auto">
+        Ordenar por
+        <select [(ngModel)]="sortBy" class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+          <option value="marginPct">Mayor margen (%)</option>
+          <option value="margin">Mayor ganancia ($)</option>
+          <option value="name">Nombre</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="bg-white rounded-card shadow-soft overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs text-sage-500 border-b border-sage-100">
+            <th class="px-4 py-3">Plato</th>
+            <th class="px-4 py-3 text-right">Precio</th>
+            <th class="px-4 py-3 text-right">Costo</th>
+            <th class="px-4 py-3 text-right">Ganancia</th>
+            <th class="px-4 py-3 text-right">Margen</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-sage-100">
+          <tr *ngFor="let r of rows">
+            <td class="px-4 py-2.5 font-bold text-sage-900">{{ r.name }}<span *ngIf="r.isPromo" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold align-middle">Promo</span></td>
+            <td class="px-4 py-2.5 text-right">{{ r.price | money }}</td>
+            <td class="px-4 py-2.5 text-right text-sage-600">{{ r.cost | money }}</td>
+            <td class="px-4 py-2.5 text-right font-bold" [ngClass]="(r.margin ?? 0) < 0 ? 'text-cafe-red-700' : 'text-sage-900'">{{ r.margin | money }}</td>
+            <td class="px-4 py-2.5 text-right">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="(r.marginPct ?? 0) < lowMargin ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-green-50 text-cafe-green-700'">{{ r.marginPct === null ? '–' : (r.marginPct / 100 | percent:'1.0-0') }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-3 text-xs text-sage-500">
+      En rojo: platos donde el costo se come más del {{ 100 - lowMargin }} % del precio.
+      <ng-container *ngIf="withoutRecipe > 0"> {{ withoutRecipe }} {{ withoutRecipe === 1 ? 'plato no tiene' : 'platos no tienen' }} receta y no aparecen acá.</ng-container>
+    </p>
+  </ng-container>
+</div>

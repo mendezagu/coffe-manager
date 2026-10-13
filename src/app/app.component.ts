@@ -5,6 +5,7 @@ import { DatePipe } from '@angular/common';
 import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
 import { SettingsService } from './services/settings.service';
 import { CashService } from './services/cash.service';
+import { InventoryService, InventorySummary } from './services/inventory.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
@@ -36,20 +37,42 @@ export class AppComponent {
     private router: Router,
     private gestionService: GestionService,
     public settings: SettingsService,
-    public cash: CashService
+    public cash: CashService,
+    private inventory: InventoryService
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
-    this.settings.settings$.subscribe(() => (this.shift = this.settings.shiftLabel()));
+    this.settings.settings$.subscribe(() => {
+      this.shift = this.settings.shiftLabel();
+      this.refreshStock(); // por si se activó o desactivó el inventario
+    });
     this.role$ = this.userService.getRoleState();
     this.user$ = this.userService.getAuthState();
   }
 
   private cashTimer?: ReturnType<typeof setInterval>;
 
+  // Aviso de insumos bajos o agotados (solo administrador, y solo si usa inventario)
+  stock: InventorySummary | null = null;
+  private isAdminRole = false;
+  private stockTimer?: ReturnType<typeof setInterval>;
+
+  private refreshStock() {
+    if (!this.isAdminRole || !this.settings.value.inventoryActive) {
+      this.stock = null;
+      return;
+    }
+    this.inventory.summary().subscribe({ next: (s) => (this.stock = s), error: () => {} });
+  }
+
   ngOnInit() {
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
+      this.isAdminRole = role === 'admin';
+      if (this.stockTimer) clearInterval(this.stockTimer);
+      this.refreshStock();
+      if (this.isAdminRole) this.stockTimer = setInterval(() => this.refreshStock(), 300000);
+
       if (this.cashTimer) clearInterval(this.cashTimer);
       if (role === 'admin' || role === 'cashier') {
         const refresh = () => this.cash.refresh().subscribe({ error: () => {} });

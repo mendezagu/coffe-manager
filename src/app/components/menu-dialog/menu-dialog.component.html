@@ -101,6 +101,8 @@
             <div class="flex-1 min-w-0">
               <small class="font-semibold text-sage-900 mb-1">{{ menu.name }}</small>
               <span *ngIf="hasModifiers(menu)" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">Opciones</span>
+              <span *ngIf="menu.availableUnits === 0" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold align-middle">Agotado</span>
+              <span *ngIf="menu.availableUnits !== null && menu.availableUnits !== undefined && menu.availableUnits > 0 && menu.availableUnits <= 5" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-[10px] font-bold align-middle">Quedan {{ menu.availableUnits }}</span>
               <div class="flex items-center gap-1">
                 <small class="font-semibold text-cafe-green-700">{{ menu.price }}</small>
               </div>
@@ -121,11 +123,11 @@
 
               <!-- Botón Agregar -->
               <button
-                class="flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-200"
+                class="flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 [ngClass]="addedItems[menu._id] ?
                   'bg-cafe-green-700 text-white' :
                   'bg-cafe-green-700 hover:bg-cafe-green-800 text-white'"
-                (click)="addItem(menu)"
+                (click)="addItem(menu)" [disabled]="menu.availableUnits === 0"
               >
                 <mat-icon class="!w-3.5 !h-3.5 !text-sm" *ngIf="!addedItems[menu._id]">add_circle</mat-icon>
                 <mat-icon class="!w-3.5 !h-3.5 !text-sm" *ngIf="addedItems[menu._id]">check_circle</mat-icon>

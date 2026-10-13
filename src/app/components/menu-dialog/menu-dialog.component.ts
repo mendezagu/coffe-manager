@@ -66,6 +66,12 @@ export class MenuDialogComponent {
       : '';
   }
 
+  // Mensaje del servidor pensado para la persona (ej: "No hay stock suficiente…"); si no hay, uno genérico
+  private serverMessage(error: any, fallback: string): string {
+    const message = String(error?.message ?? '');
+    return message && !message.startsWith('Error ') ? message : fallback;
+  }
+
   ngOnInit(): void {
      console.log('Datos recibidos en MenuDialogComponent:', this.data);
     this.loadMenu();
@@ -259,7 +265,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
       },
       (error) => {
         console.error("Error al actualizar la mesa:", error);
-        alert("Ocurrió un error al actualizar la mesa antes de imprimir.");
+        alert(this.serverMessage(error, 'Ocurrió un error al actualizar la mesa antes de imprimir.'));
       }
     );
   }
@@ -267,6 +273,15 @@ updateQuantity(menu: MenuItem, event: Event): void {
 
   // Agregar un plato. Si ofrece opciones (tamaño, leche, extras…) primero se eligen.
   addItem(menu: MenuItem): void {
+    // Con inventario: no se pide más de lo que se puede preparar (el servidor también lo comprueba)
+    const limit = menu.availableUnits;
+    if (limit !== null && limit !== undefined) {
+      const already = this.selectedItems.filter((s) => s._id === menu._id).reduce((n, s) => n + (s.quantity ?? 0), 0);
+      if (limit === 0 || already + (menu.quantity ?? 1) > limit) {
+        alert(limit === 0 ? `${menu.name} está agotado.` : `Solo quedan ${limit} de ${menu.name}.`);
+        return;
+      }
+    }
     const groups = this.groupsFor(menu);
     if (!groups.length) {
       this.commitAdd(menu, []);

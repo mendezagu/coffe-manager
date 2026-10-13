@@ -80,6 +80,11 @@ export class SettingsComponent implements OnInit {
     return logo ?? null;
   }
 
+  // ¿El plan del negocio incluye el inventario?
+  get canInventory(): boolean {
+    return (this.form?.features ?? []).includes('inventory');
+  }
+
   // ¿El plan del negocio incluye separar cocina y barra?
   get canSplit(): boolean {
     return (this.form?.features ?? []).includes('kitchen_bar_split');

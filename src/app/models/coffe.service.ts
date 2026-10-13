@@ -10,6 +10,7 @@ export interface MenuItem {
   isPromo?: boolean;
   categoryId?: string | null;
   modifierGroupIds?: string[];
+  availableUnits?: number | null;
 }
 
 export interface Table {

@@ -24,7 +24,8 @@ export class ModifierPickerDialogComponent {
     // Los grupos obligatorios de una sola opción arrancan con la primera opción elegida:
     // el caso común (ej: tamaño "Chico") queda a un toque de distancia.
     for (const g of data.groups) {
-      this.choice[g._id] = g.required && g.selection === 'SINGLE' && g.options[0] ? [g.options[0]._id] : [];
+      const first = g.options.find((o) => !o.outOfStock); // la primera que no esté agotada
+      this.choice[g._id] = g.required && g.selection === 'SINGLE' && first ? [first._id] : [];
     }
   }
 
@@ -33,6 +34,7 @@ export class ModifierPickerDialogComponent {
   }
 
   toggle(group: ModifierGroup, option: ModifierOption) {
+    if (option.outOfStock) return;
     const current = this.choice[group._id];
     if (group.selection === 'SINGLE') {
       // tocar la elegida la quita, salvo que el grupo sea obligatorio

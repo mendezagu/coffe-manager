@@ -24,6 +24,8 @@ export interface MenuItem {
   lineKey?: string;
   // solo en pantallas de cobro: precio del plato sin los extras (price incluye los extras)
   basePrice?: number;
+  // con inventario: cuántas unidades se pueden preparar con lo que hay (0 = agotado; null = no se controla)
+  availableUnits?: number | null;
 }
 
 export type ModifierSelection = 'SINGLE' | 'MULTIPLE';
@@ -34,6 +36,8 @@ export interface ModifierOption {
   priceDelta: number;
   position: number;
   active: boolean;
+  // con inventario: el insumo de esta opción se agotó
+  outOfStock?: boolean;
 }
 
 export interface ModifierGroup {
@@ -107,8 +111,11 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
       // Error en el cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error en el servidor
-      errorMessage = `Error ${error.status}: ${error.message}`;
+      // Error en el servidor: si trae un mensaje pensado para la persona (ej: "No hay stock suficiente…"), se usa ese
+      const serverMessage = error.error?.message;
+      errorMessage = serverMessage
+        ? Array.isArray(serverMessage) ? serverMessage.join('. ') : serverMessage
+        : `Error ${error.status}: ${error.message}`;
     }
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));

@@ -41,6 +41,11 @@
       Balance
     </button>
 
+    <button mat-button routerLink="/inventory" *ngIf="(role$ | async) === 'admin' && (settings.settings$ | async)?.inventoryActive" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <mat-icon fontIcon="inventory_2"></mat-icon>
+      Inventario
+    </button>
+
     <button mat-button routerLink="/reports" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
       <mat-icon fontIcon="bar_chart"></mat-icon>
       Reportes
@@ -90,6 +95,13 @@
         <!-- Contenido a la derecha -->
         <div class="d-flex align-items-center gap-2">
         <!-- Usuario y rol -->
+        <!-- Insumos bajos o agotados -->
+        <a *ngIf="stock && (stock.lowCount + stock.outCount) > 0" routerLink="/inventory"
+          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline bg-yellow-100 border-yellow-300 text-yellow-800"
+          [attr.aria-label]="'Inventario: ' + stock.outCount + ' agotados y ' + stock.lowCount + ' con stock bajo'">
+          <mat-icon class="!w-4 !h-4 !text-base">inventory_2</mat-icon>
+          <span>{{ stock.outCount + stock.lowCount }}<span class="hidden sm:inline"> {{ (stock.outCount + stock.lowCount) === 1 ? 'insumo' : 'insumos' }} por reponer</span></span>
+        </a>
         <!-- Estado de la caja (administrador y cajero) -->
         <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
           class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline"

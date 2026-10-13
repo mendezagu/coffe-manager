@@ -14,9 +14,14 @@ export interface SalesReport {
     itemsSold: number;
     salesWithoutDetail: number;
     tipsTotal: number;
+    // ganancia sobre lo vendido con receta (costo conocido); revenueWithoutCost es lo vendido sin costo
+    costTotal: number;
+    profit: number;
+    profitMarginPct: number | null;
+    revenueWithoutCost: number;
   };
   byDay: { date: string; salesCount: number; totalAmount: number }[];
-  items: { name: string; quantity: number; amount: number }[];
+  items: { name: string; quantity: number; amount: number; cost: number | null; profit: number | null }[];
   byWaiter: { name: string; salesCount: number; totalAmount: number; tips: number }[];
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
 }

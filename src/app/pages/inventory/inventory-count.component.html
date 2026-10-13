@@ -1,0 +1,65 @@
+<div>
+  <p class="text-sm text-sage-600 mt-0 mb-4">
+    Contá lo que hay realmente en el depósito y anotalo al lado de cada insumo. Solo se corrigen los que completes: el sistema ajusta el stock
+    a lo que contaste y registra cada diferencia en los movimientos.
+  </p>
+
+  <!-- Resultado del último conteo -->
+  <section *ngIf="result as r" class="mb-5 p-5 bg-white rounded-card shadow-soft border-l-4" [ngClass]="r.differences === 0 ? 'border-cafe-green-700' : 'border-cafe-red-700'" role="status">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h3 class="text-lg font-bold text-sage-900 m-0">Conteo registrado</h3>
+        <p class="text-sm text-sage-600 mt-1 mb-0">
+          <ng-container *ngIf="r.differences === 0">Todo coincidía con el sistema.</ng-container>
+          <ng-container *ngIf="r.differences > 0">{{ r.differences }} {{ r.differences === 1 ? 'diferencia' : 'diferencias' }}, por un valor de
+            <strong [ngClass]="r.totalValue < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">{{ r.totalValue | money }}</strong>
+            ({{ r.totalValue < 0 ? 'faltante' : 'sobrante' }}, al costo).</ng-container>
+        </p>
+      </div>
+      <button type="button" (click)="result = null" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50">Cerrar</button>
+    </div>
+    <ul *ngIf="r.differences > 0" class="m-0 mt-3 p-0 list-none divide-y divide-sage-100 text-sm">
+      <ng-container *ngFor="let row of r.items">
+        <li *ngIf="row.difference !== 0" class="py-1.5 flex flex-wrap justify-between gap-2">
+          <span class="text-sage-800 font-medium">{{ row.name }}</span>
+          <span class="text-sage-600">sistema {{ formatQty(row.expected, row.unit) }} → contado {{ formatQty(row.counted, row.unit) }}</span>
+          <span class="font-bold" [ngClass]="row.difference < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">{{ row.difference > 0 ? '+' : '' }}{{ formatQty(row.difference, row.unit) }} ({{ row.value | money }})</span>
+        </li>
+      </ng-container>
+    </ul>
+  </section>
+
+  <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+  <p *ngIf="!loading && items.length === 0" class="text-sm text-sage-600">No hay insumos para contar. Creálos en la pestaña Stock.</p>
+
+  <ng-container *ngIf="!loading && items.length > 0">
+    <div class="flex flex-wrap items-center gap-3 mb-3">
+      <input type="search" [(ngModel)]="search" placeholder="Buscar insumo…" aria-label="Buscar insumo"
+        class="flex-1 min-w-[200px] px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white" />
+      <span class="text-sm text-sage-600">{{ filled.length }} de {{ items.length }} contados</span>
+    </div>
+
+    <div class="bg-white rounded-card shadow-soft overflow-hidden mb-4">
+      <ul class="m-0 p-0 list-none divide-y divide-sage-100">
+        <li *ngFor="let i of filtered" class="px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span class="flex-1 min-w-[160px] text-sm font-bold text-sage-900">{{ i.name }}</span>
+          <span class="text-sm text-sage-500 min-w-[110px] text-right">Sistema: {{ formatQty(i.onHand, i.unit) }}</span>
+          <input type="number" min="0" step="any" [(ngModel)]="counted[i._id]" [attr.aria-label]="'Cantidad contada de ' + i.name" placeholder="Contado"
+            class="w-32 px-3 py-2 border border-sage-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+          <span class="w-28 text-right text-sm font-bold" [ngClass]="(difference(i) ?? 0) === 0 ? 'text-sage-400' : (difference(i) ?? 0) < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">
+            <ng-container *ngIf="difference(i) !== null">{{ (difference(i) ?? 0) === 0 ? 'Coincide' : ((difference(i) ?? 0) > 0 ? '+' : '') + formatQty(difference(i), i.unit) }}</ng-container>
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <input [(ngModel)]="note" maxlength="200" placeholder="Nota del conteo (opcional)" aria-label="Nota del conteo"
+        class="flex-1 min-w-[220px] px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white" />
+      <button type="button" (click)="confirm()" [disabled]="busy || filled.length === 0"
+        class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ busy ? 'Registrando…' : 'Registrar conteo' }}
+      </button>
+    </div>
+  </ng-container>
+</div>

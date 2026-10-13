@@ -44,7 +44,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   loading = false;
   error = '';
   showTables = false;
-  itemsBy: 'amount' | 'quantity' = 'amount';
+  itemsBy: 'amount' | 'quantity' | 'profit' = 'amount';
 
   private charts: Chart[] = [];
 
@@ -97,12 +97,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
     });
   }
 
-  setItemsBy(by: 'amount' | 'quantity') {
+  setItemsBy(by: 'amount' | 'quantity' | 'profit') {
     this.itemsBy = by;
     this.renderCharts();
   }
 
   // ---- Datos derivados ----
+
+  // Hay costos conocidos (inventario con recetas): se puede mostrar la ganancia
+  get hasCosts(): boolean {
+    return !!this.report && this.report.summary.costTotal > 0;
+  }
 
   get hasSales(): boolean {
     return !!this.report && this.report.summary.salesCount > 0;
@@ -110,7 +115,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   get topItems() {
     const list = [...(this.report?.items ?? [])];
-    return list.sort((a, b) => b[this.itemsBy] - a[this.itemsBy]).slice(0, 10);
+    const value = (i: SalesReport['items'][number]) => (this.itemsBy === 'profit' ? i.profit ?? -Infinity : i[this.itemsBy]);
+    return list.sort((a, b) => value(b) - value(a)).slice(0, 10);
   }
 
   paymentLabel(method: string): string {
@@ -137,8 +143,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     const items = this.topItems;
     const byQty = this.itemsBy === 'quantity';
-    this.bar(this.itemsRef, items.map((i) => i.name), items.map((i) => (byQty ? i.quantity : i.amount)), byQty ? 'Unidades' : 'Importe',
-      byQty ? (v) => `${v} u.` : money, {
+    const byProfit = this.itemsBy === 'profit';
+    this.bar(this.itemsRef, items.map((i) => i.name), items.map((i) => (byQty ? i.quantity : byProfit ? i.profit ?? 0 : i.amount)),
+      byQty ? 'Unidades' : byProfit ? 'Ganancia' : 'Importe', byQty ? (v) => `${v} u.` : money, {
         horizontal: true,
         afterLabel: (i) => (byQty ? money(items[i].amount) : `${items[i].quantity} u.`),
       });

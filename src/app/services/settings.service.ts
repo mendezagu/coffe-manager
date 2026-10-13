@@ -32,6 +32,10 @@ export interface TenantSettings {
   tipEnabled: boolean;
   tipSuggestedPct: number;
   requireOpenRegister: boolean;
+  // inventario: lo que el negocio eligió, lo que rige (elegido y permitido por el plan) y si bloquea pedidos sin stock
+  inventoryEnabled: boolean;
+  inventoryActive: boolean;
+  blockOutOfStock: boolean;
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -63,6 +67,9 @@ const DEFAULTS: TenantSettings = {
   tipEnabled: false,
   tipSuggestedPct: 10,
   requireOpenRegister: true,
+  inventoryEnabled: false,
+  inventoryActive: false,
+  blockOutOfStock: true,
 };
 
 @Injectable({ providedIn: 'root' })

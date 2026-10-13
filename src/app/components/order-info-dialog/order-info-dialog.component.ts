@@ -160,7 +160,9 @@ export class OrderInfoDialogComponent implements OnInit {
       },
       (error) => {
         console.error('Error guardando cambios:', error);
-        alert('Error al actualizar las órdenes. Por favor, inténtalo de nuevo.');
+        // si el motivo es de negocio (ej: no hay stock para subir la cantidad), se muestra tal cual
+        const message = String(error?.message ?? '');
+        alert(message && !message.startsWith('Error ') ? message : 'Error al actualizar las órdenes. Por favor, inténtalo de nuevo.');
       }
     );
   }

@@ -43,6 +43,12 @@ import { ReportsComponent } from './pages/reports/reports.component';
 import { CategoriesComponent } from './pages/categories/categories.component';
 import { ModifiersComponent } from './pages/modifiers/modifiers.component';
 import { CashComponent } from './pages/cash/cash.component';
+import { InventoryComponent } from './pages/inventory/inventory.component';
+import { InventoryStockComponent } from './pages/inventory/inventory-stock.component';
+import { InventoryRecipesComponent } from './pages/inventory/inventory-recipes.component';
+import { InventoryCountComponent } from './pages/inventory/inventory-count.component';
+import { InventoryMovementsComponent } from './pages/inventory/inventory-movements.component';
+import { InventoryProfitComponent } from './pages/inventory/inventory-profit.component';
 import { PaymentPanelComponent } from './components/payment-panel/payment-panel.component';
 import { ModifierPickerDialogComponent } from './components/modifier-picker-dialog/modifier-picker-dialog.component';
 import { MoneyPipe } from './pipes/money.pipe';
@@ -72,6 +78,12 @@ import { LogsComponent } from './components/logs/logs.component';
     CategoriesComponent,
     ModifiersComponent,
     CashComponent,
+    InventoryComponent,
+    InventoryStockComponent,
+    InventoryRecipesComponent,
+    InventoryCountComponent,
+    InventoryMovementsComponent,
+    InventoryProfitComponent,
     PaymentPanelComponent,
     ModifierPickerDialogComponent,
     MoneyPipe,
