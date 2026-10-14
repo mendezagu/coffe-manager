@@ -3,9 +3,40 @@
 <div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 pt-[16px] sm:pt-6 pb-[96px]">
   <div class="max-w-[1920px] mx-auto flex flex-col gap-[16px]">
 
-    <!-- Resumen -->
-    <section aria-label="Resumen del salón" class="grid grid-cols-3 gap-[8px] sm:gap-[16px]">
-      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+    <!-- Resumen: tarjetas de ancho fijo (no se estiran), una al lado de la otra y en varias filas si no entran -->
+    <section aria-label="Resumen del salón" class="flex flex-wrap gap-[8px] sm:gap-[12px]">
+      <!-- Solo administrador: ventas de hoy y permanencia -->
+      <ng-container *ngIf="roleValue === 'admin'">
+        <div class="bg-cafe-green-800 rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
+          <div class="min-w-0">
+            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-cafe-green-200 m-0 truncate">Ventas de hoy</p>
+            <p class="m-0 mt-[2px] text-xl sm:text-2xl font-bold text-white leading-tight truncate">{{ live ? (live.sales.total | money) : '—' }}</p>
+            <p class="text-xs m-0 mt-[4px] flex items-center gap-[2px] truncate"
+              [ngClass]="live?.changePct === null || live?.changePct === undefined ? 'text-cafe-green-200' : (live!.changePct! >= 0 ? 'text-cafe-green-100 font-medium' : 'text-cafe-red-200 font-medium')">
+              <ng-container *ngIf="live && live.changePct !== null; else noCompare">
+                <mat-icon class="!w-4 !h-4 !text-base">{{ live.changePct >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                {{ live.changePct >= 0 ? '+' : '' }}{{ live.changePct | number: '1.0-1' }}% vs. ayer
+              </ng-container>
+              <ng-template #noCompare>{{ live ? live.sales.count + (live.sales.count === 1 ? ' venta' : ' ventas') : '' }}</ng-template>
+            </p>
+          </div>
+        <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-white/15 text-white items-center justify-center flex-shrink-0"><mat-icon fontSet="material-icons-outlined">receipt_long</mat-icon></span>
+        </div>
+
+        <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
+          <div class="min-w-0">
+            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Permanencia promedio</p>
+            <p class="m-0 mt-[2px] text-xl sm:text-2xl font-bold text-sage-900 leading-tight">{{ stayText(live?.averageStayMinutes) }}</p>
+            <p class="text-xs text-sage-600 m-0 mt-[4px] flex items-center gap-[4px]">
+              <mat-icon class="!w-4 !h-4 !text-base text-cafe-amber-600 flex-shrink-0">timer</mat-icon>
+              <span class="truncate">{{ live && live.staysCount > 0 ? live.staysCount + (live.staysCount === 1 ? ' mesa cerrada' : ' mesas cerradas') : 'sin mesas cerradas' }}</span>
+            </p>
+          </div>
+        <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-cafe-amber-50 text-cafe-amber-700 items-center justify-center flex-shrink-0"><mat-icon>hourglass_top</mat-icon></span>
+        </div>
+      </ng-container>
+
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
         <div class="min-w-0">
           <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Ocupación</p>
           <p class="m-0 mt-[2px] flex items-baseline gap-[6px] flex-wrap">
@@ -17,32 +48,27 @@
             <span class="w-1.5 h-1.5 rounded-full bg-cafe-green-700"></span>{{ freeCount }} {{ freeCount === 1 ? 'mesa libre' : 'mesas libres' }}
           </p>
         </div>
-        <span class="hidden md:flex w-11 h-11 rounded-xl bg-sage-100 text-cafe-green-700 items-center justify-center flex-shrink-0">
-          <mat-icon>table_restaurant</mat-icon>
-        </span>
+        <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-sage-100 text-cafe-green-700 items-center justify-center flex-shrink-0"><mat-icon>table_restaurant</mat-icon></span>
       </div>
 
-      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
         <div class="min-w-0">
           <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Para servir</p>
           <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold leading-none" [ngClass]="readyTotal > 0 ? 'text-cafe-green-700' : 'text-sage-900'">{{ readyTotal }}</p>
-          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px]">{{ readyTotal === 1 ? 'plato listo' : 'platos listos' }} en cocina o barra</p>
+          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px] truncate">{{ readyTotal === 1 ? 'plato listo' : 'platos listos' }}</p>
         </div>
-        <span class="hidden md:flex w-11 h-11 rounded-xl bg-cafe-green-50 text-cafe-green-700 items-center justify-center flex-shrink-0">
-          <mat-icon>room_service</mat-icon>
-        </span>
+        <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 items-center justify-center flex-shrink-0"><mat-icon>room_service</mat-icon></span>
       </div>
 
-      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
         <div class="min-w-0">
           <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">En preparación</p>
           <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold text-sage-900 leading-none">{{ cookingTotal }}</p>
-          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px]">{{ cookingTotal === 1 ? 'plato' : 'platos' }} por salir</p>
+          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px] truncate">{{ cookingTotal === 1 ? 'plato' : 'platos' }} por salir</p>
         </div>
-        <span class="hidden md:flex w-11 h-11 rounded-xl bg-sage-100 text-sage-600 items-center justify-center flex-shrink-0">
-          <mat-icon>hourglass_top</mat-icon>
-        </span>
+        <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-sage-100 text-sage-600 items-center justify-center flex-shrink-0"><mat-icon>hourglass_top</mat-icon></span>
       </div>
+
     </section>
 
     <!-- Sectores y tipo de vista -->

@@ -26,9 +26,23 @@ export interface SalesReport {
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
 }
 
+// Resumen del momento para el Inicio del administrador
+export interface LiveSummary {
+  sales: { total: number; count: number };
+  yesterday: { total: number; count: number }; // ayer hasta esta misma hora
+  changePct: number | null; // null si ayer a esta hora no hubo ventas
+  averageStayMinutes: number | null; // null si hoy no se cerró ninguna mesa
+  staysCount: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
   constructor(private http: HttpClient) {}
+
+  live(): Observable<LiveSummary> {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    return this.http.get<LiveSummary>(`${environmentMongo.apiUrl}/reports/live`, { params: new HttpParams().set('tz', tz) });
+  }
 
   // from/to: YYYY-MM-DD (inclusive). La zona horaria es la del navegador: define dónde empieza cada día.
   sales(from: string, to: string): Observable<SalesReport> {

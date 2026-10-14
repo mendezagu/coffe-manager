@@ -12,6 +12,7 @@ import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { modifiersText } from 'src/app/utils/modifiers';
 import { QrInbox, QrService } from 'src/app/services/qr.service';
+import { LiveSummary, ReportsService } from 'src/app/services/reports.service';
 import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
 import { Subscription } from 'rxjs';
 
@@ -48,6 +49,7 @@ export class CardComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     public settings: SettingsService,
     private qr: QrService,
+    private reports: ReportsService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -75,15 +77,52 @@ export class CardComponent implements OnInit, OnDestroy {
     this.qrSub = this.qr.inbox$.subscribe((inbox) => (this.qrInbox = inbox));
 
     // Suscribirse al rol para uso en handlers sin pipes en templates
-    this.role$.subscribe(role => this.roleValue = role);
+    this.role$.subscribe(role => {
+      this.roleValue = role;
+      // Ventas de hoy y permanencia: solo las ve el administrador
+      if (this.liveTimer) clearInterval(this.liveTimer);
+      this.live = null;
+      if (role === 'admin') {
+        this.loadLive();
+        this.liveTimer = setInterval(() => this.loadLive(), 60000);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.refresh) clearInterval(this.refresh);
+    if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
   }
 
   private qrSub?: Subscription;
+
+  // ---- Resumen del administrador ----
+  live: LiveSummary | null = null;
+  private liveTimer?: ReturnType<typeof setInterval>;
+
+  // Las tarjetas ocupan todo el ancho. El administrador tiene cinco: en celular van de a dos y desde
+  // pantallas medianas todas en una sola fila. Los demás roles tienen tres y siempre van en una fila.
+  get summaryCardWidth(): string {
+    return this.roleValue === 'admin' ? 'w-[calc(50%-4px)] lg:w-auto lg:flex-1' : 'flex-1';
+  }
+
+  // Con cinco tarjetas en una fila los íconos solo entran en pantallas grandes
+  get summaryIconVisibility(): string {
+    return this.roleValue === 'admin' ? 'hidden xl:flex' : 'hidden sm:flex';
+  }
+
+  loadLive(): void {
+    this.reports.live().subscribe({ next: (l) => (this.live = l), error: () => {} });
+  }
+
+  // 45 -> "45 min"; 75 -> "1 h 15 min"
+  stayText(minutes: number | null | undefined): string {
+    if (minutes === null || minutes === undefined) return '—';
+    if (minutes < 60) return `${minutes} min`;
+    const m = minutes % 60;
+    return m ? `${Math.floor(minutes / 60)} h ${m} min` : `${minutes / 60} h`;
+  }
   qrInbox: QrInbox = { active: false, requests: [], calls: [] };
 
   qrRequestsOf(table: any): number {
@@ -440,6 +479,7 @@ addMenuItems(table: Table): void {
       });
   
       dialogRef.afterClosed().subscribe(result => {
+        this.loadLive(); // un cobro cambia las ventas de hoy
         if (result?.status === 'mesa_liberada') {
           console.log(`Mesa con ID ${result.tableId} liberada correctamente.`);
           
