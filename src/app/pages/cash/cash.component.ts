@@ -10,6 +10,26 @@ const METHOD_LABELS: Record<string, string> = {
   tarjeta: 'Tarjeta',
 };
 
+// Colores del gráfico por método de cobro (las clases van completas para que Tailwind las encuentre)
+const METHOD_STYLES: Record<string, { stroke: string; dot: string }> = {
+  efectivo: { stroke: 'text-cafe-green-700', dot: 'bg-cafe-green-700' },
+  transferencia: { stroke: 'text-cafe-amber-500', dot: 'bg-cafe-amber-500' },
+  qr: { stroke: 'text-cafe-green-300', dot: 'bg-cafe-green-300' },
+  tarjeta: { stroke: 'text-cafe-red-500', dot: 'bg-cafe-red-500' },
+};
+const OTHER_STYLE = { stroke: 'text-sage-400', dot: 'bg-sage-400' };
+
+export interface MethodRow {
+  label: string;
+  amount: number;
+  count: number;
+  pct: number;
+  dash: string; // tramo del círculo (la circunferencia mide 100)
+  offset: number;
+  stroke: string;
+  dot: string;
+}
+
 @Component({
   selector: 'app-cash',
   templateUrl: './cash.component.html',
@@ -61,6 +81,50 @@ export class CashComponent implements OnInit {
   // admin mientras la caja está abierta. Acá solo se acomoda la pantalla a lo que llega.
   get blind(): boolean {
     return this.register?.cash.expected === null;
+  }
+
+  // Lo cobrado por método, con su porción del círculo. Vacío en el conteo a ciegas (no llegan los importes).
+  get methodRows(): MethodRow[] {
+    const rows = [...(this.register?.byMethod ?? [])].filter((m) => m.amount > 0).sort((a, b) => b.amount - a.amount);
+    const total = rows.reduce((sum, m) => sum + m.amount, 0);
+    if (total <= 0) return [];
+    let used = 0;
+    return rows.map((m) => {
+      const pct = (m.amount / total) * 100;
+      const style = METHOD_STYLES[m.method] ?? OTHER_STYLE;
+      const row: MethodRow = {
+        label: this.methodLabel(m.method),
+        amount: m.amount,
+        count: m.count,
+        pct,
+        dash: `${pct} ${100 - pct}`,
+        offset: -used,
+        ...style,
+      };
+      used += pct;
+      return row;
+    });
+  }
+
+  // Todo lo cobrado que no es efectivo (transferencia, QR, tarjeta)
+  get nonCashTotal(): number {
+    return (this.register?.byMethod ?? []).filter((m) => m.method !== 'efectivo').reduce((sum, m) => sum + m.amount, 0);
+  }
+
+  get nonCashPct(): number {
+    const total = this.register?.sales.totalAmount ?? 0;
+    return total > 0 ? (this.nonCashTotal / total) * 100 : 0;
+  }
+
+  get tipsPct(): number {
+    const sales = this.register?.sales;
+    return sales && sales.totalAmount && sales.tipsTotal !== null ? (sales.tipsTotal / sales.totalAmount) * 100 : 0;
+  }
+
+  // "Aylen Lupino" -> "AL"
+  initials(name: string): string {
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '?';
   }
 
   methodLabel(method: string): string {

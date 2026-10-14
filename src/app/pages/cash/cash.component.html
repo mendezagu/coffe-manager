@@ -1,266 +1,425 @@
-<div class="w-full min-h-screen bg-sage-100 px-4 py-6 sm:px-8">
-  <div class="max-w-5xl mx-auto">
+<!-- Caja. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a Tailwind;
+     por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
+<div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 py-[16px] sm:py-6 lg:py-8">
+  <div class="max-w-[1400px] mx-auto flex flex-col gap-[16px] sm:gap-[24px]">
 
-    <h1 class="text-2xl font-bold text-sage-900">Caja</h1>
-    <p class="text-sage-600 text-sm mt-1 mb-6">Controlá el efectivo del turno: se abre con un fondo y se cierra contando lo que hay.</p>
-
-    <p *ngIf="loading" class="text-sage-600 text-sm">Cargando…</p>
+    <p *ngIf="loading" class="text-sage-600 text-sm m-0">Cargando…</p>
 
     <!-- Resultado del cierre -->
-    <section *ngIf="closedSummary as c" class="mb-6 p-5 bg-white rounded-card shadow-soft border-l-4"
+    <section *ngIf="closedSummary as c" class="p-[16px] sm:p-[20px] bg-white rounded-card shadow-soft border-l-[4px]"
       [ngClass]="(c.difference || 0) === 0 ? 'border-cafe-green-700' : 'border-cafe-red-700'" role="status">
-      <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
           <h2 class="text-lg font-bold text-sage-900 m-0">Caja cerrada</h2>
-          <p class="text-sm text-sage-600 mt-1 mb-0">Cerrada por {{ c.closedByName }}. Debería haber {{ c.cash.expected | money }} y contaste {{ c.countedAmount | money }}.</p>
+          <p class="text-sm text-sage-600 mt-[4px] mb-0">Cerrada por {{ c.closedByName }}. Debería haber {{ c.cash.expected | money }} y contaste {{ c.countedAmount | money }}.</p>
         </div>
-        <button type="button" (click)="dismissClosed()" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50">Entendido</button>
+        <button type="button" (click)="dismissClosed()" class="px-[12px] py-[6px] text-sm font-medium rounded-lg border-[1px] border-sage-200 text-sage-700 hover:bg-sage-50">Entendido</button>
       </div>
-      <p class="mt-3 mb-0 text-2xl font-bold" [ngClass]="(c.difference || 0) === 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">
+      <p class="mt-[12px] mb-0 text-2xl font-bold" [ngClass]="(c.difference || 0) === 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">
         <ng-container *ngIf="(c.difference || 0) === 0">✓ La caja cierra justa</ng-container>
         <ng-container *ngIf="(c.difference || 0) < 0">Faltan {{ -(c.difference || 0) | money }}</ng-container>
         <ng-container *ngIf="(c.difference || 0) > 0">Sobran {{ c.difference | money }}</ng-container>
       </p>
     </section>
 
-    <!-- CAJA CERRADA -->
-    <section *ngIf="state && !state.open" class="bg-white rounded-card shadow-soft p-6 mb-6">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-12 h-12 rounded-xl bg-cafe-red-50 text-cafe-red-700 flex items-center justify-center">
-          <mat-icon>lock</mat-icon>
+    <!-- ===== CAJA CERRADA ===== -->
+    <section *ngIf="state && !state.open" class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px]">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-[16px]">
+        <div class="w-14 h-14 rounded-xl bg-cafe-red-50 text-cafe-red-700 flex items-center justify-center flex-shrink-0">
+          <mat-icon class="!w-8 !h-8 !text-[32px]">lock</mat-icon>
         </div>
-        <div>
-          <h2 class="text-lg font-bold text-sage-900 m-0">No hay caja abierta</h2>
-          <p class="text-sm text-sage-600 m-0">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-[8px]">
+            <h1 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">No hay caja abierta</h1>
+            <span class="inline-flex items-center gap-[6px] px-[10px] py-[2px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold tracking-wide">
+              <span class="w-2 h-2 rounded-full bg-cafe-red-700"></span>CERRADA
+            </span>
+          </div>
+          <p class="text-sm text-sage-600 mt-[4px] mb-0">
             {{ state.requireOpenRegister ? 'No se puede cobrar hasta abrirla.' : 'Podés cobrar igual, pero los cobros no quedan asociados a una caja.' }}
           </p>
         </div>
       </div>
 
-      <form (ngSubmit)="open()" #of="ngForm" class="flex flex-wrap items-end gap-3">
-        <label class="block">
-          <span class="block text-xs font-bold text-sage-500 mb-1.5">Efectivo con el que arrancás (fondo)</span>
-          <input name="opening" type="number" min="0" step="any" required [(ngModel)]="openingAmount" placeholder="Ej: 20000"
-            class="w-56 px-4 py-2.5 border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+      <form (ngSubmit)="open()" #of="ngForm" class="mt-[20px] p-[16px] rounded-xl bg-sage-50 border-[1px] border-sage-200 flex flex-col sm:flex-row sm:items-end gap-[12px]">
+        <label class="block flex-1 sm:max-w-xs">
+          <span class="block text-xs font-bold text-sage-600 mb-[6px]">Efectivo con el que arrancás (fondo)</span>
+          <span class="relative block">
+            <span class="absolute left-[14px] top-1/2 -translate-y-1/2 text-sage-500 text-sm">$</span>
+            <input name="opening" type="number" min="0" step="any" required [(ngModel)]="openingAmount" placeholder="Ej: 20000"
+              class="w-full pl-[30px] pr-[14px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          </span>
         </label>
         <button type="submit" [disabled]="of.invalid || busy"
-          class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ busy ? 'Abriendo…' : 'Abrir caja' }}
+          class="inline-flex items-center justify-center gap-[8px] px-[20px] py-[10px] bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
+          <mat-icon class="!w-5 !h-5 !text-xl">lock_open</mat-icon>{{ busy ? 'Abriendo…' : 'Abrir caja' }}
         </button>
       </form>
     </section>
 
-    <!-- CAJA ABIERTA -->
+    <!-- ===== CAJA ABIERTA ===== -->
     <ng-container *ngIf="state && state.open && register as r">
-      <section class="bg-white rounded-card shadow-soft p-5 mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
-            <mat-icon>point_of_sale</mat-icon>
+
+      <!-- Encabezado de la caja -->
+      <section class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px] flex flex-col lg:flex-row lg:items-center justify-between gap-[16px]">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-[16px] min-w-0">
+          <div class="w-14 h-14 rounded-xl bg-cafe-green-700 text-white flex items-center justify-center flex-shrink-0 shadow-green">
+            <mat-icon class="!w-8 !h-8 !text-[32px]">point_of_sale</mat-icon>
           </div>
-          <div>
-            <h2 class="text-lg font-bold text-sage-900 m-0">Caja abierta</h2>
-            <p class="text-sm text-sage-600 m-0">Abrió {{ r.openedByName }} · {{ r.openedAt | date:'dd/MM HH:mm' }} · fondo {{ r.cash.opening | money }}</p>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-[8px]">
+              <h1 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">Caja del turno</h1>
+              <span class="inline-flex items-center gap-[6px] px-[10px] py-[2px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold tracking-wide">
+                <span class="w-2 h-2 rounded-full bg-cafe-green-700 animate-pulse"></span>ABIERTA
+              </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-[16px] gap-y-[4px] text-sm text-sage-600 mt-[6px]">
+              <span class="inline-flex items-center gap-[4px]"><mat-icon class="!w-[16px] !h-[16px] !text-base text-sage-400">schedule</mat-icon>Apertura: <strong class="text-sage-900">{{ r.openedAt | date:'dd/MM HH:mm' }}</strong></span>
+              <span class="inline-flex items-center gap-[4px]"><mat-icon class="!w-[16px] !h-[16px] !text-base text-sage-400">person</mat-icon>Cajero: <strong class="text-sage-900">{{ r.openedByName }}</strong></span>
+              <span class="inline-flex items-center gap-[4px]"><mat-icon class="!w-[16px] !h-[16px] !text-base text-sage-400">savings</mat-icon>Fondo: <strong class="text-cafe-green-700">{{ r.cash.opening | money }}</strong></span>
+            </div>
           </div>
         </div>
-        <button *ngIf="!closing" type="button" (click)="startClose()"
-          class="px-5 py-2.5 bg-cafe-red-700 hover:bg-cafe-red-800 text-white font-bold text-sm rounded-lg">Cerrar caja</button>
+        <button type="button" (click)="startClose()"
+          class="inline-flex items-center justify-center gap-[8px] px-[18px] py-[10px] bg-cafe-red-700 hover:bg-cafe-red-800 text-white font-bold text-sm rounded-xl shadow-brick flex-shrink-0">
+          <mat-icon class="!w-5 !h-5 !text-xl">lock_clock</mat-icon>Cerrar y arqueo de caja
+        </button>
       </section>
 
-      <!-- Cierre: se cuenta primero -->
-      <section *ngIf="closing" class="bg-white rounded-card shadow-soft p-5 mb-4 border border-cafe-red-200">
-        <h3 class="text-lg font-bold text-sage-900 m-0">Cerrar caja</h3>
-        <p class="text-sm text-sage-600 mt-1 mb-4">Contá el efectivo que hay en el cajón (billetes y monedas) e ingresá el total. El sistema lo compara con lo que debería haber.</p>
-        <form (ngSubmit)="confirmClose()" #cf="ngForm" class="space-y-3">
-          <label class="block">
-            <span class="block text-xs font-bold text-sage-500 mb-1.5">Efectivo contado</span>
-            <input name="counted" type="number" min="0" step="any" required [(ngModel)]="counted" placeholder="Total contado"
-              class="w-56 px-4 py-2.5 border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
-          </label>
-          <label class="block">
-            <span class="block text-xs font-bold text-sage-500 mb-1.5">Nota (opcional)</span>
-            <input name="note" [(ngModel)]="closeNote" maxlength="300" placeholder="Ej: se pagó un taxi sin anotar"
-              class="w-full max-w-lg px-4 py-2.5 border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
-          </label>
-          <div class="flex gap-2">
-            <button type="submit" [disabled]="cf.invalid || busy"
-              class="px-5 py-2.5 bg-cafe-red-700 hover:bg-cafe-red-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">{{ busy ? 'Cerrando…' : 'Confirmar cierre' }}</button>
-            <button type="button" (click)="cancelClose()" class="px-5 py-2.5 border border-sage-200 text-sage-700 font-medium text-sm rounded-lg hover:bg-sage-50">Cancelar</button>
-          </div>
-        </form>
-      </section>
-
-      <!-- Resumen del turno -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div *ngIf="!blind" class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500 m-0">Efectivo esperado</p>
-          <p class="text-2xl font-bold text-cafe-green-700 mt-1 mb-0">{{ r.cash.expected | money }}</p>
-        </div>
+      <!-- Indicadores -->
+      <section aria-label="Indicadores del turno" class="grid grid-cols-2 gap-[12px] sm:gap-[16px]" [ngClass]="blind ? '' : 'xl:grid-cols-4'">
         <ng-container *ngIf="!blind">
-          <div class="bg-white rounded-card shadow-soft p-4">
-            <p class="text-xs font-bold text-sage-500 m-0">Ventas</p>
-            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.totalAmount | money }}</p>
-            <p class="text-xs text-sage-500 m-0">{{ r.sales.count }} {{ r.sales.count === 1 ? 'cobro' : 'cobros' }}</p>
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px] min-w-0">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600 truncate">Efectivo esperado en caja</span>
+              <span class="w-8 h-8 rounded-lg bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">payments</mat-icon></span>
+            </div>
+            <div>
+              <p class="text-xl sm:text-3xl font-bold text-cafe-green-800 tracking-tight m-0 truncate">{{ r.cash.expected | money }}</p>
+              <p class="hidden sm:flex items-center gap-[6px] text-xs text-cafe-green-700 m-0 mt-[4px]"><mat-icon class="!w-4 !h-4 !text-base">add_circle</mat-icon>{{ r.cash.opening | money }} de fondo inicial</p>
+            </div>
           </div>
-          <div class="bg-white rounded-card shadow-soft p-4">
-            <p class="text-xs font-bold text-sage-500 m-0">Propinas</p>
-            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.tipsTotal | money }}</p>
+
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px] min-w-0">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600 truncate">Ventas del turno</span>
+              <span class="w-8 h-8 rounded-lg bg-sage-100 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">storefront</mat-icon></span>
+            </div>
+            <div>
+              <p class="text-xl sm:text-3xl font-bold text-sage-900 tracking-tight m-0 truncate">{{ r.sales.totalAmount | money }}</p>
+              <p class="hidden sm:flex items-center gap-[6px] text-xs text-sage-600 m-0 mt-[4px]"><span class="w-1.5 h-1.5 rounded-full bg-cafe-green-700"></span><strong>{{ r.sales.count }}</strong> {{ r.sales.count === 1 ? 'cobro completado' : 'cobros completados' }}</p>
+            </div>
           </div>
-          <div class="bg-white rounded-card shadow-soft p-4">
-            <p class="text-xs font-bold text-sage-500 m-0">Descuentos</p>
-            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.discountTotal | money }}</p>
+
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px] min-w-0">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600 truncate">Cobros digitales</span>
+              <span class="w-8 h-8 rounded-lg bg-sage-100 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">qr_code_scanner</mat-icon></span>
+            </div>
+            <div>
+              <p class="text-xl sm:text-3xl font-bold text-sage-900 tracking-tight m-0 truncate">{{ nonCashTotal | money }}</p>
+              <p class="hidden sm:flex items-center gap-[6px] text-xs text-sage-600 m-0 mt-[4px]"><mat-icon class="!w-4 !h-4 !text-base text-cafe-green-700">verified</mat-icon>Transferencia, QR y tarjeta ({{ nonCashPct | number:'1.0-0' }}%)</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px] min-w-0">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600 truncate">Propinas</span>
+              <span class="w-8 h-8 rounded-lg bg-cafe-amber-50 text-cafe-amber-700 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">volunteer_activism</mat-icon></span>
+            </div>
+            <div>
+              <p class="text-xl sm:text-3xl font-bold text-sage-900 tracking-tight m-0 truncate">{{ r.sales.tipsTotal | money }}</p>
+              <p class="hidden sm:flex items-center gap-[6px] text-xs text-sage-600 m-0 mt-[4px]">
+                <mat-icon class="!w-4 !h-4 !text-base text-cafe-amber-600">paid</mat-icon>{{ tipsPct | number:'1.0-1' }}% de lo vendido<ng-container *ngIf="r.sales.discountTotal"> · {{ r.sales.discountTotal | money }} en descuentos</ng-container>
+              </p>
+            </div>
           </div>
         </ng-container>
 
         <!-- Conteo a ciegas: solo lo que cargó la propia persona y cuántos cobros hubo, sin importes de lo vendido -->
         <ng-container *ngIf="blind">
-          <div class="bg-white rounded-card shadow-soft p-4">
-            <p class="text-xs font-bold text-sage-500 m-0">Fondo inicial</p>
-            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.cash.opening | money }}</p>
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px]">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600">Fondo inicial</span>
+              <span class="w-8 h-8 rounded-lg bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center"><mat-icon class="!w-5 !h-5 !text-xl">savings</mat-icon></span>
+            </div>
+            <p class="text-xl sm:text-3xl font-bold text-sage-900 tracking-tight m-0">{{ r.cash.opening | money }}</p>
           </div>
-          <div class="bg-white rounded-card shadow-soft p-4">
-            <p class="text-xs font-bold text-sage-500 m-0">Cobros del turno</p>
-            <p class="text-2xl font-bold text-sage-900 mt-1 mb-0">{{ r.sales.count }}</p>
+          <div class="bg-white rounded-card shadow-soft p-[14px] sm:p-[18px] flex flex-col justify-between gap-[8px]">
+            <div class="flex items-center justify-between gap-[8px]">
+              <span class="text-xs font-medium text-sage-600">Cobros del turno</span>
+              <span class="w-8 h-8 rounded-lg bg-sage-100 text-cafe-green-700 flex items-center justify-center"><mat-icon class="!w-5 !h-5 !text-xl">receipt_long</mat-icon></span>
+            </div>
+            <p class="text-xl sm:text-3xl font-bold text-sage-900 tracking-tight m-0">{{ r.sales.count }}</p>
           </div>
         </ng-container>
-      </div>
-
-      <div class="grid gap-4 lg:grid-cols-2 mb-4">
-        <!-- Por método -->
-        <section class="bg-white rounded-card shadow-soft p-5">
-          <ng-container *ngIf="!blind">
-            <h3 class="font-bold text-sage-800 mt-0 mb-3">Cobrado por método</h3>
-            <p *ngIf="r.byMethod.length === 0" class="text-sm text-sage-500 m-0">Todavía no hubo cobros en esta caja.</p>
-            <ul class="divide-y divide-sage-100 m-0 p-0 list-none">
-              <li *ngFor="let m of r.byMethod" class="py-2 flex justify-between text-sm">
-                <span class="text-sage-700">{{ methodLabel(m.method) }}</span>
-                <span class="font-bold text-sage-900">{{ m.amount | money }}</span>
-              </li>
-            </ul>
-          </ng-container>
-          <ng-container *ngIf="blind">
-            <h3 class="font-bold text-sage-800 mt-0 mb-2">Conteo a ciegas</h3>
-            <p class="text-sm text-sage-600 m-0">
-              Mientras la caja está abierta no se muestran los importes de lo vendido: ni el total, ni lo cobrado en efectivo o por cada método.
-              Al cerrar, contás el efectivo del cajón y el sistema te dice si cierra justo, si faltan o si sobran.
-            </p>
-          </ng-container>
-          <ng-container *ngIf="r.tipsByWaiter.length">
-            <h4 class="text-sm font-bold text-sage-800 mt-4 mb-2">Propinas por mozo</h4>
-            <ul class="divide-y divide-sage-100 m-0 p-0 list-none">
-              <li *ngFor="let t of r.tipsByWaiter" class="py-1.5 flex justify-between text-sm">
-                <span class="text-sage-700">{{ t.waiterName }}</span>
-                <span class="font-bold text-sage-900">{{ t.amount | money }}</span>
-              </li>
-            </ul>
-          </ng-container>
-        </section>
-
-        <!-- Efectivo -->
-        <section class="bg-white rounded-card shadow-soft p-5">
-          <h3 class="font-bold text-sage-800 mt-0 mb-3">Movimiento de efectivo</h3>
-          <ul class="divide-y divide-sage-100 m-0 p-0 list-none text-sm">
-            <li class="py-2 flex justify-between"><span class="text-sage-700">Fondo inicial</span><span class="font-bold">{{ r.cash.opening | money }}</span></li>
-            <li *ngIf="r.cash.sales !== null" class="py-2 flex justify-between"><span class="text-sage-700">Cobros en efectivo</span><span class="font-bold">+ {{ r.cash.sales | money }}</span></li>
-            <li class="py-2 flex justify-between"><span class="text-sage-700">Ingresos</span><span class="font-bold">+ {{ r.cash.in | money }}</span></li>
-            <li class="py-2 flex justify-between"><span class="text-sage-700">Retiros y gastos</span><span class="font-bold">− {{ r.cash.out | money }}</span></li>
-          </ul>
-          <p *ngIf="blind" class="mt-3 mb-0 text-xs text-sage-500">El total esperado se muestra al cerrar la caja, después de que cuentes el efectivo.</p>
-        </section>
-      </div>
-
-      <!-- Movimientos manuales -->
-      <section class="bg-white rounded-card shadow-soft p-5 mb-6">
-        <h3 class="font-bold text-sage-800 mt-0 mb-1">Ingresos y retiros de efectivo</h3>
-        <p class="text-sm text-sage-600 mt-0 mb-3">Para lo que no es una venta: cambio que te traen, un pago a un proveedor, plata que se lleva al banco.</p>
-
-        <form (ngSubmit)="addMovement()" #mf="ngForm" class="flex flex-wrap items-end gap-3 mb-4">
-          <label class="block">
-            <span class="block text-xs font-bold text-sage-500 mb-1.5">Tipo</span>
-            <select name="type" [(ngModel)]="movement.type" class="px-3 py-2.5 border border-sage-200 rounded-lg text-sm bg-white">
-              <option value="OUT">Retiro o gasto</option>
-              <option value="IN">Ingreso</option>
-            </select>
-          </label>
-          <label class="block">
-            <span class="block text-xs font-bold text-sage-500 mb-1.5">Importe</span>
-            <input name="amount" type="number" min="0" step="any" required [(ngModel)]="movement.amount"
-              class="w-36 px-3 py-2.5 border border-sage-200 rounded-lg text-sm" />
-          </label>
-          <label class="block flex-1 min-w-[200px]">
-            <span class="block text-xs font-bold text-sage-500 mb-1.5">Motivo</span>
-            <input name="reason" required maxlength="120" [(ngModel)]="movement.reason" placeholder="Ej: hielo, cambio, retiro al banco"
-              class="w-full px-3 py-2.5 border border-sage-200 rounded-lg text-sm" />
-          </label>
-          <button type="submit" [disabled]="mf.invalid || busy"
-            class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Registrar</button>
-        </form>
-
-        <p *ngIf="r.movements.length === 0" class="text-sm text-sage-500 m-0">No hay movimientos en esta caja.</p>
-        <ul class="divide-y divide-sage-100 m-0 p-0 list-none text-sm">
-          <li *ngFor="let m of r.movements" class="py-2 flex flex-wrap items-center justify-between gap-2">
-            <span class="text-sage-700">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold mr-1.5" [ngClass]="m.type === 'IN' ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }}</span>
-              {{ m.reason }} <span class="text-xs text-sage-500">· {{ m.createdBy }} · {{ m.createdAt | date:'HH:mm' }}</span>
-            </span>
-            <span class="font-bold" [ngClass]="m.type === 'IN' ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span>
-          </li>
-        </ul>
       </section>
+
+      <!-- Panel central -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-[16px] sm:gap-[24px] items-start">
+
+        <!-- Movimientos de efectivo -->
+        <div class="lg:col-span-7 flex flex-col gap-[16px] sm:gap-[24px] min-w-0">
+          <section class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px]">
+            <div class="flex items-center justify-between gap-[8px] mb-[16px]">
+              <h2 class="flex items-center gap-[8px] text-lg font-bold text-sage-900 m-0">
+                <mat-icon class="text-cafe-green-700">account_balance_wallet</mat-icon>Movimientos de efectivo
+              </h2>
+              <span class="px-[10px] py-[2px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">En vivo</span>
+            </div>
+
+            <form (ngSubmit)="addMovement()" #mf="ngForm" class="p-[14px] sm:p-[16px] rounded-xl bg-sage-50 border-[1px] border-sage-200">
+              <p class="flex items-center gap-[6px] text-sm font-bold text-sage-800 m-0 mb-[4px]"><mat-icon class="!w-5 !h-5 !text-xl text-cafe-green-700">sync_alt</mat-icon>Registrar ingreso o retiro de efectivo</p>
+              <p class="text-xs text-sage-600 m-0 mb-[12px]">Para lo que no es una venta: cambio que te traen, un pago a un proveedor, plata que se lleva al banco.</p>
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-[12px]">
+                <label class="sm:col-span-4 block">
+                  <span class="block text-xs font-bold text-sage-600 mb-[4px]">Tipo</span>
+                  <select name="type" [(ngModel)]="movement.type" class="w-full px-[12px] py-[9px] border-[1px] border-sage-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+                    <option value="OUT">Retiro o gasto</option>
+                    <option value="IN">Ingreso</option>
+                  </select>
+                </label>
+                <label class="sm:col-span-3 block">
+                  <span class="block text-xs font-bold text-sage-600 mb-[4px]">Importe</span>
+                  <input name="amount" type="number" min="0" step="any" required [(ngModel)]="movement.amount" placeholder="Ej: 4500"
+                    class="w-full px-[12px] py-[9px] border-[1px] border-sage-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                </label>
+                <label class="sm:col-span-5 block">
+                  <span class="block text-xs font-bold text-sage-600 mb-[4px]">Motivo</span>
+                  <input name="reason" required maxlength="120" [(ngModel)]="movement.reason" placeholder="Ej: hielo, cambio, retiro al banco"
+                    class="w-full px-[12px] py-[9px] border-[1px] border-sage-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                </label>
+              </div>
+              <div class="flex justify-end mt-[12px]">
+                <button type="submit" [disabled]="mf.invalid || busy"
+                  class="inline-flex items-center gap-[8px] px-[18px] py-[9px] bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                  <mat-icon class="!w-5 !h-5 !text-xl">save</mat-icon>Registrar en caja
+                </button>
+              </div>
+            </form>
+
+            <p class="text-xs font-bold uppercase tracking-wider text-sage-500 mt-[20px] mb-[8px]">Movimientos de este turno</p>
+            <ul class="flex flex-col gap-[6px] m-0 p-0 list-none">
+              <li *ngFor="let m of r.movements" class="flex items-center justify-between gap-[12px] p-[10px] sm:p-[12px] rounded-xl bg-sage-50">
+                <div class="flex items-center gap-[10px] min-w-0">
+                  <span class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    [ngClass]="m.type === 'IN' ? 'bg-cafe-green-100 text-cafe-green-700' : 'bg-cafe-red-100 text-cafe-red-700'">
+                    <mat-icon class="!w-4 !h-4 !text-base">{{ m.type === 'IN' ? 'add_card' : 'remove_shopping_cart' }}</mat-icon>
+                  </span>
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-sage-900 m-0 truncate">{{ m.reason }}</p>
+                    <p class="text-xs text-sage-600 m-0">{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }} · {{ m.createdBy }} · {{ m.createdAt | date:'HH:mm' }}</p>
+                  </div>
+                </div>
+                <span class="text-sm font-bold flex-shrink-0" [ngClass]="m.type === 'IN' ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span>
+              </li>
+              <li class="flex items-center justify-between gap-[12px] p-[10px] sm:p-[12px] rounded-xl bg-sage-50">
+                <div class="flex items-center gap-[10px] min-w-0">
+                  <span class="w-8 h-8 rounded-full bg-cafe-green-100 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-4 !h-4 !text-base">lock_open</mat-icon></span>
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-sage-900 m-0 truncate">Fondo de apertura del turno</p>
+                    <p class="text-xs text-sage-600 m-0">{{ r.openedAt | date:'dd/MM HH:mm' }} · {{ r.openedByName }}</p>
+                  </div>
+                </div>
+                <span class="text-sm font-bold text-cafe-green-700 flex-shrink-0">+ {{ r.cash.opening | money }}</span>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Cobrado por método y efectivo -->
+        <div class="lg:col-span-5 flex flex-col gap-[16px] sm:gap-[24px] min-w-0">
+          <section class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px]">
+            <ng-container *ngIf="!blind">
+              <div class="flex items-center justify-between gap-[8px] mb-[8px]">
+                <h2 class="flex items-center gap-[8px] text-lg font-bold text-sage-900 m-0"><mat-icon class="text-cafe-green-700">pie_chart</mat-icon>Cobrado por método</h2>
+                <span class="text-xs font-bold text-sage-600">Total: {{ r.sales.totalAmount | money }}</span>
+              </div>
+              <p *ngIf="methodRows.length === 0" class="text-sm text-sage-500 m-0 py-[16px]">Todavía no hubo cobros en esta caja.</p>
+
+              <ng-container *ngIf="methodRows.length > 0">
+                <div class="flex items-center justify-center py-[8px]">
+                  <div class="relative w-40 h-40 flex items-center justify-center">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36" role="img" aria-label="Distribución de lo cobrado por método">
+                      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="4.5" class="text-sage-100"></circle>
+                      <circle *ngFor="let m of methodRows" cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor" stroke-width="4.5"
+                        [attr.stroke-dasharray]="m.dash" [attr.stroke-dashoffset]="m.offset" [ngClass]="m.stroke"></circle>
+                    </svg>
+                    <div class="absolute flex flex-col items-center justify-center text-center">
+                      <span class="text-[11px] font-bold uppercase text-sage-500">{{ methodRows[0].label }}</span>
+                      <span class="text-2xl font-bold text-sage-900">{{ methodRows[0].pct | number:'1.0-0' }}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <ul class="flex flex-col gap-[8px] m-0 p-0 list-none mt-[8px]">
+                  <li *ngFor="let m of methodRows" class="p-[12px] rounded-xl bg-sage-50 flex flex-col gap-[6px]">
+                    <div class="flex items-center justify-between gap-[8px]">
+                      <span class="flex items-center gap-[8px] text-sm font-bold text-sage-900 min-w-0"><span class="w-3 h-3 rounded-full flex-shrink-0" [ngClass]="m.dot"></span><span class="truncate">{{ m.label }}</span></span>
+                      <span class="text-sm font-bold text-sage-900 flex-shrink-0">{{ m.amount | money }}</span>
+                    </div>
+                    <div class="w-full bg-sage-200 rounded-full h-1.5 overflow-hidden"><div class="h-1.5 rounded-full" [ngClass]="m.dot" [style.width.%]="m.pct"></div></div>
+                    <div class="flex justify-between text-xs text-sage-600">
+                      <span>{{ m.count }} {{ m.count === 1 ? 'cobro' : 'cobros' }}</span>
+                      <span class="font-bold">{{ m.pct | number:'1.0-1' }}% del total</span>
+                    </div>
+                  </li>
+                </ul>
+              </ng-container>
+            </ng-container>
+
+            <ng-container *ngIf="blind">
+              <h2 class="flex items-center gap-[8px] text-lg font-bold text-sage-900 m-0 mb-[8px]"><mat-icon class="text-cafe-green-700">visibility_off</mat-icon>Conteo a ciegas</h2>
+              <p class="text-sm text-sage-600 m-0">
+                Mientras la caja está abierta no se muestran los importes de lo vendido: ni el total, ni lo cobrado en efectivo o por cada método.
+                Al cerrar, contás el efectivo de la caja y el sistema te dice si cierra justo, si faltan o si sobran.
+              </p>
+            </ng-container>
+
+            <ng-container *ngIf="r.tipsByWaiter.length">
+              <h3 class="text-sm font-bold text-sage-800 mt-[20px] mb-[8px]">Propinas por mozo</h3>
+              <ul class="divide-y divide-sage-100 m-0 p-0 list-none">
+                <li *ngFor="let t of r.tipsByWaiter" class="py-[6px] flex justify-between text-sm">
+                  <span class="text-sage-700">{{ t.waiterName }}</span>
+                  <span class="font-bold text-sage-900">{{ t.amount | money }}</span>
+                </li>
+              </ul>
+            </ng-container>
+          </section>
+
+          <section class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px]">
+            <h2 class="flex items-center gap-[8px] text-lg font-bold text-sage-900 m-0 mb-[12px]"><mat-icon class="text-cafe-green-700">savings</mat-icon>Efectivo de la caja</h2>
+            <ul class="divide-y divide-sage-100 m-0 p-0 list-none text-sm">
+              <li class="py-[8px] flex justify-between"><span class="text-sage-700">Fondo inicial</span><span class="font-bold">{{ r.cash.opening | money }}</span></li>
+              <li *ngIf="r.cash.sales !== null" class="py-[8px] flex justify-between"><span class="text-sage-700">Cobros en efectivo</span><span class="font-bold">+ {{ r.cash.sales | money }}</span></li>
+              <li class="py-[8px] flex justify-between"><span class="text-sage-700">Ingresos</span><span class="font-bold text-cafe-green-700">+ {{ r.cash.in | money }}</span></li>
+              <li class="py-[8px] flex justify-between"><span class="text-sage-700">Retiros y gastos</span><span class="font-bold text-cafe-red-700">− {{ r.cash.out | money }}</span></li>
+            </ul>
+            <p *ngIf="blind" class="mt-[12px] mb-0 text-xs text-sage-500">El total esperado se muestra al cerrar la caja, después de que cuentes el efectivo.</p>
+          </section>
+        </div>
+      </div>
     </ng-container>
 
-    <!-- HISTORIAL (admin) -->
-    <section *ngIf="isAdmin" class="bg-white rounded-card shadow-soft overflow-hidden">
-      <div class="p-5 pb-3">
-        <h2 class="text-lg font-bold text-sage-900 m-0">Historial de cajas</h2>
-        <p class="text-sm text-sage-600 mt-1 mb-0">Quién la manejó, cuánto se vendió y cuánto faltó o sobró en cada cierre.</p>
+    <!-- ===== HISTORIAL (admin) ===== -->
+    <section *ngIf="isAdmin" class="bg-white rounded-card shadow-soft p-[16px] sm:p-[24px] flex flex-col gap-[16px]">
+      <div>
+        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Historial de cierres de caja y arqueos</h2>
+        <p class="text-sm text-sage-600 mt-[4px] mb-0">Quién la manejó, cuánto se esperaba, cuánto se contó y cuánto faltó o sobró en cada cierre.</p>
       </div>
-      <p *ngIf="history.length === 0" class="px-5 pb-5 text-sm text-sage-500 m-0">Todavía no hay cajas.</p>
+      <p *ngIf="history.length === 0" class="text-sm text-sage-500 m-0">Todavía no hay cajas.</p>
 
-      <ul class="divide-y divide-sage-100 m-0 p-0 list-none">
-        <li *ngFor="let h of history">
-          <button type="button" (click)="toggleRow(h)" [attr.aria-expanded]="!!expanded[h.id]"
-            class="w-full px-5 py-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-left hover:bg-sage-50">
-            <span class="text-sm font-bold text-sage-900 min-w-[120px]">{{ h.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span class="text-sm text-sage-600 flex-1 min-w-[160px]">{{ h.openedByName }}<span *ngIf="h.closedByName && h.closedByName !== h.openedByName"> → {{ h.closedByName }}</span></span>
-            <span *ngIf="!h.closedAt" class="px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">Abierta</span>
-            <ng-container *ngIf="h.closedAt">
-              <span class="text-sm text-sage-600">Contado {{ h.countedAmount | money }}</span>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold min-w-[90px] text-center"
-                [ngClass]="(h.difference || 0) === 0 ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">
-                {{ (h.difference || 0) === 0 ? 'Justa' : ((h.difference || 0) < 0 ? 'Faltan ' : 'Sobran ') + ((h.difference || 0) < 0 ? -(h.difference || 0) : h.difference) }}
-              </span>
+      <div *ngIf="history.length > 0" class="overflow-x-auto -mx-[4px] px-[4px]">
+        <table class="w-full text-left border-collapse min-w-[720px]">
+          <thead>
+            <tr class="bg-sage-100 text-sage-600 text-[11px] uppercase tracking-wider">
+              <th class="py-[10px] px-[14px] rounded-l-lg font-bold">Apertura</th>
+              <th class="py-[10px] px-[14px] font-bold">Cajero</th>
+              <th class="py-[10px] px-[14px] font-bold">Esperado</th>
+              <th class="py-[10px] px-[14px] font-bold">Contado</th>
+              <th class="py-[10px] px-[14px] font-bold">Diferencia</th>
+              <th class="py-[10px] px-[14px] rounded-r-lg font-bold text-right">Detalle</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm text-sage-900">
+            <ng-container *ngFor="let h of history">
+              <tr class="hover:bg-sage-50 transition-colors border-b-[1px] border-sage-100">
+                <td class="py-[12px] px-[14px] font-bold whitespace-nowrap">{{ h.openedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="py-[12px] px-[14px]">
+                  <span class="inline-flex items-center gap-[8px]">
+                    <span class="w-7 h-7 rounded-full bg-sage-100 text-cafe-green-700 flex items-center justify-center text-xs font-bold">{{ initials(h.openedByName) }}</span>
+                    <span>{{ h.openedByName }}<span *ngIf="h.closedByName && h.closedByName !== h.openedByName" class="text-sage-500"> → {{ h.closedByName }}</span></span>
+                  </span>
+                </td>
+                <td class="py-[12px] px-[14px] font-bold whitespace-nowrap">{{ h.closedAt ? (h.expectedAmount | money) : '—' }}</td>
+                <td class="py-[12px] px-[14px] font-bold whitespace-nowrap">{{ h.closedAt ? (h.countedAmount | money) : '—' }}</td>
+                <td class="py-[12px] px-[14px] whitespace-nowrap">
+                  <span *ngIf="!h.closedAt" class="px-[10px] py-[2px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">Abierta</span>
+                  <span *ngIf="h.closedAt" class="inline-flex items-center gap-[4px] px-[10px] py-[2px] rounded-full text-xs font-bold"
+                    [ngClass]="(h.difference || 0) === 0 ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">
+                    <mat-icon class="!w-[14px] !h-[14px] !text-sm">{{ (h.difference || 0) === 0 ? 'check_circle' : 'warning' }}</mat-icon>
+                    {{ (h.difference || 0) === 0 ? 'Justa' : ((h.difference || 0) < 0 ? 'Faltan ' : 'Sobran ') + (((h.difference || 0) < 0 ? -(h.difference || 0) : h.difference) | money) }}
+                  </span>
+                </td>
+                <td class="py-[12px] px-[14px] text-right">
+                  <button type="button" (click)="toggleRow(h)" [attr.aria-expanded]="!!expanded[h.id]"
+                    class="inline-flex items-center gap-[4px] px-[12px] py-[6px] rounded-lg bg-sage-100 hover:bg-sage-200 text-sage-800 text-xs font-bold">
+                    <mat-icon class="!w-4 !h-4 !text-base">{{ expanded[h.id] ? 'expand_less' : 'visibility' }}</mat-icon>{{ expanded[h.id] ? 'Ocultar' : 'Ver detalle' }}
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="expanded[h.id]">
+                <td colspan="6" class="px-[14px] pb-[16px] bg-sage-50">
+                  <p *ngIf="expanded[h.id] === 'loading'" class="text-sm text-sage-500 m-0 pt-[12px]">Cargando…</p>
+                  <div *ngIf="detailOf(h) as d" class="pt-[12px] grid gap-[16px] sm:grid-cols-2 text-sm">
+                    <div>
+                      <p class="font-bold text-sage-800 m-0 mb-[4px]">Ventas: {{ d.sales.totalAmount | money }} ({{ d.sales.count }})</p>
+                      <ul class="m-0 p-0 list-none text-sage-700">
+                        <li *ngFor="let m of d.byMethod" class="flex justify-between"><span>{{ methodLabel(m.method) }}</span><span>{{ m.amount | money }}</span></li>
+                      </ul>
+                      <p *ngIf="d.sales.tipsTotal" class="m-0 mt-[4px] text-sage-600">Propinas: {{ d.sales.tipsTotal | money }}</p>
+                    </div>
+                    <div>
+                      <p class="font-bold text-sage-800 m-0 mb-[4px]">Efectivo</p>
+                      <ul class="m-0 p-0 list-none text-sage-700">
+                        <li class="flex justify-between"><span>Fondo</span><span>{{ d.cash.opening | money }}</span></li>
+                        <li class="flex justify-between"><span>Cobros en efectivo</span><span>+ {{ d.cash.sales | money }}</span></li>
+                        <li class="flex justify-between"><span>Ingresos</span><span>+ {{ d.cash.in | money }}</span></li>
+                        <li class="flex justify-between"><span>Retiros y gastos</span><span>− {{ d.cash.out | money }}</span></li>
+                        <li class="flex justify-between font-bold text-sage-900"><span>Esperado</span><span>{{ d.cash.expected | money }}</span></li>
+                      </ul>
+                    </div>
+                    <ul *ngIf="d.movements.length" class="sm:col-span-2 m-0 p-0 list-none text-sage-700">
+                      <li *ngFor="let m of d.movements" class="flex justify-between"><span>{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }}: {{ m.reason }} ({{ m.createdBy }})</span><span>{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span></li>
+                    </ul>
+                    <p *ngIf="d.note" class="sm:col-span-2 m-0 text-sage-600 italic">Nota: {{ d.note }}</p>
+                  </div>
+                </td>
+              </tr>
             </ng-container>
-          </button>
-
-          <div *ngIf="expanded[h.id]" class="px-5 pb-4 bg-sage-50/60">
-            <p *ngIf="expanded[h.id] === 'loading'" class="text-sm text-sage-500 m-0 pt-3">Cargando…</p>
-            <div *ngIf="detailOf(h) as d" class="pt-3 grid gap-4 sm:grid-cols-2 text-sm">
-              <div>
-                <p class="font-bold text-sage-800 m-0 mb-1">Ventas: {{ d.sales.totalAmount | money }} ({{ d.sales.count }})</p>
-                <ul class="m-0 p-0 list-none text-sage-700">
-                  <li *ngFor="let m of d.byMethod" class="flex justify-between"><span>{{ methodLabel(m.method) }}</span><span>{{ m.amount | money }}</span></li>
-                </ul>
-                <p *ngIf="d.sales.tipsTotal" class="m-0 mt-1 text-sage-600">Propinas: {{ d.sales.tipsTotal | money }}</p>
-              </div>
-              <div>
-                <p class="font-bold text-sage-800 m-0 mb-1">Efectivo</p>
-                <ul class="m-0 p-0 list-none text-sage-700">
-                  <li class="flex justify-between"><span>Fondo</span><span>{{ d.cash.opening | money }}</span></li>
-                  <li class="flex justify-between"><span>Cobros en efectivo</span><span>+ {{ d.cash.sales | money }}</span></li>
-                  <li class="flex justify-between"><span>Ingresos</span><span>+ {{ d.cash.in | money }}</span></li>
-                  <li class="flex justify-between"><span>Retiros y gastos</span><span>− {{ d.cash.out | money }}</span></li>
-                  <li class="flex justify-between font-bold text-sage-900"><span>Esperado</span><span>{{ d.cash.expected | money }}</span></li>
-                </ul>
-              </div>
-              <ul *ngIf="d.movements.length" class="sm:col-span-2 m-0 p-0 list-none text-sage-700">
-                <li *ngFor="let m of d.movements" class="flex justify-between"><span>{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }}: {{ m.reason }} ({{ m.createdBy }})</span><span>{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span></li>
-              </ul>
-              <p *ngIf="d.note" class="sm:col-span-2 m-0 text-sage-600 italic">Nota: {{ d.note }}</p>
-            </div>
-          </div>
-        </li>
-      </ul>
+          </tbody>
+        </table>
+      </div>
     </section>
+  </div>
 
+  <!-- ===== Arqueo y cierre (el efectivo se cuenta ANTES de ver cuánto debería haber) ===== -->
+  <div *ngIf="closing" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-[0px] sm:p-[16px]" (click)="cancelClose()" (keydown.escape)="cancelClose()">
+    <div class="w-full sm:max-w-xl max-h-[92vh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-dialog shadow-dialog p-[20px] sm:p-[24px]"
+      role="dialog" aria-modal="true" aria-labelledby="close-title" (click)="$event.stopPropagation()">
+      <div class="flex items-start justify-between gap-[12px] mb-[16px]">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-cafe-red-700 m-0">Procedimiento de cierre</p>
+          <h3 id="close-title" class="text-xl font-bold text-sage-900 m-0">Arqueo y cierre de caja</h3>
+        </div>
+        <button type="button" (click)="cancelClose()" aria-label="Cerrar" class="w-9 h-9 rounded-full bg-sage-100 hover:bg-sage-200 flex items-center justify-center flex-shrink-0">
+          <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+        </button>
+      </div>
+
+      <p class="text-sm text-sage-600 mt-0 mb-[16px]">Contá el efectivo que hay en la caja (billetes y monedas) e ingresá el total. El sistema lo compara con lo que debería haber.</p>
+
+      <form (ngSubmit)="confirmClose()" #cf="ngForm" class="flex flex-col gap-[14px]">
+        <label class="block">
+          <span class="block text-xs font-bold text-sage-600 mb-[6px]">Efectivo contado en caja</span>
+          <span class="relative block">
+            <span class="absolute left-[14px] top-1/2 -translate-y-1/2 text-sage-500">$</span>
+            <input name="counted" type="number" min="0" step="any" required autofocus [(ngModel)]="counted" placeholder="0,00"
+              class="w-full pl-[32px] pr-[14px] py-[12px] bg-sage-50 border-[1px] border-sage-300 rounded-xl text-lg font-bold text-sage-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          </span>
+        </label>
+        <label class="block">
+          <span class="block text-xs font-bold text-sage-600 mb-[6px]">Observación de cierre (opcional)</span>
+          <textarea name="note" rows="2" [(ngModel)]="closeNote" maxlength="300" placeholder="Ej: se pagó un taxi sin anotar, billetes dañados…"
+            class="w-full px-[14px] py-[10px] bg-sage-50 border-[1px] border-sage-300 rounded-xl text-sm resize-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700"></textarea>
+        </label>
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-[8px] pt-[4px]">
+          <button type="button" (click)="cancelClose()" class="px-[20px] py-[10px] rounded-xl text-sm font-bold text-sage-700 hover:bg-sage-100">Cancelar</button>
+          <button type="submit" [disabled]="cf.invalid || busy"
+            class="px-[20px] py-[10px] rounded-xl bg-cafe-red-700 hover:bg-cafe-red-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">{{ busy ? 'Cerrando…' : 'Confirmar cierre' }}</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
