@@ -15,12 +15,16 @@ interface CartLine {
 
 type Phase = 'loading' | 'notFound' | 'error' | 'pin' | 'ready';
 
+// Cómo avanza un pedido (lo que ve el cliente)
 const STEPS: { step: ClientStep; label: string }[] = [
   { step: 'RECEIVED', label: 'Recibido' },
   { step: 'CONFIRMED', label: 'Confirmado' },
-  { step: 'PREPARING', label: 'En preparación' },
+  { step: 'PREPARING', label: 'En cocina' },
   { step: 'READY', label: 'Listo' },
 ];
+
+// Pedidos que todavía están en marcha: se muestran completos. Los terminados quedan plegados.
+const LIVE_STEPS: ClientStep[] = ['RECEIVED', 'CONFIRMED', 'PREPARING'];
 
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
@@ -42,18 +46,43 @@ const store = {
 };
 
 // Pantalla que ve el cliente al escanear el QR de su mesa. No necesita sesión ni instalar nada.
+// Cuánto dura la pantalla de pedido enviado antes de pasar al seguimiento
+const SPLASH_SECONDS = 7;
+
 @Component({
   selector: 'app-qr-order',
   templateUrl: './qr-order.component.html',
+  styles: [
+    `
+      @keyframes drawCheck {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .check-path {
+        stroke-dasharray: 24;
+        stroke-dashoffset: 24;
+        animation: drawCheck 0.6s 0.2s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .check-path {
+          animation-duration: 0.01s;
+          animation-delay: 0s;
+        }
+      }
+    `,
+  ],
 })
 export class QrOrderComponent implements OnInit, OnDestroy {
   token = '';
   phase: Phase = 'loading';
   info: PublicInfo | null = null;
 
+  // Código de mesa: cuatro casilleros
   pin = '';
-  pinInput = '';
+  pinDigits: string[] = ['', '', '', ''];
   pinError = '';
+  pinHelpSent = false;
 
   tab: 'menu' | 'orders' = 'menu';
   search = '';
@@ -74,12 +103,22 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   banner: { kind: 'ok' | 'error'; text: string } | null = null;
 
   orders: ClientOrders = { requests: [], calls: { waiter: false, bill: false } };
+
+  // Pantalla de transición que se ve un momento después de enviar el pedido
+  splash: { id: string; units: number; total: number; step: ClientStep; previous: number } | null = null;
+  splashSeconds = SPLASH_SECONDS;
+  readonly splashDurationMs = SPLASH_SECONDS * 1000;
+  splashRunning = false; // pone en marcha la barra de progreso
+  private splashTimer?: ReturnType<typeof setInterval>;
+  private splashEnd?: ReturnType<typeof setTimeout>;
   steps = STEPS;
   callBusy = false;
+  openPast: Record<string, boolean> = {};
 
   private clientId = '';
   private timer?: ReturnType<typeof setInterval>;
   private bannerTimer?: ReturnType<typeof setTimeout>;
+  private helpTimer?: ReturnType<typeof setTimeout>;
   private formatter?: Intl.NumberFormat;
 
   constructor(private route: ActivatedRoute, private api: QrPublicService) {}
@@ -99,6 +138,8 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.timer) clearInterval(this.timer);
     if (this.bannerTimer) clearTimeout(this.bannerTimer);
+    if (this.helpTimer) clearTimeout(this.helpTimer);
+    this.clearSplashTimers();
   }
 
   // ---------- carga ----------
@@ -113,7 +154,9 @@ export class QrOrderComponent implements OnInit, OnDestroy {
           this.phase = 'pin';
           if (this.pin) this.pinError = 'Ese código no es correcto';
           this.pin = '';
+          this.pinDigits = ['', '', '', ''];
           store.set(sessionStorage, `qr-pin:${this.token}`, null);
+          this.focusPin(0);
           return;
         }
         this.phase = 'ready';
@@ -131,14 +174,79 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ---------- código de mesa ----------
+
+  get pinComplete(): boolean {
+    return this.pinDigits.every((d) => d !== '');
+  }
+
+  focusPin(index: number) {
+    setTimeout(() => (document.getElementById(`pin-${index}`) as HTMLInputElement | null)?.focus(), 30);
+  }
+
+  onPinInput(index: number, event: Event) {
+    const el = event.target as HTMLInputElement;
+    const digits = el.value.replace(/\D/g, '');
+    // Autocompletado o pegado de varios dígitos juntos
+    if (digits.length > 1) {
+      this.fillPin(digits);
+      return;
+    }
+    this.pinDigits[index] = digits;
+    el.value = digits;
+    this.pinError = '';
+    if (digits && index < 3) this.focusPin(index + 1);
+    if (this.pinComplete) this.submitPin();
+  }
+
+  onPinKeydown(index: number, event: KeyboardEvent) {
+    if (event.key === 'Backspace' && !this.pinDigits[index] && index > 0) {
+      this.pinDigits[index - 1] = '';
+      this.focusPin(index - 1);
+    }
+  }
+
+  onPinPaste(event: ClipboardEvent) {
+    event.preventDefault();
+    this.fillPin(event.clipboardData?.getData('text') ?? '');
+  }
+
+  private fillPin(text: string) {
+    const digits = text.replace(/\D/g, '').slice(0, 4);
+    this.pinDigits = [0, 1, 2, 3].map((i) => digits[i] ?? '');
+    this.pinError = '';
+    if (this.pinComplete) this.submitPin();
+    else this.focusPin(Math.min(digits.length, 3));
+  }
+
   submitPin() {
-    const pin = this.pinInput.trim();
-    if (!pin) return;
-    this.pin = pin;
-    store.set(sessionStorage, `qr-pin:${this.token}`, pin);
-    this.pinInput = '';
+    if (!this.pinComplete) {
+      this.pinError = 'Completá los 4 números';
+      this.focusPin(this.pinDigits.findIndex((d) => d === ''));
+      return;
+    }
+    this.pin = this.pinDigits.join('');
+    store.set(sessionStorage, `qr-pin:${this.token}`, this.pin);
     this.phase = 'loading';
     this.load();
+  }
+
+  // Sin código también se puede llamar al mozo (es lo que hace quien no lo tiene)
+  callWaiterWithoutPin() {
+    if (this.callBusy || this.pinHelpSent) return;
+    this.callBusy = true;
+    this.api.call(this.token, undefined, 'WAITER').subscribe({
+      next: () => {
+        this.callBusy = false;
+        this.pinHelpSent = true;
+        if (this.helpTimer) clearTimeout(this.helpTimer);
+        this.helpTimer = setTimeout(() => (this.pinHelpSent = false), 6000);
+      },
+      error: (err) => {
+        this.callBusy = false;
+        this.pinError = this.errorText(err);
+      },
+    });
   }
 
   loadOrders() {
@@ -152,8 +260,10 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   private askPinAgain() {
     this.pin = '';
+    this.pinDigits = ['', '', '', ''];
     store.set(sessionStorage, `qr-pin:${this.token}`, null);
     this.phase = 'pin';
+    this.focusPin(0);
   }
 
   // ---------- carta ----------
@@ -265,8 +375,12 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     this.addToCart(item, 1, '', [], [], item.price);
   }
 
+  private lineKey(itemId: string, optionIds: string[], note: string) {
+    return [itemId, [...optionIds].sort().join('|'), note.trim()].join('#');
+  }
+
   private addToCart(item: PublicItem, quantity: number, note: string, optionIds: string[], extras: string[], unitPrice: number) {
-    const key = [item.id, [...optionIds].sort().join('|'), note].join('#');
+    const key = this.lineKey(item.id, optionIds, note);
     const existing = this.cart.find((l) => l.key === key);
     if (existing) existing.quantity = Math.min(30, existing.quantity + quantity);
     else this.cart.push({ key, itemId: item.id, name: item.name, quantity, note, optionIds, extras, unitPrice });
@@ -291,6 +405,20 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     this.saveCart();
   }
 
+  // La aclaración se edita en el pedido; al terminar, si quedó igual a otra línea del mismo plato, se juntan
+  commitNote(line: CartLine) {
+    line.note = line.note.slice(0, 140);
+    const key = this.lineKey(line.itemId, line.optionIds, line.note);
+    const twin = this.cart.find((l) => l !== line && l.key === key);
+    if (twin) {
+      twin.quantity = Math.min(30, twin.quantity + line.quantity);
+      this.cart = this.cart.filter((l) => l !== line);
+    } else {
+      line.key = key;
+    }
+    this.saveCart();
+  }
+
   send() {
     if (this.sending || this.cart.length === 0) return;
     this.sending = true;
@@ -302,7 +430,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
         items: this.cart.map((l) => ({
           menuItemId: l.itemId,
           quantity: l.quantity,
-          note: l.note || undefined,
+          note: l.note.trim() || undefined,
           optionIds: l.optionIds.length ? l.optionIds : undefined,
         })),
       })
@@ -312,8 +440,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
           this.cart = [];
           this.saveCart();
           this.cartOpen = false;
-          this.tab = 'orders';
-          this.say('ok', sent.step === 'RECEIVED' ? '¡Pedido enviado! El mozo lo va a confirmar.' : '¡Pedido enviado!');
+          this.showSplash(sent);
           this.loadOrders();
         },
         error: (err) => {
@@ -326,14 +453,87 @@ export class QrOrderComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ---------- transición después de enviar ----------
+
+  private showSplash(sent: ClientRequest) {
+    const units = sent.items.reduce((n, l) => n + l.quantity, 0);
+    this.splash = { id: sent.id, units, total: sent.total, step: sent.step, previous: this.orders.requests.length };
+    this.splashSeconds = SPLASH_SECONDS;
+    this.splashRunning = false;
+    this.clearSplashTimers();
+    // La barra arranca en el cuadro siguiente para que la transición se vea
+    setTimeout(() => (this.splashRunning = true), 30);
+    this.splashTimer = setInterval(() => {
+      this.splashSeconds = Math.max(0, this.splashSeconds - 1);
+      if (this.splashSeconds === 0 && this.splashTimer) clearInterval(this.splashTimer);
+    }, 1000);
+    this.splashEnd = setTimeout(() => this.finishSplash(), SPLASH_SECONDS * 1000 + 200);
+    window.scrollTo({ top: 0 });
+  }
+
+  // Número del pedido recién enviado (cuando todavía no llegó la lista actualizada, el siguiente al último)
+  get splashNumber(): number {
+    const s = this.splash;
+    if (!s) return 0;
+    const found = this.orders.requests.findIndex((r) => r.id === s.id);
+    return found >= 0 ? this.orders.requests.length - found : s.previous + 1;
+  }
+
+  finishSplash() {
+    this.clearSplashTimers();
+    this.splash = null;
+    this.tab = 'orders';
+    this.loadOrders();
+  }
+
+  private clearSplashTimers() {
+    if (this.splashTimer) clearInterval(this.splashTimer);
+    if (this.splashEnd) clearTimeout(this.splashEnd);
+  }
+
   // ---------- mis pedidos ----------
 
+  get liveRequests(): ClientRequest[] {
+    return this.orders.requests.filter((r) => LIVE_STEPS.includes(r.step));
+  }
+
+  get pastRequests(): ClientRequest[] {
+    return this.orders.requests.filter((r) => !LIVE_STEPS.includes(r.step));
+  }
+
   get activeCount() {
-    return this.orders.requests.filter((r) => r.step !== 'REJECTED' && r.step !== 'CANCELLED' && r.step !== 'READY').length;
+    return this.liveRequests.length;
+  }
+
+  // Número del pedido en esta mesa para este celular: el más viejo es el 1
+  requestNumber(r: ClientRequest): number {
+    return this.orders.requests.length - this.orders.requests.indexOf(r);
   }
 
   stepIndex(step: ClientStep) {
     return STEPS.findIndex((s) => s.step === step);
+  }
+
+  // Frase de estado de un pedido en marcha
+  statusText(step: ClientStep): string {
+    switch (step) {
+      case 'RECEIVED':
+        return 'Esperando que el mozo lo confirme';
+      case 'CONFIRMED':
+        return 'Confirmado: ya va a cocina';
+      case 'PREPARING':
+        return 'Lo están preparando';
+      default:
+        return '';
+    }
+  }
+
+  pastLabel(step: ClientStep): string {
+    return step === 'READY' ? 'Listo' : step === 'REJECTED' ? 'No se pudo tomar' : 'Cancelado';
+  }
+
+  togglePast(id: string) {
+    this.openPast[id] = !this.openPast[id];
   }
 
   cancelRequest(r: ClientRequest) {

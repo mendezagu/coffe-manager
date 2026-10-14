@@ -34,6 +34,11 @@ module.exports = {
           900: '#0e3624',
         },
         // Ladrillo: mesa ocupada y acciones destructivas.
+        // Pantalla del cliente (pedido por QR): crema y verde bosque
+        'crema': { DEFAULT: '#FAF8F5', dark: '#F0ECE4' },
+        'forest': { DEFAULT: '#1E3A2F', hover: '#162b23', light: '#284E3F', soft: '#EAF0EC' },
+        'charcoal': '#1A2521',
+        'muted': '#63736C',
         // Ámbar: mesa con un pedido por QR esperando confirmación. Misma profundidad que el verde y el ladrillo.
         'cafe-amber': {
           50: '#fbf1de',
@@ -75,6 +80,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Roboto', 'system-ui', '-apple-system', 'sans-serif'],
+        // Solo la pantalla del cliente (pedido por QR)
+        jakarta: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'elegant': '0 4px 15px rgba(0, 0, 0, 0.1)',
@@ -87,6 +94,7 @@ module.exports = {
         'brick': '0 18px 30px -18px rgba(138, 42, 28, 0.65)',
         'green': '0 18px 30px -20px rgba(29, 91, 62, 0.8)',
         'amber': '0 18px 30px -18px rgba(134, 84, 16, 0.7)',
+        'floating': '0 12px 30px -4px rgba(30, 58, 47, 0.22)',
       },
       borderRadius: {
         'card': '20px',
