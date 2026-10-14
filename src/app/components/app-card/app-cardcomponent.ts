@@ -31,8 +31,10 @@ export class CardComponent implements OnInit, OnDestroy {
   private refresh?: ReturnType<typeof setInterval>;
   tables: Table[] = [];
   searchText: string = '';
-  viewMode: 'joint' | 'sector' = 'joint';
-  selectedGroupKey: string | null = null;
+  // 'grouped': una sección por sector, con su título. 'flat': todas las mesas juntas en una sola grilla.
+  viewMode: 'grouped' | 'flat' = 'grouped';
+  selectedGroupKey: string | null = null; // sector elegido en las pestañas; null o '__all__' = todos
+  statusFilter: 'all' | 'free' | 'busy' | 'qr' = 'all';
   waiters: Waiter[] = [];
    selectedItems: MenuItem[] = [];
    menuItems: MenuItem[] = [];
@@ -114,8 +116,108 @@ export class CardComponent implements OnInit, OnDestroy {
   // Mesas filtradas por nombre (sin distinguir mayúsculas ni tildes)
   get filteredTables(): Table[] {
     const query = this.normalizeText(this.searchText);
-    if (!query) return this.tables;
-    return this.tables.filter(table => this.normalizeText(table.name).includes(query));
+    return this.tables.filter(table => {
+      const matchesText =
+        !query ||
+        [table.name, table.sectorName, table.waiterId ? table.waiterName : ''].some(v => this.normalizeText(v).includes(query));
+      return matchesText && this.matchesStatus(table);
+    });
+  }
+
+  // Tono de la tarjeta: verde = libre, ámbar = tiene un pedido o aviso por QR esperando, rojo = ocupada
+  toneOf(table: Table): 'green' | 'amber' | 'red' {
+    if (this.needsQrAttention(table)) return 'amber';
+    return this.isFree(table) ? 'green' : 'red';
+  }
+
+  // Las clases van completas (no armadas por partes) para que Tailwind las encuentre
+  readonly toneStyles = {
+    green: {
+      card: 'bg-cafe-green-50 border-cafe-green-200',
+      title: 'text-cafe-green-900',
+      pill: 'bg-cafe-green-100 text-cafe-green-800',
+      dot: 'bg-cafe-green-700',
+      meta: 'text-cafe-green-700',
+      metaIcon: 'text-cafe-green-400',
+      strong: 'text-cafe-green-900',
+      ring: 'ring-cafe-green-200',
+      primary: 'bg-cafe-green-700 text-white hover:bg-cafe-green-800',
+      secondary: 'bg-cafe-green-100 text-cafe-green-800 hover:bg-cafe-green-200',
+      box: 'bg-cafe-green-100 text-cafe-green-900',
+      boxLabel: 'text-cafe-green-700',
+    },
+    amber: {
+      card: 'bg-cafe-amber-50 border-cafe-amber-300 ring-2 ring-cafe-amber-100',
+      title: 'text-cafe-amber-900',
+      pill: 'bg-cafe-amber-100 text-cafe-amber-800',
+      dot: 'bg-cafe-amber-700',
+      meta: 'text-cafe-amber-800',
+      metaIcon: 'text-cafe-amber-500',
+      strong: 'text-cafe-amber-900',
+      ring: 'ring-cafe-amber-200',
+      primary: 'bg-cafe-amber-700 text-white hover:bg-cafe-amber-800',
+      secondary: 'bg-cafe-amber-100 text-cafe-amber-800 hover:bg-cafe-amber-200',
+      box: 'bg-cafe-amber-100 text-cafe-amber-900',
+      boxLabel: 'text-cafe-amber-800',
+    },
+    red: {
+      card: 'bg-cafe-red-50 border-cafe-red-200',
+      title: 'text-cafe-red-900',
+      pill: 'bg-cafe-red-100 text-cafe-red-800',
+      dot: 'bg-cafe-red-700',
+      meta: 'text-cafe-red-700',
+      metaIcon: 'text-cafe-red-400',
+      strong: 'text-cafe-red-900',
+      ring: 'ring-cafe-red-200',
+      primary: 'bg-cafe-red-700 text-white hover:bg-cafe-red-800',
+      secondary: 'bg-cafe-red-100 text-cafe-red-800 hover:bg-cafe-red-200',
+      box: 'bg-cafe-red-100 text-cafe-red-900',
+      boxLabel: 'text-cafe-red-700',
+    },
+  } as const;
+
+  // Estilos de una mesa según su tono
+  styleOf(table: Table) {
+    return this.toneStyles[this.toneOf(table)];
+  }
+
+  isFree(table: Table): boolean {
+    return !!table.available && !table.controlledBy;
+  }
+
+  private matchesStatus(table: Table): boolean {
+    switch (this.statusFilter) {
+      case 'free': return this.isFree(table);
+      case 'busy': return !this.isFree(table);
+      case 'qr': return this.needsQrAttention(table);
+      default: return true;
+    }
+  }
+
+  // ---- Resumen de arriba ----
+  get freeCount(): number { return this.tables.filter(t => this.isFree(t)).length; }
+  get busyCount(): number { return this.tables.length - this.freeCount; }
+  get qrTablesCount(): number { return this.tables.filter(t => this.needsQrAttention(t)).length; }
+  get occupancyPct(): number { return this.tables.length ? Math.round((this.busyCount / this.tables.length) * 100) : 0; }
+  // Platos que cocina ya terminó y esperan ser servidos
+  get readyTotal(): number { return this.tables.reduce((n, t) => n + this.readyCount(t), 0); }
+  // Platos pedidos que todavía están en cocina o barra
+  get cookingTotal(): number {
+    return this.tables.reduce((n, t) => n + ((t.orders || []) as any[]).filter(o => o.status !== 'READY').length, 0);
+  }
+  // Pedidos y avisos de clientes esperando al personal
+  get qrPendingTotal(): number { return this.qrInbox.requests.length + this.qrInbox.calls.length; }
+
+  // Mesas ocupadas de un grupo (para el título de cada sector)
+  occupiedIn(group: { tables: Table[] }): number {
+    return group.tables.filter(t => !this.isFree(t)).length;
+  }
+
+  openAllQr(): void {
+    this.dialog
+      .open(QrInboxDialogComponent, { data: null, width: '600px', maxWidth: '96vw', autoFocus: false })
+      .afterClosed()
+      .subscribe(() => this.loadTables());
   }
 
   // Mesas agrupadas por sector (ordenadas por nombre) y, al final, las que no tienen sector.
@@ -159,20 +261,25 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
   // Grupo de la pestaña activa; si el elegido ya no existe (ej. la búsqueda lo dejó vacío), el primero
-  get activeGroupKey(): string | null {
-    const groups = this.tableGroups;
-    return (groups.find(g => g.key === this.selectedGroupKey) ?? groups[0])?.key ?? null;
+  get activeGroupKey(): string {
+    const key = this.selectedGroupKey;
+    return key && this.tableGroups.some(g => g.key === key) ? key : '__all__';
   }
 
   // Vista conjunta: todos los sectores uno arriba del otro. Vista por sector: solo el de la pestaña activa.
   get visibleGroups(): TableGroup[] {
-    const groups = this.tableGroups;
-    if (this.viewMode !== 'sector' || !this.hasSectors) return groups;
-    const active = groups.find(g => g.key === this.activeGroupKey);
-    return active ? [active] : [];
+    let groups = this.tableGroups;
+    if (this.hasSectors && this.activeGroupKey !== '__all__') {
+      groups = groups.filter(g => g.key === this.activeGroupKey);
+    }
+    // Vista conjunta: sin títulos de sector, todas las mesas en una sola grilla
+    if (this.viewMode === 'flat' && groups.length > 0) {
+      return [{ key: '__flat__', name: null, tables: groups.flatMap(g => g.tables) }];
+    }
+    return groups;
   }
 
-  setViewMode(mode: 'joint' | 'sector'): void {
+  setViewMode(mode: 'grouped' | 'flat'): void {
     this.viewMode = mode;
     this.persistView('tablesViewMode', mode);
   }
@@ -194,7 +301,7 @@ export class CardComponent implements OnInit, OnDestroy {
   private restoreView(): void {
     try {
       const mode = localStorage.getItem('tablesViewMode');
-      if (mode === 'joint' || mode === 'sector') this.viewMode = mode;
+      if (mode === 'grouped' || mode === 'flat') this.viewMode = mode;
       this.selectedGroupKey = localStorage.getItem('tablesSelectedGroup');
     } catch {
       /* sin persistencia */

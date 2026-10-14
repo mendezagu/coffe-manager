@@ -1,217 +1,232 @@
-<div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 py-[20px] sm:py-6 lg:py-8">
-  <div class="max-w-[1920px] mx-auto">
-    <!-- Barra superior: buscador (solo por nombre) + tipo de vista -->
-    <div class="flex flex-wrap items-center justify-between gap-[12px] mb-[16px]">
-    <div class="relative w-full sm:max-w-[420px]">
-      <div class="absolute inset-y-0 left-0 pl-[14px] flex items-center pointer-events-none">
-        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">search</mat-icon>
-      </div>
-      <input
-        type="text"
-        [(ngModel)]="searchText"
-        placeholder="Buscar mesa..."
-        class="w-full pl-[44px] pr-[40px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 placeholder-sage-400 shadow-soft focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
-      />
-      <button
-        *ngIf="searchText"
-        type="button"
-        aria-label="Limpiar búsqueda"
-        class="absolute inset-y-0 right-0 pr-[12px] flex items-center text-sage-500 hover:text-sage-800"
-        (click)="searchText = ''">
-        <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
-      </button>
-    </div>
+<!-- Inicio: resumen, filtros y mesas. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con
+     !important y pisa a Tailwind; por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
+<div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 pt-[16px] sm:pt-6 pb-[96px]">
+  <div class="max-w-[1920px] mx-auto flex flex-col gap-[16px]">
 
-      <!-- Tipo de vista: solo si hay sectores creados -->
-      <div *ngIf="hasSectors" class="inline-flex p-[3px] bg-white border-[1px] border-sage-300 rounded-xl shadow-soft" role="group" aria-label="Tipo de vista">
-        <button
-          type="button"
-          class="flex items-center gap-1.5 px-[12px] py-[7px] rounded-[9px] text-sm font-medium transition-colors duration-200"
-          [ngClass]="viewMode === 'joint' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'"
-          [attr.aria-pressed]="viewMode === 'joint'"
-          (click)="setViewMode('joint')">
-          <mat-icon class="!w-5 !h-5 !text-xl">view_agenda</mat-icon>
-          <span>Vista conjunta</span>
+    <!-- Resumen -->
+    <section aria-label="Resumen del salón" class="grid grid-cols-3 gap-[8px] sm:gap-[16px]">
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Ocupación</p>
+          <p class="m-0 mt-[2px] flex items-baseline gap-[6px] flex-wrap">
+            <span class="text-2xl sm:text-3xl font-bold text-sage-900 leading-none">{{ busyCount }}</span>
+            <span class="text-sm sm:text-base text-sage-500">/{{ tables.length }}</span>
+            <span class="hidden sm:inline px-[8px] py-[1px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ occupancyPct }}%</span>
+          </p>
+          <p class="hidden sm:flex items-center gap-[6px] text-xs text-sage-600 m-0 mt-[4px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-cafe-green-700"></span>{{ freeCount }} {{ freeCount === 1 ? 'mesa libre' : 'mesas libres' }}
+          </p>
+        </div>
+        <span class="hidden md:flex w-11 h-11 rounded-xl bg-sage-100 text-cafe-green-700 items-center justify-center flex-shrink-0">
+          <mat-icon>table_restaurant</mat-icon>
+        </span>
+      </div>
+
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Para servir</p>
+          <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold leading-none" [ngClass]="readyTotal > 0 ? 'text-cafe-green-700' : 'text-sage-900'">{{ readyTotal }}</p>
+          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px]">{{ readyTotal === 1 ? 'plato listo' : 'platos listos' }} en cocina o barra</p>
+        </div>
+        <span class="hidden md:flex w-11 h-11 rounded-xl bg-cafe-green-50 text-cafe-green-700 items-center justify-center flex-shrink-0">
+          <mat-icon>room_service</mat-icon>
+        </span>
+      </div>
+
+      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0">
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">En preparación</p>
+          <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold text-sage-900 leading-none">{{ cookingTotal }}</p>
+          <p class="hidden sm:block text-xs text-sage-600 m-0 mt-[4px]">{{ cookingTotal === 1 ? 'plato' : 'platos' }} por salir</p>
+        </div>
+        <span class="hidden md:flex w-11 h-11 rounded-xl bg-sage-100 text-sage-600 items-center justify-center flex-shrink-0">
+          <mat-icon>hourglass_top</mat-icon>
+        </span>
+      </div>
+    </section>
+
+    <!-- Sectores y tipo de vista -->
+    <section *ngIf="hasSectors" class="bg-white rounded-card shadow-soft p-[6px] flex flex-col md:flex-row md:items-center justify-between gap-[8px]">
+      <div class="flex items-center gap-[4px] overflow-x-auto" role="tablist" aria-label="Sectores">
+        <button type="button" role="tab" [attr.aria-selected]="activeGroupKey === '__all__'" (click)="selectGroup('__all__')"
+          class="flex-shrink-0 flex items-center gap-[8px] px-[14px] py-[7px] rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
+          [ngClass]="activeGroupKey === '__all__' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'">
+          Todos
+          <span class="min-w-[22px] px-[6px] rounded-full text-[11px] leading-[18px] text-center"
+            [ngClass]="activeGroupKey === '__all__' ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ filteredTables.length }}</span>
         </button>
-        <button
-          type="button"
-          class="flex items-center gap-1.5 px-[12px] py-[7px] rounded-[9px] text-sm font-medium transition-colors duration-200"
-          [ngClass]="viewMode === 'sector' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'"
-          [attr.aria-pressed]="viewMode === 'sector'"
-          (click)="setViewMode('sector')">
-          <mat-icon class="!w-5 !h-5 !text-xl">tab</mat-icon>
-          <span>Por sector</span>
+        <button *ngFor="let group of tableGroups" type="button" role="tab" [attr.aria-selected]="activeGroupKey === group.key" (click)="selectGroup(group.key)"
+          class="flex-shrink-0 flex items-center gap-[8px] px-[14px] py-[7px] rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
+          [ngClass]="activeGroupKey === group.key ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'">
+          {{ group.name }}
+          <span class="min-w-[22px] px-[6px] rounded-full text-[11px] leading-[18px] text-center"
+            [ngClass]="activeGroupKey === group.key ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ group.tables.length }}</span>
         </button>
       </div>
-    </div>
 
-    <!-- Pestañas por sector (solo en "Por sector") -->
-    <div *ngIf="viewMode === 'sector' && hasSectors && tableGroups.length > 0"
-         class="flex gap-2 overflow-x-auto pb-[4px] mb-[16px]" role="tablist">
-      <button
-        *ngFor="let group of tableGroups"
-        type="button"
-        role="tab"
-        class="flex-shrink-0 flex items-center gap-2 px-[16px] py-[8px] rounded-full border-[1px] text-sm font-semibold transition-colors duration-200"
-        [ngClass]="activeGroupKey === group.key
-          ? 'bg-cafe-green-700 border-cafe-green-700 text-white'
-          : 'bg-white border-sage-300 text-sage-700 hover:bg-sage-50'"
-        [attr.aria-selected]="activeGroupKey === group.key"
-        (click)="selectGroup(group.key)">
-        <span>{{ group.name }}</span>
-        <span class="min-w-[20px] px-1.5 rounded-full text-xs font-bold leading-[20px] text-center"
-              [ngClass]="activeGroupKey === group.key ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ group.tables.length }}</span>
-      </button>
-    </div>
+      <div class="inline-flex self-end md:self-auto flex-shrink-0 p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Tipo de vista">
+        <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
+          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
+          [ngClass]="viewMode === 'grouped' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
+          <mat-icon class="!w-5 !h-5 !text-xl">view_agenda</mat-icon><span>Por sector</span>
+        </button>
+        <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
+          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
+          [ngClass]="viewMode === 'flat' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
+          <mat-icon class="!w-5 !h-5 !text-xl">grid_view</mat-icon><span>Vista conjunta</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Búsqueda y filtro por estado -->
+    <section class="flex flex-col sm:flex-row gap-[8px] sm:gap-[12px]">
+      <div class="relative flex-1 min-w-0">
+        <div class="absolute inset-y-0 left-0 pl-[14px] flex items-center pointer-events-none">
+          <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">search</mat-icon>
+        </div>
+        <input type="text" [(ngModel)]="searchText" placeholder="Buscar por mesa, sector o mozo..." aria-label="Buscar mesas"
+          class="w-full pl-[44px] pr-[40px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 placeholder-sage-400 shadow-soft focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
+        <button *ngIf="searchText" type="button" aria-label="Limpiar búsqueda" (click)="searchText = ''"
+          class="absolute inset-y-0 right-0 pr-[12px] flex items-center text-sage-500 hover:text-sage-800">
+          <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="relative sm:w-[240px] flex-shrink-0">
+        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500 absolute left-[12px] top-1/2 -translate-y-1/2 pointer-events-none">filter_list</mat-icon>
+        <select [(ngModel)]="statusFilter" aria-label="Filtrar por estado"
+          class="w-full appearance-none pl-[40px] pr-[36px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 shadow-soft focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 cursor-pointer">
+          <option value="all">Todos los estados ({{ tables.length }})</option>
+          <option value="free">Libres ({{ freeCount }})</option>
+          <option value="busy">Ocupadas ({{ busyCount }})</option>
+          <option *ngIf="settings.value.qrActive" value="qr">Pidiendo por QR ({{ qrTablesCount }})</option>
+        </select>
+        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500 absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none">expand_more</mat-icon>
+      </div>
+    </section>
 
     <!-- Sin resultados -->
-    <div *ngIf="searchText && filteredTables.length === 0"
-         class="flex flex-col items-center justify-center py-[48px] text-sage-600">
+    <div *ngIf="tables.length > 0 && filteredTables.length === 0" class="flex flex-col items-center justify-center py-[48px] text-sage-600 text-center">
       <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300 mb-2">search_off</mat-icon>
-      <p class="text-base font-medium m-0">No hay mesas que coincidan con "{{ searchText }}"</p>
+      <p class="text-base font-medium m-0">No hay mesas que coincidan con lo que buscás</p>
+      <button type="button" (click)="searchText = ''; statusFilter = 'all'" class="mt-[12px] px-[16px] py-[8px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold text-sage-800">Quitar filtros</button>
     </div>
 
-    <!-- Grid de cards: 4 columnas desde 640px de ancho (sm) y una sola en celulares; filas del mismo alto -->
-    <!-- Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a
-         Tailwind; por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
-    <!-- Una sección por sector (con título); si no hay sectores se muestra una sola grilla sin título -->
-    <section *ngFor="let group of visibleGroups" class="mb-[28px] last:mb-0">
-      <!-- En "Por sector" el nombre ya está en la pestaña, así que el título solo se muestra en la vista conjunta -->
-      <div *ngIf="group.name && viewMode === 'joint'" class="flex items-center gap-[10px] mb-[12px]">
-        <h2 class="text-lg font-bold text-sage-800 m-0">{{ group.name }}</h2>
-        <span class="px-2 py-0.5 rounded-full bg-white border-[1px] border-sage-200 text-sage-600 text-xs font-semibold">{{ group.tables.length }}</span>
-        <div class="flex-1 h-px bg-sage-300"></div>
+    <!-- Mesas: una sección por sector (con título) o una sola grilla en la vista conjunta -->
+    <section *ngFor="let group of visibleGroups" class="flex flex-col gap-[12px]">
+      <div *ngIf="group.name" class="flex flex-wrap items-center gap-[8px] sm:gap-[10px]">
+        <mat-icon class="text-cafe-green-700">storefront</mat-icon>
+        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">{{ group.name }}</h2>
+        <span class="px-[10px] py-[2px] rounded-full bg-white border-[1px] border-sage-200 text-sage-600 text-xs font-semibold">
+          {{ group.tables.length }} {{ group.tables.length === 1 ? 'mesa' : 'mesas' }} · {{ occupiedIn(group) }} {{ occupiedIn(group) === 1 ? 'ocupada' : 'ocupadas' }}
+        </span>
+        <div class="hidden sm:block flex-1 h-px bg-sage-300"></div>
       </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 auto-rows-fr gap-[12px] sm:gap-[16px]">
-      <div *ngFor="let table of group.tables" class="group min-w-0">
-        <!-- Card principal: ambas llenas; libre = verde botella, ocupada = ladrillo. Alto mínimo fijo = el de una mesa ocupada con órdenes -->
-        <div class="relative h-full min-h-[250px] rounded-[18px] p-[14px] flex flex-col text-white transition-transform duration-200 ease-out hover:-translate-y-0.5"
-             [ngClass]="needsQrAttention(table)
-               ? 'bg-cafe-amber-700 shadow-amber'
-               : ((table.available && !table.controlledBy)
-                 ? 'bg-cafe-green-700 shadow-green'
-                 : 'bg-cafe-red-700 shadow-brick')">
-
-          <!-- Header: nombre + estado a la izquierda, logo a la derecha -->
-          <div class="flex items-start justify-between gap-2 mb-[10px]">
-            <div class="flex flex-col items-start gap-1.5 min-w-0">
-              <h3 class="text-xl font-medium tracking-tight leading-none m-0 truncate max-w-full">
-                {{ table.name }}
-              </h3>
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/15 text-white">
-                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                <ng-container *ngIf="table.available && !table.controlledBy; else ocupadaLabel">Libre</ng-container>
-                <ng-template #ocupadaLabel>Ocupada</ng-template>
-              </span>
-            </div>
-            <img
-              class="w-9 h-9 rounded-full object-cover ring-2 ring-white/30 flex-shrink-0"
-              *ngIf="(settings.settings$ | async)?.logoUrl"
-              [src]="(settings.settings$ | async)?.logoUrl || ''"
-              [alt]="(settings.settings$ | async)?.name"
-            />
-          </div>
-
-          <!-- Mozo -->
-          <div class="flex items-center gap-1.5 text-xs mb-1.5">
-            <mat-icon class="!w-4 !h-4 !text-base opacity-70">person</mat-icon>
-            <span class="font-medium truncate" *ngIf="table.waiterName?.trim()">{{ table.waiterName }}</span>
-            <span class="opacity-70" *ngIf="!table.waiterName?.trim()">Sin mozo asignado</span>
-          </div>
-
-          <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
-          <button *ngIf="qrRequestsOf(table) > 0 || qrCallsOf(table).waiter || qrCallsOf(table).bill" type="button" (click)="openQrInbox(table)"
-            class="w-full mb-1.5 flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white text-cafe-amber-800 text-xs font-bold text-left"
-            [attr.aria-label]="'Atender pedidos QR de ' + table.name">
-            <mat-icon class="!w-4 !h-4 !text-base flex-shrink-0">qr_code_2</mat-icon>
-            <span class="min-w-0 truncate">
-              <ng-container *ngIf="qrRequestsOf(table) > 0">{{ qrRequestsOf(table) }} {{ qrRequestsOf(table) === 1 ? 'pedido por confirmar' : 'pedidos por confirmar' }}</ng-container>
-              <ng-container *ngIf="qrRequestsOf(table) > 0 && (qrCallsOf(table).waiter || qrCallsOf(table).bill)"> · </ng-container>
-              <ng-container *ngIf="qrCallsOf(table).bill">Pide la cuenta</ng-container>
-              <ng-container *ngIf="qrCallsOf(table).bill && qrCallsOf(table).waiter"> · </ng-container>
-              <ng-container *ngIf="qrCallsOf(table).waiter">Llama al mozo</ng-container>
-            </span>
-          </button>
-
-          <!-- Mesa controlada -->
-          <div *ngIf="table.controlledBy" class="mb-1.5">
-            <div class="px-2 py-1.5 rounded-lg bg-black/20 text-white">
-              <p class="text-[11px] font-medium opacity-70 mb-0.5">Administrada por</p>
-              <p class="text-xs font-medium m-0">{{ getTableNameById(table.controlledBy) }}</p>
-            </div>
-          </div>
-
-          <!-- Mesas vinculadas -->
-          <div *ngIf="table.linkedTables && table.linkedTables.length > 0" class="mb-1.5">
-            <div class="px-2 py-1.5 rounded-lg bg-black/20 text-white">
-              <p class="text-[11px] font-medium opacity-70 mb-1">Vinculada con</p>
-              <div class="flex flex-wrap gap-1">
-                <span *ngFor="let linkedTableId of table.linkedTables"
-                      class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium bg-white/20 text-white">
-                  {{ getTableNameById(linkedTableId) }}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-[12px] sm:gap-[16px]">
+        <article *ngFor="let table of group.tables" class="min-w-0 rounded-card shadow-soft p-[16px] flex flex-col justify-between border-[1px] transition-shadow hover:shadow-soft-lg"
+          [ngClass]="styleOf(table).card">
+          <div>
+            <!-- Nombre, estado y logo -->
+            <div class="flex items-start justify-between gap-[8px]">
+              <div class="min-w-0">
+                <h3 class="text-lg font-bold tracking-tight leading-tight m-0 truncate" [ngClass]="styleOf(table).title">{{ table.name }}</h3>
+                <span class="inline-flex items-center gap-[6px] mt-[6px] px-[10px] py-[2px] rounded-full text-xs font-bold" [ngClass]="styleOf(table).pill">
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="styleOf(table).dot"></span>
+                  {{ isFree(table) ? 'Libre' : 'Ocupada' }}<ng-container *ngIf="toneOf(table) === 'amber'"> · Pendiente</ng-container>
                 </span>
+              </div>
+              <img *ngIf="(settings.settings$ | async)?.logoUrl" [src]="(settings.settings$ | async)?.logoUrl || ''" [alt]="(settings.settings$ | async)?.name"
+                class="w-9 h-9 rounded-full object-cover ring-1 flex-shrink-0" [ngClass]="styleOf(table).ring" />
+            </div>
+
+            <!-- Mozo -->
+            <div class="flex items-center gap-[6px] text-sm mt-[12px]" [ngClass]="styleOf(table).meta">
+              <mat-icon class="!w-[18px] !h-[18px] !text-[18px]" [ngClass]="styleOf(table).metaIcon">person</mat-icon>
+              <span *ngIf="table.waiterName?.trim() && table.waiterId" class="truncate">Mozo: <strong class="font-bold" [ngClass]="styleOf(table).strong">{{ table.waiterName }}</strong></span>
+              <span *ngIf="!(table.waiterName?.trim() && table.waiterId)" class="italic opacity-70">Sin mozo asignado</span>
+            </div>
+
+            <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
+            <button *ngIf="needsQrAttention(table)" type="button" (click)="openQrInbox(table)" [attr.aria-label]="'Atender pedidos QR de ' + table.name"
+              class="w-full mt-[12px] flex items-center gap-[8px] px-[10px] py-[8px] rounded-xl bg-white border-[1px] border-cafe-amber-200 text-cafe-amber-800 text-xs font-bold text-left hover:bg-cafe-amber-100 transition-colors">
+              <mat-icon class="!w-[18px] !h-[18px] !text-[18px] flex-shrink-0">qr_code_scanner</mat-icon>
+              <span class="min-w-0 flex-1">
+                <ng-container *ngIf="qrRequestsOf(table) > 0">{{ qrRequestsOf(table) }} {{ qrRequestsOf(table) === 1 ? 'pedido por confirmar' : 'pedidos por confirmar' }}</ng-container>
+                <ng-container *ngIf="qrRequestsOf(table) > 0 && (qrCallsOf(table).waiter || qrCallsOf(table).bill)"> · </ng-container>
+                <ng-container *ngIf="qrCallsOf(table).bill">Pide la cuenta</ng-container>
+                <ng-container *ngIf="qrCallsOf(table).bill && qrCallsOf(table).waiter"> · </ng-container>
+                <ng-container *ngIf="qrCallsOf(table).waiter">Llama al mozo</ng-container>
+              </span>
+              <span class="w-2 h-2 rounded-full bg-cafe-amber-700 animate-pulse flex-shrink-0"></span>
+            </button>
+
+            <!-- Mesa controlada -->
+            <div *ngIf="table.controlledBy" class="mt-[12px] px-[10px] py-[8px] rounded-xl" [ngClass]="styleOf(table).box">
+              <p class="text-[11px] font-medium m-0" [ngClass]="styleOf(table).boxLabel">Administrada por</p>
+              <p class="text-sm font-bold m-0">{{ getTableNameById(table.controlledBy) }}</p>
+            </div>
+
+            <!-- Mesas vinculadas -->
+            <div *ngIf="table.linkedTables && table.linkedTables.length > 0" class="mt-[12px] px-[10px] py-[8px] rounded-xl" [ngClass]="styleOf(table).box">
+              <p class="text-[11px] font-medium m-0 mb-[4px]" [ngClass]="styleOf(table).boxLabel">Vinculada con</p>
+              <div class="flex flex-wrap gap-[4px]">
+                <span *ngFor="let linkedTableId of table.linkedTables" class="px-[8px] py-[1px] rounded-md bg-white text-xs font-bold">{{ getTableNameById(linkedTableId) }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Spacer para empujar acciones al fondo -->
-          <div class="flex-1 min-h-[8px]"></div>
+          <!-- Acciones -->
+          <div class="pt-[16px] flex flex-col gap-[8px]">
+            <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="orderButtonClicked(table)" [disabled]="table.controlledBy"
+              class="w-full flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              [ngClass]="styleOf(table).primary">
+              <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
+              <span>Ordenar</span>
+            </button>
 
-          <!-- Botón Ordenar (cocina solo consulta) -->
-          <button
-            *ngIf="(role$ | async) !== 'kitchen'"
-            class="w-full flex items-center justify-center gap-1.5 px-2 py-[9px] text-sm font-bold rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            [ngClass]="needsQrAttention(table)
-              ? 'bg-white hover:bg-sage-50 text-cafe-amber-800'
-              : (table.available && !table.controlledBy)
-              ? 'bg-white hover:bg-sage-50 text-cafe-green-700'
-              : ((table.orders && table.orders.length > 0) ? 'bg-white hover:bg-sage-50 text-cafe-red-700' : 'bg-white/15 hover:bg-white/25 text-white')"
-            (click)="orderButtonClicked(table)"
-            [disabled]="table.controlledBy">
-            <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
-            <span>Ordenar</span>
-          </button>
-
-          <!-- Botones de gestión (cuando hay órdenes): cuadrados, icono arriba y texto abajo -->
-          <div *ngIf="table.orders && table.orders.length > 0" class="flex gap-1.5 mt-[8px]">
-            <button
-              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-              (click)="openTableInfoDialog(table)"
-              [disabled]="table.controlledBy">
-              <span class="flex items-center gap-1">
-                <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">receipt_long</mat-icon>
-                <span class="min-w-[18px] px-1 rounded-full text-[11px] font-bold leading-[18px] text-center"
-                      [ngClass]="(table.available && !table.controlledBy) ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'">{{ table.orders.length }}</span>
-                <span *ngIf="readyCount(table) > 0" title="Listos para servir"
-                      class="inline-flex items-center gap-0.5 min-w-[18px] px-1 rounded-full text-[11px] font-bold leading-[18px] bg-white text-cafe-green-700">
+            <div *ngIf="table.orders && table.orders.length > 0" class="flex gap-[6px]">
+              <button type="button" (click)="openTableInfoDialog(table)" [disabled]="table.controlledBy"
+                class="flex-[2] min-w-0 flex items-center justify-center gap-[4px] py-[7px] px-[6px] rounded-lg transition-colors text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                [ngClass]="styleOf(table).secondary">
+                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base flex-shrink-0">receipt_long</mat-icon>
+                <span class="whitespace-nowrap">Órdenes</span>
+                <span class="min-w-[18px] px-[4px] rounded-full bg-white text-sage-800 text-[11px] leading-[18px] text-center">{{ table.orders.length }}</span>
+                <span *ngIf="readyCount(table) > 0" title="Listos para servir" class="inline-flex items-center min-w-[18px] px-[4px] rounded-full bg-cafe-green-700 text-white text-[11px] leading-[18px]">
                   <mat-icon class="!w-3 !h-3 !text-[12px] !leading-3">check</mat-icon>{{ readyCount(table) }}
                 </span>
-              </span>
-              <span>Órdenes</span>
-            </button>
+              </button>
 
-            <button
-              *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'"
-              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-              (click)="openTotalDialog(table)"
-              [disabled]="table.controlledBy">
-              <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">payments</mat-icon>
-              <span>Total</span>
-            </button>
+              <button *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" type="button" (click)="openTotalDialog(table)" [disabled]="table.controlledBy"
+                class="flex-1 min-w-0 flex items-center justify-center gap-[4px] py-[7px] px-[6px] rounded-lg transition-colors text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                [ngClass]="styleOf(table).secondary">
+                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base flex-shrink-0">payments</mat-icon>
+                <span class="truncate">Total</span>
+              </button>
 
-            <!-- Botón Imprimir Comanda -->
-            <button
-              title="Imprimir Comanda"
-              class="flex-1 min-w-0 flex flex-col items-center justify-center gap-1 px-1 py-[8px] text-xs font-medium leading-tight text-center rounded-xl border-[1px] border-white/30 hover:bg-white/10 text-white transition-colors duration-200"
-              (click)="printTicket(table.id)">
-              <mat-icon fontSet="material-icons-outlined" class="!w-5 !h-5 !text-xl">print</mat-icon>
-              <span>Imprimir Comanda</span>
-            </button>
+              <button type="button" title="Imprimir comanda" aria-label="Imprimir comanda" (click)="printTicket(table.id)"
+                class="flex-shrink-0 flex items-center justify-center gap-[4px] py-[7px] px-[12px] rounded-lg transition-colors text-xs font-bold"
+                [ngClass]="styleOf(table).secondary">
+                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base">print</mat-icon>
+              </button>
+            </div>
           </div>
-        </div>
+        </article>
       </div>
-    </div>
     </section>
+  </div>
+
+  <!-- Barra flotante: pedidos y avisos de clientes esperando -->
+  <div *ngIf="qrPendingTotal > 0" class="fixed bottom-[12px] left-[12px] right-[12px] sm:left-auto sm:right-6 sm:bottom-6 z-30">
+    <div class="flex items-center justify-between gap-[12px] bg-white/95 backdrop-blur rounded-2xl shadow-dialog border-[1px] border-cafe-amber-200 px-[14px] py-[10px]">
+      <span class="flex items-center gap-[8px] text-sm font-bold text-sage-900">
+        <span class="w-2.5 h-2.5 rounded-full bg-cafe-amber-700 animate-pulse"></span>
+        {{ qrPendingTotal }} {{ qrPendingTotal === 1 ? 'cliente espera' : 'clientes esperan' }} atención
+      </span>
+      <button type="button" (click)="openAllQr()" class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-xl bg-cafe-amber-700 text-white text-sm font-bold hover:bg-cafe-amber-800 transition-colors">
+        <mat-icon class="!w-5 !h-5 !text-xl">notifications</mat-icon>
+        <span>Atender</span>
+      </button>
+    </div>
   </div>
 </div>
