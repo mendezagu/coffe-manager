@@ -28,6 +28,7 @@ export class TotalDialogComponent implements OnInit {
   waiterName: string = ''; // Nueva propiedad para almacenar el nombre del mozo
   isTicketPrinted: boolean = false;
   isAdmin = false;
+  canDiscount = false; // administrador, o cajero si el negocio lo habilitó
   modifiersText = modifiersText;
   // Cómo se paga (lo arma el panel de pago): propina, pagos y vuelto
   payment: PaymentValue | null = null;
@@ -42,8 +43,10 @@ export class TotalDialogComponent implements OnInit {
     private userService: UserService,
     private cash: CashService
   ) {
-    // Solo el administrador aplica descuentos (el servidor también lo exige)
-    this.isAdmin = this.userService.currentRole() === 'admin';
+    // El administrador aplica descuentos; el cajero solo si el negocio lo habilitó (el servidor también lo exige)
+    const role = this.userService.currentRole();
+    this.isAdmin = role === 'admin';
+    this.canDiscount = this.isAdmin || (role === 'cashier' && !!this.settings.value.cashierDiscounts);
     // Se trabaja sobre copias: elegir cuánto cobrar no debe tocar la mesa que se ve de fondo
     this.orders = (data.orders || []).map((o: any) => ({ ...o, maxQuantity: o.quantity }));
     this.table = data.table || [];

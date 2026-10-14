@@ -102,7 +102,7 @@
           <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
           <div class="flex items-center justify-between gap-2 pl-1">
             <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</strong></span>
-            <div *ngIf="!order.isPromo && isAdmin" class="flex items-center gap-1.5">
+            <div *ngIf="!order.isPromo && canDiscount" class="flex items-center gap-1.5">
               <span class="text-sage-500 text-xs">% desc.</span>
               <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-sage-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
             </div>
@@ -126,8 +126,8 @@
       </div>
     </div>
 
-    <!-- Panel de descuento (solo administrador) -->
-    <div class="mb-3" *ngIf="isAdmin">
+    <!-- Panel de descuento (administrador, o cajero si el negocio lo habilitó) -->
+    <div class="mb-3" *ngIf="canDiscount">
       <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
         <mat-icon class="!w-4 !h-4 !text-base text-sage-600">local_offer</mat-icon>
         Aplicar Descuento

@@ -117,49 +117,24 @@
             <span class="absolute -top-0.5 -right-0.5 min-w-[18px] px-1 rounded-full bg-yellow-600 text-white text-[11px] font-bold leading-[18px] text-center">{{ stock.outCount + stock.lowCount }}</span>
           </a>
 
-          <!-- Estado de la caja (administrador y cajero) -->
+          <!-- Estado de la caja (administrador y cajero): ícono con un punto verde (abierta) o rojo (cerrada) -->
           <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
-            class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold no-underline"
-            [ngClass]="c.open ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'"
-            [attr.aria-label]="c.open ? 'Caja abierta' : 'Caja cerrada'">
-            <span class="w-2 h-2 rounded-full" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
-            <span class="hidden sm:inline">{{ c.open ? 'Caja abierta' : 'Caja cerrada' }}</span>
+            class="relative w-10 h-10 rounded-full flex items-center justify-center no-underline transition-colors"
+            [ngClass]="c.open ? 'bg-cafe-green-50 text-cafe-green-700 hover:bg-cafe-green-100' : 'bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100'"
+            [attr.aria-label]="c.open ? 'Caja abierta' : 'Caja cerrada'" [title]="c.open ? 'Caja abierta' : 'Caja cerrada'">
+            <mat-icon class="!w-6 !h-6 !text-2xl">point_of_sale</mat-icon>
+            <span class="absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-white" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
           </a>
 
-          <!-- Turno y fecha: informativo, sin borde -->
-          <div class="hidden md:flex flex-col items-end leading-tight mx-1">
-            <span class="text-sage-800 text-sm font-medium">{{ shift }}</span>
-            <span class="text-sage-500 text-xs">{{ currentDate }}</span>
-          </div>
-
-          <!-- Usuario -->
-          <div class="relative" *ngIf="user$ | async as user">
-            <button type="button" (click)="userMenuOpen = !userMenuOpen" [attr.aria-expanded]="userMenuOpen" aria-haspopup="menu"
-              class="d-flex align-items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-sage-100 transition-colors">
-              <span class="w-8 h-8 rounded-full bg-cafe-green-700 text-white text-xs font-bold flex items-center justify-center">{{ initials(user.name) }}</span>
-              <span class="hidden sm:inline text-sm font-medium text-sage-800 max-w-[120px] truncate">{{ user.name }}</span>
-              <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">expand_more</mat-icon>
-            </button>
-
-            <ng-container *ngIf="userMenuOpen">
-              <div class="fixed inset-0 z-20" (click)="userMenuOpen = false"></div>
-              <div role="menu" class="absolute right-0 top-full mt-2 z-30 w-60 bg-white rounded-2xl shadow-dialog border-[1px] border-sage-200 p-2">
-                <div class="px-3 py-2">
-                  <p class="text-sm font-bold text-sage-900 m-0 truncate">{{ user.name }}</p>
-                  <p class="text-xs text-sage-500 m-0 truncate">{{ user.email }}</p>
-                  <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
-                </div>
-                <div class="h-px bg-sage-200 my-1"></div>
-                <a *ngIf="user.role === 'admin'" routerLink="/settings" (click)="userMenuOpen = false" role="menuitem"
-                  class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-sage-800 no-underline hover:bg-sage-100">
-                  <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">business</mat-icon> Mi negocio
-                </a>
-                <button type="button" (click)="userMenuOpen = false; logout()" role="menuitem"
-                  class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-cafe-red-700 hover:bg-cafe-red-50 text-left">
-                  <mat-icon class="!w-5 !h-5 !text-xl">logout</mat-icon> Cerrar sesión
-                </button>
-              </div>
-            </ng-container>
+          <!-- Turno y fecha -->
+          <div class="hidden md:flex items-center gap-2.5 pl-3 ml-1 border-l-[1px] border-sage-200">
+            <span class="w-9 h-9 rounded-xl bg-sage-100 text-sage-600 flex items-center justify-center">
+              <mat-icon class="!w-5 !h-5 !text-xl">{{ shiftIcon }}</mat-icon>
+            </span>
+            <div class="flex flex-col leading-tight">
+              <span class="text-sage-800 text-sm font-bold">{{ shift }}</span>
+              <span class="text-sage-500 text-xs">{{ currentDate }}</span>
+            </div>
           </div>
         </div>
 

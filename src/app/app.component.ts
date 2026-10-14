@@ -70,6 +70,11 @@ export class AppComponent {
     this.qr.watch(staff && !!this.settings.value.qrActive);
   }
 
+  // Ícono según el turno (mañana, tarde o noche)
+  get shiftIcon(): string {
+    return this.shift.includes('Mañana') ? 'light_mode' : this.shift.includes('Tarde') ? 'wb_twilight' : 'dark_mode';
+  }
+
   userMenuOpen = false;
 
   // "Agustín Méndez" -> "AM"

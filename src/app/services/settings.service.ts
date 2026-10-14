@@ -29,6 +29,7 @@ export interface TenantSettings {
   splitKitchenBar: boolean; // lo que el negocio eligió
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)
   // propinas y caja
+  cashierDiscounts: boolean; // el cajero puede aplicar descuentos al cobrar
   tipEnabled: boolean;
   tipSuggestedPct: number;
   requireOpenRegister: boolean;
@@ -69,6 +70,7 @@ const DEFAULTS: TenantSettings = {
   features: [],
   splitKitchenBar: false,
   splitActive: false,
+  cashierDiscounts: false,
   tipEnabled: false,
   tipSuggestedPct: 10,
   requireOpenRegister: true,

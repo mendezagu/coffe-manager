@@ -148,6 +148,14 @@
           </label>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="cashierDiscounts" [(ngModel)]="form.cashierDiscounts" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Permitir descuentos al cajero</span>
+              <span class="block text-xs text-sage-500">Si lo activás, el cajero ve las opciones de descuento al cobrar (por plato y general). El administrador siempre puede. Los platos en promo nunca llevan descuento.</span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
             <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Ofrecer propina al cobrar</span>
