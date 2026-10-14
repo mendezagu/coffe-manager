@@ -15,51 +15,58 @@
       </div>
     </div>
 
-    <button mat-button routerLink="/home" *ngIf="(role$ | async) !== 'kitchen' && (role$ | async) !== 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="storefront"></mat-icon>
-      Inicio
-    </button>
+    <ng-container *ngIf="role$ | async as role">
 
-    <button mat-button routerLink="/kitchen" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'kitchen' || (role$ | async) === 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="restaurant"></mat-icon>
-      {{ (role$ | async) === 'bar' ? 'Barra' : 'Cocina' }}
-    </button>
+      <!-- Operación: lo que se usa todo el día -->
+      <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Operación</p>
+      <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="storefront"></mat-icon>
+        Inicio
+        <span *ngIf="(qr.inbox$ | async) as q" [hidden]="(q.requests.length + q.calls.length) === 0"
+          class="ml-auto min-w-[20px] px-1.5 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-5 text-center"
+          [attr.aria-label]="(q.requests.length + q.calls.length) + ' pedidos QR esperando'">{{ q.requests.length + q.calls.length }}</span>
+      </button>
+      <button mat-button routerLink="/kitchen" *ngIf="role === 'admin' || role === 'kitchen' || role === 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="restaurant"></mat-icon>
+        {{ role === 'bar' ? 'Barra' : 'Cocina' }}
+      </button>
+      <button mat-button routerLink="/cash" *ngIf="role === 'admin' || role === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="point_of_sale"></mat-icon>
+        Caja
+      </button>
 
-    <!-- ✅ Botón Administrar solo para Admin -->
-    <button mat-button routerLink="/admin" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="settings"></mat-icon>
-      Administrar
-    </button>
+      <!-- Negocio: los números -->
+      <ng-container *ngIf="role === 'admin'">
+      <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Negocio</p>
+      <button mat-button routerLink="/balance" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="paid"></mat-icon>
+        Balance
+      </button>
+      <button mat-button routerLink="/reports" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="bar_chart"></mat-icon>
+        Reportes
+      </button>
+      <button mat-button routerLink="/inventory" *ngIf="(settings.settings$ | async)?.inventoryActive" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="inventory_2"></mat-icon>
+        Inventario
+      </button>
 
-    <button mat-button routerLink="/cash" *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="point_of_sale"></mat-icon>
-      Caja
-    </button>
-
-    <button mat-button routerLink="/balance" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="paid"></mat-icon>
-      Balance
-    </button>
-
-    <button mat-button routerLink="/inventory" *ngIf="(role$ | async) === 'admin' && (settings.settings$ | async)?.inventoryActive" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="inventory_2"></mat-icon>
-      Inventario
-    </button>
-
-    <button mat-button routerLink="/reports" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="bar_chart"></mat-icon>
-      Reportes
-    </button>
-
-    <button mat-button routerLink="/settings" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="business"></mat-icon>
-      Mi negocio
-    </button>
-
-    <button mat-button routerLink="/logs" *ngIf="(role$ | async) === 'admin'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-      <mat-icon fontIcon="visibility_lock"></mat-icon>
-      Logs
-    </button>
+      <!-- Configuración: casi nunca -->
+      <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Configuración</p>
+      <button mat-button routerLink="/admin" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="settings"></mat-icon>
+        Administrar
+      </button>
+      <button mat-button routerLink="/settings" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="business"></mat-icon>
+        Mi negocio
+      </button>
+      <button mat-button routerLink="/logs" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="visibility_lock"></mat-icon>
+        Logs
+      </button>
+      </ng-container>
+    </ng-container>
 
     <div class="flex-1"></div>
 
@@ -71,60 +78,89 @@
 
   <mat-drawer-content>
 
-    <!-- ✅ Toolbar solo aparece si está autenticado -->
+    <!-- Encabezado: solo con sesión iniciada -->
     <div *ngIf="isLoggedIn" class="sticky top-0 z-10">
       <mat-toolbar class="custom-toolbar d-flex justify-content-between align-items-center">
 
-        <!-- Contenido a la izquierda -->
-        <div class="cont-1 d-flex align-items-center gap-2">
-          <!-- Botón de menú (solo visible si está autenticado) -->
-          <button mat-icon-button (click)="sidenav.toggle()">
+        <!-- Izquierda: menú y marca -->
+        <div class="cont-1 d-flex align-items-center gap-2 min-w-0">
+          <button mat-icon-button (click)="sidenav.toggle()" aria-label="Abrir o cerrar el menú">
             <mat-icon class="!text-sage-600">menu</mat-icon>
           </button>
-
           <img
-            class="rounded-full"
+            class="rounded-full flex-shrink-0"
             style="width: 34px; height: 34px; object-fit: cover;"
             *ngIf="(settings.settings$ | async)?.logoUrl"
             [src]="(settings.settings$ | async)?.logoUrl"
             [alt]="(settings.settings$ | async)?.name"
           />
-          <span class="text-sage-800 font-bold text-lg">{{ (settings.settings$ | async)?.name }}</span>
+          <span class="text-sage-800 font-bold text-lg truncate">{{ (settings.settings$ | async)?.name }}</span>
         </div>
 
-        <!-- Contenido a la derecha -->
+        <!-- Derecha: alertas, caja, turno y usuario -->
         <div class="d-flex align-items-center gap-2">
-        <!-- Usuario y rol -->
-        <!-- Insumos bajos o agotados -->
-        <a *ngIf="stock && (stock.lowCount + stock.outCount) > 0" routerLink="/inventory"
-          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline bg-yellow-100 border-yellow-300 text-yellow-800"
-          [attr.aria-label]="'Inventario: ' + stock.outCount + ' agotados y ' + stock.lowCount + ' con stock bajo'">
-          <mat-icon class="!w-4 !h-4 !text-base">inventory_2</mat-icon>
-          <span>{{ stock.outCount + stock.lowCount }}<span class="hidden sm:inline"> {{ (stock.outCount + stock.lowCount) === 1 ? 'insumo' : 'insumos' }} por reponer</span></span>
-        </a>
-        <!-- Pedidos y avisos que llegan por QR -->
-        <button *ngIf="(qr.inbox$ | async) as q" [hidden]="!q.active" type="button" (click)="openQrInbox()"
-          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold"
-          [ngClass]="(q.requests.length + q.calls.length) > 0 ? 'bg-cafe-red-700 border-cafe-red-700 text-white animate-pulse' : 'bg-white border-sage-300 text-sage-600'"
-          [attr.aria-label]="'Pedidos por QR: ' + q.requests.length + ' pedidos y ' + q.calls.length + ' avisos esperando'">
-          <mat-icon class="!w-4 !h-4 !text-base">qr_code_2</mat-icon>
-          <span>{{ q.requests.length + q.calls.length }}<span class="hidden sm:inline"> {{ (q.requests.length + q.calls.length) === 1 ? 'pedido QR' : 'pedidos QR' }}</span></span>
-        </button>
-        <!-- Estado de la caja (administrador y cajero) -->
-        <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
-          class="d-flex align-items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold no-underline"
-          [ngClass]="c.open ? 'bg-cafe-green-50 border-cafe-green-200 text-cafe-green-700' : 'bg-cafe-red-50 border-cafe-red-200 text-cafe-red-700'"
-          [attr.aria-label]="c.open ? 'Caja abierta' : 'Caja cerrada'">
-          <span class="w-2 h-2 rounded-full" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
-          <span class="hidden sm:inline">{{ c.open ? 'Caja abierta' : 'Caja cerrada' }}</span>
-        </a>
-        <!-- En pantallas chicas el rol va en el sidebar -->
-        <span *ngIf="user$ | async as user" class="hidden sm:inline-block px-3 py-1 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
 
-        <div class="cont-2 d-flex align-items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-sage-300">
-          <span class="w-2 h-2 rounded-full bg-cafe-green-700"></span>
-          <span class="text-sage-800 font-medium text-sm">{{ shift }}</span>
-        </div>
+          <!-- Alertas: solo aparecen si hay algo que atender -->
+          <button *ngIf="(qr.inbox$ | async) as q" [hidden]="!q.active || (q.requests.length + q.calls.length) === 0" type="button" (click)="openQrInbox()"
+            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100 transition-colors"
+            [attr.aria-label]="'Pedidos por QR: ' + q.requests.length + ' pedidos y ' + q.calls.length + ' avisos esperando'"
+            title="Pedidos y avisos de los clientes">
+            <mat-icon class="!w-6 !h-6 !text-2xl animate-pulse">notifications_active</mat-icon>
+            <span class="absolute -top-0.5 -right-0.5 min-w-[18px] px-1 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-[18px] text-center">{{ q.requests.length + q.calls.length }}</span>
+          </button>
+
+          <a *ngIf="stock && (stock.lowCount + stock.outCount) > 0" routerLink="/inventory"
+            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-yellow-100 text-yellow-800 no-underline"
+            [attr.aria-label]="'Inventario: ' + stock.outCount + ' agotados y ' + stock.lowCount + ' con stock bajo'"
+            [title]="(stock.outCount + stock.lowCount) + ' insumos por reponer'">
+            <mat-icon class="!w-6 !h-6 !text-2xl">inventory_2</mat-icon>
+            <span class="absolute -top-0.5 -right-0.5 min-w-[18px] px-1 rounded-full bg-yellow-600 text-white text-[11px] font-bold leading-[18px] text-center">{{ stock.outCount + stock.lowCount }}</span>
+          </a>
+
+          <!-- Estado de la caja (administrador y cajero) -->
+          <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
+            class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold no-underline"
+            [ngClass]="c.open ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-cafe-red-50 text-cafe-red-700'"
+            [attr.aria-label]="c.open ? 'Caja abierta' : 'Caja cerrada'">
+            <span class="w-2 h-2 rounded-full" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
+            <span class="hidden sm:inline">{{ c.open ? 'Caja abierta' : 'Caja cerrada' }}</span>
+          </a>
+
+          <!-- Turno y fecha: informativo, sin borde -->
+          <div class="hidden md:flex flex-col items-end leading-tight mx-1">
+            <span class="text-sage-800 text-sm font-medium">{{ shift }}</span>
+            <span class="text-sage-500 text-xs">{{ currentDate }}</span>
+          </div>
+
+          <!-- Usuario -->
+          <div class="relative" *ngIf="user$ | async as user">
+            <button type="button" (click)="userMenuOpen = !userMenuOpen" [attr.aria-expanded]="userMenuOpen" aria-haspopup="menu"
+              class="d-flex align-items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-sage-100 transition-colors">
+              <span class="w-8 h-8 rounded-full bg-cafe-green-700 text-white text-xs font-bold flex items-center justify-center">{{ initials(user.name) }}</span>
+              <span class="hidden sm:inline text-sm font-medium text-sage-800 max-w-[120px] truncate">{{ user.name }}</span>
+              <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">expand_more</mat-icon>
+            </button>
+
+            <ng-container *ngIf="userMenuOpen">
+              <div class="fixed inset-0 z-20" (click)="userMenuOpen = false"></div>
+              <div role="menu" class="absolute right-0 top-full mt-2 z-30 w-60 bg-white rounded-2xl shadow-dialog border-[1px] border-sage-200 p-2">
+                <div class="px-3 py-2">
+                  <p class="text-sm font-bold text-sage-900 m-0 truncate">{{ user.name }}</p>
+                  <p class="text-xs text-sage-500 m-0 truncate">{{ user.email }}</p>
+                  <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
+                </div>
+                <div class="h-px bg-sage-200 my-1"></div>
+                <a *ngIf="user.role === 'admin'" routerLink="/settings" (click)="userMenuOpen = false" role="menuitem"
+                  class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-sage-800 no-underline hover:bg-sage-100">
+                  <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">business</mat-icon> Mi negocio
+                </a>
+                <button type="button" (click)="userMenuOpen = false; logout()" role="menuitem"
+                  class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-cafe-red-700 hover:bg-cafe-red-50 text-left">
+                  <mat-icon class="!w-5 !h-5 !text-xl">logout</mat-icon> Cerrar sesión
+                </button>
+              </div>
+            </ng-container>
+          </div>
         </div>
 
       </mat-toolbar>

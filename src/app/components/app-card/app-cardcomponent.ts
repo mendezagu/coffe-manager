@@ -88,6 +88,12 @@ export class CardComponent implements OnInit, OnDestroy {
     return this.qrInbox.requests.filter((r) => r.tableId === table.id).length;
   }
 
+  // Mesa que espera atención del cliente: pedido por confirmar o aviso (mozo / cuenta)
+  needsQrAttention(table: any): boolean {
+    const calls = this.qrCallsOf(table);
+    return this.qrRequestsOf(table) > 0 || calls.waiter || calls.bill;
+  }
+
   qrCallsOf(table: any): { waiter: boolean; bill: boolean } {
     const calls = this.qrInbox.calls.filter((c) => c.tableId === table.id);
     return { waiter: calls.some((c) => c.type === 'WAITER'), bill: calls.some((c) => c.type === 'BILL') };

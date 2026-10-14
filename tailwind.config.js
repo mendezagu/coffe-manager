@@ -34,6 +34,19 @@ module.exports = {
           900: '#0e3624',
         },
         // Ladrillo: mesa ocupada y acciones destructivas.
+        // Ámbar: mesa con un pedido por QR esperando confirmación. Misma profundidad que el verde y el ladrillo.
+        'cafe-amber': {
+          50: '#fbf1de',
+          100: '#f2dcb0',
+          200: '#e6c17f',
+          300: '#d6a252',
+          400: '#c0842c',
+          500: '#a86d1b',
+          600: '#96600f',
+          700: '#865410',
+          800: '#6a410c',
+          900: '#523309',
+        },
         'cafe-red': {
           50: '#fbedea',
           100: '#ebcfc2',
@@ -73,6 +86,7 @@ module.exports = {
         'dialog': '0 30px 60px -20px rgba(30, 43, 36, 0.45)',
         'brick': '0 18px 30px -18px rgba(138, 42, 28, 0.65)',
         'green': '0 18px 30px -20px rgba(29, 91, 62, 0.8)',
+        'amber': '0 18px 30px -18px rgba(134, 84, 16, 0.7)',
       },
       borderRadius: {
         'card': '20px',

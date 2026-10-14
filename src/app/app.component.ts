@@ -70,6 +70,14 @@ export class AppComponent {
     this.qr.watch(staff && !!this.settings.value.qrActive);
   }
 
+  userMenuOpen = false;
+
+  // "Agustín Méndez" -> "AM"
+  initials(name: string): string {
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '?';
+  }
+
   openQrInbox() {
     this.dialog.open(QrInboxDialogComponent, { data: null, width: '600px', maxWidth: '96vw', autoFocus: false });
   }
