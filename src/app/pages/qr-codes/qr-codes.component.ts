@@ -20,7 +20,7 @@ export class QrCodesComponent implements OnInit {
   loading = true;
   view: QrTablesView | null = null;
   cards: QrCard[] = [];
-  baseUrl = this.readBase() || window.location.origin;
+  baseUrl = this.readBase() || this.appBase();
   busy = false;
 
   constructor(private qr: QrService, public settings: SettingsService, private snackBar: MatSnackBar) {}
@@ -144,7 +144,14 @@ export class QrCodesComponent implements OnInit {
   }
 
   private cleanBase(): string {
-    return (this.baseUrl || window.location.origin).trim().replace(/\/+$/, '');
+    return (this.baseUrl || this.appBase()).trim().replace(/\/+$/, '');
+  }
+
+  // Dirección de la app con la carpeta en la que está publicada (ej: https://usuario.github.io/coffe-manager)
+  // y no solo el dominio: si no, los QR apuntarían a una página que no existe.
+  private appBase(): string {
+    const u = new URL(document.baseURI);
+    return (u.origin + u.pathname).replace(/\/+$/, '');
   }
 
   private readBase(): string {
