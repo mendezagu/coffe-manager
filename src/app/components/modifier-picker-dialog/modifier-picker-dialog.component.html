@@ -1,11 +1,43 @@
-<div class="flex flex-col max-h-[80vh] bg-white rounded-dialog overflow-hidden shadow-dialog">
+<div class="flex flex-col max-h-[85vh] bg-white rounded-dialog overflow-hidden shadow-dialog">
 
   <div class="flex-shrink-0 px-5 pt-5 pb-3">
     <h2 class="text-lg font-bold text-sage-900 m-0">{{ data.item.name }}</h2>
-    <p class="text-sage-500 text-xs mt-0.5 mb-0">Elegí las opciones</p>
+    <p class="text-sage-500 text-xs mt-0.5 mb-0">{{ units > 1 ? 'Elegí las opciones de cada unidad' : 'Elegí las opciones' }}</p>
+  </div>
+
+  <!-- Varias unidades: cada una lleva sus propias opciones (ej: un café jarrito y otro doble) -->
+  <div *ngIf="units > 1" class="flex-shrink-0 px-5 pb-3">
+    <ul class="list-none p-0 m-0 flex flex-col gap-1.5" role="tablist" aria-label="Unidades del pedido">
+      <li *ngFor="let i of unitList">
+        <button type="button" role="tab" [attr.aria-selected]="current === i" (click)="select(i)"
+          class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-left transition-colors"
+          [ngClass]="current === i ? 'border-cafe-green-700 bg-cafe-green-50' : 'border-sage-200 bg-white hover:bg-sage-50'">
+          <span class="flex items-center gap-2 min-w-0">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              [ngClass]="missingIn(i).length ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-green-700 text-white'">
+              <mat-icon *ngIf="!missingIn(i).length" class="!w-4 !h-4 !text-base !leading-4">check</mat-icon>
+              <ng-container *ngIf="missingIn(i).length">{{ i + 1 }}</ng-container>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-xs font-bold text-sage-800">{{ data.item.name }} {{ i + 1 }}</span>
+              <span class="block text-xs truncate" [ngClass]="missingIn(i).length ? 'text-cafe-red-700' : 'text-sage-600'">{{ missingIn(i).length ? 'Falta elegir ' + missingIn(i)[0].name : summary(i) }}</span>
+            </span>
+          </span>
+          <span class="text-xs font-bold text-cafe-green-700 flex-shrink-0">{{ unitPriceOf(i) | money }}</span>
+        </button>
+      </li>
+    </ul>
   </div>
 
   <div class="flex-1 overflow-y-auto px-5 pb-3 space-y-4">
+    <div *ngIf="units > 1" class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-sage-100">
+      <p class="text-sm font-bold text-sage-800 m-0 pt-2">Unidad {{ current + 1 }} de {{ units }}</p>
+      <div class="flex gap-2 pt-2">
+        <button *ngIf="current > 0" type="button" (click)="copyFromPrevious()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual a la anterior</button>
+        <button type="button" (click)="copyToAll()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual en todas</button>
+      </div>
+    </div>
+
     <section *ngFor="let group of data.groups">
       <div class="flex items-center gap-2 mb-2">
         <h3 class="text-sm font-bold text-sage-800 m-0">{{ group.name }}</h3>
@@ -34,18 +66,21 @@
 
   <div class="flex-shrink-0 flex items-center justify-between gap-3 px-5 py-3 border-t border-sage-100 bg-white">
     <div>
-      <p class="text-[11px] font-bold text-sage-400 m-0">Precio por unidad</p>
-      <p class="text-lg font-bold text-cafe-green-700 m-0">{{ unitPrice | money }}</p>
+      <p class="text-[11px] font-bold text-sage-400 m-0">{{ units > 1 ? 'Total de ' + units + ' unidades' : 'Precio por unidad' }}</p>
+      <p class="text-lg font-bold text-cafe-green-700 m-0">{{ (units > 1 ? totalPrice : unitPrice) | money }}</p>
     </div>
     <div class="flex gap-2">
       <button type="button" (click)="cancel()" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Cancelar</button>
-      <button type="button" (click)="confirm()" [disabled]="missing.length > 0"
+      <button type="button" (click)="primary()" [disabled]="units === 1 && !canConfirm"
         class="px-4 py-2.5 rounded-lg text-sm font-bold bg-cafe-green-700 hover:bg-cafe-green-800 text-white disabled:opacity-50 disabled:cursor-not-allowed">
-        Agregar
+        {{ primaryLabel }}
       </button>
     </div>
   </div>
-  <p *ngIf="missing.length" role="alert" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
+  <p *ngIf="units === 1 && missing.length" role="alert" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
     Falta elegir: {{ missing[0].name }}
+  </p>
+  <p *ngIf="units > 1 && !canConfirm" role="status" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
+    Falta elegir opciones en: {{ incomplete.join(', ') }}
   </p>
 </div>

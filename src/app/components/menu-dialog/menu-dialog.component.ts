@@ -287,28 +287,41 @@ updateQuantity(menu: MenuItem, event: Event): void {
       this.commitAdd(menu, []);
       return;
     }
+    // Si se piden varias unidades, las opciones se eligen una por una (dos cafés pueden ser distintos)
+    const units = Math.max(1, Math.floor(menu.quantity ?? 1));
     this.dialog
-      .open<ModifierPickerDialogComponent, any, OrderModifier[]>(ModifierPickerDialogComponent, {
+      .open<ModifierPickerDialogComponent, any, OrderModifier[][]>(ModifierPickerDialogComponent, {
         width: '440px',
         maxWidth: '95vw',
-        data: { item: menu, groups },
+        data: { item: menu, groups, units },
       })
       .afterClosed()
-      .subscribe(mods => {
-        if (mods) this.commitAdd(menu, mods);
+      .subscribe(perUnit => {
+        if (!perUnit) return;
+        // Las unidades con las mismas opciones quedan juntas en una sola línea
+        const lines = new Map<string, { mods: OrderModifier[]; count: number }>();
+        for (const mods of perUnit) {
+          const key = lineKey(menu._id, mods);
+          const line = lines.get(key);
+          if (line) line.count += 1;
+          else lines.set(key, { mods, count: 1 });
+        }
+        for (const { mods, count } of lines.values()) this.commitAdd(menu, mods, count);
+        menu.quantity = 1; // la cantidad ya se repartió entre las unidades
       });
   }
 
-  private commitAdd(menu: MenuItem, mods: OrderModifier[]): void {
+  // qty: cuántas unidades tiene esta combinación de opciones; sin indicarla, se comporta como siempre
+  private commitAdd(menu: MenuItem, mods: OrderModifier[], qty?: number): void {
     const key = lineKey(menu._id, mods);
     const index = this.selectedItems.findIndex(item => (item.lineKey ?? item._id) === key);
 
     if (index === -1) {
       // Si esa combinación no está en la lista, la agregamos con cantidad mínima 1
-      this.selectedItems.push({ ...menu, quantity: menu.quantity ?? 1, note: '', selectedModifiers: mods, lineKey: key });
+      this.selectedItems.push({ ...menu, quantity: qty ?? menu.quantity ?? 1, note: '', selectedModifiers: mods, lineKey: key });
     } else {
       // Si ya está, incrementamos la cantidad asegurándonos de que no sea undefined
-      this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + 1;
+      this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + (qty ?? 1);
     }
 
     // Marcar el botón como "agregado" en el objeto auxiliar
