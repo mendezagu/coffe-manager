@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 export interface SalesReport {
   range: { from: string; to: string; tz: string };
@@ -41,13 +41,13 @@ export class ReportsService {
 
   live(): Observable<LiveSummary> {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-    return this.http.get<LiveSummary>(`${environmentMongo.apiUrl}/reports/live`, { params: new HttpParams().set('tz', tz) });
+    return this.http.get<LiveSummary>(`${environment.apiUrl}/reports/live`, { params: new HttpParams().set('tz', tz) });
   }
 
   // from/to: YYYY-MM-DD (inclusive). La zona horaria es la del navegador: define dónde empieza cada día.
   sales(from: string, to: string): Observable<SalesReport> {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     const params = new HttpParams().set('from', from).set('to', to).set('tz', tz);
-    return this.http.get<SalesReport>(`${environmentMongo.apiUrl}/reports/sales`, { params });
+    return this.http.get<SalesReport>(`${environment.apiUrl}/reports/sales`, { params });
   }
 }

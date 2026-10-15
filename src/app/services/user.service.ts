@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'bar';
 
@@ -37,7 +37,7 @@ const toApiRole = (role: AppRole) => role.toUpperCase();
   providedIn: 'root',
 })
 export class UserService {
-  private readonly baseUrl = environmentMongo.apiUrl;
+  private readonly baseUrl = environment.apiUrl;
   private authState = new BehaviorSubject<AppUser | null>(this.readStoredUser());
 
   constructor(private http: HttpClient) {

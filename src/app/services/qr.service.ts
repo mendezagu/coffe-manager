@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 // ---------- Personal del local ----------
 
@@ -72,7 +72,7 @@ const DEFAULT_SOUND: QrSound = { enabled: true, volume: 60 };
 // (igual que la cocina) y, cuando llega algo nuevo, suena un aviso.
 @Injectable({ providedIn: 'root' })
 export class QrService implements OnDestroy {
-  private readonly baseUrl = `${environmentMongo.apiUrl}/qr`;
+  private readonly baseUrl = `${environment.apiUrl}/qr`;
   private state = new BehaviorSubject<QrInbox>(EMPTY);
   readonly inbox$ = this.state.asObservable();
 
@@ -261,7 +261,7 @@ export interface SendLine {
 // Llamadas de la pantalla pública: no llevan sesión; el código secreto del QR va en la dirección.
 @Injectable({ providedIn: 'root' })
 export class QrPublicService {
-  private readonly baseUrl = `${environmentMongo.apiUrl}/public/mesa`;
+  private readonly baseUrl = `${environment.apiUrl}/public/mesa`;
 
   constructor(private http: HttpClient) {}
 

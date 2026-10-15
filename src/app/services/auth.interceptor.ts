@@ -3,7 +3,7 @@ import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
 
 // Agrega el token a las llamadas a la API y cierra la sesión si el servidor responde 401.
@@ -14,7 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private injector: Injector) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (!req.url.startsWith(environmentMongo.apiUrl)) return next.handle(req);
+    if (!req.url.startsWith(environment.apiUrl)) return next.handle(req);
 
     const users = this.injector.get(UserService);
     const token = users.getToken();

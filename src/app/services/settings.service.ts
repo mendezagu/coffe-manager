@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
 
 // Datos del negocio: marca, datos para tickets, moneda y turnos. Vienen de la API (por negocio).
@@ -85,7 +85,7 @@ const DEFAULTS: TenantSettings = {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private readonly url = `${environmentMongo.apiUrl}/settings`;
+  private readonly url = `${environment.apiUrl}/settings`;
   private state = new BehaviorSubject<TenantSettings>(this.readCache() ?? DEFAULTS);
   private formatter?: Intl.NumberFormat;
 

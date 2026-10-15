@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 export const STOCK_UNITS = [
   { value: 'unidad', label: 'unidades' },
@@ -85,7 +85,7 @@ export interface InventorySummary {
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
-  private readonly baseUrl = `${environmentMongo.apiUrl}/inventory`;
+  private readonly baseUrl = `${environment.apiUrl}/inventory`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 import { map, Observable, catchError, throwError, BehaviorSubject, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { OrderModifier } from 'src/app/utils/modifiers';
@@ -99,7 +99,7 @@ export interface Sector {
 export class GestionService {
   // Dentro de la clase GestionService
 private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
-  private apiUrl = environmentMongo.apiUrl;
+  private apiUrl = environment.apiUrl;
   tables: any;
 
   constructor(private http: HttpClient) {}

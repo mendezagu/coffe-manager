@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 export interface CashMovement {
   id: string;
@@ -54,7 +54,7 @@ export interface CashHistoryRow {
 
 @Injectable({ providedIn: 'root' })
 export class CashService {
-  private readonly baseUrl = `${environmentMongo.apiUrl}/cash`;
+  private readonly baseUrl = `${environment.apiUrl}/cash`;
   private state = new BehaviorSubject<CashState | null>(null);
 
   // Estado conocido de la caja (null hasta que llega la primera respuesta)

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environmentMongo } from 'src/environments/environmentMongo';
+import { environment } from 'src/environments/environment';
 
 export type KitchenStatus = 'PENDING' | 'PREPARING' | 'READY';
 export type KitchenDestination = 'KITCHEN' | 'BAR';
@@ -23,7 +23,7 @@ export interface KitchenOrder {
 
 @Injectable({ providedIn: 'root' })
 export class KitchenService {
-  private readonly baseUrl = `${environmentMongo.apiUrl}/kitchen`;
+  private readonly baseUrl = `${environment.apiUrl}/kitchen`;
 
   constructor(private http: HttpClient) {}
 

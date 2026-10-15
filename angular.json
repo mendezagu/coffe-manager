@@ -60,10 +60,6 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
-                },
-                {
-                  "replace": "src/environments/environmentMongo.ts",
-                  "with": "src/environments/environmentMongo.prod.ts"
                 }
               ],
               "serviceWorker": true,
@@ -75,17 +71,7 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.ts"
-                },
-                {
-                  "replace": "src/environments/environmentMongo.ts",
-                  "with": "src/environments/environmentMongo.ts"
-                }
-              ]
+              "namedChunks": true
             },
             "test": {
               "buildOptimizer": false,
@@ -98,10 +84,6 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.test.ts"
-                },
-                {
-                  "replace": "src/environments/environmentMongo.ts",
-                  "with": "src/environments/environmentMongo.test.ts"
                 }
               ]
             }
