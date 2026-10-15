@@ -308,7 +308,8 @@ export class CardComponent implements OnInit, OnDestroy {
   // Vista conjunta: todos los sectores uno arriba del otro. Vista por sector: solo el de la pestaña activa.
   get visibleGroups(): TableGroup[] {
     let groups = this.tableGroups;
-    if (this.hasSectors && this.activeGroupKey !== '__all__') {
+    // El sector elegido solo filtra en la vista por sector; en la vista conjunta se ven todas las mesas
+    if (this.viewMode === 'grouped' && this.hasSectors && this.activeGroupKey !== '__all__') {
       groups = groups.filter(g => g.key === this.activeGroupKey);
     }
     // Vista conjunta: sin títulos de sector, todas las mesas en una sola grilla
@@ -323,7 +324,36 @@ export class CardComponent implements OnInit, OnDestroy {
     this.persistView('tablesViewMode', mode);
   }
 
+  // Arrastrar las pestañas de sector con el mouse (con el dedo ya se desplazan solas)
+  private dragging = false;
+  private dragMoved = false;
+  private dragStartX = 0;
+  private dragStartScroll = 0;
+
+  dragStart(event: MouseEvent, el: HTMLElement): void {
+    this.dragging = true;
+    this.dragMoved = false;
+    this.dragStartX = event.pageX;
+    this.dragStartScroll = el.scrollLeft;
+  }
+
+  dragMove(event: MouseEvent, el: HTMLElement): void {
+    if (!this.dragging) return;
+    const dx = event.pageX - this.dragStartX;
+    // Un movimiento chico sigue siendo un clic; uno grande es un arrastre y no debe elegir el sector
+    if (Math.abs(dx) > 5) this.dragMoved = true;
+    if (this.dragMoved) el.scrollLeft = this.dragStartScroll - dx;
+  }
+
+  dragEnd(): void {
+    this.dragging = false;
+  }
+
   selectGroup(key: string): void {
+    if (this.dragMoved) {
+      this.dragMoved = false; // el clic que cierra un arrastre no elige nada
+      return;
+    }
     this.selectedGroupKey = key;
     this.persistView('tablesSelectedGroup', key);
   }

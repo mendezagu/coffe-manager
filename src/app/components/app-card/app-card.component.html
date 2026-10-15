@@ -71,9 +71,27 @@
 
     </section>
 
-    <!-- Sectores y tipo de vista -->
-    <section *ngIf="hasSectors" class="bg-white rounded-card shadow-soft p-[6px] flex flex-col md:flex-row md:items-center justify-between gap-[8px]">
-      <div class="flex items-center gap-[4px] overflow-x-auto" role="tablist" aria-label="Sectores">
+    <!-- Tipo de vista: fuera de la tarjeta de sectores, arriba a la derecha -->
+    <div *ngIf="hasSectors" class="flex justify-end">
+      <div class="inline-flex whitespace-nowrap p-[3px] bg-white border-[1px] border-sage-200 rounded-xl shadow-soft" role="group" aria-label="Tipo de vista">
+        <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
+          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
+          [ngClass]="viewMode === 'grouped' ? 'bg-cafe-green-700 text-white font-bold' : 'text-sage-600 hover:bg-sage-100'">
+          <mat-icon class="!w-5 !h-5 !text-xl">view_agenda</mat-icon><span>Por sector</span>
+        </button>
+        <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
+          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
+          [ngClass]="viewMode === 'flat' ? 'bg-cafe-green-700 text-white font-bold' : 'text-sage-600 hover:bg-sage-100'">
+          <mat-icon class="!w-5 !h-5 !text-xl">grid_view</mat-icon><span>Vista conjunta</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sectores (solo en la vista por sector) -->
+    <section *ngIf="hasSectors && viewMode === 'grouped'" class="bg-white rounded-card shadow-soft p-[6px]">
+      <!-- Los sectores se desplazan a los costados arrastrando (mouse o dedo), sin barra visible y sin tapar el selector de vista -->
+      <div #sectorTabs class="flex items-center gap-[4px] min-w-0 overflow-x-auto cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
+        (mousedown)="dragStart($event, sectorTabs)" (mousemove)="dragMove($event, sectorTabs)" (mouseup)="dragEnd()" (mouseleave)="dragEnd()">
         <button type="button" role="tab" [attr.aria-selected]="activeGroupKey === '__all__'" (click)="selectGroup('__all__')"
           class="flex-shrink-0 flex items-center gap-[8px] px-[14px] py-[7px] rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
           [ngClass]="activeGroupKey === '__all__' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'">
@@ -87,19 +105,6 @@
           {{ group.name }}
           <span class="min-w-[22px] px-[6px] rounded-full text-[11px] leading-[18px] text-center"
             [ngClass]="activeGroupKey === group.key ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ group.tables.length }}</span>
-        </button>
-      </div>
-
-      <div class="inline-flex self-end md:self-auto flex-shrink-0 p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Tipo de vista">
-        <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
-          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
-          [ngClass]="viewMode === 'grouped' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
-          <mat-icon class="!w-5 !h-5 !text-xl">view_agenda</mat-icon><span>Por sector</span>
-        </button>
-        <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
-          class="flex items-center gap-[6px] px-[12px] py-[6px] rounded-[9px] text-sm font-medium transition-colors"
-          [ngClass]="viewMode === 'flat' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
-          <mat-icon class="!w-5 !h-5 !text-xl">grid_view</mat-icon><span>Vista conjunta</span>
         </button>
       </div>
     </section>
