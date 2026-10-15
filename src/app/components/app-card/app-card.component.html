@@ -91,7 +91,7 @@
     <section *ngIf="hasSectors && viewMode === 'grouped'" class="bg-white rounded-card shadow-soft p-[6px]">
       <!-- Los sectores se desplazan a los costados arrastrando (mouse o dedo), sin barra visible y sin tapar el selector de vista -->
       <div #sectorTabs class="flex items-center gap-[4px] min-w-0 overflow-x-auto cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
-        (mousedown)="dragStart($event, sectorTabs)" (mousemove)="dragMove($event, sectorTabs)" (mouseup)="dragEnd()" (mouseleave)="dragEnd()">
+        (mousedown)="dragStart($event, sectorTabs)">
         <button type="button" role="tab" [attr.aria-selected]="activeGroupKey === '__all__'" (click)="selectGroup('__all__')"
           class="flex-shrink-0 flex items-center gap-[8px] px-[14px] py-[7px] rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
           [ngClass]="activeGroupKey === '__all__' ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'">
@@ -99,7 +99,7 @@
           <span class="min-w-[22px] px-[6px] rounded-full text-[11px] leading-[18px] text-center"
             [ngClass]="activeGroupKey === '__all__' ? 'bg-white/20 text-white' : 'bg-sage-100 text-sage-600'">{{ filteredTables.length }}</span>
         </button>
-        <button *ngFor="let group of tableGroups" type="button" role="tab" [attr.aria-selected]="activeGroupKey === group.key" (click)="selectGroup(group.key)"
+        <button *ngFor="let group of tableGroups; trackBy: trackGroup" type="button" role="tab" [attr.aria-selected]="activeGroupKey === group.key" (click)="selectGroup(group.key)"
           class="flex-shrink-0 flex items-center gap-[8px] px-[14px] py-[7px] rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
           [ngClass]="activeGroupKey === group.key ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-sage-100'">
           {{ group.name }}
@@ -144,7 +144,7 @@
     </div>
 
     <!-- Mesas: una sección por sector (con título) o una sola grilla en la vista conjunta -->
-    <section *ngFor="let group of visibleGroups" class="flex flex-col gap-[12px]">
+    <section *ngFor="let group of visibleGroups; trackBy: trackGroup" class="flex flex-col gap-[12px]">
       <div *ngIf="group.name" class="flex flex-wrap items-center gap-[8px] sm:gap-[10px]">
         <mat-icon class="text-cafe-green-700">storefront</mat-icon>
         <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">{{ group.name }}</h2>

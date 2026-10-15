@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
@@ -50,6 +50,7 @@ export class CardComponent implements OnInit, OnDestroy {
     public settings: SettingsService,
     private qr: QrService,
     private reports: ReportsService,
+    private zone: NgZone,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -93,6 +94,7 @@ export class CardComponent implements OnInit, OnDestroy {
     if (this.refresh) clearInterval(this.refresh);
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
+    this.dragEnd();
   }
 
   private qrSub?: Subscription;
@@ -324,29 +326,43 @@ export class CardComponent implements OnInit, OnDestroy {
     this.persistView('tablesViewMode', mode);
   }
 
-  // Arrastrar las pestañas de sector con el mouse (con el dedo ya se desplazan solas)
-  private dragging = false;
+  // Arrastrar las pestañas de sector con el mouse (con el dedo ya se desplazan solas).
+  // Los escuchas se enganchan solo mientras se arrastra y fuera de Angular: si no, cada movimiento del mouse
+  // dispararía una actualización de la pantalla y los botones se recrearían antes de poder hacer clic.
   private dragMoved = false;
-  private dragStartX = 0;
-  private dragStartScroll = 0;
+  private dragMoveHandler?: (e: MouseEvent) => void;
+  private dragEndHandler?: () => void;
 
   dragStart(event: MouseEvent, el: HTMLElement): void {
-    this.dragging = true;
+    if (event.button !== 0) return;
+    this.dragEnd();
     this.dragMoved = false;
-    this.dragStartX = event.pageX;
-    this.dragStartScroll = el.scrollLeft;
-  }
-
-  dragMove(event: MouseEvent, el: HTMLElement): void {
-    if (!this.dragging) return;
-    const dx = event.pageX - this.dragStartX;
-    // Un movimiento chico sigue siendo un clic; uno grande es un arrastre y no debe elegir el sector
-    if (Math.abs(dx) > 5) this.dragMoved = true;
-    if (this.dragMoved) el.scrollLeft = this.dragStartScroll - dx;
+    const startX = event.pageX;
+    const startScroll = el.scrollLeft;
+    this.zone.runOutsideAngular(() => {
+      this.dragMoveHandler = (e: MouseEvent) => {
+        const dx = e.pageX - startX;
+        // Un movimiento chico sigue siendo un clic; uno grande es un arrastre y no debe elegir el sector
+        if (Math.abs(dx) > 5) this.dragMoved = true;
+        if (this.dragMoved) el.scrollLeft = startScroll - dx;
+      };
+      this.dragEndHandler = () => this.dragEnd();
+      document.addEventListener('mousemove', this.dragMoveHandler);
+      document.addEventListener('mouseup', this.dragEndHandler);
+    });
   }
 
   dragEnd(): void {
-    this.dragging = false;
+    if (this.dragMoveHandler) document.removeEventListener('mousemove', this.dragMoveHandler);
+    if (this.dragEndHandler) document.removeEventListener('mouseup', this.dragEndHandler);
+    this.dragMoveHandler = undefined;
+    this.dragEndHandler = undefined;
+  }
+
+  // Los grupos se calculan de nuevo en cada actualización: se identifican por su clave para que Angular
+  // conserve los botones y las tarjetas en vez de volver a crearlos.
+  trackGroup(_index: number, group: { key: string }): string {
+    return group.key;
   }
 
   selectGroup(key: string): void {
