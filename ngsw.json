@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1789132163628,
+  "timestamp": 1792032174236,
   "index": "/coffe-manager/index.html",
   "assetGroups": [
     {
@@ -13,12 +13,12 @@
       "urls": [
         "/coffe-manager/favicon.ico",
         "/coffe-manager/index.html",
-        "/coffe-manager/main.d080c378cadb173e.js",
+        "/coffe-manager/main.fc8214c5e5e42d84.js",
         "/coffe-manager/manifest.webmanifest",
         "/coffe-manager/polyfills.c1d09ce1b7230b82.js",
         "/coffe-manager/runtime.2e215144d3f83b1e.js",
         "/coffe-manager/scripts.1ac6d0d02f230370.js",
-        "/coffe-manager/styles.106e2adfb21fba1e.css"
+        "/coffe-manager/styles.d1e82d7103365741.css"
       ],
       "patterns": []
     },
@@ -49,13 +49,13 @@
     "/coffe-manager/assets/ticket-style.css": "28bb2630f63ff37cd9009f1150ebf526bcdcfd0f",
     "/coffe-manager/assets/ticket-template.html": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
     "/coffe-manager/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "/coffe-manager/index.html": "dd638cc68e3d6ea387a155375c8f13614d83b24e",
-    "/coffe-manager/main.d080c378cadb173e.js": "f0238e7d94e937ae9c91bf80a095dbc55f4c469e",
+    "/coffe-manager/index.html": "5ab6bdb6b1210790a23a7e5aeeaa4402194a7e57",
+    "/coffe-manager/main.fc8214c5e5e42d84.js": "ac87eb083f1170631682e877466bc50df80e196f",
     "/coffe-manager/manifest.webmanifest": "d3f08acbcc1d881a6ba2735373bb02926bb0af9a",
     "/coffe-manager/polyfills.c1d09ce1b7230b82.js": "35be750de46882f1377f4814e5a48873648e10bb",
     "/coffe-manager/runtime.2e215144d3f83b1e.js": "2b0d6e03c3f351aa0e25906ca96b61d63f2b5f9d",
     "/coffe-manager/scripts.1ac6d0d02f230370.js": "3e03c7963828ff9539f82dcd788ff3ac916212d2",
-    "/coffe-manager/styles.106e2adfb21fba1e.css": "2ce774ddf0661c6b28998f5d13c6f80cd23a6325"
+    "/coffe-manager/styles.d1e82d7103365741.css": "ecdbded4747cbc32e1d1a2f3cce54806282258b1"
   },
   "navigationUrls": [
     {
