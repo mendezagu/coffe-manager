@@ -26,25 +26,46 @@ export class QrCodesComponent implements OnInit {
   constructor(private qr: QrService, public settings: SettingsService, private snackBar: MatSnackBar) {}
 
   ngOnInit() {
-    this.load(true);
+    this.load();
   }
 
-  // Con "generate" se crean los códigos de las mesas que todavía no tienen (las impresas no cambian)
-  load(generate = false) {
+  // Los códigos NO se crean solos: se piden con el botón "Generar QR". Esto solo muestra lo que ya existe.
+  load() {
     this.loading = true;
     this.qr.tables().subscribe({
       next: (view) => {
         this.view = view;
-        const missing = view.tables.some((t) => !t.hasQr || (view.requirePin && !t.pin));
-        if (generate && view.planIncluded && missing) {
-          this.qr.generate().subscribe({ next: () => this.load(false), error: () => this.render(view) });
-        } else {
-          this.render(view);
+        // Sin el pedido por QR activo no se muestra ningún código
+        if (view.active) this.render(view);
+        else {
+          this.cards = [];
+          this.loading = false;
         }
       },
       error: () => {
         this.loading = false;
         this.notify('No se pudieron cargar las mesas');
+      },
+    });
+  }
+
+  // Mesas que todavía no tienen su código (todas, la primera vez; después, las que se agreguen)
+  get missingCount(): number {
+    return this.view?.tables.filter((t) => !t.hasQr).length ?? 0;
+  }
+
+  generate() {
+    if (this.busy) return;
+    this.busy = true;
+    this.qr.generate().subscribe({
+      next: (r) => {
+        this.busy = false;
+        this.notify(r.created === 1 ? 'Se generó 1 código' : `Se generaron ${r.created} códigos`);
+        this.load();
+      },
+      error: (err) => {
+        this.busy = false;
+        this.notify(err?.error?.message || 'No se pudieron generar los códigos');
       },
     });
   }
@@ -91,7 +112,7 @@ export class QrCodesComponent implements OnInit {
       next: () => {
         this.busy = false;
         this.notify(`QR de ${card.name} regenerado. Imprimí el nuevo.`);
-        this.load(false);
+        this.load();
       },
       error: (err) => {
         this.busy = false;
