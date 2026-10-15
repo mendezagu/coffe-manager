@@ -177,9 +177,23 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
     } else if (this.rows.length === 1) {
       this.rows[0].amount = this.due;
     } else {
-      this.fillLast();
+      this.rebalance();
     }
     this.emit();
+  }
+
+  // Con varios métodos, si lo que hay que cobrar cambia (ej: se tocó un descuento), las filas de arriba conservan lo
+  // que se les cargó solo hasta donde alcanza, y la última toma el resto. Así los pagos nunca quedan con un importe
+  // viejo (antes el efectivo seguía mostrando la cuenta de antes del descuento).
+  private rebalance() {
+    let left = this.due;
+    const last = this.rows.length - 1;
+    for (let i = 0; i < last; i++) {
+      const kept = Math.min(Math.max(0, round2(Number(this.rows[i].amount) || 0)), left);
+      this.rows[i].amount = kept;
+      left = round2(left - kept);
+    }
+    this.rows[last].amount = Math.max(0, left);
   }
 
   private emit() {

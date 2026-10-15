@@ -327,6 +327,8 @@ export class TotalDialogComponent implements OnInit {
   }
 
   printTicket(): void {
+    // Un ticket con un pago que no cubre la cuenta mostraría importes que no se van a cobrar
+    if (this.payment && !this.payment.valid) return;
     // Suponiendo que tienes el nombre de la mesa y el nombre del mozo disponibles
     const tableName = this.tableName; // Aquí debes usar la variable que contiene el nombre de la mesa
     const waiterName = this.waiterName; // Aquí debes usar la variable que contiene el nombre del mozo

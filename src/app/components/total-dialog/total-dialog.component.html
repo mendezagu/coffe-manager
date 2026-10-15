@@ -231,7 +231,7 @@
       <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
       Cerrar
     </button>
-    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5" (click)="printTicket()">
+    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5" (click)="printTicket()" [disabled]="!payment?.valid" [attr.title]="payment?.valid ? null : 'Revisá el pago: no cubre el total'">
       <mat-icon class="!w-4 !h-4 !text-base">print</mat-icon>
       Imprimir
     </button>
