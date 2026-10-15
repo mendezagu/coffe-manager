@@ -26,7 +26,7 @@
           class="ml-auto min-w-[20px] px-1.5 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-5 text-center"
           [attr.aria-label]="(q.requests.length + q.calls.length) + ' pedidos QR esperando'">{{ q.requests.length + q.calls.length }}</span>
       </button>
-      <button mat-button routerLink="/kitchen" *ngIf="role === 'admin' || role === 'kitchen' || role === 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <button mat-button routerLink="/kitchen" *ngIf="role === 'kitchen' || role === 'bar' || (role === 'admin' && (settings.settings$ | async)?.kitchenEnabled)" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
         <mat-icon fontIcon="restaurant"></mat-icon>
         {{ role === 'bar' ? 'Barra' : 'Cocina' }}
       </button>

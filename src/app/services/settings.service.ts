@@ -26,6 +26,7 @@ export interface TenantSettings {
   // plan y funciones habilitadas
   plan: string;
   features: string[];
+  kitchenEnabled: boolean; // el negocio usa la pantalla de cocina (opcional, apagada por defecto)
   splitKitchenBar: boolean; // lo que el negocio eligió
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)
   // propinas y caja
@@ -68,6 +69,7 @@ const DEFAULTS: TenantSettings = {
   shiftNightStart: 18,
   plan: 'pro',
   features: [],
+  kitchenEnabled: false,
   splitKitchenBar: false,
   splitActive: false,
   cashierDiscounts: false,

@@ -23,7 +23,9 @@ export class CategoriesComponent implements OnInit {
   newDestination: Destination = 'KITCHEN';
 
   // El destino "barra" depende del plan; que tenga efecto depende de lo que el negocio activó
-  canSplit = false;
+  canSplit = false; // el plan lo incluye Y el negocio usa la cocina
+  planAllowsSplit = false;
+  kitchenEnabled = false;
   splitActive = false;
 
   // Avisa al panel de administración que cambiaron las categorías (para refrescar los selectores del menú)
@@ -33,7 +35,9 @@ export class CategoriesComponent implements OnInit {
 
   ngOnInit() {
     this.settings.settings$.subscribe((s) => {
-      this.canSplit = (s.features ?? []).includes('kitchen_bar_split');
+      this.kitchenEnabled = !!s.kitchenEnabled;
+      this.planAllowsSplit = (s.features ?? []).includes('kitchen_bar_split');
+      this.canSplit = this.planAllowsSplit && this.kitchenEnabled;
       this.splitActive = !!s.splitActive;
     });
     this.settings.load();

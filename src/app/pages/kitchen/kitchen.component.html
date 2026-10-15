@@ -5,7 +5,7 @@
         <div class="page-header__icon"><mat-icon>soup_kitchen</mat-icon></div>
         <div class="min-w-0">
           <h1 class="page-title">{{ title }}</h1>
-          <p class="page-sub">Se actualiza sola cada pocos segundos.</p>
+          <p class="page-sub">{{ kitchenEnabled ? 'Se actualiza sola cada pocos segundos.' : 'Pantalla de cocina' }}</p>
         </div>
       </div>
       <span *ngIf="offline" role="alert" class="rounded-full bg-cafe-red-50 px-3 py-1.5 text-xs font-bold text-cafe-red-700">Sin conexión · reintentando…</span>
@@ -26,11 +26,21 @@
   <div class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-7xl mx-auto">
 
-    <p *ngIf="barDisabled" class="px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <!-- La cocina es opcional: sin habilitarla en "Mi negocio" no hay pantalla -->
+    <div *ngIf="settingsReady && !kitchenEnabled" class="max-w-md mx-auto bg-white rounded-card shadow-soft p-6 text-center">
+      <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-sage-100 text-sage-600 flex items-center justify-center"><mat-icon class="!w-8 !h-8 !text-[32px]">soup_kitchen</mat-icon></div>
+      <h2 class="text-lg font-bold text-sage-900 m-0 mb-1">La cocina no está activada</h2>
+      <p class="text-sm text-sage-600 m-0">
+        <ng-container *ngIf="isAdmin">Activala en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a> para usar la pantalla de cocina.</ng-container>
+        <ng-container *ngIf="!isAdmin">Pedile al administrador que la active en "Mi negocio".</ng-container>
+      </p>
+    </div>
+
+    <p *ngIf="barDisabled && kitchenEnabled" class="px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
       La barra no está activada en este negocio, así que todos los pedidos van a la cocina.
     </p>
 
-    <p *ngIf="!loaded && !offline && !barDisabled" class="text-sage-600 text-sm">Cargando pedidos…</p>
+    <p *ngIf="kitchenEnabled && !loaded && !offline && !barDisabled" class="text-sage-600 text-sm">Cargando pedidos…</p>
 
     <div class="grid gap-4 lg:grid-cols-3" *ngIf="(loaded || offline) && !barDisabled">
       <section *ngFor="let col of columns" class="bg-sage-200/50 rounded-card p-3">

@@ -171,8 +171,10 @@
             </span>
             <h2 class="text-2xl font-extrabold text-charcoal tracking-tight mt-[4px] mb-0">¡Tu pedido fue enviado!</h2>
             <p class="text-sm text-muted max-w-xs mx-auto mt-[6px] mb-0">
-              <ng-container *ngIf="info.autoConfirm">La comanda ya entró en la cocina y la barra de {{ info.business.name }}.</ng-container>
-              <ng-container *ngIf="!info.autoConfirm">El mozo lo va a confirmar en breve y recién ahí pasa a cocina y barra.</ng-container>
+              <ng-container *ngIf="info.autoConfirm && kitchen">La comanda ya entró en la cocina y la barra de {{ info.business.name }}.</ng-container>
+              <ng-container *ngIf="info.autoConfirm && !kitchen">Tu pedido ya quedó registrado en {{ info.business.name }}.</ng-container>
+              <ng-container *ngIf="!info.autoConfirm && kitchen">El mozo lo va a confirmar en breve y recién ahí pasa a cocina y barra.</ng-container>
+              <ng-container *ngIf="!info.autoConfirm && !kitchen">El mozo lo va a confirmar en breve.</ng-container>
             </p>
           </div>
 
@@ -292,7 +294,7 @@
             <p class="m-0 text-xs font-bold text-cafe-green-700 flex items-center gap-[8px]">
               <span class="w-2 h-2 rounded-full bg-cafe-green-700 animate-ping"></span>{{ statusText(r.step) }}
             </p>
-            <ol class="list-none p-0 m-0 grid grid-cols-4 gap-[6px]" aria-label="Estado del pedido">
+            <ol class="list-none p-0 m-0 grid gap-[6px]" [style.grid-template-columns]="'repeat(' + steps.length + ', minmax(0, 1fr))'" aria-label="Estado del pedido">
               <li *ngFor="let s of steps; let i = index" class="text-center">
                 <div class="h-1.5 rounded-full" [ngClass]="i < stepIndex(r.step) ? 'bg-cafe-green-700' : (i === stepIndex(r.step) ? 'bg-cafe-green-700 animate-pulse' : 'bg-[#E2DCD0]')"></div>
                 <span class="block text-[11px] mt-[6px] leading-tight" [ngClass]="i === stepIndex(r.step) ? 'font-extrabold text-forest' : (i < stepIndex(r.step) ? 'font-bold text-cafe-green-700' : 'text-muted')">{{ s.label }}</span>
@@ -343,8 +345,8 @@
             <button type="button" (click)="togglePast(r.id)" [attr.aria-expanded]="!!openPast[r.id]" class="w-full p-[14px] flex items-center justify-between gap-[12px] text-left hover:bg-crema-dark/60 transition-colors">
               <div class="flex items-center gap-[10px] min-w-0">
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  [ngClass]="r.step === 'READY' ? 'bg-cafe-green-100 text-cafe-green-800' : 'bg-cafe-red-50 text-cafe-red-700'">
-                  <mat-icon class="!w-5 !h-5 !text-xl">{{ r.step === 'READY' ? 'check_circle' : (r.step === 'REJECTED' ? 'error_outline' : 'cancel') }}</mat-icon>
+                  [ngClass]="isDone(r.step) ? 'bg-cafe-green-100 text-cafe-green-800' : 'bg-cafe-red-50 text-cafe-red-700'">
+                  <mat-icon class="!w-5 !h-5 !text-xl">{{ isDone(r.step) ? 'check_circle' : (r.step === 'REJECTED' ? 'error_outline' : 'cancel') }}</mat-icon>
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-bold text-forest leading-tight m-0">Pedido #{{ requestNumber(r) }} · {{ pastLabel(r.step) }}</p>
@@ -365,6 +367,7 @@
                 <span class="min-w-0 truncate">{{ l.quantity }}× {{ l.name }}<ng-container *ngIf="l.extras.length"> · {{ l.extras.join(', ') }}</ng-container></span>
                 <span class="font-bold text-forest flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
               </div>
+              <p *ngIf="!kitchen && r.step === 'CONFIRMED'" class="flex items-center gap-[4px] text-[11px] text-cafe-green-700 font-medium m-0 pt-[6px]"><mat-icon class="!w-4 !h-4 !text-base">done_all</mat-icon>Confirmado por el mozo</p>
               <p *ngIf="r.step === 'READY'" class="flex items-center gap-[4px] text-[11px] text-cafe-green-700 font-medium m-0 pt-[6px]"><mat-icon class="!w-4 !h-4 !text-base">done_all</mat-icon>Listo: el mozo ya lo lleva a tu mesa</p>
             </div>
           </div>
@@ -503,8 +506,9 @@
             <div class="flex items-start gap-[10px] px-[4px] text-muted">
               <mat-icon class="!w-5 !h-5 !text-xl text-cafe-green-700 flex-shrink-0 mt-[1px]">verified_user</mat-icon>
               <p class="text-xs leading-snug m-0">
-                <ng-container *ngIf="!info.autoConfirm">El mozo va a <strong class="text-charcoal">confirmar tu pedido</strong> en la mesa antes de mandarlo a cocina o barra.</ng-container>
-                <ng-container *ngIf="info.autoConfirm">Tu pedido se envía <strong class="text-charcoal">directo a cocina o barra</strong>.</ng-container>
+                <ng-container *ngIf="!info.autoConfirm">El mozo va a <strong class="text-charcoal">confirmar tu pedido</strong> en la mesa<ng-container *ngIf="kitchen"> antes de mandarlo a cocina o barra</ng-container>.</ng-container>
+                <ng-container *ngIf="info.autoConfirm && kitchen">Tu pedido se envía <strong class="text-charcoal">directo a cocina o barra</strong>.</ng-container>
+                <ng-container *ngIf="info.autoConfirm && !kitchen">Tu pedido se <strong class="text-charcoal">registra al instante</strong>.</ng-container>
               </p>
             </div>
 

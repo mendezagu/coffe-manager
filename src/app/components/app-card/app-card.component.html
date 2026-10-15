@@ -51,7 +51,7 @@
         <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-sage-100 text-cafe-green-700 items-center justify-center flex-shrink-0"><mat-icon>table_restaurant</mat-icon></span>
       </div>
 
-      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
+      <div *ngIf="settings.value.kitchenEnabled" class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
         <div class="min-w-0">
           <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">Para servir</p>
           <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold leading-none" [ngClass]="readyTotal > 0 ? 'text-cafe-green-700' : 'text-sage-900'">{{ readyTotal }}</p>
@@ -60,7 +60,7 @@
         <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 items-center justify-center flex-shrink-0"><mat-icon>room_service</mat-icon></span>
       </div>
 
-      <div class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
+      <div *ngIf="settings.value.kitchenEnabled" class="bg-white rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
         <div class="min-w-0">
           <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sage-500 m-0 truncate">En preparación</p>
           <p class="m-0 mt-[2px] text-2xl sm:text-3xl font-bold text-sage-900 leading-none">{{ cookingTotal }}</p>
@@ -223,7 +223,7 @@
                 <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base flex-shrink-0">receipt_long</mat-icon>
                 <span class="whitespace-nowrap">Órdenes</span>
                 <span class="min-w-[18px] px-[4px] rounded-full bg-white text-sage-800 text-[11px] leading-[18px] text-center">{{ table.orders.length }}</span>
-                <span *ngIf="readyCount(table) > 0" title="Listos para servir" class="inline-flex items-center min-w-[18px] px-[4px] rounded-full bg-cafe-green-700 text-white text-[11px] leading-[18px]">
+                <span *ngIf="settings.value.kitchenEnabled && readyCount(table) > 0" title="Listos para servir" class="inline-flex items-center min-w-[18px] px-[4px] rounded-full bg-cafe-green-700 text-white text-[11px] leading-[18px]">
                   <mat-icon class="!w-3 !h-3 !text-[12px] !leading-3">check</mat-icon>{{ readyCount(table) }}
                 </span>
               </button>

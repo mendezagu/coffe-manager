@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppRole, AppUser, ROLE_LABELS, UserService } from 'src/app/services/user.service';
+import { SettingsService } from 'src/app/services/settings.service';
 
 @Component({
   selector: 'app-users',
@@ -12,7 +13,13 @@ export class UsersComponent implements OnInit {
   saving = false;
   currentUserId: string | null = null;
 
-  roles = (Object.keys(ROLE_LABELS) as AppRole[]).map((value) => ({ value, label: ROLE_LABELS[value] }));
+  // Los roles "Cocina" y "Barra" solo tienen sentido si el negocio usa la pantalla de cocina
+  get roles() {
+    const kitchen = !!this.settings.value.kitchenEnabled;
+    return (Object.keys(ROLE_LABELS) as AppRole[])
+      .filter((value) => kitchen || (value !== 'kitchen' && value !== 'bar'))
+      .map((value) => ({ value, label: ROLE_LABELS[value] }));
+  }
   roleLabel = (role: AppRole) => ROLE_LABELS[role];
 
   form = { name: '', email: '', password: '', role: 'waiter' as AppRole };
@@ -20,7 +27,7 @@ export class UsersComponent implements OnInit {
   // Avisa al panel de administración que cambió la lista (para actualizar el contador de la tarjeta)
   @Output() changed = new EventEmitter<void>();
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar) {}
+  constructor(private userService: UserService, private snackBar: MatSnackBar, private settings: SettingsService) {}
 
   ngOnInit() {
     this.userService.getAuthState().subscribe((u) => (this.currentUserId = u?.id ?? null));

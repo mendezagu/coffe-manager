@@ -1,10 +1,10 @@
 <div>
     <!-- Cocina y barra: depende del plan -->
-    <div *ngIf="canSplit && !splitActive" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <div *ngIf="kitchenEnabled && planAllowsSplit && !splitActive" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
       Podés mandar categorías a la <strong>barra</strong>, pero todavía no está activada.
       Activala en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a> para que cada plato vaya a su pantalla.
     </div>
-    <div *ngIf="!canSplit" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <div *ngIf="kitchenEnabled && !planAllowsSplit" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
       Con tu plan todos los pedidos van a la <strong>cocina</strong>.
       Un plan superior permite enviar bebidas y otros platos a una barra con su propia pantalla.
     </div>

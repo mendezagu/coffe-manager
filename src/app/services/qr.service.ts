@@ -229,6 +229,7 @@ export interface PublicInfo {
   table: { name: string };
   requiresPin: boolean;
   autoConfirm: boolean;
+  kitchen: boolean; // el negocio usa la cocina: solo entonces hay "en cocina" y "listo"
   limits: { maxPending: number; minSecondsBetweenSends: number };
   pinOk: boolean;
   menu?: { categories: { id: string; name: string }[]; items: PublicItem[] };

@@ -23,6 +23,9 @@ const STEPS: { step: ClientStep; label: string }[] = [
   { step: 'READY', label: 'Listo' },
 ];
 
+// Sin cocina el pedido termina cuando el mozo lo confirma
+const STEPS_NO_KITCHEN = STEPS.filter((s) => s.step === 'RECEIVED' || s.step === 'CONFIRMED');
+
 // Pedidos que todavía están en marcha: se muestran completos. Los terminados quedan plegados.
 const LIVE_STEPS: ClientStep[] = ['RECEIVED', 'CONFIRMED', 'PREPARING'];
 
@@ -111,7 +114,6 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   splashRunning = false; // pone en marcha la barra de progreso
   private splashTimer?: ReturnType<typeof setInterval>;
   private splashEnd?: ReturnType<typeof setTimeout>;
-  steps = STEPS;
   callBusy = false;
   openPast: Record<string, boolean> = {};
 
@@ -172,6 +174,24 @@ export class QrOrderComponent implements OnInit, OnDestroy {
         } else this.phase = this.info ? this.phase : 'error';
       },
     });
+  }
+
+  // ¿El negocio usa la cocina? Sin ella el pedido no pasa por "en cocina" ni "listo"
+  get kitchen(): boolean {
+    return this.info?.kitchen !== false;
+  }
+
+  get steps() {
+    return this.kitchen ? STEPS : STEPS_NO_KITCHEN;
+  }
+
+  private get liveSteps(): ClientStep[] {
+    return this.kitchen ? LIVE_STEPS : ['RECEIVED'];
+  }
+
+  // Pedido terminado con éxito: listo (con cocina) o confirmado (sin cocina)
+  isDone(step: ClientStep): boolean {
+    return step === 'READY' || (!this.kitchen && step === 'CONFIRMED');
   }
 
   // ---------- código de mesa ----------
@@ -494,11 +514,11 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   // ---------- mis pedidos ----------
 
   get liveRequests(): ClientRequest[] {
-    return this.orders.requests.filter((r) => LIVE_STEPS.includes(r.step));
+    return this.orders.requests.filter((r) => this.liveSteps.includes(r.step));
   }
 
   get pastRequests(): ClientRequest[] {
-    return this.orders.requests.filter((r) => !LIVE_STEPS.includes(r.step));
+    return this.orders.requests.filter((r) => !this.liveSteps.includes(r.step));
   }
 
   get activeCount() {
@@ -529,7 +549,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   pastLabel(step: ClientStep): string {
-    return step === 'READY' ? 'Listo' : step === 'REJECTED' ? 'No se pudo tomar' : 'Cancelado';
+    return step === 'READY' ? 'Listo' : step === 'CONFIRMED' ? 'Confirmado' : step === 'REJECTED' ? 'No se pudo tomar' : 'Cancelado';
   }
 
   togglePast(id: string) {

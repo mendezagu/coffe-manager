@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GestionService, Waiter } from 'src/app/services/gestionService';
 import { QrCall, QrRequest, QrService } from 'src/app/services/qr.service';
+import { SettingsService } from 'src/app/services/settings.service';
 
 export interface QrInboxData {
   tableId?: string; // solo los pedidos y avisos de esa mesa
@@ -28,6 +29,7 @@ export class QrInboxDialogComponent implements OnInit {
   constructor(
     public qr: QrService,
     private gestion: GestionService,
+    private settings: SettingsService,
     private snackBar: MatSnackBar,
     private ref: MatDialogRef<QrInboxDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: QrInboxData | null,
@@ -62,7 +64,7 @@ export class QrInboxDialogComponent implements OnInit {
     this.qr.confirm(r.id, this.waiterByRequest[r.id] || undefined).subscribe({
       next: () => {
         this.busy.delete(r.id);
-        this.notify(`Pedido de ${r.tableName} confirmado: ya está en la cocina`);
+        this.notify(`Pedido de ${r.tableName} confirmado${this.settings.value.kitchenEnabled ? ': ya está en la cocina' : ''}`);
         this.closeIfEmpty();
       },
       error: (err) => {

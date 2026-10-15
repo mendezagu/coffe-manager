@@ -48,6 +48,9 @@ export class KitchenComponent implements OnInit, OnDestroy {
   // Cocina y barra: solo si el negocio las separa. El admin ve ambas con pestañas.
   role: string | null = null;
   splitActive = false;
+  // La cocina es opcional: hasta saber si el negocio la habilitó no se muestra ni se consulta nada
+  kitchenEnabled = false;
+  settingsReady = false;
   tab: 'ALL' | KitchenDestination = 'ALL';
   private reload$ = new Subject<void>();
   private settingsSub?: Subscription;
@@ -81,12 +84,27 @@ export class KitchenComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.role = this.users.currentRole();
-    this.settings.load();
     this.settingsSub = this.settings.settings$.subscribe((s) => {
+      this.kitchenEnabled = !!s.kitchenEnabled;
       this.splitActive = !!s.splitActive;
       if (!this.splitActive) this.tab = 'ALL';
     });
+    // Se lee la configuración del servidor antes de decidir: la guardada en el navegador puede estar vieja
+    this.settings.refresh().subscribe({
+      next: (s) => {
+        this.settingsReady = true;
+        if (s.kitchenEnabled) this.startPolling();
+      },
+      error: () => {
+        this.settingsReady = true;
+        if (this.kitchenEnabled) this.startPolling();
+      },
+    });
+    this.clock = setInterval(() => (this.now = Date.now()), 15000);
+  }
 
+  private startPolling() {
+    if (this.polling) return;
     this.polling = merge(timer(0, POLL_MS), this.reload$)
       .pipe(
         switchMap(() =>
@@ -106,7 +124,6 @@ export class KitchenComponent implements OnInit, OnDestroy {
         this.orders = orders;
         this.rebuild();
       });
-    this.clock = setInterval(() => (this.now = Date.now()), 15000);
   }
 
   ngOnDestroy() {

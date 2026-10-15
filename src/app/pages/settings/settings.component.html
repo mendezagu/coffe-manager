@@ -254,8 +254,46 @@
           </div>
         </section>
 
-        <!-- Cocina y barra -->
+        <!-- Cocina -->
         <section class="bg-white rounded-card shadow-soft p-5">
+          <h2 class="font-bold text-sage-800 mb-1">Cocina</h2>
+          <p class="text-sm text-sage-600 mb-3">
+            La pantalla de cocina es un tablero para quien <strong>prepara</strong> los pedidos (cocineros o barra).
+            Cada pedido que carga el mozo, o que llega por QR y se confirma, aparece ahí como una comanda.
+            La cocina la marca como <strong>en preparación</strong> y después como <strong>lista</strong>, y el mozo lo ve en la mesa para llevarla.
+          </p>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="kitchenEnabled" [(ngModel)]="form.kitchenEnabled" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Usar pantalla de cocina</span>
+              <span class="block text-xs text-sage-500">Activala si en tu local alguien prepara los pedidos y necesita verlos en una pantalla.</span>
+            </span>
+          </label>
+
+          <div class="grid gap-3 sm:grid-cols-2 mt-3 text-xs text-sage-700">
+            <div class="p-3 rounded-xl border" [ngClass]="form.kitchenEnabled ? 'border-cafe-green-200 bg-cafe-green-50' : 'border-sage-200 bg-white'">
+              <p class="font-bold text-sage-900 m-0 mb-1.5">Si la activás</p>
+              <ul class="m-0 pl-4 space-y-1">
+                <li>Aparece <strong>Cocina</strong> en el menú, y podés crear usuarios con rol "Cocina" y "Barra".</li>
+                <li>En <strong>Inicio</strong> ves cuántos platos están en preparación y cuántos listos para servir.</li>
+                <li><strong>Pedidos por QR:</strong> el cliente sigue su pedido en el celular: Recibido → Confirmado → En cocina → Listo.</li>
+              </ul>
+            </div>
+            <div class="p-3 rounded-xl border" [ngClass]="!form.kitchenEnabled ? 'border-cafe-green-200 bg-cafe-green-50' : 'border-sage-200 bg-white'">
+              <p class="font-bold text-sage-900 m-0 mb-1.5">Si la dejás apagada</p>
+              <ul class="m-0 pl-4 space-y-1">
+                <li>No hay pantalla de cocina ni estados de preparación: el mozo carga el pedido y listo. Es lo más simple para un local chico.</li>
+                <li><strong>Pedidos por QR:</strong> el cliente ve Recibido → Confirmado. Termina cuando el mozo lo acepta, y de ahí tu equipo lo atiende como siempre.</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-xs text-sage-500 mt-3 mb-0">La impresión de comandas funciona siempre, con o sin pantalla de cocina.</p>
+        </section>
+
+        <!-- Cocina y barra (solo si se usa la cocina) -->
+        <section *ngIf="form.kitchenEnabled" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>
           <p class="text-sm text-sage-600 mb-3">
             Si lo activás, cada categoría del menú va a la pantalla de la cocina o a la de la barra, según el destino que le pongas.
