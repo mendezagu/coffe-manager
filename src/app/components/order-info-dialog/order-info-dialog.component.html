@@ -70,7 +70,7 @@
               <mat-icon class="!text-white !text-lg">add</mat-icon>
             </button>
 
-            <button *ngIf="(role$ | async) === 'admin'"
+            <button *ngIf="canRemove(role$ | async)"
               mat-mini-fab
               class="!w-9 !h-9 !bg-cafe-red-600 ml-1"
               (click)="removeOrder(order)">

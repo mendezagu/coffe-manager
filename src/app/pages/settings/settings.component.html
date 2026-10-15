@@ -199,6 +199,23 @@
           </label>
         </section>
 
+        <!-- Permisos del personal -->
+        <section class="bg-white rounded-card shadow-soft p-5">
+          <h2 class="font-bold text-sage-800 mb-1">Permisos del personal</h2>
+          <p class="text-sm text-sage-600 mb-3">Qué pueden hacer los mozos y cajeros además de lo básico. El administrador siempre puede todo.</p>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="staffCanRemoveItems" [(ngModel)]="form.staffCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Permitir eliminar ítems de una orden</span>
+              <span class="block text-xs text-sage-500">
+                Si lo activás, los mozos y cajeros ven el botón para quitar un plato de la orden de una mesa (en "Gestión de Órdenes").
+                Si lo dejás apagado, solo el administrador puede hacerlo. Subir o bajar cantidades sigue estando permitido.
+              </span>
+            </span>
+          </label>
+        </section>
+
         <!-- Pedido por QR -->
         <section class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Pedido por QR en la mesa</h2>

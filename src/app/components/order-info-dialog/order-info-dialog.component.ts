@@ -4,6 +4,7 @@ import { GestionService, MenuItem } from '../../services/gestionService';
 import { Table } from '../../services/gestionService';
 import { forkJoin, Observable, of } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
+import { SettingsService } from 'src/app/services/settings.service';
 import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
 
 @Component({
@@ -25,6 +26,7 @@ export class OrderInfoDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private gestionService: GestionService,
     private userService: UserService,
+    private settings: SettingsService,
   ) {
     this.table = data;
     console.log(this.table, 'Mesa seleccionada');
@@ -32,6 +34,11 @@ export class OrderInfoDialogComponent implements OnInit {
     // Guardar copia original para detectar cambios
     this.originalOrders = JSON.parse(JSON.stringify(this.orders));
     this.role$ = this.userService.getRoleState();
+  }
+
+  // Eliminar un ítem: el administrador siempre; mozos y cajeros solo si el negocio lo habilitó en "Mi negocio"
+  canRemove(role: string | null): boolean {
+    return role === 'admin' || ((role === 'waiter' || role === 'cashier') && !!this.settings.value.staffCanRemoveItems);
   }
 
   ngOnInit(): void {
