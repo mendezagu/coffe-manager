@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
-import { QrService } from './services/qr.service';
+import { QrCall, QrRequest, QrService } from './services/qr.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
 
 @Component({
@@ -83,6 +83,53 @@ export class AppComponent {
     return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '?';
   }
 
+  // Avisos naranjas en pantalla cuando llega un pedido o un aviso de un cliente por QR
+  qrAlerts: { id: string; title: string; detail: string; tableId: string; total?: number }[] = [];
+  private qrAlertTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  private pushQrAlerts(arrivals: { requests: QrRequest[]; calls: QrCall[] }) {
+    const fresh = [
+      ...arrivals.requests.map((r) => {
+        const units = r.items.reduce((n, l) => n + l.quantity, 0);
+        return {
+          id: r.id,
+          title: 'Nuevo pedido por QR',
+          detail: `${r.tableName} · ${units} ${units === 1 ? 'ítem' : 'ítems'}${r.customerName ? ' · ' + r.customerName : ''}`,
+          tableId: r.tableId,
+          total: r.total,
+        };
+      }),
+      ...arrivals.calls.map((c) => ({
+        id: c.id,
+        title: c.type === 'BILL' ? 'Piden la cuenta' : 'Llaman al mozo',
+        detail: c.tableName,
+        tableId: c.tableId,
+      })),
+    ];
+    // Los más nuevos arriba; se muestran hasta 4 a la vez
+    this.qrAlerts = [...fresh.reverse(), ...this.qrAlerts].slice(0, 4);
+    for (const a of fresh) {
+      this.qrAlertTimers.set(a.id, setTimeout(() => this.dismissQrAlert(a.id), 20000));
+    }
+  }
+
+  trackAlert(_index: number, alert: { id: string }): string {
+    return alert.id;
+  }
+
+  dismissQrAlert(id: string) {
+    this.qrAlerts = this.qrAlerts.filter((a) => a.id !== id);
+    const timer = this.qrAlertTimers.get(id);
+    if (timer) clearTimeout(timer);
+    this.qrAlertTimers.delete(id);
+  }
+
+  // "Atender": abre la bandeja de esa mesa para confirmar o rechazar el pedido
+  attendQrAlert(alert: { id: string; tableId: string }) {
+    this.dismissQrAlert(alert.id);
+    this.dialog.open(QrInboxDialogComponent, { data: { tableId: alert.tableId }, width: '600px', maxWidth: '96vw', autoFocus: false });
+  }
+
   openQrInbox() {
     this.dialog.open(QrInboxDialogComponent, { data: null, width: '600px', maxWidth: '96vw', autoFocus: false });
   }
@@ -96,6 +143,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
+    this.qr.arrivals$.subscribe((a) => this.pushQrAlerts(a));
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
       this.isAdminRole = role === 'admin';

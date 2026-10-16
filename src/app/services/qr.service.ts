@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -75,6 +75,9 @@ export class QrService implements OnDestroy {
   private readonly baseUrl = `${environment.apiUrl}/qr`;
   private state = new BehaviorSubject<QrInbox>(EMPTY);
   readonly inbox$ = this.state.asObservable();
+  // Lo que llegó desde la última consulta (no incluye lo que ya estaba al abrir la pantalla): sirve para mostrar el aviso
+  private arrivals = new Subject<{ requests: QrRequest[]; calls: QrCall[] }>();
+  readonly arrivals$ = this.arrivals.asObservable();
 
   private timer?: ReturnType<typeof setInterval>;
   private seen = new Set<string>();
@@ -134,9 +137,13 @@ export class QrService implements OnDestroy {
     this.http.get<QrInbox>(`${this.baseUrl}/inbox`).subscribe({
       next: (inbox) => {
         const ids = [...inbox.requests.map((r) => r.id), ...inbox.calls.map((c) => c.id)];
-        const hasNew = ids.some((id) => !this.seen.has(id));
-        // La primera consulta no suena: solo se avisa de lo que llega mientras la pantalla está abierta
-        if (hasNew && !this.firstLoad) this.beep();
+        const freshRequests = inbox.requests.filter((r) => !this.seen.has(r.id));
+        const freshCalls = inbox.calls.filter((c) => !this.seen.has(c.id));
+        // La primera consulta no suena ni avisa: solo se avisa de lo que llega mientras la pantalla está abierta
+        if ((freshRequests.length || freshCalls.length) && !this.firstLoad) {
+          this.beep();
+          this.arrivals.next({ requests: freshRequests, calls: freshCalls });
+        }
         this.firstLoad = false;
         this.seen = new Set(ids);
         this.state.next(inbox);

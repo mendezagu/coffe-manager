@@ -36,9 +36,10 @@ export class OrderInfoDialogComponent implements OnInit {
     this.role$ = this.userService.getRoleState();
   }
 
-  // Eliminar un ítem: el administrador siempre; mozos y cajeros solo si el negocio lo habilitó en "Mi negocio"
+  // Eliminar un ítem: el administrador siempre; el mozo o el cajero solo si el negocio habilitó a ese rol en "Mi negocio"
   canRemove(role: string | null): boolean {
-    return role === 'admin' || ((role === 'waiter' || role === 'cashier') && !!this.settings.value.staffCanRemoveItems);
+    const s = this.settings.value;
+    return role === 'admin' || (role === 'waiter' && !!s.waiterCanRemoveItems) || (role === 'cashier' && !!s.cashierCanRemoveItems);
   }
 
   ngOnInit(): void {

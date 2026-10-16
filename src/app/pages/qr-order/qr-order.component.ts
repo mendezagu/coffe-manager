@@ -81,9 +81,11 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   phase: Phase = 'loading';
   info: PublicInfo | null = null;
 
-  // Código de mesa: cuatro casilleros
+  // Código de mesa: se escribe en UN solo campo (invisible) y se muestra repartido en cuatro casilleros.
+  // Con cuatro campos separados, el celular perdía el foco al saltar de uno a otro y los números se mezclaban.
   pin = '';
-  pinDigits: string[] = ['', '', '', ''];
+  pinValue = '';
+  readonly pinSlots = [0, 1, 2, 3];
   pinError = '';
   pinHelpSent = false;
 
@@ -156,9 +158,9 @@ export class QrOrderComponent implements OnInit, OnDestroy {
           this.phase = 'pin';
           if (this.pin) this.pinError = 'Ese código no es correcto';
           this.pin = '';
-          this.pinDigits = ['', '', '', ''];
+          this.pinValue = '';
           store.set(sessionStorage, `qr-pin:${this.token}`, null);
-          this.focusPin(0);
+          this.focusPin();
           return;
         }
         this.phase = 'ready';
@@ -197,55 +199,29 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   // ---------- código de mesa ----------
 
   get pinComplete(): boolean {
-    return this.pinDigits.every((d) => d !== '');
+    return this.pinValue.length === 4;
   }
 
-  focusPin(index: number) {
-    setTimeout(() => (document.getElementById(`pin-${index}`) as HTMLInputElement | null)?.focus(), 30);
+  focusPin() {
+    setTimeout(() => (document.getElementById('pin-input') as HTMLInputElement | null)?.focus(), 30);
   }
 
-  onPinInput(index: number, event: Event) {
+  // Cada número que se escribe (o se pega) llena el siguiente casillero; al completar los 4 se valida solo
+  onPinInput(event: Event) {
     const el = event.target as HTMLInputElement;
-    const digits = el.value.replace(/\D/g, '');
-    // Autocompletado o pegado de varios dígitos juntos
-    if (digits.length > 1) {
-      this.fillPin(digits);
-      return;
-    }
-    this.pinDigits[index] = digits;
-    el.value = digits;
-    this.pinError = '';
-    if (digits && index < 3) this.focusPin(index + 1);
-    if (this.pinComplete) this.submitPin();
-  }
-
-  onPinKeydown(index: number, event: KeyboardEvent) {
-    if (event.key === 'Backspace' && !this.pinDigits[index] && index > 0) {
-      this.pinDigits[index - 1] = '';
-      this.focusPin(index - 1);
-    }
-  }
-
-  onPinPaste(event: ClipboardEvent) {
-    event.preventDefault();
-    this.fillPin(event.clipboardData?.getData('text') ?? '');
-  }
-
-  private fillPin(text: string) {
-    const digits = text.replace(/\D/g, '').slice(0, 4);
-    this.pinDigits = [0, 1, 2, 3].map((i) => digits[i] ?? '');
+    this.pinValue = el.value.replace(/\D/g, '').slice(0, 4);
+    el.value = this.pinValue;
     this.pinError = '';
     if (this.pinComplete) this.submitPin();
-    else this.focusPin(Math.min(digits.length, 3));
   }
 
   submitPin() {
     if (!this.pinComplete) {
       this.pinError = 'Completá los 4 números';
-      this.focusPin(this.pinDigits.findIndex((d) => d === ''));
+      this.focusPin();
       return;
     }
-    this.pin = this.pinDigits.join('');
+    this.pin = this.pinValue;
     store.set(sessionStorage, `qr-pin:${this.token}`, this.pin);
     this.phase = 'loading';
     this.load();
@@ -280,10 +256,10 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   private askPinAgain() {
     this.pin = '';
-    this.pinDigits = ['', '', '', ''];
+    this.pinValue = '';
     store.set(sessionStorage, `qr-pin:${this.token}`, null);
     this.phase = 'pin';
-    this.focusPin(0);
+    this.focusPin();
   }
 
   // ---------- carta ----------

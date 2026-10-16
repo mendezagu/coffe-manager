@@ -71,6 +71,15 @@ mat-icon {
   vertical-align: middle;
 }
 
+/* Los íconos de Material se recortan si el texto de Tailwind (`!text-xl`, `!text-base`…) les suma su propio
+   alto de línea: la caja mide 16–24px y el glifo queda corrido hacia abajo. Alto de línea 1 y centrado. */
+.mat-icon {
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Diálogos de Angular Material: esquinas y sombra del rediseño */
 .mat-mdc-dialog-container {
   --mdc-dialog-container-shape: 24px;

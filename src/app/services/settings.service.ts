@@ -31,7 +31,8 @@ export interface TenantSettings {
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)
   // propinas y caja
   cashierDiscounts: boolean; // el cajero puede aplicar descuentos al cobrar
-  staffCanRemoveItems: boolean; // mozos y cajeros pueden eliminar ítems de una orden
+  waiterCanRemoveItems: boolean; // los mozos pueden eliminar ítems de una orden
+  cashierCanRemoveItems: boolean; // los cajeros pueden eliminar ítems de una orden
   tipEnabled: boolean;
   tipSuggestedPct: number;
   requireOpenRegister: boolean;
@@ -74,7 +75,8 @@ const DEFAULTS: TenantSettings = {
   splitKitchenBar: false,
   splitActive: false,
   cashierDiscounts: false,
-  staffCanRemoveItems: false,
+  waiterCanRemoveItems: false,
+  cashierCanRemoveItems: false,
   tipEnabled: false,
   tipSuggestedPct: 10,
   requireOpenRegister: true,

@@ -62,7 +62,7 @@
         Mi negocio
       </button>
       <button mat-button routerLink="/logs" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="visibility_lock"></mat-icon>
+        <mat-icon fontIcon="lock"></mat-icon>
         Logs
       </button>
       </ng-container>
@@ -147,3 +147,24 @@
   </mat-drawer-content>
 
 </mat-drawer-container>
+
+<!-- Aviso naranja cuando llega un pedido o llamado de un cliente por QR -->
+<div *ngIf="qrAlerts.length" class="fixed z-[1000] top-[72px] right-[12px] left-[12px] sm:left-auto sm:right-[20px] sm:w-[400px] flex flex-col gap-[10px] pointer-events-none" aria-live="assertive">
+  <div *ngFor="let a of qrAlerts; trackBy: trackAlert" role="alert"
+    class="qr-alert pointer-events-auto flex items-start gap-[12px] p-[14px] rounded-2xl bg-cafe-amber-50 border-[1px] border-cafe-amber-300 shadow-dialog">
+    <span class="w-11 h-11 rounded-full bg-cafe-amber-700 text-white flex items-center justify-center flex-shrink-0 shadow-amber">
+      <mat-icon class="!w-6 !h-6 !text-2xl">notifications_active</mat-icon>
+    </span>
+    <div class="min-w-0 flex-1">
+      <p class="text-sm font-bold text-cafe-amber-900 m-0">{{ a.title }}</p>
+      <p class="text-xs text-cafe-amber-800 m-0 mt-[2px] truncate">{{ a.detail }}<ng-container *ngIf="a.total"> · {{ a.total | money }}</ng-container></p>
+      <div class="flex gap-[8px] mt-[10px]">
+        <button type="button" (click)="attendQrAlert(a)" class="px-[14px] py-[6px] rounded-lg bg-cafe-amber-700 hover:bg-cafe-amber-800 text-white text-xs font-bold">Atender</button>
+        <button type="button" (click)="dismissQrAlert(a.id)" class="px-[12px] py-[6px] rounded-lg text-cafe-amber-800 hover:bg-cafe-amber-100 text-xs font-medium">Cerrar</button>
+      </div>
+    </div>
+    <button type="button" (click)="dismissQrAlert(a.id)" aria-label="Cerrar aviso" class="w-7 h-7 rounded-full text-cafe-amber-700 hover:bg-cafe-amber-100 flex items-center justify-center flex-shrink-0">
+      <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
+    </button>
+  </div>
+</div>
