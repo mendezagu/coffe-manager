@@ -16,10 +16,33 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#1d5b3e">
+  <meta name="theme-color" content="#1b2822">
+  <style>
+    .boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #1b2822; color: #edf1ea; font: 500 18px Roboto, system-ui, sans-serif; letter-spacing: 0.01em; }
+    .boot__plate { width: 88px; height: 88px; animation: boot-spin 1.1s linear infinite; }
+    @keyframes boot-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .boot__plate { animation-duration: 3s; } }
+  </style>
 </head>
 <body class="mat-typography">
-  <app-root></app-root>
+  <!-- Pantalla de carga: se ve mientras arranca la app y Angular la reemplaza solo -->
+  <app-root>
+    <div class="boot" role="status" aria-live="polite">
+      <svg class="boot__plate" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#22322a" stroke="#5fae86" stroke-opacity=".35" />
+        <g fill="none" stroke="#5fae86" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
+          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
+          <path d="M39 50 V69" stroke-width="3.6" />
+        </g>
+        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
+        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
+      </svg>
+      <span class="boot__text">Cargando mesas…</span>
+    </div>
+  </app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
   <script>
     // Eliminar service workers para evitar caché

@@ -4,7 +4,7 @@
     <input type="search" [(ngModel)]="search" placeholder="Buscar insumo…" aria-label="Buscar insumo"
       class="flex-1 min-w-[200px] px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
     <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
-      <input type="checkbox" [(ngModel)]="onlyAlerts" class="w-4 h-4 accent-[#1d5b3e]" />
+      <input type="checkbox" [(ngModel)]="onlyAlerts" class="w-4 h-4 accent-[#1b2822]" />
       Solo bajos y agotados <span *ngIf="alertCount" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">{{ alertCount }}</span>
     </label>
     <button type="button" (click)="creating = !creating"
@@ -151,7 +151,7 @@
               class="w-36 px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white" />
           </label>
           <label class="flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none pb-2">
-            <input name="active" type="checkbox" [(ngModel)]="form.active" class="w-4 h-4 accent-[#1d5b3e]" /> Activo
+            <input name="active" type="checkbox" [(ngModel)]="form.active" class="w-4 h-4 accent-[#1b2822]" /> Activo
           </label>
         </ng-container>
 

@@ -140,7 +140,7 @@
           <h2 class="font-bold text-sage-800 mb-1">Cobro</h2>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="requireOpenRegister" [(ngModel)]="form.requireOpenRegister" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="requireOpenRegister" [(ngModel)]="form.requireOpenRegister" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Exigir caja abierta para cobrar</span>
               <span class="block text-xs text-sage-500">Cada cobro queda asociado a la caja del turno y a quien la maneja. Se abre y se cierra desde <a routerLink="/cash" class="text-cafe-green-700 font-medium underline">Caja</a>.</span>
@@ -148,7 +148,7 @@
           </label>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="cashierDiscounts" [(ngModel)]="form.cashierDiscounts" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="cashierDiscounts" [(ngModel)]="form.cashierDiscounts" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Permitir descuentos al cajero</span>
               <span class="block text-xs text-sage-500">Si lo activás, el cajero ve las opciones de descuento al cobrar (por plato y general). El administrador siempre puede. Los platos en promo nunca llevan descuento.</span>
@@ -156,7 +156,7 @@
           </label>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Ofrecer propina al cobrar</span>
               <span class="block text-xs text-sage-500">La propina se suma a lo que paga el cliente pero no cuenta como venta: es del mozo que atendió la mesa.</span>
@@ -182,7 +182,7 @@
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canInventory ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="inventoryEnabled" [(ngModel)]="form.inventoryEnabled" [disabled]="!canInventory" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="inventoryEnabled" [(ngModel)]="form.inventoryEnabled" [disabled]="!canInventory" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Usar inventario y stock</span>
               <span *ngIf="canInventory" class="block text-xs text-sage-500">Cuando lo actives vas a ver <a routerLink="/inventory" class="text-cafe-green-700 font-medium underline">Inventario</a> en el menú, para cargar insumos y recetas.</span>
@@ -191,7 +191,7 @@
           </label>
 
           <label *ngIf="form.inventoryEnabled && canInventory" class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="blockOutOfStock" [(ngModel)]="form.blockOutOfStock" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="blockOutOfStock" [(ngModel)]="form.blockOutOfStock" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">No dejar pedir lo que no hay</span>
               <span class="block text-xs text-sage-500">Si falta un insumo, el mozo no puede agregar el plato. Si lo apagás, se puede pedir igual y el stock queda en negativo (solo se avisa).</span>
@@ -212,14 +212,14 @@
 
           <div class="grid gap-2 sm:grid-cols-2">
             <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="waiterCanRemoveItems" [(ngModel)]="form.waiterCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <input type="checkbox" name="waiterCanRemoveItems" [(ngModel)]="form.waiterCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Mozos</span>
                 <span class="block text-xs text-sage-500">Pueden eliminar ítems de las órdenes.</span>
               </span>
             </label>
             <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="cashierCanRemoveItems" [(ngModel)]="form.cashierCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <input type="checkbox" name="cashierCanRemoveItems" [(ngModel)]="form.cashierCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Cajeros</span>
                 <span class="block text-xs text-sage-500">Pueden eliminar ítems de las órdenes.</span>
@@ -237,7 +237,7 @@
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canQr ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="qrEnabled" [(ngModel)]="form.qrEnabled" [disabled]="!canQr" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="qrEnabled" [(ngModel)]="form.qrEnabled" [disabled]="!canQr" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Permitir pedidos por QR</span>
               <span *ngIf="canQr" class="block text-xs text-sage-500">Después imprimí los QR en <a routerLink="/admin/qr" class="text-cafe-green-700 font-medium underline">Administrar → Códigos QR</a>.</span>
@@ -247,7 +247,7 @@
 
           <ng-container *ngIf="form.qrEnabled && canQr">
             <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="qrAutoConfirm" [(ngModel)]="form.qrAutoConfirm" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <input type="checkbox" name="qrAutoConfirm" [(ngModel)]="form.qrAutoConfirm" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Confirmar los pedidos automáticamente</span>
                 <span class="block text-xs text-sage-500">Si lo activás, los pedidos entran directo a la cocina sin que un mozo los apruebe. Recomendado solo si confiás en tus clientes o hay poco movimiento. Si lo dejás apagado, un mozo confirma cada pedido (más seguro).</span>
@@ -255,7 +255,7 @@
             </label>
 
             <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="qrRequirePin" [(ngModel)]="form.qrRequirePin" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              <input type="checkbox" name="qrRequirePin" [(ngModel)]="form.qrRequirePin" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Pedir un código de mesa de 4 dígitos</span>
                 <span class="block text-xs text-sage-500">Evita que alguien que sacó una foto del QR pida desde afuera. El mozo le da el código al cliente y cambia solo cuando la mesa se libera.</span>
@@ -266,14 +266,14 @@
           <!-- Sonido: se guarda solo en este dispositivo -->
           <div *ngIf="canQr" class="mt-3 p-3 rounded-xl border border-sage-200 bg-sage-50">
             <label class="flex items-center gap-3 select-none cursor-pointer">
-              <input type="checkbox" name="soundEnabled" [(ngModel)]="sound.enabled" (ngModelChange)="saveSound()" class="w-5 h-5 accent-[#1d5b3e]" />
+              <input type="checkbox" name="soundEnabled" [(ngModel)]="sound.enabled" (ngModelChange)="saveSound()" class="w-5 h-5 accent-[#1b2822]" />
               <span class="text-sm font-bold text-sage-900">Sonido de aviso cuando llega un pedido</span>
             </label>
             <p class="text-xs text-sage-500 mt-1 mb-2">Se guarda en este dispositivo: cada tablet o compu puede tener su propio volumen.</p>
             <div class="flex items-center gap-3" [class.opacity-50]="!sound.enabled">
               <mat-icon class="text-sage-600">volume_down</mat-icon>
               <input type="range" name="soundVolume" min="0" max="100" step="5" [(ngModel)]="sound.volume" (ngModelChange)="saveSound()" [disabled]="!sound.enabled"
-                aria-label="Volumen del aviso" class="flex-1 accent-[#1d5b3e]" />
+                aria-label="Volumen del aviso" class="flex-1 accent-[#1b2822]" />
               <mat-icon class="text-sage-600">volume_up</mat-icon>
               <span class="w-10 text-right text-sm font-bold text-sage-800">{{ sound.volume }}%</span>
             </div>
@@ -293,7 +293,7 @@
           </p>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="kitchenEnabled" [(ngModel)]="form.kitchenEnabled" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+            <input type="checkbox" name="kitchenEnabled" [(ngModel)]="form.kitchenEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Usar pantalla de cocina</span>
               <span class="block text-xs text-sage-500">Activala si en tu local alguien prepara los pedidos y necesita verlos en una pantalla.</span>
@@ -332,7 +332,7 @@
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canSplit ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
             <input type="checkbox" name="splitKitchenBar" [(ngModel)]="form.splitKitchenBar" [disabled]="!canSplit"
-              class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+              class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Separar cocina y barra</span>
               <span *ngIf="canSplit" class="block text-xs text-sage-500">

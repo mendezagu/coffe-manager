@@ -2,17 +2,36 @@
 
   <!-- Sidebar (solo visible si está autenticado) -->
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
-    <div class="flex items-center gap-3 px-2 mb-6">
+    <!-- Marca del producto: la "o" de Tavolapp es un plato -->
+    <div class="px-4 pt-1 flex justify-start" role="img" aria-label="Tavolapp">
+      <span class="inline-flex items-baseline font-bold text-sage-800 whitespace-nowrap" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em">
+        <span>Tav</span>
+        <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
+          <circle cx="50" cy="50" r="48" stroke-width="4" fill="#f6f8f4" stroke="#1d5b3e" />
+          <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#1d5b3e" />
+          <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#f6f8f4" stroke="#1d5b3e" stroke-opacity=".35" />
+          <g fill="none" stroke="#1d5b3e" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
+            <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
+            <path d="M39 50 V69" stroke-width="3.6" />
+          </g>
+          <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#8a2a1c" />
+          <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#8a2a1c" />
+        </svg>
+        <span>lapp</span>
+      </span>
+    </div>
+
+    <!-- Negocio: logo arriba y nombre debajo -->
+    <div class="mt-5 mb-2 px-3 flex flex-col items-center text-center">
       <img
-        class="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-[0_0_0_3px_#cfd8cb]"
+        class="w-[76px] h-[76px] rounded-full object-cover ring-2 ring-white shadow-[0_0_0_3px_#cfd8cb]"
         [src]="(settings.settings$ | async)?.logoUrl || ''"
         [alt]="(settings.settings$ | async)?.name"
         *ngIf="(settings.settings$ | async)?.logoUrl"
       />
-      <div>
-        <span class="block text-sage-800 font-bold text-lg leading-tight">{{ (settings.settings$ | async)?.name }}</span>
-        <span *ngIf="user$ | async as user" class="sm:hidden inline-block mt-1 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
-      </div>
+      <span class="block mt-3 text-sage-800 font-bold text-lg leading-tight break-words max-w-full">{{ (settings.settings$ | async)?.name }}</span>
+      <span *ngIf="user$ | async as user" class="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
     </div>
 
     <ng-container *ngIf="role$ | async as role">
@@ -87,14 +106,6 @@
           <button mat-icon-button (click)="sidenav.toggle()" aria-label="Abrir o cerrar el menú">
             <mat-icon class="!text-sage-600">menu</mat-icon>
           </button>
-          <img
-            class="rounded-full flex-shrink-0"
-            style="width: 34px; height: 34px; object-fit: cover;"
-            *ngIf="(settings.settings$ | async)?.logoUrl"
-            [src]="(settings.settings$ | async)?.logoUrl"
-            [alt]="(settings.settings$ | async)?.name"
-          />
-          <span class="text-sage-800 font-bold text-lg truncate">{{ (settings.settings$ | async)?.name }}</span>
         </div>
 
         <!-- Derecha: alertas, caja, turno y usuario -->

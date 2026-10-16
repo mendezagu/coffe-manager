@@ -62,6 +62,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
+import { AppLoaderComponent } from './components/app-loader/app-loader.component';
 
 
 @NgModule({
@@ -98,7 +99,7 @@ import { LogsComponent } from './components/logs/logs.component';
     QrOrderComponent,
     QrInboxDialogComponent,
     QrCodesComponent,
-
+    AppLoaderComponent,
   ],
   imports: [
     BrowserModule,

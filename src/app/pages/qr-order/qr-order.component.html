@@ -27,7 +27,7 @@
   <div class="w-full max-w-md bg-crema min-h-screen flex flex-col shadow-2xl relative pb-[112px] border-x-[1px] border-[#EAE4DC]/60">
 
     <!-- Cargando -->
-    <div *ngIf="phase === 'loading'" class="flex items-center justify-center flex-1 text-muted text-sm">Cargando la carta…</div>
+    <app-loader *ngIf="phase === 'loading'" [splash]="true" label="Cargando mesas…"></app-loader>
 
     <!-- QR inválido o apagado -->
     <div *ngIf="phase === 'notFound'" class="flex flex-col items-center justify-center flex-1 px-[24px] text-center">

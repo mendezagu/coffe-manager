@@ -26,7 +26,7 @@
     </div>
 
     <label class="flex items-start gap-3 select-none cursor-pointer">
-      <input type="checkbox" name="required" [(ngModel)]="editor.required" class="w-5 h-5 mt-0.5 accent-[#1d5b3e]" />
+      <input type="checkbox" name="required" [(ngModel)]="editor.required" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
       <span class="text-sm">
         <span class="block font-bold text-sage-900">Obligatorio</span>
         <span class="block text-xs text-sage-500">El mozo no puede agregar el plato sin elegir una opción (ej: el punto de la carne).</span>
@@ -48,7 +48,7 @@
               class="w-28 px-3 py-2 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
           </label>
           <label *ngIf="editor.id && o.id" class="flex items-center gap-1.5 text-xs text-sage-500 cursor-pointer" title="Desactivala si hoy no la tenés: no se ofrece, pero no se borra">
-            <input [name]="'optactive' + i" type="checkbox" [(ngModel)]="o.active" class="w-4 h-4 accent-[#1d5b3e]" />
+            <input [name]="'optactive' + i" type="checkbox" [(ngModel)]="o.active" class="w-4 h-4 accent-[#1b2822]" />
             Disponible
           </label>
           <button type="button" (click)="removeOption(i)" [disabled]="editor.options.length === 1" aria-label="Quitar opción"
