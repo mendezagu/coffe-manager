@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { modifiersText } from 'src/app/utils/modifiers';
+import { TicketService } from 'src/app/services/ticket.service';
 import { QrInbox, QrService } from 'src/app/services/qr.service';
 import { LiveSummary, ReportsService } from 'src/app/services/reports.service';
 import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
@@ -51,6 +52,7 @@ export class CardComponent implements OnInit, OnDestroy {
     private qr: QrService,
     private reports: ReportsService,
     private zone: NgZone,
+    private tickets: TicketService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -665,106 +667,26 @@ printTicket(tableId: string): void {
     return;
   }
 
-  // Obtener la fecha y la hora actual
-  const formattedDate = new Date().toLocaleString();
-
-  // Generar contenido del ticket con el nombre correcto de cada item
-  const printContent = `
-    <html>
-      <head>
-        <title>Ticket</title>
-        <style>
-          @page { size: 58mm landscape; margin: 0; }
-          body { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; margin: 0; padding: 0; text-align: left; }
-          .ticket { width: 58mm; padding: 5px; }
-          .header { text-align: left; margin-bottom: 5px; }
-          .order-list { text-align: left; word-wrap: break-word; }
-          .order-item { display: flex; justify-content: space-between; width: 100%; }
-          .order-item p { margin: 0; padding-right: 5px; font-size: 18px; }
-          .totals { margin-top: 5px; text-align: left; font-size: 18px; }
-          .line { border-top: 1px dashed #000; margin: 3px 0; }
-          .logo { text-align: center; margin-bottom: 10px; }
-          .logo img { width: 70px; max-width: 58mm; height: auto; }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-          ${this.ticketLogoHtml()}
-          <div class="header">
-            <h2 style="font-size: 14px;">🍽️ ${this.ticketBusinessName()}</h2>
-            <p style="font-size: 14px;">Mesa: <strong>${table.name}</strong></p>
-            <p>Mozo: <strong>${table.waiterName || 'No asignado'}</strong></p>
-            <p>${formattedDate}</p>
-          </div>
-          <div class="line"></div>
-          <div class="order-list">
-            ${table.orders.map(order => {
-              // Buscar el nombre del producto en la lista de menú
-              const menuItem = this.menuItems.find(item => item._id === order.menuItem);
-              return `
-                <div class="order-item">
-                  <p>${menuItem ? menuItem.name : 'Producto desconocido'}</p>
-                  <p>x${order.quantity}</p>
-                </div>${this.modsLine(order)}
-              `;
-            }).join('')}
-          </div>
-          <div class="line"></div>
-          <div class="totals">
-            <p>Aclaración:</p>
-            ${table.orders.filter(order => order.note).map(order => {
-              const menuItem = this.menuItems.find(item => item._id === order.menuItem);
-              return `<p>- ${menuItem ? menuItem.name : 'Producto desconocido'}: ${order.note}</p>`;
-            }).join('') || '<p>-</p>'}
-          </div>
-          <div class="line"></div>
-          <p style="text-align:center; font-size:8px;"><br></p>
-        </div>
-        <script>
-          window.print();
-          window.onafterprint = function() {
-            window.close();
-            window.opener.postMessage('closeDialog', '*');
-          }
-        </script>
-      </body>
-    </html>
-  `;
-
-  // Imprimir dos copias del ticket
-  for (let i = 0; i < 2; i++) {
-    const printWindow = window.open('', '', 'width=900,height=900');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.focus();
-      
-    }
-  }
-    location.reload();
-    // ✅ Guardar log de impresión
+  // Imprimir dos copias de la comanda (plantilla única en TicketService)
+  this.tickets.printComanda(
+    {
+      tableName: table.name,
+      waiterName: table.waiterName,
+      lines: table.orders.map((order: any) => ({
+        // Buscar el nombre del producto en la lista de menú
+        name: this.menuItems.find(item => item._id === order.menuItem)?.name ?? 'Producto desconocido',
+        quantity: order.quantity,
+        modifiers: modifiersText(order.modifiers),
+        note: order.note,
+      })),
+    },
+    { copies: 2 }
+  );
+  location.reload();
+  // ✅ Guardar log de impresión
   const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${table.name}</strong> atendida por <strong>${table.waiterName || 'Sin asignar'}</strong>`;
   this.gestionService.saveLog(logMessage);
 }
-
-
-  // Logo del negocio para las ventanas de impresión (vacío si no tiene)
-  private ticketLogoHtml(): string {
-    const logo = this.settings.absoluteLogoUrl();
-    return logo ? `<div class="logo"><img src="${logo}" alt="Logo"></div>` : '';
-  }
-
-  // Nombre del negocio ya escapado para meterlo en HTML
-  private ticketBusinessName(): string {
-    return this.settings.escape(this.settings.value.name.toUpperCase());
-  }
-
-  // Opciones elegidas (ya escapadas) como renglón de la comanda impresa
-  private modsLine(order: any): string {
-    return order.modifiers?.length
-      ? `<div style="font-size: 14px; margin-left: 8px">+ ${this.settings.escape(modifiersText(order.modifiers))}</div>`
-      : '';
-  }
 
   // Handler del botón Ordenar (evita usar pipes en template)
   orderButtonClicked(table: Table): void {

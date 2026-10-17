@@ -6,6 +6,8 @@ import { UserService } from 'src/app/services/user.service';
 import { CashService } from 'src/app/services/cash.service';
 import { PaymentValue } from '../payment-panel/payment-panel.component';
 import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
+import { TicketService } from 'src/app/services/ticket.service';
+import { CuentaLine, CuentaRow } from 'src/app/utils/ticket-html';
 
 @Component({
   selector: 'app-total-dialog',
@@ -41,7 +43,8 @@ export class TotalDialogComponent implements OnInit {
     private gestionService: GestionService,
     public settings: SettingsService,
     private userService: UserService,
-    private cash: CashService
+    private cash: CashService,
+    private tickets: TicketService
   ) {
     // El administrador aplica descuentos; el cajero solo si el negocio lo habilitó (el servidor también lo exige)
     const role = this.userService.currentRole();
@@ -299,153 +302,70 @@ export class TotalDialogComponent implements OnInit {
   }
 
   // Propina, total a pagar, medios de pago y vuelto del ticket (según lo elegido en el panel de pago)
-  private ticketPaymentHtml(): string {
+  private paymentRows(): CuentaRow[] {
     const p = this.payment;
     const fmt = (n: number) => this.settings.format(n);
     const labels: Record<string, string> = { efectivo: 'Efectivo', transferencia: 'Transferencia', qr: 'QR', tarjeta: 'Tarjeta' };
-    const rows: string[] = [];
-    if (this.partial && !this.partialIsFull) rows.push('<p><strong>Cuenta dividida: esta es una parte</strong></p>');
-    if (!p) return rows.join('');
+    const rows: CuentaRow[] = [];
+    if (this.partial && !this.partialIsFull) rows.push({ text: 'Cuenta dividida: esta es una parte', bold: true });
+    if (!p) return rows;
     if (p.tip > 0) {
-      rows.push(`<p><strong>Propina:</strong> ${fmt(p.tip)}</p>`);
-      rows.push(`<p style="font-size: 16px"><strong style="font-size: 16px">Total a pagar:</strong> ${fmt(p.due)}</p>`);
+      rows.push({ label: 'Propina:', value: fmt(p.tip) });
+      rows.push({ label: 'Total a pagar:', value: fmt(p.due), big: true });
     }
-    for (const x of p.payments) rows.push(`<p>${labels[x.method] ?? x.method}: ${fmt(x.amount)}</p>`);
-    if (p.change > 0) rows.push(`<p><strong>Vuelto:</strong> ${fmt(p.change)}</p>`);
-    return rows.join('');
-  }
-
-  // Logo del negocio para las ventanas de impresión (vacío si no tiene)
-  private ticketLogoHtml(): string {
-    const logo = this.settings.absoluteLogoUrl();
-    return logo ? `<div class="logo"><img src="${logo}" alt="Logo"></div>` : '';
-  }
-
-  // Nombre del negocio ya escapado para meterlo en HTML
-  private ticketBusinessName(): string {
-    return this.settings.escape(this.settings.value.name.toUpperCase());
+    for (const x of p.payments) rows.push({ text: `${labels[x.method] ?? x.method}: ${fmt(x.amount)}` });
+    if (p.change > 0) rows.push({ label: 'Vuelto:', value: fmt(p.change) });
+    return rows;
   }
 
   printTicket(): void {
     // Un ticket con un pago que no cubre la cuenta mostraría importes que no se van a cobrar
     if (this.payment && !this.payment.valid) return;
-    // Suponiendo que tienes el nombre de la mesa y el nombre del mozo disponibles
-    const tableName = this.tableName; // Aquí debes usar la variable que contiene el nombre de la mesa
-    const waiterName = this.waiterName; // Aquí debes usar la variable que contiene el nombre del mozo
+    const tableName = this.tableName;
+    const waiterName = this.waiterName;
     this.isTicketPrinted = true;
-    const printContent = `
-      <html>
-        <head>
-          <title>Ticket</title>
-          <style>
-            @page { size: 58mm landscape; margin: 0; }
-            body { 
-              font-family: 'Courier New', monospace; 
-              font-size: 14px;
-              font-weight: bold;
-              margin: 0;
-              padding: 0;
-              text-align: left;
-            }
-            .ticket { width: 58mm; padding: 5px; }
-            .header { text-align: left; margin-bottom: 5px; font-size: 14px; }
-            .order-list { text-align: left; word-wrap: break-word; font-size: 14px; }
-            .order-item { display: flex; justify-content: space-between; width: 100%; }
-            .order-item p { margin: 0; padding-right: 5px; }
-            .totals { margin-top: 5px; text-align: left; font-size: 14px; }
-            .line { border-top: 1px dashed #000; margin: 3px 0; }
-            .logo { text-align: center; margin-bottom: 10px; }
-            .logo img { width: 70px; height: auto; max-width: 58mm; }
-          </style>
-        </head>
-        <body>
-          <div class="ticket">
-            ${this.ticketLogoHtml()}
-            <div class="header">
-              <h2 style="font-size: 14px; margin-left: 4rem">${this.settings.escape(this.settings.value.name.toUpperCase())}</h2>
-              <div class="line"></div>
-              ${this.settings
-                .ticketHeaderLines()
-                .map((line) => `<p><strong style="font-size: 10px;">${this.settings.escape(line)}</strong></p>`)
-                .join('')}
-              <div class="line"></div>
-              <p>${new Date().toLocaleString()}</p>
-            </div>
-            <div class="order-list">
-              ${this.orders
-                .filter((order) => order.quantity > 0)
-                .map((order) => {
-                  const qty = order.quantity ?? 1;
-                  const itemDiscount = order.isPromo ? 0 : Number(order.discount) || 0;
-                  const grossLine = order.price * qty;
-                  const discountedSubtotal = grossLine * (1 - itemDiscount / 100);
-                  const mods: any[] = order.modifiers ?? [];
-                  const fmt = (n: number) => this.settings.format(n);
-                  // Con extras, el plato muestra su precio base y cada extra su propio importe; el descuento
-                  // va en un renglón aparte. Así los renglones de la línea suman lo que se cobra.
-                  const itemAmount = mods.length ? (order.basePrice ?? order.price) * qty : discountedSubtotal;
-                  const nameSuffix = `${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 && !mods.length ? `(${itemDiscount}% off)` : ''}`;
-                  const modLines = mods
-                    .map(
-                      (m) => `<div class="order-item">
-                        <p style="font-size: 11px; margin-left: 6px">+ ${this.settings.escape(m.name)}${qty > 1 && m.priceDelta ? ` x${qty}` : ''}</p>
-                        <p style="font-size: 11px">${m.priceDelta ? `${m.priceDelta > 0 ? '+' : '-'}${fmt(Math.abs(m.priceDelta * qty))}` : ''}</p>
-                      </div>`
-                    )
-                    .join('');
-                  const discountLine =
-                    mods.length && itemDiscount > 0
-                      ? `<div class="order-item">
-                        <p style="font-size: 11px; margin-left: 6px">Desc. ${itemDiscount}%</p>
-                        <p style="font-size: 11px">-${fmt(grossLine - discountedSubtotal)}</p>
-                      </div>`
-                      : '';
-                  return `
-                    <div class="order-item">
-                      <p style="font-size: 12px">${order.name} ${nameSuffix}</p>
-                      <p style="font-size: 12px">x${qty}</p>
-                      <p style="font-size: 12px">${fmt(itemAmount)}</p>
-                    </div>${modLines}${discountLine}
-                  `;
-                })
-                .join('')}
-            </div>
-            <div class="line"></div>
-            <div class="totals">
-              <p style="font-size: 16px"><strong style="font-size: 16px">Total:</strong> ${this.settings.format(this.total)}</p>
-              ${
-                this.discountPercentage > 0
-                  ? `<p><strong>Descuento (${
-                      this.discountPercentage
-                    }%${this.hasPromoItems ? ' sin promos' : ''}):</strong> -${this.settings.format(this.globalDiscountAmount)}</p>
-                     <p><strong>Total con descuento:</strong> ${this.settings.format(this.discountedTotal)}</p>`
-                  : ''
-              }
-              ${this.ticketPaymentHtml()}
-            </div>
-            <div class="line"></div>
-             <!-- Aquí agregamos el nombre de la mesa y del mozo -->
-              <p style="font-size: 10px"><strong style="font-size: 10px">Nro de mesa:</strong> ${tableName}</p>
-              <p style="font-size: 10px"><strong style="font-size: 10px">Atendido por:</strong> ${waiterName}</p>
-               <div class="line"></div>
-          </div>
-          <script>
-            window.print();
-            window.onafterprint = function() {
-              window.close();
-              window.opener.postMessage('closeDialog', '*');
-            }
-          </script>
-        </body>
-      </html>
-    `;
+    const fmt = (n: number) => this.settings.format(n);
 
-    const printWindow = window.open('', '', 'width=600,height=400');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.focus();
+    // Un renglón por plato. Con extras, el plato muestra su precio base y cada extra su propio importe; el
+    // descuento va en un renglón aparte. Así los renglones de la línea suman lo que se cobra.
+    const lines: CuentaLine[] = this.orders
+      .filter((order) => order.quantity > 0)
+      .map((order) => {
+        const qty = order.quantity ?? 1;
+        const itemDiscount = order.isPromo ? 0 : Number(order.discount) || 0;
+        const grossLine = order.price * qty;
+        const discountedSubtotal = grossLine * (1 - itemDiscount / 100);
+        const mods: any[] = order.modifiers ?? [];
+        const itemAmount = mods.length ? (order.basePrice ?? order.price) * qty : discountedSubtotal;
+        const suffix = `${order.isPromo ? '(PROMO)' : ''} ${itemDiscount > 0 && !mods.length ? `(${itemDiscount}% off)` : ''}`.trim();
+        return {
+          name: order.name,
+          suffix,
+          quantity: qty,
+          amount: fmt(itemAmount),
+          mods: mods.map((m) => ({
+            text: `+ ${m.name}${qty > 1 && m.priceDelta ? ` x${qty}` : ''}`,
+            amount: m.priceDelta ? `${m.priceDelta > 0 ? '+' : '-'}${fmt(Math.abs(m.priceDelta * qty))}` : '',
+          })),
+          discount:
+            mods.length && itemDiscount > 0
+              ? { text: `Desc. ${itemDiscount}%`, amount: `-${fmt(grossLine - discountedSubtotal)}` }
+              : undefined,
+        };
+      });
+
+    const summary: CuentaRow[] = [{ label: 'Total:', value: fmt(this.total), big: true }];
+    if (this.discountPercentage > 0) {
+      summary.push({ label: `Descuento (${this.discountPercentage}%${this.hasPromoItems ? ' sin promos' : ''}):`, value: `-${fmt(this.globalDiscountAmount)}` });
+      summary.push({ label: 'Total con descuento:', value: fmt(this.discountedTotal) });
     }
+    summary.push(...this.paymentRows());
+
+    // Ticket impreso con la plantilla única (TicketService)
+    this.tickets.printCuenta(
+      { tableName: String(tableName ?? ''), waiterName: String(waiterName ?? ''), lines, summary },
+      { windowSize: 'width=600,height=400' }
+    );
     // ✅ Guardar log de impresión
     const logMessage = `Se imprimió <strong>el ticket final</strong> de la mesa <strong>${tableName}</strong> atendida por <strong>${
       waiterName || 'Sin asignar'

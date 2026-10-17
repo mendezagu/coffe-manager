@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ModifierPickerDialogComponent } from '../modifier-picker-dialog/modifier-picker-dialog.component';
 import { OrderModifier, lineKey, modifiersText } from 'src/app/utils/modifiers';
-import { SettingsService } from 'src/app/services/settings.service';
+import { TicketService } from 'src/app/services/ticket.service';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
 import { GestionService, MenuItem, Table } from 'src/app/services/gestionService';
 
@@ -24,22 +24,11 @@ export class MenuDialogComponent {
 
   constructor(
     private gestionService: GestionService,
-    private settings: SettingsService,
+    private tickets: TicketService,
     private dialog: MatDialog,
     public dialogRef: MatDialogRef<MenuDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Table  // Se pasa la información de la mesa si es necesario
   ) {}
-
-  // Logo del negocio para las ventanas de impresión (vacío si no tiene)
-  private ticketLogoHtml(): string {
-    const logo = this.settings.absoluteLogoUrl();
-    return logo ? `<div class="logo"><img src="${logo}" alt="Logo"></div>` : '';
-  }
-
-  // Nombre del negocio ya escapado para meterlo en HTML
-  private ticketBusinessName(): string {
-    return this.settings.escape(this.settings.value.name.toUpperCase());
-  }
 
   // Modificadores (tamaño, leche, extras…) que ofrece cada plato
   modifierGroups: ModifierGroup[] = [];
@@ -58,13 +47,6 @@ export class MenuDialogComponent {
   }
 
   modifiersText = modifiersText;
-
-  // Opciones elegidas, ya escapadas, como renglón de la comanda impresa
-  private modsLine(item: MenuItem): string {
-    return item.selectedModifiers?.length
-      ? `<div style="font-size: 14px; margin-left: 8px">+ ${this.settings.escape(modifiersText(item.selectedModifiers))}</div>`
-      : '';
-  }
 
   // Mensaje del servidor pensado para la persona (ej: "No hay stock suficiente…"); si no hay, uno genérico
   private serverMessage(error: any, fallback: string): string {
@@ -192,73 +174,23 @@ updateQuantity(menu: MenuItem, event: Event): void {
         `Se agregaron: <strong>${itemsDescription}</strong> a la mesa <strong>${this.data.name}</strong> por el mozo <strong>${mozo}</strong>`
       );
   
-        const printContent = `
-          <html>
-            <head>
-              <title>Ticket</title>
-              <style>
-                @page { size: 58mm landscape; margin: 0; }
-                body { font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; margin: 0; padding: 0; text-align: left; }
-                .ticket { width: 58mm; padding: 5px; }
-                .header { text-align: left; margin-bottom: 5px; }
-                .order-list { text-align: left; word-wrap: break-word; }
-                .order-item { display: flex; justify-content: space-between; width: 100%; }
-                .order-item p { margin: 0; padding-right: 5px; font-size: 18px; }
-                .totals { margin-top: 5px; text-align: left; font-size: 18px; }
-                .line { border-top: 1px dashed #000; margin: 3px 0; }
-                .logo { text-align: center; margin-bottom: 10px; }
-                .logo img { width: 70px; max-width: 58mm; height: auto; }
-              </style>
-            </head>
-            <body>
-              <div class="ticket">
-                ${this.ticketLogoHtml()}
-                <div class="header">
-                  <h2 style="font-size: 14px;">🍽️ ${this.ticketBusinessName()}</h2>
-                  <p style="font-size: 14px;">Mesa: <strong>${this.data.name}</strong></p>
-                  <p style="font-size: 14px;">Solicitado por: <strong>${this.data.waiter?.name}</strong></p>
-                  <p>${new Date().toLocaleString()}</p>
-                </div>
-                <div class="line"></div>
-                <div class="order-list">
-                  ${this.selectedItems.map(item => `
-                    <div class="order-item">
-                      <p>${item.name}</p>
-                      <p>x${item.quantity}</p>
-                    </div>${this.modsLine(item)}
-                  `).join('')}
-                </div>
-                <div class="line"></div>
-                <div class="totals">
-                  <p>Aclaración:</p>
-                  ${this.selectedItems.filter(item => item.note).map(item => `
-                    <p>- ${item.name}: ${item.note}</p>
-                  `).join('') || '<p>-</p>'}
-                </div>
-                <div class="line"></div>
-                <p style="text-align:center; font-size:8px;"><br></p>
-              </div>
-              <script>
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                  window.opener.postMessage('closeDialog', '*');
-                   window.opener.location.reload();
-                }
-              </script>
-            </body>
-          </html>
-        `;
-  
-        // Imprimir dos veces
-        const printWindow = window.open('', '', 'width=900,height=900');
-        if (printWindow) {
-          printWindow.document.write(printContent);
-          printWindow.document.close();
-          printWindow.focus();
-           this.dialogRef.close();
-           location.reload();
-
+        // Comanda impresa con la plantilla única (TicketService)
+        const opened = this.tickets.printComanda(
+          {
+            tableName: this.data.name,
+            waiterName: this.data.waiter?.name || this.waiterName || this.data.waiterName,
+            lines: this.selectedItems.map(item => ({
+              name: item.name,
+              quantity: item.quantity ?? 1,
+              modifiers: modifiersText(item.selectedModifiers),
+              note: item.note,
+            })),
+          },
+          { reloadOpenerAfterPrint: true }
+        );
+        if (opened) {
+          this.dialogRef.close();
+          location.reload();
         }
           const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${this.data.name}</strong> atendida por <strong>${this.data.waiterName || 'Sin asignar'}</strong>`;
           this.gestionService.saveLog(logMessage);
