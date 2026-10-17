@@ -249,7 +249,7 @@
               <li *ngFor="let item of g.items">
                 <div role="button" tabindex="0" (click)="openItem(item)" (keydown.enter)="openItem(item)"
                   class="bg-white rounded-2xl p-[14px] flex items-center justify-between gap-[12px] shadow-soft transition-all"
-                  [ngClass]="item.soldOut ? 'opacity-50' : 'cursor-pointer active:scale-[0.99]'">
+                  [ngClass]="[item.soldOut ? 'opacity-50' : 'cursor-pointer active:scale-[0.99]', inCart(item) ? 'ring-[1.5px] ring-forest/40' : '']">
                   <div class="min-w-0 flex-1">
                     <p class="font-bold text-sm text-charcoal m-0 leading-snug">{{ item.name }}</p>
                     <p class="m-0 mt-[2px] flex items-center flex-wrap gap-x-[8px] gap-y-[2px]">
@@ -258,9 +258,12 @@
                       <span *ngIf="!item.soldOut && hasOptions(item)" class="text-[11px] text-muted">Con opciones</span>
                     </p>
                   </div>
-                  <button *ngIf="!item.soldOut" type="button" (click)="hasOptions(item) ? openItem(item) : quickAdd(item, $event)" [attr.aria-label]="'Agregar ' + item.name"
-                    class="w-9 h-9 flex-shrink-0 rounded-full bg-forest-soft text-forest flex items-center justify-center active:scale-90 transition-transform">
-                    <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
+                  <button *ngIf="!item.soldOut" type="button" (click)="hasOptions(item) ? openItem(item) : quickAdd(item, $event)"
+                    [attr.aria-label]="(inCart(item) ? 'Agregar otra unidad de ' : 'Agregar ') + item.name"
+                    [attr.title]="inCart(item) ? 'Agregado ×' + qtyInCart(item) : null"
+                    class="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center active:scale-90 transition-all"
+                    [ngClass]="[inCart(item) ? 'bg-forest text-white' : 'bg-forest-soft text-forest', justAdded === item.id ? 'added-pop' : '']">
+                    <mat-icon class="!w-5 !h-5 !text-xl">{{ inCart(item) ? 'check' : 'add' }}</mat-icon>
                   </button>
                 </div>
               </li>

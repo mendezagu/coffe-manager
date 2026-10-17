@@ -335,6 +335,15 @@ updateQuantity(menu: MenuItem, event: Event): void {
     this.canPrint = this.selectedItems.length > 0; // Habilitar botón de imprimir si hay elementos
   }
 
+  // Para marcar con un check los platos que ya están en la orden (con cualquier combinación de opciones)
+  isSelected(menu: MenuItem): boolean {
+    return this.selectedItems.some(s => s._id === menu._id);
+  }
+
+  selectedQty(menu: MenuItem): number {
+    return this.selectedItems.filter(s => s._id === menu._id).reduce((n, s) => n + (s.quantity ?? 0), 0);
+  }
+
   removeSelectedItem(item: MenuItem): void {
     const index = this.selectedItems.findIndex(selected => (selected.lineKey ?? selected._id) === (item.lineKey ?? item._id));
     if (index > -1) {

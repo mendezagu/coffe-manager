@@ -62,6 +62,21 @@ const SPLASH_SECONDS = 7;
           stroke-dashoffset: 0;
         }
       }
+      /* Rebote del botón al agregar un plato */
+      @keyframes addedPop {
+        0% {
+          transform: scale(0.85);
+        }
+        60% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .added-pop {
+        animation: addedPop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+      }
       .check-path {
         stroke-dasharray: 24;
         stroke-dashoffset: 24;
@@ -71,6 +86,9 @@ const SPLASH_SECONDS = 7;
         .check-path {
           animation-duration: 0.01s;
           animation-delay: 0s;
+        }
+        .added-pop {
+          animation: none;
         }
       }
     `,
@@ -382,6 +400,22 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     else this.cart.push({ key, itemId: item.id, name: item.name, quantity, note, optionIds, extras, unitPrice });
     this.saveCart();
     this.say('ok', `${item.name} agregado`);
+    // Marca el botón del plato un instante para que rebote
+    this.justAdded = item.id;
+    setTimeout(() => {
+      if (this.justAdded === item.id) this.justAdded = '';
+    }, 600);
+  }
+
+  // Platos que ya están en el pedido (con cualquier combinación de opciones): el botón "+" pasa a ser un check
+  justAdded = '';
+
+  inCart(item: PublicItem): boolean {
+    return this.cart.some((l) => l.itemId === item.id);
+  }
+
+  qtyInCart(item: PublicItem): number {
+    return this.cart.filter((l) => l.itemId === item.id).reduce((n, l) => n + l.quantity, 0);
   }
 
   // ---------- pedido ----------

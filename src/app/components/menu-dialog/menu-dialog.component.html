@@ -93,7 +93,8 @@
     <div class="space-y-2 max-h-[45vh] overflow-y-auto custom-scrollbar pr-2">
       <div
         *ngFor="let menu of filteredMenuItems"
-        class="group bg-white rounded-lg transition-all duration-300 overflow-hidden border border-sage-100 hover:border-sage-300"
+        class="group bg-white rounded-lg transition-all duration-300 overflow-hidden border"
+        [ngClass]="isSelected(menu) ? 'border-cafe-green-700 ring-1 ring-cafe-green-700/30' : 'border-sage-100 hover:border-sage-300'"
       >
         <div class="p-2.5 sm:p-3">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -123,15 +124,16 @@
 
               <!-- Botón Agregar -->
               <button
-                class="flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                type="button"
+                class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 [ngClass]="addedItems[menu._id] ?
-                  'bg-cafe-green-700 text-white' :
-                  'bg-cafe-green-700 hover:bg-cafe-green-800 text-white'"
+                  'bg-cafe-mint-500 text-cafe-green-900 added-pop' :
+                  (isSelected(menu) ? 'bg-cafe-green-700 text-white hover:bg-cafe-green-800' : 'bg-cafe-green-50 text-cafe-green-700 hover:bg-cafe-green-100')"
                 (click)="addItem(menu)" [disabled]="menu.availableUnits === 0"
+                [attr.aria-label]="(isSelected(menu) ? 'Agregar otra unidad de ' : 'Agregar ') + menu.name"
+                [attr.title]="isSelected(menu) ? 'Agregado ×' + selectedQty(menu) : 'Agregar'"
               >
-                <mat-icon class="!w-3.5 !h-3.5 !text-sm" *ngIf="!addedItems[menu._id]">add_circle</mat-icon>
-                <mat-icon class="!w-3.5 !h-3.5 !text-sm" *ngIf="addedItems[menu._id]">check_circle</mat-icon>
-                <span class="hidden sm:inline">{{ addedItems[menu._id] ? "Agregado" : "Agregar" }}</span>
+                <mat-icon class="!w-5 !h-5 !text-xl">{{ isSelected(menu) ? 'check' : 'add' }}</mat-icon>
               </button>
             </div>
           </div>
@@ -167,6 +169,18 @@
 </div>
 
 <style>
+  /* Rebote del botón al agregar un plato */
+  .added-pop {
+    animation: added-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+  }
+  @keyframes added-pop {
+    0% { transform: scale(0.9); }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .added-pop { animation: none; }
+  }
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;

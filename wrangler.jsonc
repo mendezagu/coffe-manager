@@ -1,0 +1,15 @@
+{
+  // App de Tavolapp en Cloudflare: publica la carpeta que genera "npm run build:app".
+  // Se publica con "npm run deploy:app" y queda en https://app.tavolapp.app
+  "name": "tavolapp-app",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./dist/tavolapp-app",
+    // La app es de una sola página: cualquier ruta (/login, /qr/...) devuelve index.html
+    // en vez de dar 404 al recargar.
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "app.tavolapp.app", "custom_domain": true }
+  ]
+}

@@ -7,7 +7,9 @@
     "build": "ng build --configuration=production --base-href='/coffe-manager/' --output-path=dist/coffe-manager",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "npm run build && npx angular-cli-ghpages --dir=dist/coffe-manager --no-silent"
+    "deploy": "npm run build && npx angular-cli-ghpages --dir=dist/coffe-manager --no-silent",
+    "build:app": "ng build --configuration=production --base-href=/ --output-path=dist/tavolapp-app",
+    "deploy:app": "npm run build:app && npx wrangler deploy"
   },
   "private": true,
   "dependencies": {
