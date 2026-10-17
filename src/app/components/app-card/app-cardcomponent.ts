@@ -12,6 +12,7 @@ import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { modifiersText } from 'src/app/utils/modifiers';
 import { TicketService } from 'src/app/services/ticket.service';
+import { RealtimeService } from 'src/app/services/realtime.service';
 import { QrInbox, QrService } from 'src/app/services/qr.service';
 import { LiveSummary, ReportsService } from 'src/app/services/reports.service';
 import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
@@ -30,7 +31,7 @@ interface TableGroup {
   styleUrls: ['./app-card.component.scss']
 })
 export class CardComponent implements OnInit, OnDestroy {
-  private refresh?: ReturnType<typeof setInterval>;
+  private tablesSub?: Subscription;
   tables: Table[] = [];
   searchText: string = '';
   // 'grouped': una sección por sector, con su título. 'flat': todas las mesas juntas en una sola grilla.
@@ -53,15 +54,16 @@ export class CardComponent implements OnInit, OnDestroy {
     private reports: ReportsService,
     private zone: NgZone,
     private tickets: TicketService,
+    private realtime: RealtimeService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
 
   ngOnInit(): void {
     this.restoreView();
-    this.loadTables();
-    // Refresca las mesas para que el mozo vea cuándo cocina marca algo como listo.
-    this.refresh = setInterval(() => this.loadTables(), 10000);
+    // Las mesas se actualizan en el momento en que el servidor avisa un cambio (otro mozo, la cocina, un pedido por QR).
+    // Sin conexión en vivo, se consultan cada 10 segundos como antes.
+    this.tablesSub = this.realtime.refresh$('tables', 10000).subscribe(() => this.loadTables());
     this.loadMenu(); // 📌 Cargar los ítems del menú al iniciar
 
      // Cargar los mozos al iniciar el componente
@@ -93,7 +95,7 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.refresh) clearInterval(this.refresh);
+    this.tablesSub?.unsubscribe();
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
     this.dragEnd();
@@ -448,7 +450,9 @@ addMenuItems(table: Table): void {
         this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
           this.loadTables();
         });
-      }
+      } else {
+                this.loadTables(); // el diálogo ya guardó los platos y se cerró sin devolverlos
+              }
     });
 
   } else {
@@ -486,6 +490,8 @@ addMenuItems(table: Table): void {
                 this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
                   this.loadTables();
                 });
+              } else {
+                this.loadTables(); // el diálogo ya guardó los platos y se cerró sin devolverlos
               }
             });
           },
@@ -531,10 +537,9 @@ addMenuItems(table: Table): void {
         this.loadLive(); // un cobro cambia las ventas de hoy
         if (result?.status === 'mesa_liberada') {
           console.log(`Mesa con ID ${result.tableId} liberada correctamente.`);
-          
-          // 🔄 Recargar las mesas si la mesa fue liberada
-          this.loadTables();
         }
+        // Sea un cobro parcial o la mesa completa, se actualizan las mesas
+        this.loadTables();
       });
     } else {
       console.warn('La mesa no tiene órdenes.');
@@ -579,7 +584,9 @@ openWaiterDialog(table: Table): void {
               this.gestionService.addItemsToTable(table.id, menu).subscribe(() => {
                 this.loadTables();
               });
-            }
+            } else {
+                this.loadTables(); // el diálogo ya guardó los platos y se cerró sin devolverlos
+              }
           });
         },
         error: (error) => {
@@ -682,7 +689,6 @@ printTicket(tableId: string): void {
     },
     { copies: 2 }
   );
-  location.reload();
   // ✅ Guardar log de impresión
   const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${table.name}</strong> atendida por <strong>${table.waiterName || 'Sin asignar'}</strong>`;
   this.gestionService.saveLog(logMessage);

@@ -55,8 +55,6 @@ export interface CuentaData {
 }
 
 export interface TicketOptions {
-  // Al terminar de imprimir, recarga la pantalla desde la que se abrió el papel
-  reloadOpenerAfterPrint?: boolean;
   // Fecha y hora impresas (por defecto, ahora)
   date?: Date;
 }
@@ -95,8 +93,7 @@ const CSS = `
 `;
 
 // Arma la página completa: estilo, contenido y el script que imprime y avisa a la pantalla de origen
-function page(kind: 'comanda' | 'cuenta', inner: string, opts: TicketOptions): string {
-  const reload = opts.reloadOpenerAfterPrint ? '\n          window.opener.location.reload();' : '';
+function page(kind: 'comanda' | 'cuenta', inner: string): string {
   return `<html>
   <head>
     <meta charset="utf-8">
@@ -111,7 +108,7 @@ ${inner}
       window.print();
       window.onafterprint = function() {
         window.close();
-        window.opener.postMessage('closeDialog', '*');${reload}
+        window.opener.postMessage('closeDialog', '*');
       }
     </script>
   </body>
@@ -160,8 +157,7 @@ ${items}
         ${notes}
       </div>
       <div class="line"></div>
-      <p class="spacer"><br></p>`,
-    opts
+      <p class="spacer"><br></p>`
   );
 }
 
@@ -209,7 +205,6 @@ ${items}
       <div class="line"></div>
       <p class="foot"><strong>Nro de mesa:</strong> ${e(data.tableName)}</p>
       <p class="foot"><strong>Atendido por:</strong> ${e(data.waiterName)}</p>
-      <div class="line"></div>`,
-    opts
+      <div class="line"></div>`
   );
 }

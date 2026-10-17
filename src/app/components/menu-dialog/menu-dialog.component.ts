@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ModifierPickerDialogComponent } from '../modifier-picker-dialog/modifier-picker-dialog.component';
 import { OrderModifier, lineKey, modifiersText } from 'src/app/utils/modifiers';
@@ -11,7 +11,7 @@ import { GestionService, MenuItem, Table } from 'src/app/services/gestionService
   templateUrl: './menu-dialog.component.html',
   styleUrls: ['./menu-dialog.component.scss']
 })
-export class MenuDialogComponent {
+export class MenuDialogComponent implements OnDestroy {
 
   menuItems: MenuItem[] = [];
   selectedItems: MenuItem[] = [];
@@ -71,12 +71,18 @@ export class MenuDialogComponent {
   }
 
     // Escuchar el mensaje de cierre desde la ventana de impresión
-    window.addEventListener('message', (event) => {
-      if (event.data === 'closeDialog') {
-        this.dialogRef.close(this.selectedItems); // Cerrar el diálogo
-      }
-    });
+    window.addEventListener('message', this.onPrintMessage);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.onPrintMessage);
+  }
+
+  private onPrintMessage = (event: MessageEvent) => {
+    if (event.data === 'closeDialog') {
+      this.dialogRef.close(this.selectedItems); // Cerrar el diálogo
+    }
+  };
 
   loadMenu(): void {
     this.gestionService.getMenu().subscribe((menus) => {
@@ -186,12 +192,9 @@ updateQuantity(menu: MenuItem, event: Event): void {
               note: item.note,
             })),
           },
-          { reloadOpenerAfterPrint: true }
         );
-        if (opened) {
-          this.dialogRef.close();
-          location.reload();
-        }
+        // Los platos ya quedaron guardados en la mesa: se cierra el diálogo y la pantalla de mesas se actualiza sola
+        if (opened) this.dialogRef.close();
           const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${this.data.name}</strong> atendida por <strong>${this.data.waiterName || 'Sin asignar'}</strong>`;
           this.gestionService.saveLog(logMessage);
       },

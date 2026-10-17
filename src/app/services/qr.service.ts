@@ -1,8 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { RealtimeService } from './realtime.service';
 
 // ---------- Personal del local ----------
 
@@ -79,7 +80,7 @@ export class QrService implements OnDestroy {
   private arrivals = new Subject<{ requests: QrRequest[]; calls: QrCall[] }>();
   readonly arrivals$ = this.arrivals.asObservable();
 
-  private timer?: ReturnType<typeof setInterval>;
+  private sub?: Subscription;
   private seen = new Set<string>();
   private firstLoad = true;
   private audio?: AudioContext;
@@ -107,7 +108,7 @@ export class QrService implements OnDestroy {
     this.beep(true);
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private realtime: RealtimeService) {}
 
   get value(): QrInbox {
     return this.state.value;
@@ -121,16 +122,16 @@ export class QrService implements OnDestroy {
   // Empieza (o deja de) consultar la bandeja. Se llama según el rol y el plan del negocio.
   watch(enabled: boolean) {
     if (!enabled) {
-      if (this.timer) clearInterval(this.timer);
-      this.timer = undefined;
+      this.sub?.unsubscribe();
+      this.sub = undefined;
       this.seen.clear();
       this.firstLoad = true;
       this.state.next(EMPTY);
       return;
     }
-    if (this.timer) return;
-    this.refresh();
-    this.timer = setInterval(() => this.refresh(), POLL_MS);
+    if (this.sub) return;
+    // Se actualiza en el momento en que llega un pedido o aviso; sin conexión en vivo, consulta cada POLL_MS
+    this.sub = this.realtime.refresh$('qr', POLL_MS).subscribe(() => this.refresh());
   }
 
   refresh() {
@@ -201,7 +202,7 @@ export class QrService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.timer) clearInterval(this.timer);
+    this.sub?.unsubscribe();
   }
 }
 
@@ -271,7 +272,7 @@ export interface SendLine {
 export class QrPublicService {
   private readonly baseUrl = `${environment.apiUrl}/public/mesa`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private realtime: RealtimeService) {}
 
   private headers(pin?: string) {
     return pin ? { headers: new HttpHeaders({ 'x-table-pin': pin }) } : {};

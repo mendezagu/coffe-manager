@@ -1,5 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { RealtimeService } from 'src/app/services/realtime.service';
 import { ClientOrders, ClientRequest, ClientStep, PublicGroup, PublicInfo, PublicItem, QrPublicService } from 'src/app/services/qr.service';
 
 interface CartLine {
@@ -138,12 +140,16 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   openPast: Record<string, boolean> = {};
 
   private clientId = '';
-  private timer?: ReturnType<typeof setInterval>;
+  private ordersSub?: Subscription;
+  // Al volver a la pestaña se actualiza enseguida (mientras estaba oculta no se consultaba)
+  private onVisible = () => {
+    if (!document.hidden && this.phase === 'ready') this.loadOrders();
+  };
   private bannerTimer?: ReturnType<typeof setTimeout>;
   private helpTimer?: ReturnType<typeof setTimeout>;
   private formatter?: Intl.NumberFormat;
 
-  constructor(private route: ActivatedRoute, private api: QrPublicService) {}
+  constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService) {}
 
   ngOnInit() {
     this.token = this.route.snapshot.paramMap.get('token') ?? '';
@@ -152,13 +158,18 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     this.cart = this.readCart();
     this.customerName = store.get(localStorage, 'qr-customer-name') ?? '';
     this.load();
-    this.timer = setInterval(() => {
+    // El estado de los pedidos se actualiza en el momento en que el local lo cambia; sin conexión en vivo, cada 6 segundos
+    this.realtime.connectCustomer(this.token);
+    this.ordersSub = this.realtime.refresh$('orders', 6000).subscribe(() => {
       if (this.phase === 'ready' && !document.hidden) this.loadOrders();
-    }, 6000);
+    });
+    document.addEventListener('visibilitychange', this.onVisible);
   }
 
   ngOnDestroy() {
-    if (this.timer) clearInterval(this.timer);
+    this.ordersSub?.unsubscribe();
+    this.realtime.disconnectCustomer();
+    document.removeEventListener('visibilitychange', this.onVisible);
     if (this.bannerTimer) clearTimeout(this.bannerTimer);
     if (this.helpTimer) clearTimeout(this.helpTimer);
     this.clearSplashTimers();

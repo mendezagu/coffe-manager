@@ -63,9 +63,10 @@ describe('ticket-html (plantilla única de comanda y cuenta)', () => {
     expect(html).toContain('Atendido por:</strong> Lucía');
   });
 
-  it('recarga la pantalla de origen solo si se pide', () => {
-    const data = { tableName: '4', lines: [{ name: 'Té', quantity: 1 }] };
-    expect(buildComanda(data, brand, { date })).not.toContain('opener.location.reload');
-    expect(buildComanda(data, brand, { date, reloadOpenerAfterPrint: true })).toContain('opener.location.reload');
+  it('el papel imprime y avisa a la pantalla de origen, pero ya no la recarga', () => {
+    const html = buildComanda({ tableName: '4', lines: [{ name: 'Té', quantity: 1 }] }, brand, { date });
+    expect(html).toContain('window.print()');
+    expect(html).toContain("postMessage('closeDialog'");
+    expect(html).not.toContain('location.reload');
   });
 });

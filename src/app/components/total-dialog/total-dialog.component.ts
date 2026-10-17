@@ -284,7 +284,7 @@ export class TotalDialogComponent implements OnInit {
               status: isPartPayment ? 'parte_cobrada' : 'mesa_liberada',
               tableId: this.data.tableId,
             });
-            location.reload();
+            // La pantalla de mesas se actualiza al cerrarse el diálogo (y por el aviso en vivo del servidor)
             this.isProcessing = false;
           }, 1500); // Espera 1.5 segundos para mostrar el spinner y el texto
         },

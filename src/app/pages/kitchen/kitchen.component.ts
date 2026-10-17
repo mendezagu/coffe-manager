@@ -4,6 +4,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { KitchenDestination, KitchenOrder, KitchenService, KitchenStatus } from 'src/app/services/kitchen.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { UserService } from 'src/app/services/user.service';
+import { RealtimeService } from 'src/app/services/realtime.service';
 
 const POLL_MS = 5000;
 const LATE_MINUTES = 10;
@@ -61,7 +62,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   // una lectura vieja no "des-haga" por un instante lo que cocina acaba de tocar.
   private inFlight = 0;
 
-  constructor(private kitchen: KitchenService, private settings: SettingsService, private users: UserService) {}
+  constructor(private kitchen: KitchenService, private settings: SettingsService, private users: UserService, private realtime: RealtimeService) {}
 
   get isAdmin(): boolean {
     return this.role === 'admin';
@@ -105,7 +106,8 @@ export class KitchenComponent implements OnInit, OnDestroy {
 
   private startPolling() {
     if (this.polling) return;
-    this.polling = merge(timer(0, POLL_MS), this.reload$)
+    // Se actualiza cuando el servidor avisa un cambio; sin conexión en vivo, consulta cada POLL_MS como antes
+    this.polling = merge(this.realtime.refresh$('kitchen', POLL_MS), this.reload$)
       .pipe(
         switchMap(() =>
           this.kitchen.list(this.isAdmin && this.splitActive && this.tab !== 'ALL' ? this.tab : undefined).pipe(

@@ -86,8 +86,7 @@ export class OrderInfoDialogComponent implements OnInit {
       this.table = updatedTable;
       this.orders = this.table.orders;
       this.printMenuItems(); // Actualizar nombres visibles
-      this.dialogRef.close(); // Cierra el diálogo después de eliminar las órdenes
-      location.reload();
+      this.dialogRef.close(); // Cierra el diálogo después de eliminar las órdenes (la pantalla de mesas se actualiza al cerrarse)
     },
     (error) => {
       console.error('Error eliminando órdenes:', error);
@@ -204,7 +203,6 @@ export class OrderInfoDialogComponent implements OnInit {
 
   // Finalizar guardado
   private finishSaving(): void {
-    this.dialogRef.close();
-    location.reload();
+    this.dialogRef.close(); // la pantalla de mesas se actualiza al cerrarse
   }
 }
