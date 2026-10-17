@@ -1,8 +1,8 @@
 {
-  "name": "coffe-manager",
-  "short_name": "coffe-manager",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "name": "Tavolapp",
+  "short_name": "Tavolapp",
+  "theme_color": "#1b2822",
+  "background_color": "#1b2822",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
