@@ -1,0 +1,126 @@
+<!-- Portal del hotel. Bootstrap global pisa p-3/4/5, gap-3/4/5, mb-3/4 y border con !important,
+     por eso acá se usan valores explícitos ([14px]) en esas escalas. -->
+<div class="min-h-screen bg-sage-100 text-sage-900">
+
+  <!-- Login -->
+  <div *ngIf="!loggedIn" class="min-h-screen flex items-center justify-center px-[16px]">
+    <form (ngSubmit)="login()" class="w-full max-w-sm bg-white rounded-2xl shadow-soft p-[24px]">
+      <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center mb-[12px]"><mat-icon>hotel</mat-icon></div>
+      <h1 class="m-0 text-xl font-bold">Portal del hotel</h1>
+      <p class="m-0 mt-[4px] mb-[18px] text-sm text-sage-600">Ingresá con el acceso que te dio Tavolapp.</p>
+
+      <label for="hp-email" class="block text-xs font-bold text-sage-600 mb-[4px]">Email</label>
+      <input id="hp-email" name="email" type="email" [(ngModel)]="email" autocomplete="username"
+        class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 text-sm" />
+      <label for="hp-pass" class="block text-xs font-bold text-sage-600 mb-[4px]">Contraseña</label>
+      <input id="hp-pass" name="password" type="password" [(ngModel)]="password" autocomplete="current-password"
+        class="w-full px-[12px] py-[10px] mb-[14px] rounded-xl border-[1px] border-sage-300 text-sm" />
+
+      <p *ngIf="loginError" role="alert" class="m-0 mb-[12px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ loginError }}</p>
+      <button type="submit" [disabled]="busy || !email.trim() || !password"
+        class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+        {{ busy ? 'Ingresando…' : 'Ingresar' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Panel -->
+  <ng-container *ngIf="loggedIn">
+    <header class="bg-white border-b-[1px] border-sage-200">
+      <div class="max-w-4xl mx-auto px-[16px] py-[14px] flex items-center justify-between gap-[12px]">
+        <div class="flex items-center gap-[12px] min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon>hotel</mat-icon></div>
+          <div class="min-w-0">
+            <h1 class="m-0 text-lg font-bold truncate">{{ summary?.hotel?.name || 'Portal del hotel' }}</h1>
+            <p class="m-0 text-xs text-sage-500">Beneficio para huéspedes · Tavolapp</p>
+          </div>
+        </div>
+        <button type="button" (click)="logout()" class="px-[14px] py-[8px] rounded-lg bg-white border-[1px] border-sage-200 text-sage-700 text-sm font-bold flex-shrink-0">Salir</button>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-[16px] py-[20px]">
+      <p *ngIf="error" role="alert" class="mb-[16px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
+      <p *ngIf="notice" role="status" class="mb-[16px] px-[12px] py-[8px] rounded-lg bg-cafe-green-50 text-cafe-green-800 text-sm font-medium">{{ notice }}</p>
+      <p *ngIf="loading && !summary" class="text-sm text-sage-600">Cargando…</p>
+
+      <ng-container *ngIf="summary as s">
+        <p *ngIf="!s.hotel.active" role="alert" class="mb-[16px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">El hotel está dado de baja: los huéspedes no pueden pedir vouchers.</p>
+
+        <!-- Resumen -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-[12px] mb-[16px]">
+          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Emitidos</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.issued }}</p></div>
+          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Usados</p><p class="m-0 mt-[4px] text-2xl font-bold text-cafe-green-700" data-testid="redeemed">{{ s.totals.redeemed }}</p></div>
+          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Vencidos</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.expired }}</p></div>
+          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Anulados</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.cancelled }}</p></div>
+        </div>
+
+        <div class="grid gap-[16px] md:grid-cols-2 mb-[16px]">
+          <!-- Código -->
+          <section class="bg-white rounded-2xl shadow-soft p-[16px]">
+            <h2 class="m-0 mb-[4px] font-bold">Código para huéspedes</h2>
+            <p class="m-0 mb-[10px] text-xs text-sage-500">Es lo que prueba que alguien está alojado. Cambialo cuando quieras (por ejemplo cada semana).</p>
+            <p class="m-0 mb-[12px] text-3xl font-bold tracking-[0.2em] text-cafe-green-800" data-testid="access-code">{{ s.hotel.accessCode }}</p>
+            <div class="flex flex-wrap gap-[8px]">
+              <input name="newCode" [(ngModel)]="newCode" (keydown.enter)="saveCode()" placeholder="Nuevo código" maxlength="40" aria-label="Nuevo código"
+                class="flex-1 min-w-[140px] px-[12px] py-[8px] rounded-xl border-[1px] border-sage-300 text-sm uppercase" />
+              <button type="button" (click)="generateCode()" class="px-[12px] py-[8px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold">Generar</button>
+              <button type="button" (click)="saveCode()" [disabled]="!newCode.trim()"
+                class="px-[14px] py-[8px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold disabled:opacity-50">Guardar</button>
+            </div>
+          </section>
+
+          <!-- QR -->
+          <section class="bg-white rounded-2xl shadow-soft p-[16px]">
+            <h2 class="m-0 mb-[4px] font-bold">QR del hotel</h2>
+            <p class="m-0 mb-[10px] text-xs text-sage-500">Los huéspedes lo escanean para ver los restaurantes y pedir su voucher.</p>
+            <div class="flex items-center gap-[14px]">
+              <img *ngIf="qr" [src]="qr" alt="QR del hotel" class="w-28 h-28 rounded-lg border-[1px] border-sage-200 flex-shrink-0" />
+              <div class="min-w-0">
+                <p class="m-0 text-xs text-sage-600 break-all">{{ url }}</p>
+                <div class="flex flex-wrap gap-[8px] mt-[10px]">
+                  <button type="button" (click)="copy(url)" class="px-[12px] py-[6px] rounded-lg bg-white border-[1px] border-sage-300 text-xs font-bold">Copiar enlace</button>
+                  <button type="button" (click)="printCard()" class="px-[12px] py-[6px] rounded-lg bg-cafe-green-700 text-white text-xs font-bold">Imprimir tarjeta</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Por restaurante -->
+        <section *ngIf="s.byRestaurant.length" class="bg-white rounded-2xl shadow-soft p-[16px] mb-[16px]">
+          <h2 class="m-0 mb-[10px] font-bold">Por restaurante</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-xs text-sage-500"><th class="py-[6px]">Restaurante</th><th class="py-[6px] text-right">Emitidos</th><th class="py-[6px] text-right">Usados</th></tr></thead>
+            <tbody class="divide-y divide-sage-100">
+              <tr *ngFor="let r of s.byRestaurant"><td class="py-[6px]">{{ r.name }}</td><td class="py-[6px] text-right">{{ r.issued }}</td><td class="py-[6px] text-right font-bold">{{ r.redeemed }}</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Últimos vouchers -->
+        <section class="bg-white rounded-2xl shadow-soft p-[16px]">
+          <h2 class="m-0 mb-[4px] font-bold">Últimos vouchers</h2>
+          <p class="m-0 mb-[10px] text-xs text-sage-500">Si alguien lo pidió sin estar alojado, podés anular su voucher mientras no se haya usado.</p>
+          <p *ngIf="s.recent.length === 0" class="m-0 text-sm text-sage-500">Todavía no se emitió ninguno.</p>
+          <div class="overflow-x-auto">
+            <table *ngIf="s.recent.length" class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-[6px]">Huésped</th><th class="py-[6px]">Restaurante</th><th class="py-[6px]">Pedido</th><th class="py-[6px]">Estado</th><th></th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let v of s.recent">
+                  <td class="py-[6px]">{{ v.guestName }}</td>
+                  <td class="py-[6px]">{{ v.restaurantName }}</td>
+                  <td class="py-[6px] whitespace-nowrap">{{ v.createdAt | date:'dd/MM HH:mm' }}</td>
+                  <td class="py-[6px]"><span class="px-[8px] py-[2px] rounded-full text-xs font-bold" [ngClass]="chip(v.status)">{{ label(v.status) }}</span></td>
+                  <td class="py-[6px] text-right">
+                    <button *ngIf="v.status === 'ISSUED'" type="button" (click)="cancel(v.id, v.guestName)" class="text-xs font-bold text-cafe-red-700 underline bg-transparent">Anular</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </ng-container>
+    </main>
+  </ng-container>
+</div>

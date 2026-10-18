@@ -102,7 +102,7 @@
           <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
           <div class="flex items-center justify-between gap-2 pl-1">
             <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</strong></span>
-            <div *ngIf="!order.isPromo && canDiscount" class="flex items-center gap-1.5">
+            <div *ngIf="!order.isPromo && manualDiscountAllowed" class="flex items-center gap-1.5">
               <span class="text-sage-500 text-xs">% desc.</span>
               <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-sage-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
             </div>
@@ -126,8 +126,36 @@
       </div>
     </div>
 
+    <!-- Voucher de hotel: lo puede usar cualquier cajero; fija el descuento y no se suma a otros -->
+    <div class="mb-3" data-testid="voucher-panel">
+      <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
+        <mat-icon class="!w-4 !h-4 !text-base text-sage-600">hotel</mat-icon>
+        Voucher de hotel
+      </h3>
+
+      <div *ngIf="!voucher" class="flex items-stretch gap-2">
+        <input type="text" [(ngModel)]="voucherInput" (keydown.enter)="applyVoucher()" maxlength="20" autocomplete="off" autocapitalize="characters"
+          placeholder="Código del voucher" aria-label="Código del voucher de hotel"
+          class="flex-1 min-w-0 px-3 py-2 text-sm uppercase tracking-widest border border-sage-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+        <button type="button" (click)="applyVoucher()" [disabled]="!voucherInput.trim() || voucherChecking"
+          class="px-4 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold text-xs rounded-lg border border-sage-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ voucherChecking ? 'Revisando…' : 'Aplicar' }}
+        </button>
+      </div>
+      <p *ngIf="voucherError" role="alert" class="mt-2 mb-0 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-xs font-medium">{{ voucherError }}</p>
+
+      <div *ngIf="voucher" class="flex items-center justify-between gap-2 p-3 rounded-lg border border-cafe-green-200 bg-cafe-green-50">
+        <div class="min-w-0">
+          <p class="m-0 text-sm font-bold text-cafe-green-900 truncate">{{ voucher.hotelName }} · {{ voucher.discountPct }}% de descuento</p>
+          <p class="m-0 text-xs text-cafe-green-800 truncate">Huésped: {{ voucher.guestName }} · código {{ voucher.code }}</p>
+          <p class="m-0 text-xs text-cafe-green-800">Un voucher por mesa. No se suma a otros descuentos ni toca los ítems en promo.</p>
+        </div>
+        <button type="button" (click)="removeVoucher()" class="flex-shrink-0 px-3 py-1.5 bg-white text-sage-700 font-bold text-xs rounded-lg border border-sage-200">Quitar</button>
+      </div>
+    </div>
+
     <!-- Panel de descuento (administrador, o cajero si el negocio lo habilitó) -->
-    <div class="mb-3" *ngIf="canDiscount">
+    <div class="mb-3" *ngIf="manualDiscountAllowed">
       <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
         <mat-icon class="!w-4 !h-4 !text-base text-sage-600">local_offer</mat-icon>
         Aplicar Descuento
@@ -201,7 +229,7 @@
           <span>{{ discountableTotal | money }}</span>
         </div>
         <div class="flex justify-between gap-2 font-bold">
-          <span>Descuento {{ discountPercentage }}%{{ hasPromoItems ? ' (solo sin promo)' : '' }}</span>
+          <span>{{ voucher ? 'Voucher ' + voucher.hotelName : 'Descuento' }} {{ discountPercentage }}%{{ hasPromoItems ? ' (solo sin promo)' : '' }}</span>
           <span>-{{ globalDiscountAmount | money }}</span>
         </div>
         <div *ngIf="hasPromoItems" class="flex justify-between gap-2">

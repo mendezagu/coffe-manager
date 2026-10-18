@@ -8,6 +8,7 @@ import { PaymentValue } from '../payment-panel/payment-panel.component';
 import { modifiersText, modifiersTotal } from 'src/app/utils/modifiers';
 import { TicketService } from 'src/app/services/ticket.service';
 import { CuentaLine, CuentaRow } from 'src/app/utils/ticket-html';
+import { CheckedVoucher, HotelsService, apiMessage } from 'src/app/services/hotels.service';
 
 @Component({
   selector: 'app-total-dialog',
@@ -36,6 +37,11 @@ export class TotalDialogComponent implements OnInit {
   payment: PaymentValue | null = null;
   // Cobrar solo una parte de la mesa (división de cuenta por platos)
   partial = false;
+  // Voucher de hotel (uno por mesa): fija el descuento y no se combina con descuentos manuales
+  voucherInput = '';
+  voucher: CheckedVoucher | null = null;
+  voucherError = '';
+  voucherChecking = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -44,7 +50,8 @@ export class TotalDialogComponent implements OnInit {
     public settings: SettingsService,
     private userService: UserService,
     private cash: CashService,
-    private tickets: TicketService
+    private tickets: TicketService,
+    private hotels: HotelsService
   ) {
     // El administrador aplica descuentos; el cajero solo si el negocio lo habilitó (el servidor también lo exige)
     const role = this.userService.currentRole();
@@ -160,6 +167,42 @@ export class TotalDialogComponent implements OnInit {
     this.calculateDiscountedTotal();
   }
 
+  // ---- voucher de hotel ----
+
+  // Los descuentos manuales (general y por plato) se bloquean mientras haya un voucher
+  get manualDiscountAllowed(): boolean {
+    return this.canDiscount && !this.voucher;
+  }
+
+  applyVoucher() {
+    const code = this.voucherInput.trim();
+    if (!code || this.voucherChecking) return;
+    this.voucherError = '';
+    this.voucherChecking = true;
+    this.hotels.validate(code).subscribe({
+      next: (v) => {
+        this.voucherChecking = false;
+        // El voucher reemplaza cualquier descuento manual que hubiera
+        this.orders.forEach((o) => (o.discount = 0));
+        this.voucher = v;
+        this.voucherInput = '';
+        this.discountPercentage = v.discountPct;
+        this.calculateTotal();
+      },
+      error: (err) => {
+        this.voucherChecking = false;
+        this.voucherError = apiMessage(err, 'No se pudo revisar el voucher. Probá de nuevo.');
+      },
+    });
+  }
+
+  removeVoucher() {
+    this.voucher = null;
+    this.voucherError = '';
+    this.discountPercentage = 0;
+    this.calculateTotal();
+  }
+
   applyDiscount(discount: number) {
     this.discountPercentage = discount;
     this.calculateDiscountedTotal();
@@ -259,7 +302,9 @@ export class TotalDialogComponent implements OnInit {
 
     // Cobrar y liberar es UNA sola llamada: o se guarda la venta y se descuentan los platos, o no pasa nada.
     // Solo se informan los descuentos pedidos y cómo se paga; el total lo calcula y guarda el servidor.
-    const items = this.chargeLines
+    const items = this.voucher
+      ? []
+      : this.chargeLines
       .filter((o) => !o.isPromo && Number(o.discount) > 0)
       .map((o) => ({ orderId: o._id, discount: Number(o.discount) }));
 
@@ -268,7 +313,9 @@ export class TotalDialogComponent implements OnInit {
         checkoutId: this.orderId,
         payments: this.payment.payments,
         tip: this.payment.tip,
-        globalDiscount: this.discountPercentage,
+        // con voucher, el servidor fija el descuento: no se manda uno manual
+        globalDiscount: this.voucher ? 0 : this.discountPercentage,
+        voucherCode: this.voucher?.code,
         items,
         lines: isPartPayment ? this.chargeLines.map((o) => ({ orderId: o._id, quantity: o.quantity })) : undefined,
       })
@@ -356,7 +403,8 @@ export class TotalDialogComponent implements OnInit {
 
     const summary: CuentaRow[] = [{ label: 'Total:', value: fmt(this.total), big: true }];
     if (this.discountPercentage > 0) {
-      summary.push({ label: `Descuento (${this.discountPercentage}%${this.hasPromoItems ? ' sin promos' : ''}):`, value: `-${fmt(this.globalDiscountAmount)}` });
+      const what = this.voucher ? `Voucher ${this.voucher.hotelName}` : 'Descuento';
+      summary.push({ label: `${what} (${this.discountPercentage}%${this.hasPromoItems ? ' sin promos' : ''}):`, value: `-${fmt(this.globalDiscountAmount)}` });
       summary.push({ label: 'Total con descuento:', value: fmt(this.discountedTotal) });
     }
     summary.push(...this.paymentRows());

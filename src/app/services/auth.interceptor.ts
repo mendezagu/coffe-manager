@@ -14,7 +14,8 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private injector: Injector) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if (!req.url.startsWith(environment.apiUrl)) return next.handle(req);
+    // El portal de hoteles tiene su propio token y su propio manejo de sesión: no se mezcla con el del personal
+    if (!req.url.startsWith(environment.apiUrl) || req.url.includes('/hotel-portal/')) return next.handle(req);
 
     const users = this.injector.get(UserService);
     const token = users.getToken();

@@ -63,6 +63,9 @@ import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
 import { AppLoaderComponent } from './components/app-loader/app-loader.component';
+import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
+import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
+import { HotelPartnershipsComponent } from './components/hotel-partnerships/hotel-partnerships.component';
 
 
 @NgModule({
@@ -100,6 +103,9 @@ import { AppLoaderComponent } from './components/app-loader/app-loader.component
     QrInboxDialogComponent,
     QrCodesComponent,
     AppLoaderComponent,
+    HotelLandingComponent,
+    HotelPortalComponent,
+    HotelPartnershipsComponent,
   ],
   imports: [
     BrowserModule,

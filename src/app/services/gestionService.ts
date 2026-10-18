@@ -294,6 +294,8 @@ checkout(
     items: { orderId: string; discount: number }[];
     // cobrar solo una parte de la mesa (división por platos); sin esto se cobra todo
     lines?: { orderId: string; quantity: number }[];
+    // voucher de hotel (uno por mesa): fija el descuento y no se combina con otros
+    voucherCode?: string;
   }
 ): Observable<any> {
   return this.http.post<any>(`${this.apiUrl}/tables/${tableId}/checkout`, body);

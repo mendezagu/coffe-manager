@@ -24,6 +24,8 @@ export interface SalesReport {
   items: { name: string; quantity: number; amount: number; cost: number | null; profit: number | null }[];
   byWaiter: { name: string; salesCount: number; totalAmount: number; tips: number }[];
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
+  // ventas con voucher de hotel: lo que trajo cada hotel y lo descontado
+  byHotel: { hotelId: string; name: string; salesCount: number; totalAmount: number; discountTotal: number; averageTicket: number }[];
 }
 
 // Resumen del momento para el Inicio del administrador

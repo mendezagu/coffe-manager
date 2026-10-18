@@ -12,6 +12,8 @@ import { ReportsComponent } from './pages/reports/reports.component';
 import { CashComponent } from './pages/cash/cash.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
+import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
+import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
 import { guestGuard, roleGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -30,6 +32,10 @@ const routes: Routes = [
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
   // Pantalla pública del cliente (QR de la mesa): sin sesión; lo único que da acceso es el código del QR
   { path: 'mesa/:token', component: QrOrderComponent },
+  // Pantalla pública del huésped (QR del hotel): sin sesión
+  { path: 'hotel/:slug', component: HotelLandingComponent },
+  // Portal del hotel: tiene su propio login (no usa el del personal de los restaurantes)
+  { path: 'hotel-portal', component: HotelPortalComponent },
   { path: '**', redirectTo: '/home' }, // cocina y barra rebotan de /home a /kitchen (roleGuard)
 ];
 

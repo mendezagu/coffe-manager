@@ -1,0 +1,96 @@
+<!-- Pantalla del huésped (QR del hotel). Bootstrap global pisa p-3/4/5, gap-3/4/5, mb-3/4 y border con
+     !important, por eso acá se usan valores explícitos ([14px]) en esas escalas. -->
+<div class="min-h-screen bg-sage-100 text-sage-900 flex justify-center">
+  <div class="w-full max-w-md min-h-screen bg-white flex flex-col shadow-2xl">
+
+    <app-loader *ngIf="phase === 'loading'" [splash]="true" label="Cargando…"></app-loader>
+
+    <div *ngIf="phase === 'notFound'" class="flex flex-col items-center justify-center flex-1 px-[24px] text-center">
+      <mat-icon class="!w-14 !h-14 !text-5xl text-sage-400 mb-[12px]">hotel</mat-icon>
+      <h1 class="text-xl font-bold m-0 mb-[8px]">Este enlace no está disponible</h1>
+      <p class="text-sm text-sage-600 m-0">Pedí el código de nuevo en recepción.</p>
+    </div>
+
+    <div *ngIf="phase === 'error'" class="flex flex-col items-center justify-center flex-1 px-[24px] text-center">
+      <mat-icon class="!w-14 !h-14 !text-5xl text-sage-400 mb-[12px]">wifi_off</mat-icon>
+      <h1 class="text-xl font-bold m-0 mb-[8px]">No pudimos cargar la página</h1>
+      <p class="text-sm text-sage-600 mb-[16px]">Revisá tu conexión e intentá de nuevo.</p>
+      <button type="button" (click)="load()" class="px-[20px] py-[10px] rounded-xl bg-cafe-green-700 text-white font-bold text-sm">Reintentar</button>
+    </div>
+
+    <ng-container *ngIf="phase === 'ready' && info">
+      <header class="px-[20px] pt-[28px] pb-[22px] bg-cafe-green-700 text-white">
+        <p class="m-0 text-xs font-medium opacity-80">Beneficio para huéspedes de</p>
+        <h1 class="m-0 mt-[2px] text-2xl font-bold leading-tight">{{ info.name }}</h1>
+        <p class="m-0 mt-[8px] text-sm opacity-90">Comé en estos restaurantes con descuento. Elegí uno y recibí tu voucher.</p>
+      </header>
+
+      <main class="px-[16px] py-[20px] flex flex-col gap-[20px] flex-1">
+
+        <!-- Datos del huésped -->
+        <section class="rounded-2xl border-[1px] border-sage-200 bg-sage-50 p-[16px]">
+          <h2 class="m-0 mb-[10px] text-sm font-bold">Tus datos</h2>
+          <label for="guest" class="block text-xs font-medium text-sage-600 mb-[4px]">Tu nombre</label>
+          <input id="guest" name="guest" type="text" [(ngModel)]="guestName" maxlength="60" autocomplete="name"
+            class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 bg-white text-sm" />
+          <label for="hcode" class="block text-xs font-medium text-sage-600 mb-[4px]">Código del hotel</label>
+          <input id="hcode" name="hcode" type="text" [(ngModel)]="accessCode" maxlength="40" autocomplete="off" autocapitalize="characters"
+            class="w-full px-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 bg-white text-sm uppercase tracking-wider" />
+          <p class="m-0 mt-[6px] text-xs text-sage-500">Lo encontrás en tu habitación o en recepción.</p>
+        </section>
+
+        <p *ngIf="info.restaurants.length === 0" class="text-sm text-sage-600 text-center m-0">Todavía no hay restaurantes adheridos. Volvé pronto.</p>
+
+        <!-- Restaurantes -->
+        <section *ngFor="let r of info.restaurants" class="rounded-2xl border-[1px] border-sage-200 bg-white shadow-soft overflow-hidden">
+          <div class="p-[16px] flex items-start gap-[12px]">
+            <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <img *ngIf="r.logoUrl; else cup" [src]="r.logoUrl" [alt]="r.name" class="w-full h-full object-cover" />
+              <ng-template #cup><mat-icon>restaurant</mat-icon></ng-template>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="m-0 text-base font-bold truncate">{{ r.name }}</h3>
+              <p *ngIf="r.address || r.city" class="m-0 text-xs text-sage-600">{{ r.address }}<span *ngIf="r.address && r.city">, </span>{{ r.city }}</p>
+              <p *ngIf="r.conditions" class="m-0 mt-[4px] text-xs text-sage-600">{{ r.conditions }}</p>
+            </div>
+            <span class="flex-shrink-0 px-[10px] py-[4px] rounded-full bg-cafe-green-100 text-cafe-green-800 text-sm font-bold">{{ r.discountPct }}%</span>
+          </div>
+
+          <!-- Voucher ya pedido -->
+          <ng-container *ngIf="activeFor(r.id) as v; else askBtn">
+            <div class="px-[16px] pb-[16px]">
+              <div class="rounded-xl bg-cafe-green-50 border-[1px] border-cafe-green-200 p-[14px] text-center">
+                <p class="m-0 text-xs font-medium text-cafe-green-800">Mostrá este código en el restaurante</p>
+                <p class="m-0 my-[6px] text-3xl font-bold tracking-[0.25em] text-cafe-green-900" data-testid="voucher-code">{{ v.code }}</p>
+                <img *ngIf="v.qr" [src]="v.qr" alt="Código QR del voucher" class="mx-auto w-[120px] h-[120px]" />
+                <p class="m-0 mt-[6px] text-xs text-cafe-green-800">
+                  A nombre de {{ v.guestName }} · 1 voucher por mesa ·
+                  {{ daysLeft(v) > 1 ? 'vence en ' + daysLeft(v) + ' días' : 'vence hoy' }}
+                </p>
+              </div>
+              <button type="button" (click)="ask(r.id)" [disabled]="!canAsk"
+                class="mt-[8px] w-full text-xs font-medium text-sage-600 underline bg-transparent disabled:opacity-50">Pedir otro voucher</button>
+            </div>
+          </ng-container>
+
+          <ng-template #askBtn>
+            <div class="px-[16px] pb-[16px]">
+              <button type="button" (click)="ask(r.id)" [disabled]="!canAsk"
+                class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ pendingId === r.id ? 'Pidiendo…' : 'Obtener mi voucher' }}
+              </button>
+              <p *ngIf="!canAsk && !pendingId" class="m-0 mt-[6px] text-xs text-sage-500 text-center">Completá tu nombre y el código del hotel.</p>
+            </div>
+          </ng-template>
+
+          <p *ngIf="errorFor === r.id" role="alert" class="m-[16px] mt-0 px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-xs font-medium">{{ error }}</p>
+        </section>
+
+        <p class="m-0 text-xs text-sage-500 text-center">
+          Cada voucher sirve para una mesa y dura {{ info.voucherValidDays }} {{ info.voucherValidDays === 1 ? 'día' : 'días' }}.
+          El descuento no se suma a otras promociones. Con tecnología de Tavolapp.
+        </p>
+      </main>
+    </ng-container>
+  </div>
+</div>

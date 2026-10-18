@@ -157,7 +157,29 @@
         </div>
 
       </div>
+
+      <!-- Hoteles: ventas de huéspedes que llegaron con un voucher -->
+      <section *ngIf="report.byHotel?.length" class="bg-white rounded-card shadow-soft p-4 mt-4" data-testid="hotel-sales">
+        <h2 class="font-bold text-sage-800 mb-1">Ventas por hotel</h2>
+        <p class="text-xs text-sage-500 mb-3">Mesas cobradas con voucher de hotel. El descuento ya está restado del importe.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Hotel</th><th class="py-1.5 text-right">Mesas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Ticket promedio</th><th class="py-1.5 text-right">Descontado</th></tr></thead>
+            <tbody class="divide-y divide-sage-100">
+              <tr *ngFor="let h of report.byHotel">
+                <td class="py-1.5 font-medium">{{ h.name }}</td>
+                <td class="py-1.5 text-right">{{ h.salesCount }}</td>
+                <td class="py-1.5 text-right font-medium">{{ h.totalAmount | money }}</td>
+                <td class="py-1.5 text-right">{{ h.averageTicket | money }}</td>
+                <td class="py-1.5 text-right text-cafe-red-700">{{ h.discountTotal | money }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </ng-container>
+
+    <app-hotel-partnerships></app-hotel-partnerships>
 
   </div>
   </div>
