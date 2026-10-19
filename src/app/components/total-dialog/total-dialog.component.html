@@ -147,7 +147,7 @@
       <div *ngIf="voucher" class="flex items-center justify-between gap-2 p-3 rounded-lg border border-cafe-green-200 bg-cafe-green-50">
         <div class="min-w-0">
           <p class="m-0 text-sm font-bold text-cafe-green-900 truncate">{{ voucher.hotelName }} · {{ voucher.discountPct }}% de descuento</p>
-          <p class="m-0 text-xs text-cafe-green-800 truncate">Huésped: {{ voucher.guestName }} · código {{ voucher.code }}</p>
+          <p class="m-0 text-xs text-cafe-green-800 truncate">Huésped: {{ voucher.guestName }}<ng-container *ngIf="voucher.documentHint"> (documento terminado en {{ voucher.documentHint }})</ng-container> · código {{ voucher.code }}</p>
           <p class="m-0 text-xs text-cafe-green-800">Un voucher por mesa. No se suma a otros descuentos ni toca los ítems en promo.</p>
         </div>
         <button type="button" (click)="removeVoucher()" class="flex-shrink-0 px-3 py-1.5 bg-white text-sage-700 font-bold text-xs rounded-lg border border-sage-200">Quitar</button>

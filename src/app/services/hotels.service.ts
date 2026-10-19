@@ -31,6 +31,22 @@ export interface IssuedVoucher {
   discountPct: number;
   conditions: string;
   validTo: string;
+  // true si el servidor devolvió el voucher que el huésped ya tenía vigente (en vez de crear otro)
+  reused?: boolean;
+}
+
+// Estado de un voucher que el huésped ya tiene (lo calcula el servidor; EXPIRED = sin usar y vencido)
+export type VoucherStatusName = 'ISSUED' | 'REDEEMED' | 'CANCELLED' | 'EXPIRED';
+
+export interface VoucherStatusInfo {
+  code: string;
+  status: VoucherStatusName;
+  restaurantId: string;
+  restaurantName: string;
+  discountPct: number;
+  conditions: string;
+  validTo: string;
+  redeemedAt: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,8 +58,13 @@ export class HotelPublicService {
     return this.http.get<HotelPublicInfo>(`${this.base}/${encodeURIComponent(slug)}`);
   }
 
-  issue(slug: string, body: { restaurantId: string; guestName: string; accessCode: string }): Observable<IssuedVoucher> {
+  issue(slug: string, body: { restaurantId: string; guestName: string; document: string; accessCode: string }): Observable<IssuedVoucher> {
     return this.http.post<IssuedVoucher>(`${this.base}/${encodeURIComponent(slug)}/vouchers`, body);
+  }
+
+  // Estado de los vouchers que el celular ya tiene (por sus códigos)
+  statuses(slug: string, codes: string[]): Observable<VoucherStatusInfo[]> {
+    return this.http.post<VoucherStatusInfo[]>(`${this.base}/${encodeURIComponent(slug)}/vouchers/status`, { codes });
   }
 }
 
@@ -53,6 +74,8 @@ export interface CheckedVoucher {
   code: string;
   hotelName: string;
   guestName: string;
+  // Últimos caracteres del documento del huésped (null en vouchers anteriores a este dato)
+  documentHint?: string | null;
   discountPct: number;
   validTo: string;
 }

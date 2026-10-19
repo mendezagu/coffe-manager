@@ -6,12 +6,17 @@ import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
 import { SettingsService } from './services/settings.service';
 import { CashService } from './services/cash.service';
 import { InventoryService, InventorySummary } from './services/inventory.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
 import { QrCall, QrRequest, QrService } from './services/qr.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
+
+// Rutas que ve gente sin cuenta del restaurante
+const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/hotel-portal'];
+export const isPublicPath = (url: string) => PUBLIC_PREFIXES.some((p) => url.split('?')[0].split('#')[0].startsWith(p));
 
 @Component({
   selector: 'app-root',
@@ -22,6 +27,9 @@ export class AppComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   showFiller = false;
   isLoggedIn: boolean = false;
+  // Páginas públicas (cliente por QR, huésped y portal del hotel): nunca llevan el menú ni la barra del restaurante,
+  // aunque en ese navegador haya una sesión del personal abierta
+  publicPage = false;
   role$: Observable<string | null>;
   user$: Observable<AppUser | null>;
   roleLabels = ROLE_LABELS;
@@ -159,6 +167,12 @@ export class AppComponent {
         refresh();
         this.cashTimer = setInterval(refresh, 60000);
       }
+    });
+
+    // Qué página se está viendo
+    this.publicPage = isPublicPath(this.router.url);
+    this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
+      this.publicPage = isPublicPath(e.urlAfterRedirects);
     });
 
     // Suscribirse a cambios en la autenticación

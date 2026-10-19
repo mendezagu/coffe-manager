@@ -1,7 +1,7 @@
 <mat-drawer-container class="example-container" autosize>
 
   <!-- Sidebar (solo visible si está autenticado) -->
-  <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn">
+  <mat-drawer #sidenav class="example-sidenav d-flex flex-column" mode="side" *ngIf="isLoggedIn && !publicPage">
     <!-- Marca del producto: la "o" de Tavolapp es un plato -->
     <div class="px-4 pt-1 flex justify-start" role="img" aria-label="Tavolapp">
       <span class="inline-flex items-baseline font-bold text-sage-800 whitespace-nowrap" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em">
@@ -98,7 +98,7 @@
   <mat-drawer-content>
 
     <!-- Encabezado: solo con sesión iniciada -->
-    <div *ngIf="isLoggedIn" class="sticky top-0 z-10">
+    <div *ngIf="isLoggedIn && !publicPage" class="sticky top-0 z-10">
       <mat-toolbar class="custom-toolbar d-flex justify-content-between align-items-center">
 
         <!-- Izquierda: menú y marca -->
@@ -160,7 +160,7 @@
 </mat-drawer-container>
 
 <!-- Aviso naranja cuando llega un pedido o llamado de un cliente por QR -->
-<div *ngIf="qrAlerts.length" class="fixed z-[1000] top-[72px] right-[12px] left-[12px] sm:left-auto sm:right-[20px] sm:w-[400px] flex flex-col gap-[10px] pointer-events-none" aria-live="assertive">
+<div *ngIf="qrAlerts.length && !publicPage" class="fixed z-[1000] top-[72px] right-[12px] left-[12px] sm:left-auto sm:right-[20px] sm:w-[400px] flex flex-col gap-[10px] pointer-events-none" aria-live="assertive">
   <div *ngFor="let a of qrAlerts; trackBy: trackAlert" role="alert"
     class="qr-alert pointer-events-auto flex items-start gap-[12px] p-[14px] rounded-2xl bg-cafe-amber-50 border-[1px] border-cafe-amber-300 shadow-dialog">
     <span class="w-11 h-11 rounded-full bg-cafe-amber-700 text-white flex items-center justify-center flex-shrink-0 shadow-amber">

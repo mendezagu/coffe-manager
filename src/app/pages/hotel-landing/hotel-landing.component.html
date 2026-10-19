@@ -22,75 +22,202 @@
       <header class="px-[20px] pt-[28px] pb-[22px] bg-cafe-green-700 text-white">
         <p class="m-0 text-xs font-medium opacity-80">Beneficio para huéspedes de</p>
         <h1 class="m-0 mt-[2px] text-2xl font-bold leading-tight">{{ info.name }}</h1>
-        <p class="m-0 mt-[8px] text-sm opacity-90">Comé en estos restaurantes con descuento. Elegí uno y recibí tu voucher.</p>
+        <p class="m-0 mt-[8px] text-sm opacity-90">Comé con descuento en los restaurantes asociados.</p>
       </header>
 
-      <main class="px-[16px] py-[20px] flex flex-col gap-[20px] flex-1">
+      <!-- Solapas -->
+      <nav class="flex border-b-[1px] border-sage-200 bg-white sticky top-0 z-10" role="tablist">
+        <button type="button" role="tab" [attr.aria-selected]="tab === 'restaurants'" (click)="showTab('restaurants')"
+          class="flex-1 py-[14px] text-sm font-bold bg-transparent border-b-2"
+          [ngClass]="tab === 'restaurants' ? 'border-cafe-green-700 text-cafe-green-800' : 'border-transparent text-sage-600'">
+          Restaurantes
+        </button>
+        <button type="button" role="tab" [attr.aria-selected]="tab === 'mine'" (click)="showTab('mine')"
+          class="flex-1 py-[14px] text-sm font-bold bg-transparent border-b-2"
+          [ngClass]="tab === 'mine' ? 'border-cafe-green-700 text-cafe-green-800' : 'border-transparent text-sage-600'">
+          Mis vouchers
+          <span *ngIf="activeVouchers.length" class="ml-[4px] px-[8px] py-[1px] rounded-full bg-cafe-green-100 text-cafe-green-800 text-xs">{{ activeVouchers.length }}</span>
+        </button>
+      </nav>
 
-        <!-- Datos del huésped -->
-        <section class="rounded-2xl border-[1px] border-sage-200 bg-sage-50 p-[16px]">
-          <h2 class="m-0 mb-[10px] text-sm font-bold">Tus datos</h2>
-          <label for="guest" class="block text-xs font-medium text-sage-600 mb-[4px]">Tu nombre</label>
-          <input id="guest" name="guest" type="text" [(ngModel)]="guestName" maxlength="60" autocomplete="name"
-            class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 bg-white text-sm" />
-          <label for="hcode" class="block text-xs font-medium text-sage-600 mb-[4px]">Código del hotel</label>
-          <input id="hcode" name="hcode" type="text" [(ngModel)]="accessCode" maxlength="40" autocomplete="off" autocapitalize="characters"
-            class="w-full px-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 bg-white text-sm uppercase tracking-wider" />
-          <p class="m-0 mt-[6px] text-xs text-sage-500">Lo encontrás en tu habitación o en recepción.</p>
-        </section>
+      <main class="px-[16px] py-[20px] flex flex-col gap-[16px] flex-1">
 
-        <p *ngIf="info.restaurants.length === 0" class="text-sm text-sage-600 text-center m-0">Todavía no hay restaurantes adheridos. Volvé pronto.</p>
-
-        <!-- Restaurantes -->
-        <section *ngFor="let r of info.restaurants" class="rounded-2xl border-[1px] border-sage-200 bg-white shadow-soft overflow-hidden">
-          <div class="p-[16px] flex items-start gap-[12px]">
-            <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              <img *ngIf="r.logoUrl; else cup" [src]="r.logoUrl" [alt]="r.name" class="w-full h-full object-cover" />
-              <ng-template #cup><mat-icon>restaurant</mat-icon></ng-template>
-            </div>
-            <div class="min-w-0 flex-1">
-              <h3 class="m-0 text-base font-bold truncate">{{ r.name }}</h3>
-              <p *ngIf="r.address || r.city" class="m-0 text-xs text-sage-600">{{ r.address }}<span *ngIf="r.address && r.city">, </span>{{ r.city }}</p>
-              <p *ngIf="r.conditions" class="m-0 mt-[4px] text-xs text-sage-600">{{ r.conditions }}</p>
-            </div>
-            <span class="flex-shrink-0 px-[10px] py-[4px] rounded-full bg-cafe-green-100 text-cafe-green-800 text-sm font-bold">{{ r.discountPct }}%</span>
+        <!-- ================= RESTAURANTES ================= -->
+        <ng-container *ngIf="tab === 'restaurants'">
+          <div class="rounded-2xl bg-cafe-green-50 border-[1px] border-cafe-green-200 p-[14px] flex gap-[10px]">
+            <mat-icon class="text-cafe-green-700 flex-shrink-0">info</mat-icon>
+            <p class="m-0 text-sm text-cafe-green-900">
+              Elegí un restaurante y pedí tu voucher.
+              <strong>Cada voucher vale solo en el restaurante donde lo pediste.</strong>
+              Si querés comer en otro, pedí uno para ese.
+            </p>
           </div>
 
-          <!-- Voucher ya pedido -->
-          <ng-container *ngIf="activeFor(r.id) as v; else askBtn">
-            <div class="px-[16px] pb-[16px]">
-              <div class="rounded-xl bg-cafe-green-50 border-[1px] border-cafe-green-200 p-[14px] text-center">
-                <p class="m-0 text-xs font-medium text-cafe-green-800">Mostrá este código en el restaurante</p>
-                <p class="m-0 my-[6px] text-3xl font-bold tracking-[0.25em] text-cafe-green-900" data-testid="voucher-code">{{ v.code }}</p>
-                <img *ngIf="v.qr" [src]="v.qr" alt="Código QR del voucher" class="mx-auto w-[120px] h-[120px]" />
-                <p class="m-0 mt-[6px] text-xs text-cafe-green-800">
-                  A nombre de {{ v.guestName }} · 1 voucher por mesa ·
-                  {{ daysLeft(v) > 1 ? 'vence en ' + daysLeft(v) + ' días' : 'vence hoy' }}
-                </p>
+          <p *ngIf="info.restaurants.length === 0" class="text-sm text-sage-600 text-center m-0">Todavía no hay restaurantes adheridos. Volvé pronto.</p>
+
+          <section *ngFor="let r of info.restaurants" class="rounded-2xl border-[1px] border-sage-200 bg-white shadow-soft overflow-hidden">
+            <div class="p-[16px] flex items-start gap-[12px]">
+              <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img *ngIf="r.logoUrl; else cup" [src]="r.logoUrl" [alt]="r.name" class="w-full h-full object-cover" />
+                <ng-template #cup><mat-icon>restaurant</mat-icon></ng-template>
               </div>
-              <button type="button" (click)="ask(r.id)" [disabled]="!canAsk"
-                class="mt-[8px] w-full text-xs font-medium text-sage-600 underline bg-transparent disabled:opacity-50">Pedir otro voucher</button>
+              <div class="min-w-0 flex-1">
+                <h3 class="m-0 text-base font-bold truncate">{{ r.name }}</h3>
+                <p *ngIf="r.address || r.city" class="m-0 text-xs text-sage-600">{{ r.address }}<span *ngIf="r.address && r.city">, </span>{{ r.city }}</p>
+                <p *ngIf="r.conditions" class="m-0 mt-[4px] text-xs text-sage-600">{{ r.conditions }}</p>
+              </div>
+              <span class="flex-shrink-0 px-[10px] py-[4px] rounded-full bg-cafe-green-100 text-cafe-green-800 text-sm font-bold">{{ r.discountPct }}%</span>
+            </div>
+            <div class="px-[16px] pb-[16px]">
+              <ng-container *ngIf="activeFor(r.id) as v; else askBtn">
+                <button type="button" (click)="showVoucher(v)"
+                  class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-50 border-[1px] border-cafe-green-200 text-cafe-green-800 font-bold text-sm">
+                  Ver mi voucher · {{ v.code }}
+                </button>
+              </ng-container>
+              <ng-template #askBtn>
+                <button type="button" (click)="openDialog(r)"
+                  class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm">
+                  Obtener mi voucher
+                </button>
+                <p *ngIf="waitUntil(r.id) as until" class="m-0 mt-[6px] text-xs text-sage-500 text-center">
+                  Ya usaste tu voucher acá. Podés pedir otro después del {{ until | date: 'dd/MM HH:mm' }}.
+                </p>
+              </ng-template>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- ================= MIS VOUCHERS ================= -->
+        <ng-container *ngIf="tab === 'mine'">
+          <div class="flex rounded-xl bg-sage-100 p-[4px]" role="tablist">
+            <button type="button" role="tab" [attr.aria-selected]="sub === 'active'" (click)="sub = 'active'"
+              class="flex-1 py-[8px] rounded-lg text-sm font-bold"
+              [ngClass]="sub === 'active' ? 'bg-white text-cafe-green-800 shadow-soft' : 'bg-transparent text-sage-600'">
+              Vigentes ({{ activeVouchers.length }})
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="sub === 'past'" (click)="sub = 'past'"
+              class="flex-1 py-[8px] rounded-lg text-sm font-bold"
+              [ngClass]="sub === 'past' ? 'bg-white text-cafe-green-800 shadow-soft' : 'bg-transparent text-sage-600'">
+              Vencidos y canjeados ({{ pastVouchers.length }})
+            </button>
+          </div>
+
+          <!-- Vigentes -->
+          <ng-container *ngIf="sub === 'active'">
+            <div *ngFor="let v of activeVouchers" class="rounded-2xl border-[1px] border-cafe-green-200 bg-cafe-green-50 p-[14px] text-center">
+              <p class="m-0 text-sm font-bold text-cafe-green-900">{{ v.restaurantName }} · {{ v.discountPct }}%</p>
+              <p class="m-0 text-xs font-bold text-cafe-green-800">Válido solo en {{ v.restaurantName }}</p>
+              <p class="m-0 my-[6px] text-3xl font-bold tracking-[0.25em] text-cafe-green-900">{{ v.code }}</p>
+              <img *ngIf="qrs[v.code]" [src]="qrs[v.code]" alt="Código QR del voucher" class="mx-auto w-[120px] h-[120px]" />
+              <p class="m-0 mt-[6px] text-xs text-cafe-green-800">
+                A nombre de {{ v.guestName }} · {{ daysLeft(v) > 1 ? 'vence en ' + daysLeft(v) + ' días' : 'vence hoy' }}
+              </p>
+              <ng-container *ngTemplateOutlet="shareBtns; context: { $implicit: v }"></ng-container>
+            </div>
+            <div *ngIf="!activeVouchers.length" class="text-center py-[24px]">
+              <mat-icon class="!w-12 !h-12 !text-4xl text-sage-400">confirmation_number</mat-icon>
+              <p class="m-0 mt-[6px] text-sm font-bold">No tenés vouchers vigentes</p>
+              <p class="m-0 mt-[4px] text-xs text-sage-600">Acá aparecen los vouchers que pediste desde este celular.</p>
+              <button type="button" (click)="showTab('restaurants')" class="mt-[12px] px-[18px] py-[10px] rounded-xl bg-cafe-green-700 text-white font-bold text-sm">Ver restaurantes</button>
             </div>
           </ng-container>
 
-          <ng-template #askBtn>
-            <div class="px-[16px] pb-[16px]">
-              <button type="button" (click)="ask(r.id)" [disabled]="!canAsk"
-                class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ pendingId === r.id ? 'Pidiendo…' : 'Obtener mi voucher' }}
-              </button>
-              <p *ngIf="!canAsk && !pendingId" class="m-0 mt-[6px] text-xs text-sage-500 text-center">Completá tu nombre y el código del hotel.</p>
+          <!-- Vencidos y canjeados -->
+          <ng-container *ngIf="sub === 'past'">
+            <div *ngFor="let v of pastVouchers" class="rounded-2xl border-[1px] border-sage-200 bg-white p-[14px] flex items-center gap-[12px]">
+              <div class="min-w-0 flex-1">
+                <p class="m-0 text-sm font-bold truncate">{{ v.restaurantName }} · {{ v.discountPct }}%</p>
+                <p class="m-0 text-xs text-sage-600">
+                  <ng-container *ngIf="v.status === 'REDEEMED' && v.redeemedAt; else notUsed">Canjeado el {{ v.redeemedAt | date: 'dd/MM/yyyy HH:mm' }}</ng-container>
+                  <ng-template #notUsed>{{ v.status === 'CANCELLED' ? 'Anulado' : 'Venció el ' + (v.validTo | date: 'dd/MM/yyyy') }}</ng-template>
+                </p>
+                <p class="m-0 text-xs text-sage-500 tracking-widest">{{ v.code }}</p>
+              </div>
+              <span class="flex-shrink-0 px-[10px] py-[4px] rounded-full text-xs font-bold"
+                [ngClass]="v.status === 'REDEEMED' ? 'bg-cafe-green-100 text-cafe-green-800' : 'bg-sage-100 text-sage-600'">{{ statusLabel(v) }}</span>
             </div>
-          </ng-template>
+            <p *ngIf="!pastVouchers.length" class="m-0 py-[24px] text-sm text-sage-600 text-center">Todavía no tenés vouchers vencidos ni canjeados.</p>
+          </ng-container>
+        </ng-container>
 
-          <p *ngIf="errorFor === r.id" role="alert" class="m-[16px] mt-0 px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-xs font-medium">{{ error }}</p>
-        </section>
-
-        <p class="m-0 text-xs text-sage-500 text-center">
-          Cada voucher sirve para una mesa y dura {{ info.voucherValidDays }} {{ info.voucherValidDays === 1 ? 'día' : 'días' }}.
+        <p class="m-0 mt-auto text-xs text-sage-500 text-center">
+          Cada voucher sirve para una mesa, vale solo en el restaurante donde lo pediste y dura {{ info.voucherValidDays }} {{ info.voucherValidDays === 1 ? 'día' : 'días' }}.
           El descuento no se suma a otras promociones. Con tecnología de Tavolapp.
         </p>
       </main>
     </ng-container>
+  </div>
+
+  <!-- Botones para copiar el código y mandarlo por WhatsApp -->
+  <ng-template #shareBtns let-v>
+    <div class="mt-[12px] flex gap-[8px]">
+      <button type="button" (click)="copyCode(v)"
+        class="flex-1 inline-flex items-center justify-center gap-[6px] px-[12px] py-[10px] rounded-xl bg-white border-[1px] border-cafe-green-300 text-cafe-green-800 font-bold text-sm">
+        <mat-icon class="!w-5 !h-5 !text-xl">{{ copiedCode === v.code ? 'check' : 'content_copy' }}</mat-icon>
+        <span aria-live="polite">{{ copiedCode === v.code ? '¡Copiado!' : 'Copiar código' }}</span>
+      </button>
+      <button type="button" (click)="share(v)" [disabled]="sharing"
+        class="flex-1 inline-flex items-center justify-center gap-[6px] px-[12px] py-[10px] rounded-xl bg-cafe-green-700 text-white font-bold text-sm disabled:opacity-60">
+        <mat-icon class="!w-5 !h-5 !text-xl">share</mat-icon> {{ sharing ? 'Preparando…' : 'Enviar imagen' }}
+      </button>
+    </div>
+    <p *ngIf="shareNote" role="status" class="m-0 mt-[6px] text-xs text-sage-600 text-center">{{ shareNote }}</p>
+  </ng-template>
+
+  <!-- ================= DIÁLOGO ================= -->
+  <div *ngIf="dialogFor" class="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/50" (click)="closeDialog()">
+    <div role="dialog" aria-modal="true" aria-labelledby="dlg-title" (click)="$event.stopPropagation()"
+      class="w-full max-w-md max-h-[92vh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl p-[20px] shadow-dialog">
+
+      <!-- Voucher entregado -->
+      <ng-container *ngIf="result as v; else form">
+        <h2 id="dlg-title" class="m-0 text-lg font-bold">Tu voucher</h2>
+        <div class="mt-[12px] rounded-2xl bg-cafe-green-50 border-[1px] border-cafe-green-200 p-[16px] text-center">
+          <p class="m-0 text-sm font-bold text-cafe-green-900">{{ v.restaurantName }} · {{ v.discountPct }}% de descuento</p>
+          <p class="m-0 mt-[2px] text-xs font-bold text-cafe-green-800">Válido solo en {{ v.restaurantName }}</p>
+          <p class="m-0 my-[8px] text-4xl font-bold tracking-[0.25em] text-cafe-green-900" data-testid="voucher-code">{{ v.code }}</p>
+          <img *ngIf="qrs[v.code]" [src]="qrs[v.code]" alt="Código QR del voucher" class="mx-auto w-[150px] h-[150px]" />
+          <p class="m-0 mt-[8px] text-xs text-cafe-green-800">
+            A nombre de {{ v.guestName }} · 1 voucher por mesa ·
+            {{ daysLeft(v) > 1 ? 'vence en ' + daysLeft(v) + ' días' : 'vence hoy' }}
+          </p>
+        </div>
+        <ng-container *ngTemplateOutlet="shareBtns; context: { $implicit: v }"></ng-container>
+        <p *ngIf="reused" role="status" class="m-0 mt-[10px] text-xs text-sage-600 text-center">Ya tenías este voucher vigente: sigue siendo el mismo código. Cuando lo uses y pasen 24 horas, podés pedir uno nuevo.</p>
+        <p class="m-0 mt-[10px] text-xs text-sage-600 text-center">Mostráselo al cajero al pagar. Lo vas a encontrar siempre en «Mis vouchers».</p>
+        <button type="button" (click)="closeDialog()" class="mt-[14px] w-full px-[16px] py-[12px] rounded-xl bg-cafe-green-700 text-white font-bold text-sm">Listo</button>
+      </ng-container>
+
+      <!-- Formulario -->
+      <ng-template #form>
+        <h2 id="dlg-title" class="m-0 text-lg font-bold">Voucher para {{ dialogFor.name }}</h2>
+        <p class="m-0 mt-[8px] inline-flex items-center gap-[6px] px-[10px] py-[4px] rounded-full bg-cafe-green-100 text-cafe-green-800 text-xs font-bold">
+          <mat-icon class="!w-4 !h-4 !text-base">place</mat-icon> Solo vale en {{ dialogFor.name }}
+        </p>
+        <p class="m-0 mt-[10px] text-sm text-sage-600">Completá tus datos para recibir tu voucher del {{ dialogFor.discountPct }}%.</p>
+
+        <form (ngSubmit)="ask()" class="mt-[14px]">
+          <label for="guest" class="block text-xs font-medium text-sage-600 mb-[4px]">Tu nombre y apellido</label>
+          <input id="guest" name="guest" type="text" [(ngModel)]="guestName" maxlength="60" autocomplete="name"
+            class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 bg-white text-sm" />
+          <label for="doc" class="block text-xs font-medium text-sage-600 mb-[4px]">Tu DNI o pasaporte</label>
+          <input id="doc" name="doc" type="text" [(ngModel)]="guestDocument" maxlength="25" autocomplete="off" inputmode="text"
+            class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 bg-white text-sm" />
+          <label for="hcode" class="block text-xs font-medium text-sage-600 mb-[4px]">Código del hotel</label>
+          <input id="hcode" name="hcode" type="text" [(ngModel)]="accessCode" maxlength="40" autocomplete="off" autocapitalize="characters"
+            class="w-full px-[12px] py-[10px] rounded-xl border-[1px] border-sage-300 bg-white text-sm uppercase tracking-wider" />
+          <p class="m-0 mt-[6px] text-xs text-sage-500">El código del hotel lo encontrás en tu habitación o en recepción. Tu documento solo se usa para controlar que cada huésped pida un voucher por restaurante.</p>
+
+          <p *ngIf="error" role="alert" class="m-0 mt-[12px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-xs font-medium">{{ error }}</p>
+
+          <button type="submit" [disabled]="!canAsk"
+            class="mt-[14px] w-full px-[16px] py-[12px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ pending ? 'Pidiendo…' : 'Obtener mi voucher' }}
+          </button>
+          <button type="button" (click)="closeDialog()" class="mt-[8px] w-full py-[10px] text-sm font-medium text-sage-600 bg-transparent">Cancelar</button>
+        </form>
+      </ng-template>
+    </div>
   </div>
 </div>
