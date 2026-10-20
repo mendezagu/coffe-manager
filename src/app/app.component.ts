@@ -18,7 +18,7 @@ import { NavGuideService } from './services/nav-guide.service';
 
 // Rutas que ve gente sin cuenta del restaurante
 // (y el asistente de primeros pasos, que también va en pantalla completa, sin menú ni barra)
-const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/hotel-portal', '/bienvenida'];
+const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/hotel-portal', '/bienvenida', '/cambiar-clave'];
 export const isPublicPath = (url: string) => PUBLIC_PREFIXES.some((p) => url.split('?')[0].split('#')[0].startsWith(p));
 
 @Component({

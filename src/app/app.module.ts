@@ -70,6 +70,9 @@ import { OnboardingComponent } from './pages/onboarding/onboarding.component';
 import { GettingStartedComponent } from './components/getting-started/getting-started.component';
 import { SetupGateComponent } from './components/setup-gate/setup-gate.component';
 import { GuideHintComponent } from './components/guide-hint/guide-hint.component';
+import { PasswordToggleDirective } from './directives/password-toggle.directive';
+import { ChangePasswordComponent } from './pages/change-password/change-password.component';
+import { ChangePasswordFormComponent } from './components/change-password-form/change-password-form.component';
 
 
 @NgModule({
@@ -114,6 +117,9 @@ import { GuideHintComponent } from './components/guide-hint/guide-hint.component
     GettingStartedComponent,
     SetupGateComponent,
     GuideHintComponent,
+    PasswordToggleDirective,
+    ChangePasswordComponent,
+    ChangePasswordFormComponent,
   ],
   imports: [
     BrowserModule,

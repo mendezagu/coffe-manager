@@ -367,6 +367,11 @@
       <h2 class="text-center text-2xl font-bold text-sage-900">{{ (settings.settings$ | async)?.name }}</h2>
       <p class="text-center text-sage-500 text-sm mt-1 mb-6">Bienvenido</p>
 
+      <p *ngIf="passwordChanged" role="status" class="mb-4 flex items-start gap-2 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm font-medium text-cafe-green-800">
+        <mat-icon class="!h-5 !w-5 flex-none !text-xl">check_circle</mat-icon>
+        <span>Contraseña actualizada. Ingresá con tu contraseña nueva.</span>
+      </p>
+
       <!-- Formulario -->
       <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
 
@@ -384,6 +389,7 @@
           <label class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña</label>
           <input
             type="password"
+            appPasswordToggle
             formControlName="password"
             required
             class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
@@ -401,7 +407,16 @@
           {{ loading ? 'Ingresando…' : 'Ingresar' }}
         </button>
 
-        <p class="text-center text-sage-500 text-xs mt-4">¿No tenés usuario? Pedile uno al administrador.</p>
+        <!-- Dos casos distintos: el personal de un local que ya usa Tavolapp, y un local nuevo que quiere empezar -->
+        <div class="mt-5 border-t border-sage-100 pt-4 text-center">
+          <p class="m-0 text-xs text-sage-500">¿Sos parte del equipo de un local? Pedile tu usuario al administrador.</p>
+          <p class="m-0 mt-3 text-sm font-medium text-sage-800">¿Querés usar Tavolapp en tu local?</p>
+          <a href="https://tavolapp.app/#demo" target="_blank" rel="noopener"
+            class="mt-2 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-cafe-green-700 text-sm font-bold text-cafe-green-700 no-underline transition-colors hover:bg-cafe-green-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
+            Solicitar mi cuenta
+            <mat-icon class="!w-4 !h-4 !text-base">arrow_outward</mat-icon>
+          </a>
+        </div>
 
       </form>
     </div>

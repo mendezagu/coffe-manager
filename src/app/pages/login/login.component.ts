@@ -26,8 +26,11 @@ export class LoginComponent {
   //  - 'plates' : platos de Tavolapp girando a los dos lados
   // Para compararlas: /login?escena=mozo, /login?escena=logo o /login?escena=platos
   scene: Scene = DEFAULT_SCENE;
+  // Se llega acá después de cambiar la contraseña en el primer ingreso
+  passwordChanged = false;
 
   constructor(private userService: UserService, private router: Router, public settings: SettingsService, route: ActivatedRoute) {
+    this.passwordChanged = route.snapshot.queryParamMap.get('clave') === 'ok';
     const wanted = route.snapshot.queryParamMap.get('escena');
     if (wanted === 'mozo') this.scene = 'staff';
     else if (wanted === 'platos') this.scene = 'plates';

@@ -15,7 +15,8 @@ import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
 import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
-import { guestGuard, roleGuard } from './guards/auth.guard';
+import { ChangePasswordComponent } from './pages/change-password/change-password.component';
+import { guestGuard, pendingPasswordGuard, roleGuard } from './guards/auth.guard';
 import { onboardingGuard } from './guards/onboarding.guard';
 
 const routes: Routes = [
@@ -25,6 +26,8 @@ const routes: Routes = [
   { path: 'bienvenida', component: OnboardingComponent, canActivate: [roleGuard('admin')] },
   { path: 'kitchen', component: KitchenComponent, canActivate: [roleGuard('admin', 'kitchen', 'bar')] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  // Primer ingreso con una contraseña asignada por otra persona: hay que cambiarla antes de seguir
+  { path: 'cambiar-clave', component: ChangePasswordComponent, canActivate: [pendingPasswordGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'admin/:section', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'inventory', component: InventoryComponent, canActivate: [roleGuard('admin')] },

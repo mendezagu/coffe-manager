@@ -13,7 +13,7 @@
       <input id="hp-email" name="email" type="email" [(ngModel)]="email" autocomplete="username"
         class="w-full px-[12px] py-[10px] mb-[12px] rounded-xl border-[1px] border-sage-300 text-sm" />
       <label for="hp-pass" class="block text-xs font-bold text-sage-600 mb-[4px]">Contraseña</label>
-      <input id="hp-pass" name="password" type="password" [(ngModel)]="password" autocomplete="current-password"
+      <input id="hp-pass" name="password" type="password" appPasswordToggle [(ngModel)]="password" autocomplete="current-password"
         class="w-full px-[12px] py-[10px] mb-[14px] rounded-xl border-[1px] border-sage-300 text-sm" />
 
       <p *ngIf="loginError" role="alert" class="m-0 mb-[12px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ loginError }}</p>

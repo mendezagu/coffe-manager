@@ -13,6 +13,8 @@ export interface AppUser {
   role: AppRole;
   active?: boolean;
   createdAt?: string;
+  // la contraseña se la puso otra persona: tiene que cambiarla antes de usar la app
+  mustChangePassword?: boolean;
 }
 
 export const ROLE_LABELS: Record<AppRole, string> = {
@@ -80,6 +82,22 @@ export class UserService {
 
   getRoleState(): Observable<AppRole | null> {
     return this.authState.pipe(map((u) => u?.role ?? null));
+  }
+
+  mustChangePassword(): boolean {
+    return !!this.authState.value?.mustChangePassword;
+  }
+
+  // Cambia la contraseña del usuario con sesión (pide la actual). Después ya no se le exige el cambio.
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(`${this.baseUrl}/auth/change-password`, { currentPassword, newPassword })
+      .pipe(
+        tap(() => {
+          const user = this.authState.value;
+          if (user?.mustChangePassword) this.setUser({ ...user, mustChangePassword: false });
+        }),
+      );
   }
 
   isAuthenticated(): boolean {

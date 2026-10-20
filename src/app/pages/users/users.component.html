@@ -17,7 +17,7 @@
 
       <label class="block">
         <span class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña (mín. 8)</span>
-        <input name="password" type="password" [(ngModel)]="form.password" required minlength="8" autocomplete="new-password"
+        <input name="password" type="password" appPasswordToggle [(ngModel)]="form.password" required minlength="8" autocomplete="new-password"
           class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
 
