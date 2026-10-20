@@ -8,50 +8,101 @@
           <p class="page-sub">Registro de eventos administrativos</p>
         </div>
       </div>
+      <button *ngIf="total > 0" type="button" (click)="clearLogs()"
+        class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100 transition-colors">
+        <mat-icon class="!w-4 !h-4 !text-base">delete_sweep</mat-icon>
+        Borrar historial
+      </button>
     </div>
   </header>
 
   <div class="px-4 py-6 sm:px-8 sm:py-8">
-  <div class="max-w-5xl mx-auto">
+    <div class="max-w-5xl mx-auto">
 
-    <!-- Empty state -->
-    <div *ngIf="logs.length === 0" class="flex flex-col items-center justify-center py-16 bg-white rounded-card shadow-soft">
-      <div class="w-16 h-16 rounded-full bg-sage-50 flex items-center justify-center mb-3">
-        <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300">inbox</mat-icon>
+      <!-- Sin registros -->
+      <div *ngIf="total === 0" class="flex flex-col items-center justify-center py-16 bg-white rounded-card shadow-soft">
+        <div class="w-16 h-16 rounded-full bg-sage-50 flex items-center justify-center mb-3">
+          <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300">inbox</mat-icon>
+        </div>
+        <p class="m-0 text-sage-600 text-base font-semibold">No hay acciones registradas</p>
+        <p class="m-0 mt-1 text-sage-400 text-sm">Los pedidos, cobros e impresiones van a aparecer acá.</p>
       </div>
-      <p class="text-sage-600 text-base font-semibold">No hay acciones registradas</p>
+
+      <ng-container *ngIf="total > 0">
+
+        <!-- Buscador y filtros -->
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="relative">
+            <mat-icon class="!w-5 !h-5 !text-xl absolute left-3 top-1/2 -translate-y-1/2 text-sage-400 pointer-events-none">search</mat-icon>
+            <label for="log-search" class="sr-only">Buscar en el historial</label>
+            <input id="log-search" type="text" [(ngModel)]="query" (ngModelChange)="onQueryChange()" placeholder="Buscar por mesa, mozo o plato…"
+              class="w-full h-11 pl-10 pr-3 bg-white border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 placeholder-sage-400" />
+          </div>
+          <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por tipo">
+            <button *ngFor="let f of filters" type="button" (click)="setFilter(f)" [attr.aria-pressed]="filter === f"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
+              [ngClass]="filter === f ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'">
+              {{ labelOf(f) }}
+              <span class="rounded-full px-1.5 text-[11px] leading-4" [ngClass]="filter === f ? 'bg-white/20' : 'bg-sage-100 text-sage-500'">{{ countOf(f) }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nada coincide con el filtro -->
+        <div *ngIf="filtered.length === 0" class="flex flex-col items-center justify-center py-14 bg-white rounded-card shadow-soft text-center">
+          <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300">search_off</mat-icon>
+          <p class="m-0 mt-2 text-sage-600 text-base font-semibold">No hay resultados</p>
+          <p class="m-0 mt-1 text-sage-400 text-sm">Probá con otra búsqueda o con otro tipo de acción.</p>
+        </div>
+
+        <!-- Lista agrupada por día -->
+        <div *ngFor="let g of groups" class="mb-5">
+          <h2 class="sticky top-0 z-[1] m-0 mb-2 py-1 text-xs font-bold uppercase tracking-wider text-sage-500 bg-sage-100">{{ g.label }}</h2>
+          <ul class="m-0 p-0 list-none bg-white rounded-card shadow-soft overflow-hidden divide-y divide-sage-100">
+            <li *ngFor="let r of g.rows; trackBy: trackRow" class="flex items-start gap-3 px-4 py-3 hover:bg-sage-50 transition-colors">
+              <span class="grid h-9 w-9 flex-none place-items-center rounded-xl" [ngClass]="styles[r.kind].chip" [attr.title]="styles[r.kind].label">
+                <mat-icon class="!w-5 !h-5 !text-xl">{{ styles[r.kind].icon }}</mat-icon>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="m-0 text-sm leading-snug text-sage-700 break-words [&_strong]:font-bold [&_strong]:text-sage-900" [innerHTML]="r.action"></p>
+                <p class="m-0 mt-0.5 text-[11px] font-bold uppercase tracking-wide text-sage-400">{{ styles[r.kind].label }}</p>
+              </div>
+              <time class="flex-none pt-0.5 text-xs font-bold text-sage-500 tabular-nums" [attr.datetime]="r.timestamp">{{ r.time }}</time>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Paginado -->
+        <nav *ngIf="filtered.length > 0" class="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Paginado del historial">
+          <div class="flex items-center justify-between gap-3 sm:justify-start">
+            <p class="m-0 text-sm text-sage-600">Mostrando <strong class="text-sage-900">{{ from }}–{{ to }}</strong> de {{ filtered.length }}</p>
+            <label class="flex items-center gap-1.5 text-xs text-sage-500">
+              Por página
+              <select [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"
+                class="h-9 rounded-lg border border-sage-200 bg-white px-2 text-sm font-bold text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+                <option *ngFor="let s of pageSizes" [value]="s">{{ s }}</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-center gap-1">
+            <button type="button" (click)="goTo(currentPage - 1)" [disabled]="currentPage === 1" aria-label="Página anterior"
+              class="grid h-10 w-10 place-items-center rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <ng-container *ngFor="let p of pageButtons">
+              <span *ngIf="p === null" class="px-1 text-sage-400" aria-hidden="true">…</span>
+              <button *ngIf="p !== null" type="button" (click)="goTo(p)" [attr.aria-current]="p === currentPage ? 'page' : null" [attr.aria-label]="'Página ' + p"
+                class="h-10 min-w-[40px] rounded-lg border px-2 text-sm font-bold transition-colors"
+                [ngClass]="p === currentPage ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:bg-sage-50'">{{ p }}</button>
+            </ng-container>
+            <button type="button" (click)="goTo(currentPage + 1)" [disabled]="currentPage === pageCount" aria-label="Página siguiente"
+              class="grid h-10 w-10 place-items-center rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </nav>
+      </ng-container>
     </div>
-
-    <!-- Tabla -->
-    <div *ngIf="logs.length > 0" class="bg-white rounded-card shadow-soft overflow-hidden">
-      <table mat-table [dataSource]="logs" class="w-full">
-
-        <!-- Columna: Fecha -->
-        <ng-container matColumnDef="timestamp">
-          <th mat-header-cell *matHeaderCellDef class="!bg-sage-50 !text-sage-500 !font-medium !text-xs"> Fecha </th>
-          <td mat-cell *matCellDef="let log" class="!text-sage-700 !text-sm"> {{ log.timestamp | date: 'short' }} </td>
-        </ng-container>
-
-        <!-- Columna: Acción -->
-        <ng-container matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef class="!bg-sage-50 !text-sage-500 !font-medium !text-xs"> Acción </th>
-          <td mat-cell *matCellDef="let log" class="!text-sage-900 !text-sm"> <span [innerHTML]="log.action"></span> </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:!bg-sage-50"></tr>
-      </table>
-    </div>
-
-    <div class="flex justify-end mt-6">
-      <button
-        class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100 transition-all duration-200"
-        (click)="clearLogs()"
-      >
-        <mat-icon class="!w-4 !h-4 !text-base">delete_sweep</mat-icon>
-        Borrar Logs
-      </button>
-    </div>
-  </div>
   </div>
 </div>

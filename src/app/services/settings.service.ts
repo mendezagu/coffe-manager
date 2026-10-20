@@ -45,6 +45,8 @@ export interface TenantSettings {
   qrActive: boolean;
   qrAutoConfirm: boolean;
   qrRequirePin: boolean;
+  // el asistente de primeros pasos ya se terminó (o se salteó)
+  onboardingDone: boolean;
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -87,6 +89,7 @@ const DEFAULTS: TenantSettings = {
   qrActive: false,
   qrAutoConfirm: false,
   qrRequirePin: false,
+  onboardingDone: true,
 };
 
 @Injectable({ providedIn: 'root' })

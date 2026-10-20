@@ -131,3 +131,25 @@ mat-icon {
     @apply m-0 mt-0.5 text-sm text-sage-500;
   }
 }
+
+/* Guía de la primera venta: el botón que hay que tocar late con un anillo ámbar (tarjeta de mesa) */
+.guide-pulse {
+  animation: guide-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes guide-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(230, 131, 74, 0.75);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(230, 131, 74, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-pulse {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(230, 131, 74, 0.6);
+  }
+}

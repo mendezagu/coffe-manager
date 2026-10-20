@@ -66,6 +66,10 @@ import { AppLoaderComponent } from './components/app-loader/app-loader.component
 import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
 import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
 import { HotelPartnershipsComponent } from './components/hotel-partnerships/hotel-partnerships.component';
+import { OnboardingComponent } from './pages/onboarding/onboarding.component';
+import { GettingStartedComponent } from './components/getting-started/getting-started.component';
+import { SetupGateComponent } from './components/setup-gate/setup-gate.component';
+import { GuideHintComponent } from './components/guide-hint/guide-hint.component';
 
 
 @NgModule({
@@ -106,6 +110,10 @@ import { HotelPartnershipsComponent } from './components/hotel-partnerships/hote
     HotelLandingComponent,
     HotelPortalComponent,
     HotelPartnershipsComponent,
+    OnboardingComponent,
+    GettingStartedComponent,
+    SetupGateComponent,
+    GuideHintComponent,
   ],
   imports: [
     BrowserModule,

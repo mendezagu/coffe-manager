@@ -45,7 +45,8 @@ mat-drawer-content {
   flex: 1;
 }
 
-.example-sidenav button {
+/* Los ítems con ayuda (.nav-item-btn) llevan su propia fila y no se estiran */
+.example-sidenav button:not(.nav-item-btn) {
   display: block;
   width: 100%;
   text-align: left;
@@ -71,6 +72,27 @@ mat-drawer-content {
 
 @media (prefers-reduced-motion: reduce) {
   .qr-alert {
+    animation: none;
+  }
+}
+
+// Ítem del menú recién habilitado: un brillo verde que late, igual que el "Siguiente paso" de la lista de primeros pasos
+.nav-glow {
+  animation: nav-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes nav-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(29, 91, 62, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(29, 91, 62, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-glow {
     animation: none;
   }
 }

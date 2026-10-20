@@ -1,0 +1,34 @@
+<section class="mx-auto flex w-full max-w-[640px] flex-col items-center px-4 py-10 text-center sm:px-6 sm:py-16" aria-labelledby="gate-title">
+
+  <app-loader size="lg"></app-loader>
+
+  <h1 id="gate-title" class="m-0 mt-5 text-2xl font-bold tracking-tight text-sage-900 sm:text-3xl">Completá el onboarding para comenzar</h1>
+  <p class="m-0 mt-2 max-w-[460px] text-sm text-sage-500 sm:text-base">Cargá tu menú, tus mesas y tu mozo en unos 5 minutos y ya podés empezar a cobrar.</p>
+
+  <a routerLink="/bienvenida"
+    class="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-cafe-green-700 px-6 text-base font-bold text-white no-underline shadow-green transition hover:bg-cafe-green-800 active:scale-[0.99] sm:w-auto">
+    Continuar onboarding
+    <mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon>
+  </a>
+
+  <ul class="m-0 mt-8 grid w-full list-none grid-cols-[minmax(0,1fr)] gap-2 p-0 text-left" aria-label="Lo que falta">
+    <li *ngFor="let t of tasks; trackBy: trackTitle" class="min-w-0">
+      <a [routerLink]="['/bienvenida']" [queryParams]="{ step: t.step }"
+        class="flex min-w-0 items-center gap-3 rounded-xl border bg-white p-3 no-underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40"
+        [ngClass]="t.done ? 'border-sage-100 bg-sage-50' : 'border-sage-200 hover:border-cafe-green-300 hover:bg-cafe-green-50/50'">
+        <span class="grid h-8 w-8 flex-none place-items-center rounded-full"
+          [ngClass]="t.done ? 'bg-cafe-green-700 text-white' : 'border-2 border-sage-300 text-transparent'" aria-hidden="true">
+          <mat-icon class="!w-5 !h-5 !text-xl">check</mat-icon>
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-sm font-bold" [ngClass]="t.done ? 'text-sage-400 line-through' : 'text-sage-900'">{{ t.title }}</span>
+          <span class="block truncate text-xs text-sage-500">{{ t.hint }}</span>
+        </span>
+        <mat-icon *ngIf="!t.done" class="flex-none !text-xl text-sage-400">chevron_right</mat-icon>
+        <span class="sr-only">{{ t.done ? '(hecho)' : '(pendiente)' }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <p class="m-0 mt-3 text-xs font-bold text-sage-400">{{ doneCount }} de {{ tasks.length }} pasos</p>
+</section>

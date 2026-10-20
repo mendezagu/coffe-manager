@@ -1,4 +1,8 @@
 <div class="w-full min-h-screen">
-  <app-card></app-card>
+  <app-loader *ngIf="gate === 'loading'" size="lg" label="Cargando…" class="min-h-[60vh]"></app-loader>
+  <app-setup-gate *ngIf="gate === 'blocked' && setupStatus" [status]="setupStatus"></app-setup-gate>
+  <ng-container *ngIf="gate === 'free'">
+    <app-getting-started></app-getting-started>
+    <app-card></app-card>
+  </ng-container>
 </div>
-

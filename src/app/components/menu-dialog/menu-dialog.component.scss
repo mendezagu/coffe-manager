@@ -1,1 +1,12 @@
 /* Estilos manejados con Tailwind CSS */
+
+/* Las categorías se desplazan con el dedo o la rueda, sin barra a la vista */
+.no-scrollbar {
+  scrollbar-width: none;
+  // deslizar con el dedo de costado sin que el diálogo se mueva en vertical
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -45,49 +45,67 @@
           class="ml-auto min-w-[20px] px-1.5 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-5 text-center"
           [attr.aria-label]="(q.requests.length + q.calls.length) + ' pedidos QR esperando'">{{ q.requests.length + q.calls.length }}</span>
       </button>
-      <button mat-button routerLink="/kitchen" *ngIf="role === 'kitchen' || role === 'bar' || (role === 'admin' && (settings.settings$ | async)?.kitchenEnabled)" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="restaurant"></mat-icon>
-        {{ role === 'bar' ? 'Barra' : 'Cocina' }}
-      </button>
-      <button mat-button routerLink="/cash" *ngIf="role === 'admin' || role === 'cashier'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="point_of_sale"></mat-icon>
-        Caja
-      </button>
+      <ng-container *ngIf="!(onboarding.setupPending$ | async)">
+        <ng-container *ngIf="role === 'kitchen' || role === 'bar' || (role === 'admin' && (settings.settings$ | async)?.kitchenEnabled)">
+          <ng-container *ngTemplateOutlet="navItem; context: { key: 'kitchen', link: '/kitchen', icon: 'restaurant', label: role === 'bar' ? 'Barra' : 'Cocina' }"></ng-container>
+        </ng-container>
+      </ng-container>
+
+      <!-- Caja se habilita en cuanto hay menú, mesas y mozo: hace falta para completar los primeros pasos -->
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'caja', link: '/cash', icon: 'point_of_sale', label: 'Caja' }"></ng-container>
+      </ng-container>
 
       <!-- Negocio: los números -->
-      <ng-container *ngIf="role === 'admin'">
-      <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Negocio</p>
-      <button mat-button routerLink="/balance" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="paid"></mat-icon>
-        Balance
-      </button>
-      <button mat-button routerLink="/reports" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="bar_chart"></mat-icon>
-        Reportes
-      </button>
-      <button mat-button routerLink="/inventory" *ngIf="(settings.settings$ | async)?.inventoryActive" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="inventory_2"></mat-icon>
-        Inventario
-      </button>
+      <ng-container *ngIf="role === 'admin' && !(onboarding.setupPending$ | async)">
+        <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Negocio</p>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'balance', link: '/balance', icon: 'paid', label: 'Balance' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reports', link: '/reports', icon: 'bar_chart', label: 'Reportes' }"></ng-container>
+        <ng-container *ngIf="(settings.settings$ | async)?.inventoryActive">
+          <ng-container *ngTemplateOutlet="navItem; context: { key: 'inventory', link: '/inventory', icon: 'inventory_2', label: 'Inventario' }"></ng-container>
+        </ng-container>
+      </ng-container>
 
-      <!-- Configuración: casi nunca -->
-      <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Configuración</p>
-      <button mat-button routerLink="/admin" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="settings"></mat-icon>
-        Administrar
-      </button>
-      <button mat-button routerLink="/settings" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="business"></mat-icon>
-        Mi negocio
-      </button>
-      <button mat-button routerLink="/logs" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="lock"></mat-icon>
-        Logs
-      </button>
+      <!-- Configuración: casi nunca. Se habilita antes que el resto: en cuanto hay menú, mesas, mozo y caja -->
+      <ng-container *ngIf="role === 'admin' && !(onboarding.adminLocked$ | async)">
+        <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Configuración</p>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'admin', link: '/admin', icon: 'settings', label: 'Administrar' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'settings', link: '/settings', icon: 'business', label: 'Mi negocio' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'logs', link: '/logs', icon: 'lock', label: 'Logs' }"></ng-container>
       </ng-container>
     </ng-container>
 
-    <div class="flex-1"></div>
+    <!-- Ítem del menú. Si es nuevo (se habilitó durante los primeros pasos) se resalta, con la etiqueta "Nuevo" y una
+         ayuda que explica en una frase para qué sirve -->
+    <ng-template #navItem let-key="key" let-link="link" let-icon="icon" let-label="label">
+      <div class="mb-1">
+        <!-- La fila entera se resalta (no el botón): así el borde, el brillo y los íconos no se pisan -->
+        <div class="flex items-center rounded-xl border transition-colors"
+          [ngClass]="nav.isNew(key) ? 'border-cafe-green-700/40 bg-cafe-green-50 nav-glow' : 'border-transparent'">
+          <button mat-button [routerLink]="link" (click)="nav.markSeen(key)" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold"
+            class="nav-item-btn !min-w-0 !flex-1 !rounded-xl !h-11 !justify-start"
+            [ngClass]="nav.isNew(key) ? '!bg-transparent !text-cafe-green-800 !font-bold' : '!text-sage-600'">
+            <mat-icon [fontIcon]="icon"></mat-icon>
+            {{ label }}
+          </button>
+          <!-- La ayuda se queda siempre; "nuevo" solo cambia su color (oscuro mientras no se entró a la sección) -->
+          <button *ngIf="nav.hasHelp(key)" type="button" (click)="nav.toggleHelp(key)" [attr.aria-expanded]="nav.helpOpen === key"
+            [attr.aria-label]="(nav.isNew(key) ? 'Nuevo: ' : '') + '¿para qué sirve ' + label + '?'" [attr.title]="nav.isNew(key) ? 'Nuevo · tocá para ver para qué sirve' : 'Para qué sirve'"
+            class="nav-item-btn mr-2 grid h-7 w-7 flex-none place-items-center rounded-full transition-colors"
+            [ngClass]="nav.isNew(key) ? 'bg-cafe-green-700 text-white hover:bg-cafe-green-800' : 'bg-sage-100 text-sage-500 hover:bg-sage-200 hover:text-sage-700'">
+            <mat-icon class="!w-4 !h-4 !text-base">{{ nav.helpOpen === key ? 'close' : 'help_outline' }}</mat-icon>
+          </button>
+        </div>
+        <div *ngIf="nav.hasHelp(key) && nav.helpOpen === key" role="note"
+          class="relative mt-2 rounded-xl bg-cafe-green-700 p-3 text-xs leading-snug text-white shadow-soft">
+          <span class="absolute -top-1 right-[18px] h-2.5 w-2.5 rotate-45 bg-cafe-green-700" aria-hidden="true"></span>
+          <strong class="mb-0.5 block text-[13px]">{{ nav.info[key].title }}</strong>
+          {{ nav.info[key].text }}
+        </div>
+      </div>
+    </ng-template>
+
+<div class="flex-1"></div>
 
     <button mat-button *ngIf="isLoggedIn" (click)="logout()" class="!bg-cafe-red-50 !text-cafe-red-700 !rounded-xl !h-11 !font-bold">
       <mat-icon fontIcon="logout"></mat-icon>

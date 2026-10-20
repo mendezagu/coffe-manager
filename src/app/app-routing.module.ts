@@ -14,11 +14,15 @@ import { InventoryComponent } from './pages/inventory/inventory.component';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
 import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
+import { OnboardingComponent } from './pages/onboarding/onboarding.component';
 import { guestGuard, roleGuard } from './guards/auth.guard';
+import { onboardingGuard } from './guards/onboarding.guard';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: '/home' },
-  { path: 'home', component: HomeComponent, canActivate: [roleGuard('admin', 'cashier', 'waiter')] },
+  { path: 'home', component: HomeComponent, canActivate: [roleGuard('admin', 'cashier', 'waiter'), onboardingGuard] },
+  // Asistente de primeros pasos para un negocio nuevo (pantalla completa, sin menú)
+  { path: 'bienvenida', component: OnboardingComponent, canActivate: [roleGuard('admin')] },
   { path: 'kitchen', component: KitchenComponent, canActivate: [roleGuard('admin', 'kitchen', 'bar')] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },

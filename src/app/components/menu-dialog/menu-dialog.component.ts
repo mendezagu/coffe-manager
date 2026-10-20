@@ -96,6 +96,40 @@ export class MenuDialogComponent implements OnDestroy {
   categories: Category[] = [];
   selectedCategory: string = 'all';
 
+  // Las categorías se desplazan de costado sin barra: rueda del mouse, arrastrar con el mouse y deslizar con el dedo
+  private chipsDrag = { active: false, startX: 0, startLeft: 0, moved: false };
+
+  onChipsWheel(e: WheelEvent, el: HTMLElement) {
+    // la rueda es vertical: se usa para ir de costado (solo si hay algo que recorrer)
+    if (el.scrollWidth <= el.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    el.scrollLeft += e.deltaY;
+  }
+
+  onChipsDown(e: MouseEvent, el: HTMLElement) {
+    if (e.button !== 0) return;
+    this.chipsDrag = { active: true, startX: e.clientX, startLeft: el.scrollLeft, moved: false };
+  }
+
+  onChipsMove(e: MouseEvent, el: HTMLElement) {
+    const d = this.chipsDrag;
+    if (!d.active) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 5) d.moved = true;
+    if (d.moved) el.scrollLeft = d.startLeft - dx;
+  }
+
+  onChipsUp() {
+    this.chipsDrag.active = false;
+    // el clic que cierra un arrastre no debe elegir una categoría
+    if (this.chipsDrag.moved) setTimeout(() => (this.chipsDrag.moved = false));
+  }
+
+  pickCategory(category: string) {
+    if (this.chipsDrag.moved) return;
+    this.selectedCategory = category;
+  }
+
   get hasUncategorized(): boolean {
     return this.categories.length > 0 && this.menuItems.some(m => !m.categoryId);
   }

@@ -3,14 +3,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
 
-interface Region {
+export interface Region {
   label: string;
   currencyCode: string;
   locale: string;
 }
 
 // Moneda e idioma de formato van juntos: eligiendo el país queda resuelto $ 1.234,50 vs $1,234.50
-const REGIONS: Region[] = [
+export const REGIONS: Region[] = [
   { label: 'Argentina (ARS)', currencyCode: 'ARS', locale: 'es-AR' },
   { label: 'Chile (CLP)', currencyCode: 'CLP', locale: 'es-CL' },
   { label: 'Uruguay (UYU)', currencyCode: 'UYU', locale: 'es-UY' },

@@ -13,9 +13,12 @@ import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
 import { QrCall, QrRequest, QrService } from './services/qr.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
+import { OnboardingService } from './services/onboarding.service';
+import { NavGuideService } from './services/nav-guide.service';
 
 // Rutas que ve gente sin cuenta del restaurante
-const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/hotel-portal'];
+// (y el asistente de primeros pasos, que también va en pantalla completa, sin menú ni barra)
+const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/hotel-portal', '/bienvenida'];
 export const isPublicPath = (url: string) => PUBLIC_PREFIXES.some((p) => url.split('?')[0].split('#')[0].startsWith(p));
 
 @Component({
@@ -51,7 +54,9 @@ export class AppComponent {
     public cash: CashService,
     private inventory: InventoryService,
     public qr: QrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public onboarding: OnboardingService,
+    public nav: NavGuideService
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
@@ -65,6 +70,7 @@ export class AppComponent {
   }
 
   private cashTimer?: ReturnType<typeof setInterval>;
+  private setupTimer?: ReturnType<typeof setInterval>;
 
   // Aviso de insumos bajos o agotados (solo administrador, y solo si usa inventario)
   stock: InventorySummary | null = null;
@@ -155,6 +161,14 @@ export class AppComponent {
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
       this.isAdminRole = role === 'admin';
+      // Mientras falten pasos obligatorios el menú lateral se acorta: se revisa cada tanto y al cambiar de pantalla
+      if (this.setupTimer) clearInterval(this.setupTimer);
+      if (this.isAdminRole) {
+        this.onboarding.refreshPending();
+        this.setupTimer = setInterval(() => {
+          if (!this.publicPage) this.onboarding.refreshPending();
+        }, 20000);
+      }
       this.qrRole = role;
       this.refreshQrWatch();
       if (this.stockTimer) clearInterval(this.stockTimer);
@@ -173,6 +187,8 @@ export class AppComponent {
     this.publicPage = isPublicPath(this.router.url);
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       this.publicPage = isPublicPath(e.urlAfterRedirects);
+      if (this.isAdminRole && !this.publicPage) this.onboarding.refreshPending();
+      this.nav.visited(e.urlAfterRedirects);
     });
 
     // Suscribirse a cambios en la autenticación

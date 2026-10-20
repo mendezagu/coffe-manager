@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CoffeService, MenuItem } from 'src/app/models/coffe.service';
 import { GestionService, Table } from 'src/app/services/gestionService';
 import { PrintService } from 'src/app/services/printService';
+import { OnboardingService, OnboardingStatus, isBasicsPending } from 'src/app/services/onboarding.service';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -13,14 +15,32 @@ export class HomeComponent implements OnInit{
   tables: Table[] = [];
   refreshLinkedTables: boolean = false;
 
+  // Un administrador con el negocio sin menú, mesas o mozo no ve el tablero: se lo guía al asistente de primeros pasos
+  gate: 'loading' | 'blocked' | 'free' = 'loading';
+  setupStatus: OnboardingStatus | null = null;
+
   constructor(
     private coffeService: CoffeService,
     private gestionService: GestionService,
-    private printService: PrintService
+    private printService: PrintService,
+    private onboarding: OnboardingService,
+    private users: UserService
   ) {}
 
   ngOnInit(): void {
     this.loadTables();
+    if (this.users.currentRole() !== 'admin') {
+      this.gate = 'free';
+      return;
+    }
+    this.onboarding.status().subscribe({
+      next: (s) => {
+        this.setupStatus = s;
+        this.gate = isBasicsPending(s.counts) ? 'blocked' : 'free';
+      },
+      // sin el estado no se puede saber qué falta: nunca se bloquea el uso de la app
+      error: () => (this.gate = 'free'),
+    });
   }
 
   loadTables(): void {

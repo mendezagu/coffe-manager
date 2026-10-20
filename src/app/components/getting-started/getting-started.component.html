@@ -1,0 +1,62 @@
+<section *ngIf="visible" class="mx-4 mt-4 sm:mx-8 sm:mt-6 rounded-card bg-white border border-sage-200 shadow-soft" aria-labelledby="gs-title">
+
+  <!-- Encabezado: en celular se puede plegar para que no tape las mesas -->
+  <div class="flex items-center gap-3 p-4 sm:p-5">
+    <span class="grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
+      <mat-icon>checklist</mat-icon>
+    </span>
+    <div class="min-w-0 flex-1">
+      <h2 id="gs-title" class="m-0 text-base font-bold text-sage-900 sm:text-lg">Primeros pasos</h2>
+      <div class="mt-1.5 flex items-center gap-3">
+        <div class="h-2 flex-1 max-w-[220px] overflow-hidden rounded-full bg-sage-100" role="progressbar" [attr.aria-valuenow]="percent" aria-valuemin="0" aria-valuemax="100">
+          <div class="h-full rounded-full bg-cafe-green-700 transition-all duration-500" [style.width.%]="percent"></div>
+        </div>
+        <span class="text-xs font-bold text-sage-500">{{ doneCount }} de {{ tasks.length }}</span>
+      </div>
+    </div>
+    <button type="button" (click)="open = !open" [attr.aria-expanded]="open" [attr.aria-label]="open ? 'Plegar la lista' : 'Mostrar la lista'"
+      class="grid h-10 w-10 flex-none place-items-center rounded-lg text-sage-500 hover:bg-sage-100 transition-colors">
+      <mat-icon>{{ open ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="open" class="border-t border-sage-100 px-4 pb-4 pt-3 sm:px-5">
+
+    <div *ngIf="hasExample" class="mb-3 flex flex-col gap-2.5 rounded-xl bg-cafe-amber-50 border border-cafe-amber-200 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <p class="m-0 text-sm text-cafe-amber-900"><strong>Tenés platos de ejemplo.</strong> Editá sus precios o borrá todo el ejemplo y cargá los tuyos.</p>
+      <button type="button" (click)="removeExample()" [disabled]="busy"
+        class="self-start flex-none px-3 py-1.5 rounded-lg text-sm font-bold text-cafe-amber-900 bg-white ring-1 ring-cafe-amber-300 hover:bg-cafe-amber-100 transition-colors disabled:opacity-50 sm:self-auto">Borrar el ejemplo</button>
+    </div>
+
+    <ul class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-2 p-0 sm:grid-cols-2">
+      <li *ngFor="let t of tasks; let i = index; trackBy: trackTitle" class="min-w-0">
+        <!-- El próximo paso pendiente se destaca: borde y fondo verdes, un brillo que late y un botón de acción -->
+        <a [routerLink]="t.done ? null : t.link"
+          class="flex min-w-0 items-center gap-3 rounded-xl border p-3 no-underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40"
+          [class.gs-next]="i === nextIndex"
+          [ngClass]="t.done ? 'border-sage-100 bg-sage-50' : i === nextIndex ? 'border-cafe-green-700 bg-cafe-green-50 hover:bg-cafe-green-100/60 flex-wrap sm:flex-nowrap' : 'border-sage-200 bg-white hover:border-cafe-green-300 hover:bg-cafe-green-50/50'">
+          <span class="grid h-8 w-8 flex-none place-items-center rounded-full"
+            [ngClass]="t.done ? 'bg-cafe-green-700 text-white' : i === nextIndex ? 'bg-cafe-green-700 text-white' : 'border-2 border-sage-300 text-transparent'" aria-hidden="true">
+            <mat-icon *ngIf="i !== nextIndex || t.done" class="!w-5 !h-5 !text-xl">check</mat-icon>
+            <mat-icon *ngIf="i === nextIndex && !t.done" class="!w-5 !h-5 !text-xl">{{ t.icon }}</mat-icon>
+          </span>
+          <span class="min-w-0 flex-1" [ngClass]="i === nextIndex && !t.done ? 'basis-[calc(100%-3rem)] sm:basis-0' : ''">
+            <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span class="font-bold" [ngClass]="t.done ? 'truncate text-sm text-sage-400 line-through' : i === nextIndex ? 'text-base font-extrabold leading-5 text-sage-900' : 'truncate text-sm text-sage-900'">{{ t.title }}</span>
+              <span *ngIf="i === nextIndex && !t.done" class="flex-none rounded-full bg-cafe-green-700 px-2 py-px text-[10px] font-bold uppercase tracking-wide text-white">Siguiente paso</span>
+            </span>
+            <span class="block text-xs" [ngClass]="i === nextIndex && !t.done ? 'text-cafe-green-700 sm:truncate' : 'truncate text-sage-500'">{{ t.hint }}</span>
+          </span>
+          <span *ngIf="i === nextIndex && !t.done" class="inline-flex w-full flex-none items-center justify-center gap-1 rounded-lg bg-cafe-green-700 px-3 py-2 text-xs font-bold text-white shadow-green sm:w-auto sm:py-1.5">
+            {{ t.cta }}
+            <mat-icon class="!w-4 !h-4 !text-base">{{ t.link ? 'arrow_forward' : 'arrow_downward' }}</mat-icon>
+          </span>
+          <mat-icon *ngIf="!t.done && i !== nextIndex" class="flex-none !text-xl text-sage-400">chevron_right</mat-icon>
+          <span class="sr-only">{{ t.done ? '(hecho)' : '(pendiente)' }}</span>
+        </a>
+      </li>
+    </ul>
+
+    <p class="m-0 mt-3 text-xs text-sage-500">Cuando completes estos 5 pasos se habilita el resto del menú.</p>
+  </div>
+</section>

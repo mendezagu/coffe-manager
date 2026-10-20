@@ -16,6 +16,7 @@ import { RealtimeService } from 'src/app/services/realtime.service';
 import { QrInbox, QrService } from 'src/app/services/qr.service';
 import { LiveSummary, ReportsService } from 'src/app/services/reports.service';
 import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
+import { OnboardingService } from 'src/app/services/onboarding.service';
 import { Subscription } from 'rxjs';
 
 interface TableGroup {
@@ -32,7 +33,10 @@ interface TableGroup {
 })
 export class CardComponent implements OnInit, OnDestroy {
   private tablesSub?: Subscription;
+  private guideSub?: Subscription;
   tables: Table[] = [];
+  // Guía de la primera venta (ver OnboardingService): muestra qué botón tocar en la primera mesa
+  guideOn = false;
   searchText: string = '';
   // 'grouped': una sección por sector, con su título. 'flat': todas las mesas juntas en una sola grilla.
   viewMode: 'grouped' | 'flat' = 'grouped';
@@ -55,12 +59,14 @@ export class CardComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private tickets: TicketService,
     private realtime: RealtimeService,
+    private onboarding: OnboardingService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
 
   ngOnInit(): void {
     this.restoreView();
+    this.guideSub = this.onboarding.guideActive$.subscribe((on) => (this.guideOn = on));
     // Las mesas se actualizan en el momento en que el servidor avisa un cambio (otro mozo, la cocina, un pedido por QR).
     // Sin conexión en vivo, se consultan cada 10 segundos como antes.
     this.tablesSub = this.realtime.refresh$('tables', 10000).subscribe(() => this.loadTables());
@@ -96,6 +102,7 @@ export class CardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.tablesSub?.unsubscribe();
+    this.guideSub?.unsubscribe();
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
     this.dragEnd();
@@ -255,6 +262,13 @@ export class CardComponent implements OnInit, OnDestroy {
   get qrPendingTotal(): number { return this.qrInbox.requests.length + this.qrInbox.calls.length; }
 
   // Mesas ocupadas de un grupo (para el título de cada sector)
+  // La guía se muestra en una sola mesa: la primera que ya tiene pedido y, si no hay, la primera de todas
+  isGuide(table: Table): boolean {
+    if (!this.guideOn || this.tables.length === 0) return false;
+    const target = this.tables.find((t) => t.orders?.length) ?? this.tables[0];
+    return target.id === table.id;
+  }
+
   occupiedIn(group: { tables: Table[] }): number {
     return group.tables.filter(t => !this.isFree(t)).length;
   }
