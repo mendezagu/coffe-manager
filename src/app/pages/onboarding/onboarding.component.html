@@ -1,7 +1,7 @@
 <div class="min-h-screen flex flex-col">
 
   <!-- Barra superior: marca y salida -->
-  <header class="flex items-center justify-between gap-3 px-4 sm:px-8 py-4">
+  <header class="flex items-center justify-between gap-3 px-3 sm:px-8 py-4">
     <!-- Marca del producto: la "o" de Tavolapp es un plato (la misma del menú lateral) -->
     <span class="inline-flex items-baseline font-bold text-sage-800 whitespace-nowrap" role="img" aria-label="Tavolapp" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em">
       <span>Tav</span>
@@ -26,7 +26,7 @@
   </header>
 
   <!-- Progreso -->
-  <nav class="w-full max-w-[760px] mx-auto px-4 sm:px-0 pt-2 pb-5" aria-label="Progreso">
+  <nav class="w-full max-w-[760px] mx-auto px-3 sm:px-0 pt-2 pb-5" aria-label="Progreso">
     <ol class="flex items-center">
       <ng-container *ngFor="let s of steps; let i = index; trackBy: trackIndex">
         <li class="flex items-center" [class.flex-1]="i < steps.length - 1" [attr.aria-current]="i === step ? 'step' : null">
@@ -48,7 +48,7 @@
     <p class="sm:hidden mt-3 mb-0 text-xs font-bold uppercase tracking-wider text-sage-500">Paso {{ step + 1 }} de {{ steps.length }} · {{ current.label }}</p>
   </nav>
 
-  <main class="flex-1 px-4 pb-10 sm:px-6">
+  <main class="flex-1 px-1.5 pb-10 sm:px-6">
 
     <!-- Cargando -->
     <div *ngIf="loading" class="mx-auto w-full max-w-[640px] bg-white rounded-card shadow-soft-lg p-8 animate-pulse" aria-busy="true" aria-label="Cargando">
@@ -62,7 +62,7 @@
 
       <!-- Contenido del paso (se vuelve a animar al cambiar de paso) -->
       <ng-container *ngFor="let s of [step]">
-      <div class="step-enter p-5 sm:p-8">
+      <div class="step-enter p-3.5 sm:p-8">
 
         <div class="flex items-start gap-4 mb-6">
           <span class="grid h-12 w-12 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
@@ -343,7 +343,7 @@
       </ng-container>
 
       <!-- Botones: quedan fijos abajo si el paso es largo -->
-      <footer class="sticky bottom-0 z-10 flex flex-col-reverse gap-3 rounded-b-card border-t border-sage-200 bg-white/95 backdrop-blur p-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-5">
+      <footer class="sticky bottom-0 z-10 flex flex-col-reverse gap-3 rounded-b-card border-t border-sage-200 bg-white/95 backdrop-blur p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 sm:px-8 sm:py-5">
         <button type="button" (click)="back()" [disabled]="busy" [class.invisible]="step === 0"
           class="h-12 px-5 rounded-xl text-sm font-bold text-sage-600 hover:bg-sage-100 transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-50">
           <mat-icon class="!w-5 !h-5 !text-xl">arrow_back</mat-icon> Volver

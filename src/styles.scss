@@ -153,3 +153,24 @@ mat-icon {
     box-shadow: 0 0 0 3px rgba(230, 131, 74, 0.6);
   }
 }
+
+/* Selección de platos y cobro: en celular el diálogo ocupa toda la pantalla (así se ve todo y quedan a mano los botones) */
+@media (max-width: 639px) {
+  .cdk-overlay-pane.menu-dialog-panel,
+  .cdk-overlay-pane.total-dialog-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+  }
+  .cdk-overlay-pane.menu-dialog-panel .mat-mdc-dialog-container,
+  .cdk-overlay-pane.total-dialog-panel .mat-mdc-dialog-container {
+    height: 100%;
+    --mdc-dialog-container-shape: 0;
+  }
+  .cdk-overlay-pane.menu-dialog-panel .mat-mdc-dialog-surface,
+  .cdk-overlay-pane.total-dialog-panel .mat-mdc-dialog-surface {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}

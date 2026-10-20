@@ -453,6 +453,7 @@ addMenuItems(table: Table): void {
     const menuDialogRef = this.dialog.open(MenuDialogComponent, {
       width: '400px',
       maxWidth: '95vw',
+      panelClass: 'menu-dialog-panel',
       data: {
         ...table,
         waiter: this.waiters.find(w => w._id === table.waiterId) || null
@@ -493,6 +494,7 @@ addMenuItems(table: Table): void {
             const menuDialogRef = this.dialog.open(MenuDialogComponent, {
               width: '400px',
               maxWidth: '95vw',
+              panelClass: 'menu-dialog-panel',
               data: {
                 ...table,
                 waiter: this.waiters.find(w => w._id === waiterId) || null
@@ -540,7 +542,7 @@ addMenuItems(table: Table): void {
       const dialogRef = this.dialog.open(TotalDialogComponent, {
         width: '450px',
         maxWidth: '95vw',
-        panelClass: 'custom-dialog-container',
+        panelClass: ['custom-dialog-container', 'total-dialog-panel'],
         data: { tableId: table.id,
             orders: table.orders,
             tableName: table.name,        // Asegúrate de pasar el nombre de la mesa
@@ -587,6 +589,7 @@ openWaiterDialog(table: Table): void {
           const menuDialogRef = this.dialog.open(MenuDialogComponent, {
             width: '400px',
             maxWidth: '95vw',
+            panelClass: 'menu-dialog-panel',
             data: {
               ...table,
               waiter: this.waiters.find(w => w._id === table.waiterId) || null
