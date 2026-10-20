@@ -24,6 +24,8 @@ export const REGIONS: Region[] = [
   { label: 'Estados Unidos (USD)', currencyCode: 'USD', locale: 'en-US' },
 ];
 
+type SettingsTab = 'negocio' | 'operacion' | 'funciones' | 'cuenta';
+
 const LOGO_MAX_SIDE = 256;
 const LOGO_MAX_CHARS = 300_000;
 
@@ -36,6 +38,20 @@ export class SettingsComponent implements OnInit {
   regions: Region[] = REGIONS;
   region = ''; // `${currencyCode}|${locale}`
   saving = false;
+
+  // Pestañas de la página (cada sección del formulario pertenece a una)
+  readonly tabs: { key: SettingsTab; label: string; icon: string }[] = [
+    { key: 'negocio', label: 'Negocio', icon: 'storefront' },
+    { key: 'operacion', label: 'Operación', icon: 'tune' },
+    { key: 'funciones', label: 'Funciones', icon: 'extension' },
+    { key: 'cuenta', label: 'Seguridad', icon: 'lock' },
+  ];
+  tab: SettingsTab = 'negocio';
+
+  setTab(tab: SettingsTab) {
+    this.tab = tab;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   hours = Array.from({ length: 24 }, (_, h) => h);
 
   // Sonido de aviso de pedidos QR: se guarda en este dispositivo apenas se cambia

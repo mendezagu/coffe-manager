@@ -70,15 +70,17 @@
             class="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-xl bg-white border-[1px] border-cafe-green-700 text-cafe-green-700 text-sm font-bold disabled:opacity-50">
             <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>{{ busy ? 'Generando…' : 'Generar QR de ' + missingCount + (missingCount === 1 ? ' mesa nueva' : ' mesas nuevas') }}
           </button>
-          <button type="button" (click)="print(cards)"
+          <button type="button" (click)="print(visibleCards)"
             class="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-xl bg-cafe-green-700 text-white text-sm font-bold">
-            <mat-icon class="!w-5 !h-5 !text-xl">print</mat-icon> Imprimir todos
+            <mat-icon class="!w-5 !h-5 !text-xl">print</mat-icon> {{ activeSectorTab === 'all' ? 'Imprimir todos' : 'Imprimir estos ' + visibleCards.length }}
           </button>
         </div>
       </div>
 
+      <app-filter-tabs *ngIf="sectorTabs.length > 0" class="mb-[14px] block" label="Códigos QR por sector" [tabs]="sectorTabs" [selected]="activeSectorTab" (selectedChange)="sectorTab = $event"></app-filter-tabs>
+
       <div class="grid gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
-        <article *ngFor="let c of cards" class="p-[16px] rounded-2xl border-[1px] border-sage-200 bg-white flex flex-col items-center text-center">
+        <article *ngFor="let c of visibleCards" class="p-[16px] rounded-2xl border-[1px] border-sage-200 bg-white flex flex-col items-center text-center">
           <h3 class="text-lg font-bold text-sage-900 m-0">{{ c.name }}</h3>
           <p class="text-xs text-sage-500 m-0 mb-[8px]">{{ c.sector || 'Sin sector' }}</p>
           <img [src]="c.image" [alt]="'QR de ' + c.name" class="w-[168px] h-[168px]" />

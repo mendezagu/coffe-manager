@@ -70,10 +70,11 @@
           </div>
 
           <!-- Lista de Mesas -->
-          <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <h3 class="text-xl font-bold text-sage-900 mb-3 flex items-center gap-2">
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista de Mesas
           </h3>
+          <app-filter-tabs *ngIf="sectors.length > 0" class="mb-3 block" label="Mesas por sector" [tabs]="tableTabs" [selected]="activeTableTab" (selectedChange)="tableTab = $event"></app-filter-tabs>
           <div class="overflow-x-auto rounded-card shadow-soft bg-white">
             <table class="w-full">
               <thead class="bg-sage-50">
@@ -105,7 +106,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-sage-100">
-                <tr *ngFor="let table of tables; let i = index"
+                <tr *ngFor="let table of visibleTables; let i = index"
                     class="hover:bg-sage-50 transition-colors duration-150"
                     [class.bg-sage-50]="i % 2 === 0">
 
@@ -231,10 +232,11 @@
           </div>
 
           <!-- Lista del menú -->
-          <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <h3 class="text-xl font-bold text-sage-900 mb-3 flex items-center gap-2">
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista del Menú
           </h3>
+          <app-filter-tabs *ngIf="categories.length > 0" class="mb-3 block" label="Platos por categoría" [tabs]="menuTabsList" [selected]="activeMenuTab" (selectedChange)="menuTab = $event"></app-filter-tabs>
           <div class="overflow-x-auto rounded-card shadow-soft bg-white">
             <table class="w-full">
               <thead class="bg-sage-50">

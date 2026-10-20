@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import QRCode from 'qrcode';
+import { FilterTab } from 'src/app/components/filter-tabs/filter-tabs.component';
 import { QrService, QrTableRow, QrTablesView } from 'src/app/services/qr.service';
 import { SettingsService } from 'src/app/services/settings.service';
 
@@ -22,6 +23,30 @@ export class QrCodesComponent implements OnInit {
   cards: QrCard[] = [];
   baseUrl = this.readBase() || this.appBase();
   busy = false;
+
+  // Pestañas por sector: la clave es el nombre del sector ('all' = todos, 'none' = sin sector)
+  sectorTab = 'all';
+
+  get sectorTabs(): FilterTab[] {
+    const names: string[] = [];
+    for (const c of this.cards) if (c.sector && !names.includes(c.sector)) names.push(c.sector);
+    if (names.length === 0) return [];
+    const tabs: FilterTab[] = [{ key: 'all', label: 'Todas', count: this.cards.length }];
+    for (const n of names) tabs.push({ key: n, label: n, count: this.cards.filter((c) => c.sector === n).length });
+    const without = this.cards.filter((c) => !c.sector).length;
+    if (without > 0) tabs.push({ key: 'none', label: 'Sin sector', count: without });
+    return tabs;
+  }
+
+  get activeSectorTab(): string {
+    return this.sectorTabs.some((t) => t.key === this.sectorTab) ? this.sectorTab : 'all';
+  }
+
+  get visibleCards(): QrCard[] {
+    const tab = this.activeSectorTab;
+    if (tab === 'all') return this.cards;
+    return this.cards.filter((c) => (tab === 'none' ? !c.sector : c.sector === tab));
+  }
 
   constructor(private qr: QrService, public settings: SettingsService, private snackBar: MatSnackBar) {}
 

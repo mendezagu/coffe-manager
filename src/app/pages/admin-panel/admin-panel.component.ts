@@ -1,4 +1,5 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { FilterTab } from 'src/app/components/filter-tabs/filter-tabs.component';
 import { ActivatedRoute } from '@angular/router';
 import { CategoriesComponent } from '../categories/categories.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -57,6 +58,42 @@ export class AdminPanelComponent {
   editTableAvailability: boolean = true;
   newTableSectorId: string = ''; // '' = sin sector
   editTableSectorId: string = '';
+
+  // Pestañas de las listas: mesas por sector y platos por categoría ('all' = todas)
+  tableTab = 'all';
+  menuTab = 'all';
+
+  get tableTabs(): FilterTab[] {
+    const tabs: FilterTab[] = [{ key: 'all', label: 'Todas', count: this.tables.length }];
+    for (const s of this.sectors) tabs.push({ key: s._id, label: s.name, count: this.tables.filter((t) => t.sectorId === s._id).length });
+    const without = this.tables.filter((t) => !t.sectorId).length;
+    // "Sin sector" solo si hay sectores (si no hay ninguno, todas las mesas son "sin sector" y la pestaña sobra)
+    if (this.sectors.length > 0 && without > 0) tabs.push({ key: 'none', label: 'Sin sector', count: without });
+    return tabs;
+  }
+
+  // la pestaña elegida puede haber desaparecido (se borró el sector): en ese caso se muestran todas
+  get activeTableTab(): string {
+    return this.tableTabs.some((t) => t.key === this.tableTab) ? this.tableTab : 'all';
+  }
+
+  get visibleTables(): Table[] {
+    const tab = this.activeTableTab;
+    if (tab === 'all') return this.tables;
+    return this.tables.filter((t) => (tab === 'none' ? !t.sectorId : t.sectorId === tab));
+  }
+
+  get menuTabsList(): FilterTab[] {
+    const tabs: FilterTab[] = [{ key: 'all', label: 'Todo', count: this.menuItems.length }];
+    for (const c of this.categories) tabs.push({ key: c._id, label: c.name, count: this.menuItems.filter((m) => m.categoryId === c._id).length });
+    const without = this.menuItems.filter((m) => !m.categoryId).length;
+    if (this.categories.length > 0 && without > 0) tabs.push({ key: 'none', label: 'Sin categoría', count: without });
+    return tabs;
+  }
+
+  get activeMenuTab(): string {
+    return this.menuTabsList.some((t) => t.key === this.menuTab) ? this.menuTab : 'all';
+  }
 
   // SECTORS
   sectors: Sector[] = [];
@@ -151,10 +188,12 @@ export class AdminPanelComponent {
 
    // Filtrar los ítems del menú según el término de búsqueda
   get filteredMenuItems() {
+    const tab = this.activeMenuTab;
+    const inTab = tab === 'all' ? this.menuItems : this.menuItems.filter((item) => (tab === 'none' ? !item.categoryId : item.categoryId === tab));
     if (!this.searchTerm) {
-      return this.menuItems;
+      return inTab;
     }
-    return this.menuItems.filter(item =>
+    return inTab.filter(item =>
       item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }

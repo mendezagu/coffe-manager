@@ -42,30 +42,30 @@
     <ng-container *ngIf="report">
 
       <!-- Resumen -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div class="bg-white rounded-card shadow-soft p-4">
+      <div class="grid grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-4 gap-3 mb-4">
+        <div class="min-w-0 bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Total vendido</p>
-          <p class="text-2xl font-bold text-cafe-green-700 mt-1">{{ report.summary.totalAmount | money }}</p>
+          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-cafe-green-700 mt-1 sm:text-2xl">{{ report.summary.totalAmount | money }}</p>
         </div>
         <div class="bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Ventas</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.salesCount }}</p>
+          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.salesCount }}</p>
           <p class="text-xs text-sage-500 mt-0.5">{{ report.summary.itemsSold }} platos</p>
         </div>
         <div class="bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Ticket promedio</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.averageTicket | money }}</p>
+          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.averageTicket | money }}</p>
         </div>
         <div class="bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Descuentos</p>
-          <p class="text-2xl font-bold text-sage-900 mt-1">{{ report.summary.discountTotal | money }}</p>
+          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.discountTotal | money }}</p>
           <p class="text-xs text-sage-500 mt-0.5" *ngIf="report.summary.grossTotal > 0">
             {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto
           </p>
         </div>
         <div *ngIf="hasCosts" class="bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Ganancia estimada</p>
-          <p class="text-2xl font-bold text-cafe-green-700 mt-1">{{ report.summary.profit | money }}</p>
+          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-cafe-green-700 mt-1 sm:text-2xl">{{ report.summary.profit | money }}</p>
           <p *ngIf="report.summary.profitMarginPct !== null" class="text-xs text-sage-500 mt-0.5">{{ report.summary.profitMarginPct / 100 | percent:'1.0-0' }} de margen</p>
         </div>
       </div>
@@ -89,12 +89,12 @@
         <p class="text-sm text-sage-500 mt-1">Probá con otro período.</p>
       </div>
 
-      <div *ngIf="hasSales" class="grid gap-4 lg:grid-cols-2">
+      <div *ngIf="hasSales" class="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
 
         <!-- Ventas por día -->
-        <section class="bg-white rounded-card shadow-soft p-4 lg:col-span-2">
+        <section class="min-w-0 bg-white rounded-card shadow-soft p-4 lg:col-span-2">
           <h2 class="font-bold text-sage-800 mb-3">Ventas por día</h2>
-          <div [hidden]="showTables" class="h-64"><canvas #dayChart aria-label="Gráfico de ventas por día"></canvas></div>
+          <div [hidden]="showTables" class="relative h-64 min-w-0"><canvas #dayChart aria-label="Gráfico de ventas por día"></canvas></div>
           <div *ngIf="showTables" class="max-h-72 overflow-y-auto">
             <table class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Día</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
@@ -106,7 +106,7 @@
         </section>
 
         <!-- Platos más vendidos -->
-        <section class="bg-white rounded-card shadow-soft p-4">
+        <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 class="font-bold text-sage-800">Platos más vendidos</h2>
             <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Ordenar platos por">
@@ -119,7 +119,7 @@
             </div>
           </div>
           <p *ngIf="report.items.length === 0" class="text-sm text-sage-500 py-8 text-center">Todavía no hay ventas con detalle de platos en este rango.</p>
-          <div [hidden]="showTables || report.items.length === 0" [style.height.px]="topItems.length * 34 + 50"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
+          <div class="relative min-w-0" [hidden]="showTables || report.items.length === 0" [style.height.px]="topItems.length * 34 + 50"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
           <div *ngIf="showTables && report.items.length" class="max-h-80 overflow-y-auto">
             <table class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th><th *ngIf="hasCosts" class="py-1.5 text-right">Ganancia</th></tr></thead>
@@ -130,11 +130,11 @@
           </div>
         </section>
 
-        <div class="grid gap-4 content-start">
+        <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4">
           <!-- Ventas por mozo -->
-          <section class="bg-white rounded-card shadow-soft p-4">
+          <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
-            <div [hidden]="showTables" [style.height.px]="report.byWaiter.length * 34 + 50"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
+            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="report.byWaiter.length * 34 + 50"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Propinas</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
@@ -144,9 +144,9 @@
           </section>
 
           <!-- Método de pago -->
-          <section class="bg-white rounded-card shadow-soft p-4">
+          <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-3">Método de pago</h2>
-            <div [hidden]="showTables" [style.height.px]="report.byPayment.length * 34 + 50"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
+            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="report.byPayment.length * 34 + 50"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Método</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
@@ -162,11 +162,22 @@
       <section *ngIf="report.byHotel?.length" class="bg-white rounded-card shadow-soft p-4 mt-4" data-testid="hotel-sales">
         <h2 class="font-bold text-sage-800 mb-1">Ventas por hotel</h2>
         <p class="text-xs text-sage-500 mb-3">Mesas cobradas con voucher de hotel. El descuento ya está restado del importe.</p>
-        <div class="overflow-x-auto">
+        <ul class="m-0 list-none divide-y divide-sage-100 p-0 sm:hidden">
+          <li *ngFor="let h of hotelRows" class="py-3">
+            <p class="m-0 break-words font-bold text-sage-900">{{ h.name }}</p>
+            <dl class="m-0 mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+              <div><dt class="text-xs text-sage-500">Mesas</dt><dd class="m-0 font-medium">{{ h.salesCount }}</dd></div>
+              <div><dt class="text-xs text-sage-500">Importe</dt><dd class="m-0 font-medium">{{ h.totalAmount | money }}</dd></div>
+              <div><dt class="text-xs text-sage-500">Ticket promedio</dt><dd class="m-0">{{ h.averageTicket | money }}</dd></div>
+              <div><dt class="text-xs text-sage-500">Descuentos</dt><dd class="m-0 text-cafe-red-700">{{ h.discountTotal | money }}</dd></div>
+            </dl>
+          </li>
+        </ul>
+        <div class="hidden overflow-x-auto sm:block">
           <table class="w-full text-sm">
             <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Hotel</th><th class="py-1.5 text-right">Mesas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Ticket promedio</th><th class="py-1.5 text-right">Descontado</th></tr></thead>
             <tbody class="divide-y divide-sage-100">
-              <tr *ngFor="let h of report.byHotel">
+              <tr *ngFor="let h of hotelRows">
                 <td class="py-1.5 font-medium">{{ h.name }}</td>
                 <td class="py-1.5 text-right">{{ h.salesCount }}</td>
                 <td class="py-1.5 text-right font-medium">{{ h.totalAmount | money }}</td>
@@ -176,6 +187,12 @@
             </tbody>
           </table>
         </div>
+        <!-- Con muchos hoteles se muestran los que más vendieron (ya vienen ordenados por importe) y el resto se despliega -->
+        <button *ngIf="report.byHotel.length > hotelsPreview" type="button" (click)="hotelsExpanded = !hotelsExpanded" [attr.aria-expanded]="hotelsExpanded"
+          class="mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-sage-200 bg-white text-sm font-bold text-sage-700 transition-colors hover:bg-sage-50">
+          {{ hotelsExpanded ? 'Ver menos' : 'Ver los ' + report.byHotel.length + ' hoteles' }}
+          <mat-icon class="!h-5 !w-5 !text-xl">{{ hotelsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
       </section>
     </ng-container>
 

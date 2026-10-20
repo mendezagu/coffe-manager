@@ -44,6 +44,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
   loading = false;
   error = '';
   showTables = false;
+
+  // Ventas por hotel: con muchos hoteles se ven primero los que más vendieron y el resto se despliega
+  readonly hotelsPreview = 5;
+  hotelsExpanded = false;
+
+  get hotelRows() {
+    const all = this.report?.byHotel ?? [];
+    return this.hotelsExpanded ? all : all.slice(0, this.hotelsPreview);
+  }
   itemsBy: 'amount' | 'quantity' | 'profit' = 'amount';
 
   private charts: Chart[] = [];

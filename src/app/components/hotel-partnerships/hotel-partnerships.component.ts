@@ -10,21 +10,23 @@ import { HotelsService, Partnership, apiMessage } from 'src/app/services/hotels.
       <p class="text-xs text-sage-500 mb-3">Los huéspedes de estos hoteles reciben un voucher con el descuento que fijes acá. Si pausás una alianza, deja de ofrecerse (los vouchers ya emitidos conservan su descuento).</p>
       <p *ngIf="error" role="alert" class="mb-3 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
       <ul class="m-0 p-0 list-none divide-y divide-sage-100">
-        <li *ngFor="let p of rows" class="py-3 flex flex-wrap items-center gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="m-0 font-bold text-sage-900 truncate">{{ p.hotelName }}</p>
+        <li *ngFor="let p of rows" class="flex flex-col gap-2.5 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+          <div class="min-w-0 sm:flex-1">
+            <p class="m-0 break-words font-bold text-sage-900">{{ p.hotelName }}</p>
             <p class="m-0 text-xs" [ngClass]="p.active ? 'text-cafe-green-700' : 'text-sage-500'">{{ p.active ? 'Activa' : 'Pausada' }}</p>
           </div>
+          <div class="flex flex-wrap items-center gap-2">
           <label class="flex items-center gap-2 text-sm text-sage-700">
             Descuento
             <input type="number" min="1" max="100" step="1" [ngModel]="p.discountPct" (ngModelChange)="draft[p.id] = $event"
-              class="w-20 px-2 py-1.5 border border-sage-200 rounded-lg text-sm text-center" [attr.aria-label]="'Descuento para ' + p.hotelName" />
+              class="h-10 w-20 px-2 border border-sage-200 rounded-lg text-sm text-center" [attr.aria-label]="'Descuento para ' + p.hotelName" />
             %
           </label>
           <button type="button" (click)="saveDiscount(p)" [disabled]="busy === p.id || !changed(p)"
-            class="px-3 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Guardar</button>
+            class="h-10 px-4 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Guardar</button>
           <button type="button" (click)="toggle(p)" [disabled]="busy === p.id"
-            class="px-3 py-1.5 bg-white text-sage-700 font-bold text-xs rounded-lg border border-sage-200 disabled:opacity-50">{{ p.active ? 'Pausar' : 'Reactivar' }}</button>
+            class="h-10 px-4 bg-white text-sage-700 font-bold text-xs rounded-lg border border-sage-200 disabled:opacity-50">{{ p.active ? 'Pausar' : 'Reactivar' }}</button>
+          </div>
         </li>
       </ul>
     </section>

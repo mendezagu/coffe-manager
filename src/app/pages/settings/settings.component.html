@@ -15,12 +15,24 @@
   <div class="max-w-5xl mx-auto">
     <p *ngIf="!form" class="text-sage-600 text-sm">Cargando…</p>
 
-    <form *ngIf="form" (ngSubmit)="save()" #f="ngForm" class="grid gap-6 lg:grid-cols-[1fr_320px] items-start">
+    <!-- Pestañas: cada una agrupa un tema, así la página no es una sola lista larguísima -->
+    <div role="tablist" aria-label="Secciones de Mi negocio"
+      class="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <button *ngFor="let t of tabs" type="button" role="tab" [attr.aria-selected]="tab === t.key" (click)="setTab(t.key)"
+        class="flex h-11 flex-none items-center gap-2 whitespace-nowrap rounded-xl px-4 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40"
+        [ngClass]="tab === t.key ? 'bg-cafe-green-700 text-white shadow-green' : 'bg-white text-sage-600 ring-1 ring-sage-200 hover:bg-sage-50'">
+        <mat-icon class="!h-5 !w-5 !text-xl">{{ t.icon }}</mat-icon>
+        {{ t.label }}
+      </button>
+    </div>
+
+    <form *ngIf="form" [class.hidden]="tab === 'cuenta'" (ngSubmit)="save()" #f="ngForm" class="grid items-start gap-6"
+      [ngClass]="tab === 'negocio' ? 'lg:grid-cols-[1fr_320px]' : 'lg:grid-cols-[minmax(0,720px)]'">
 
       <div class="space-y-6">
 
         <!-- Marca -->
-        <section class="bg-white rounded-card shadow-soft p-5">
+        <section [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-4">Marca</h2>
 
           <div class="flex items-center gap-4 mb-4">
@@ -47,7 +59,7 @@
         </section>
 
         <!-- Datos del ticket -->
-        <section class="bg-white rounded-card shadow-soft p-5 grid gap-4 sm:grid-cols-2">
+        <section [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-5 grid gap-4 sm:grid-cols-2">
           <h2 class="sm:col-span-2 font-bold text-sage-800">Datos para el ticket</h2>
 
           <label class="block sm:col-span-2">
@@ -101,7 +113,7 @@
         </section>
 
         <!-- Moneda y turnos -->
-        <section class="bg-white rounded-card shadow-soft p-5 grid gap-4 sm:grid-cols-3">
+        <section [class.hidden]="tab !== 'operacion'" class="bg-white rounded-card shadow-soft p-5 grid gap-4 sm:grid-cols-3">
           <h2 class="sm:col-span-3 font-bold text-sage-800">Moneda y turnos</h2>
 
           <label class="block sm:col-span-3">
@@ -136,7 +148,7 @@
         </section>
 
         <!-- Cobro: propinas y caja -->
-        <section class="bg-white rounded-card shadow-soft p-5 space-y-3">
+        <section [class.hidden]="tab !== 'operacion'" class="bg-white rounded-card shadow-soft p-5 space-y-3">
           <h2 class="font-bold text-sage-800 mb-1">Cobro</h2>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
@@ -174,7 +186,7 @@
         </section>
 
         <!-- Inventario -->
-        <section class="bg-white rounded-card shadow-soft p-5 space-y-3">
+        <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5 space-y-3">
           <h2 class="font-bold text-sage-800 mb-1">Inventario</h2>
           <p class="text-sm text-sage-600 m-0">
             Llevá la cuenta de insumos y productos: cada venta descuenta lo que consumió, los platos que no se pueden preparar aparecen como <strong>agotados</strong> y se calcula cuánto ganás con cada uno.
@@ -200,7 +212,7 @@
         </section>
 
         <!-- Permisos del personal -->
-        <section class="bg-white rounded-card shadow-soft p-5">
+        <section [class.hidden]="tab !== 'operacion'" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Permisos del personal</h2>
           <p class="text-sm text-sage-600 mb-3">Qué pueden hacer los mozos y cajeros además de lo básico. El administrador siempre puede todo.</p>
 
@@ -229,7 +241,7 @@
         </section>
 
         <!-- Pedido por QR -->
-        <section class="bg-white rounded-card shadow-soft p-5">
+        <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Pedido por QR en la mesa</h2>
           <p class="text-sm text-sage-600 mb-3">
             Cada mesa tiene un QR: el cliente lo escanea con su celular, ve la carta y manda su pedido. El mozo lo confirma desde el sistema y recién ahí pasa a la cocina.
@@ -284,7 +296,7 @@
         </section>
 
         <!-- Cocina -->
-        <section class="bg-white rounded-card shadow-soft p-5">
+        <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina</h2>
           <p class="text-sm text-sage-600 mb-3">
             La pantalla de cocina es un tablero para quien <strong>prepara</strong> los pedidos (cocineros o barra).
@@ -322,7 +334,7 @@
         </section>
 
         <!-- Cocina y barra (solo si se usa la cocina) -->
-        <section *ngIf="form.kitchenEnabled" class="bg-white rounded-card shadow-soft p-5">
+        <section *ngIf="form.kitchenEnabled" [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5">
           <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>
           <p class="text-sm text-sage-600 mb-3">
             Si lo activás, cada categoría del menú va a la pantalla de la cocina o a la de la barra, según el destino que le pongas.
@@ -345,16 +357,18 @@
           </label>
         </section>
 
-        <div>
+        <!-- Guardar: queda fijo abajo para no tener que bajar hasta el final de cada pestaña -->
+        <div class="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-sage-200 bg-sage-100/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:bg-white/95">
           <button type="submit" [disabled]="f.invalid || !shiftsValid || saving"
             class="px-6 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
             {{ saving ? 'Guardando…' : 'Guardar cambios' }}
           </button>
+          <p *ngIf="f.invalid || !shiftsValid" class="m-0 text-xs font-medium text-cafe-red-700">Hay datos sin completar o turnos fuera de orden. Revisá todas las pestañas.</p>
         </div>
       </div>
 
       <!-- Vista previa del ticket -->
-      <aside class="bg-white rounded-card shadow-soft p-5 lg:sticky lg:top-20">
+      <aside [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-5 lg:sticky lg:top-20">
         <h2 class="font-bold text-sage-800 mb-3">Así sale en el ticket</h2>
         <div class="bg-sage-50 border border-dashed border-sage-300 rounded-lg p-3 font-mono text-xs text-sage-900 space-y-1">
           <img *ngIf="previewLogo" [src]="previewLogo" alt="" class="w-14 h-auto mx-auto mb-2" />
@@ -367,7 +381,7 @@
     </form>
 
     <!-- Mi contraseña (fuera del formulario de arriba: no puede haber un formulario dentro de otro) -->
-    <section id="mi-contrasena" class="mt-6 max-w-[460px] rounded-card bg-white p-5 shadow-soft">
+    <section id="mi-contrasena" [class.hidden]="tab !== 'cuenta'" class="max-w-[460px] rounded-card bg-white p-5 shadow-soft">
       <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">
         <mat-icon class="text-cafe-green-700">lock</mat-icon>
         Mi contraseña
