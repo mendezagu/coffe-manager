@@ -174,3 +174,13 @@ mat-icon {
     box-shadow: none !important;
   }
 }
+
+/* iPhone: Safari hace zoom automático al enfocar un campo con letra menor a 16 px.
+   En iOS los campos de texto se fuerzan a 16 px (en el resto de los dispositivos no cambia nada). */
+@supports (-webkit-touch-callout: none) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']):not([type='button']):not([type='submit']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
