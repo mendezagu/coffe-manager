@@ -1,9 +1,9 @@
-<div class="flex min-h-screen justify-center bg-sage-100">
+<div class="flex min-h-screen justify-center bg-sage-100" [attr.style]="brandStyle">
 <div class="flex min-h-screen w-full max-w-md flex-col bg-white shadow-2xl">
   <!-- Cabecera única: marca de Tavolapp y datos del local sobre el mismo fondo oscuro -->
   <div class="bg-forest px-5 pb-14 pt-4 text-white">
     <div class="mx-auto w-full max-w-lg">
-      <div class="flex justify-center"><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
+      <div class="flex justify-start"><a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] text-white no-underline opacity-90 hover:opacity-100"><span class="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Powered by</span><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 17px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
       <span>Tav</span>
       <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
         <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
@@ -19,7 +19,7 @@
         <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
       </svg>
       <span>lapp</span>
-    </span></div>
+    </span></a></div>
       <div *ngIf="info" class="mt-5 flex items-center gap-3">
         <img *ngIf="info.logoUrl" [src]="info.logoUrl" alt="" class="h-14 w-14 flex-none rounded-2xl bg-white object-contain p-1 ring-2 ring-white/30" />
         <span *ngIf="!info.logoUrl" class="grid h-14 w-14 flex-none place-items-center rounded-2xl bg-white/15 text-white"><mat-icon>restaurant</mat-icon></span>
@@ -65,7 +65,7 @@
           <div class="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="listbox" aria-label="Días">
             <button *ngFor="let d of days" type="button" role="option" [attr.aria-selected]="d.value === date" [disabled]="d.closed" (click)="pickDate(d.value)"
               class="flex h-[74px] w-16 flex-none flex-col items-center justify-center rounded-xl border text-center transition-colors disabled:cursor-not-allowed disabled:opacity-35"
-              [ngClass]="d.value === date ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-50'">
+              [ngClass]="d.value === date ? 'border-forest bg-forest text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-50'">
               <span class="text-[11px] font-bold uppercase">{{ d.weekday }}</span>
               <span class="text-xl font-bold leading-tight">{{ d.num }}</span>
               <span class="text-[11px] uppercase opacity-80">{{ d.month }}</span>
@@ -83,7 +83,7 @@
               <div class="grid grid-cols-4 gap-2" role="listbox" [attr.aria-label]="'Horarios de ' + g.label">
                 <button *ngFor="let s of g.slots" type="button" role="option" [attr.aria-selected]="s.time === time" [disabled]="!s.available" (click)="pickSlot(s)"
                   class="h-11 rounded-xl border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:border-transparent disabled:bg-sage-50 disabled:text-sage-300 disabled:line-through"
-                  [ngClass]="s.time === time ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-800 hover:border-cafe-green-700 hover:bg-cafe-green-50'">{{ s.time }}</button>
+                  [ngClass]="s.time === time ? 'border-forest bg-forest text-white shadow-soft' : 'border-sage-200 bg-white text-sage-800 hover:border-forest hover:bg-forest-soft'">{{ s.time }}</button>
               </div>
             </div>
             <p *ngIf="!tooLate" class="m-0 mt-3 text-xs text-sage-500">Los horarios tachados ya no tienen lugar.</p>
@@ -98,7 +98,7 @@
           <p *ngIf="error" role="alert" class="m-0 mt-4 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
 
           <button type="button" (click)="next()" [disabled]="!time"
-            class="mt-5 h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            class="mt-5 h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
             Continuar
           </button>
           <button type="button" (click)="openCancel()" class="mt-3 w-full text-center text-sm font-medium text-sage-500 underline">Ya reservé y quiero cancelar</button>
@@ -107,7 +107,7 @@
         <!-- 2. Datos -->
         <form *ngIf="step === 'details'" (ngSubmit)="book()" autocomplete="on" aria-label="Tus datos">
           <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Cambiar</button>
-          <div class="mb-5 rounded-xl bg-cafe-green-50 p-3 text-sm font-bold text-cafe-green-900">
+          <div class="mb-5 rounded-xl bg-forest-soft p-3 text-sm font-bold text-forest">
             {{ dateLabel }} · {{ time }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}
           </div>
           <label class="mb-3 block">
@@ -128,14 +128,14 @@
           </label>
           <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
           <button type="submit" [disabled]="!detailsValid || sending"
-            class="h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            class="h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
             {{ sending ? 'Reservando…' : 'Confirmar reserva' }}
           </button>
         </form>
 
         <!-- 3. Listo -->
         <section *ngIf="step === 'done' && done" class="text-center" aria-live="polite">
-          <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700"><mat-icon class="!h-9 !w-9 !text-4xl">check_circle</mat-icon></span>
+          <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-forest-soft text-forest"><mat-icon class="!h-9 !w-9 !text-4xl">check_circle</mat-icon></span>
           <h2 class="m-0 mt-3 text-xl font-bold text-sage-900">¡Reserva confirmada!</h2>
           <p class="m-0 mt-1 text-sm text-sage-600">Te esperamos, {{ done.guestName }}.</p>
           <dl class="mx-auto mt-5 max-w-xs space-y-2 rounded-xl bg-sage-50 p-4 text-left text-sm">
@@ -175,7 +175,7 @@
           </label>
           <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
           <button type="submit" [disabled]="!waitValid || sending"
-            class="h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            class="h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
             {{ sending ? 'Anotando…' : 'Anotarme' }}
           </button>
         </form>
@@ -207,7 +207,7 @@
               {{ sending ? 'Cancelando…' : 'Cancelar reserva' }}
             </button>
           </ng-container>
-          <p *ngIf="cancelMsg" role="status" class="m-0 rounded-lg bg-cafe-green-50 px-3 py-3 text-sm font-bold text-cafe-green-900">{{ cancelMsg }}</p>
+          <p *ngIf="cancelMsg" role="status" class="m-0 rounded-lg bg-forest-soft px-3 py-3 text-sm font-bold text-forest">{{ cancelMsg }}</p>
         </form>
       </main>
 
@@ -216,7 +216,7 @@
 
     <footer class="mt-auto pt-8 text-center">
       <p class="m-0 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-xs text-sage-600">
-        <mat-icon class="!h-4 !w-4 !text-base text-cafe-green-700">restaurant_menu</mat-icon>
+        <mat-icon class="!h-4 !w-4 !text-base text-forest">restaurant_menu</mat-icon>
         Reservas con <strong class="text-sage-800">Tavolapp</strong>
       </p>
     </footer>

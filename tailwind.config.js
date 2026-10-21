@@ -46,7 +46,13 @@ module.exports = {
         // Ladrillo: mesa ocupada y acciones destructivas.
         // Pantalla del cliente (pedido por QR): crema y verde bosque
         'crema': { DEFAULT: '#FAF8F5', dark: '#F0ECE4' },
-        'forest': { DEFAULT: '#1b2822', hover: '#131d18', light: '#22322a', soft: '#EAF0EC' },
+        // Lee el color de marca del restaurante (variables que fija la pantalla del cliente); sin ellas, verde bosque
+        'forest': {
+          DEFAULT: 'rgb(var(--brand-rgb, 27 40 34) / <alpha-value>)',
+          hover: 'rgb(var(--brand-hover-rgb, 19 29 24) / <alpha-value>)',
+          light: 'rgb(var(--brand-light-rgb, 34 50 42) / <alpha-value>)',
+          soft: 'rgb(var(--brand-soft-rgb, 234 240 236) / <alpha-value>)',
+        },
         'charcoal': '#1A2521',
         'muted': '#63736C',
         // Ámbar: mesa con un pedido por QR esperando confirmación. Misma profundidad que el verde y el ladrillo.

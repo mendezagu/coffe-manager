@@ -26,7 +26,7 @@
 <!-- Banda del local: logo, nombre y mesa sobre fondo oscuro; la carta se apoya encima con esquinas redondeadas -->
 <ng-template #brandBanner>
   <div class="bg-forest px-[20px] pt-[16px] pb-[48px] text-white">
-    <div class="flex justify-center mb-[16px]"><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 28px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
+    <div class="flex justify-start mb-[16px]"><a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] text-white no-underline opacity-90 hover:opacity-100"><span class="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Powered by</span><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 17px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
       <span>Tav</span>
       <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
         <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
@@ -42,7 +42,7 @@
         <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
       </svg>
       <span>lapp</span>
-    </span></div>
+    </span></a></div>
     <div class="flex items-center gap-[12px] min-w-0">
       <div class="w-14 h-14 rounded-2xl bg-white/15 ring-2 ring-white/25 flex items-center justify-center text-white flex-shrink-0 overflow-hidden">
         <img *ngIf="info?.business?.logoUrl; else cupIcon2" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="w-full h-full object-cover" />
@@ -64,7 +64,7 @@
   </div>
 </ng-template>
 
-<div class="min-h-screen bg-[#F5F1EB] text-charcoal font-jakarta flex justify-center selection:bg-forest selection:text-white">
+<div class="min-h-screen bg-[#F5F1EB] text-charcoal font-jakarta flex justify-center selection:bg-forest selection:text-white" [attr.style]="brandStyle">
   <div class="w-full max-w-md bg-crema min-h-screen flex flex-col shadow-2xl relative pb-[112px] border-x-[1px] border-[#EAE4DC]/60">
 
     <!-- Cargando -->

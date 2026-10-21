@@ -58,6 +58,44 @@
           </label>
         </section>
 
+        <!-- Color de marca (carta QR y reservas) -->
+        <section [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-5">
+          <h2 class="font-bold text-sage-800 mb-1">Color de tu marca</h2>
+          <p class="text-xs text-sage-500 mb-4">Lo ven tus clientes en la carta de la mesa (QR) y en la página para reservar. El panel interno no cambia.</p>
+
+          <div class="flex flex-wrap items-center gap-2 mb-3" role="radiogroup" aria-label="Colores sugeridos">
+            <button *ngFor="let s of brandSwatches" type="button" role="radio" [attr.aria-checked]="form.brandColor === s.value" [attr.aria-label]="s.label" [title]="s.label" (click)="setBrand(s.value)"
+              class="w-9 h-9 rounded-full border-2 transition-transform hover:scale-110" [style.background]="s.value"
+              [ngClass]="form.brandColor === s.value ? 'border-sage-900 ring-2 ring-white ring-offset-2 ring-offset-sage-900' : 'border-white shadow'"></button>
+            <label class="inline-flex items-center gap-2 px-3 h-9 rounded-full border border-sage-200 text-sm text-sage-700 cursor-pointer hover:bg-sage-50">
+              Otro color
+              <input name="brandColor" type="color" [(ngModel)]="form.brandColor" class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" />
+            </label>
+            <button type="button" *ngIf="form.brandColor !== defaultBrand" (click)="setBrand(defaultBrand)" class="px-3 h-9 rounded-full text-sm text-sage-600 hover:bg-sage-100">Volver al original</button>
+          </div>
+          <p *ngIf="brandAdjusted" class="text-xs text-cafe-amber-800 bg-cafe-amber-50 rounded-lg px-3 py-2 mb-3">Ese color es muy claro para llevar texto blanco: lo oscurecimos un poco para que se lea bien.</p>
+
+          <!-- Vista previa -->
+          <div class="rounded-xl overflow-hidden border border-sage-200 max-w-sm" [attr.style]="brandPreviewStyle" aria-label="Vista previa">
+            <div class="bg-forest text-white px-4 pt-4 pb-8">
+              <div class="flex items-center gap-3">
+                <span class="w-11 h-11 rounded-xl bg-white/15 ring-2 ring-white/25 overflow-hidden flex items-center justify-center shrink-0">
+                  <img *ngIf="previewLogo" [src]="previewLogo" alt="" class="w-full h-full object-cover" />
+                  <mat-icon *ngIf="!previewLogo">restaurant</mat-icon>
+                </span>
+                <div class="min-w-0"><p class="m-0 font-bold truncate">{{ form.name || 'Tu restaurante' }}</p><p class="m-0 text-xs text-white/80">Mesa 4</p></div>
+              </div>
+            </div>
+            <div class="-mt-4 rounded-t-2xl bg-white px-4 py-3">
+              <div class="flex gap-2 mb-3">
+                <span class="px-3 py-1 rounded-full bg-forest text-white text-xs font-bold">Todo</span>
+                <span class="px-3 py-1 rounded-full border border-sage-200 text-xs text-sage-600">Café</span>
+              </div>
+              <span class="inline-flex w-full justify-center py-2.5 rounded-xl bg-forest text-white text-sm font-bold">Continuar</span>
+            </div>
+          </div>
+        </section>
+
         <!-- Datos del ticket -->
         <section [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-5 grid gap-4 sm:grid-cols-2">
           <h2 class="sm:col-span-2 font-bold text-sage-800">Datos para el ticket</h2>

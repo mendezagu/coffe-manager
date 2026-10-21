@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
 import { minToTime } from 'src/app/services/reservations.service';
+import { BRAND_SWATCHES, DEFAULT_BRAND, brandStyle, legibleBrand } from 'src/app/services/brand';
 
 export interface Region {
   label: string;
@@ -72,6 +73,27 @@ export class SettingsComponent implements OnInit {
     { value: 360, label: '6 horas' },
     { value: 1440, label: '1 día' },
   ];
+
+  // Color de marca de la carta QR y de las reservas
+  readonly brandSwatches = BRAND_SWATCHES;
+  readonly defaultBrand = DEFAULT_BRAND;
+
+  get brandPreviewStyle(): string {
+    return brandStyle(this.form?.brandColor);
+  }
+
+  // El color con el que se va a ver de verdad (si es muy claro, se oscurece para que el texto blanco se lea)
+  get brandShown(): string {
+    return legibleBrand(this.form?.brandColor ?? DEFAULT_BRAND);
+  }
+
+  get brandAdjusted(): boolean {
+    return (this.form?.brandColor ?? '').toLowerCase() !== this.brandShown;
+  }
+
+  setBrand(color: string) {
+    if (this.form) this.form.brandColor = color;
+  }
 
   hasDay(n: number): boolean {
     return !!this.form?.reservationDays.includes(n);

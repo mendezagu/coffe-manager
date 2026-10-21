@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { brandStyle } from 'src/app/services/brand';
 import { RealtimeService } from 'src/app/services/realtime.service';
 import { ClientOrders, ClientRequest, ClientStep, PublicGroup, PublicInfo, PublicItem, QrPublicService } from 'src/app/services/qr.service';
 
@@ -97,6 +98,11 @@ const SPLASH_SECONDS = 7;
   ],
 })
 export class QrOrderComponent implements OnInit, OnDestroy {
+  // Variables CSS con el color de marca del restaurante (el token `forest` las lee)
+  get brandStyle(): string {
+    return brandStyle(this.info?.business?.brandColor);
+  }
+
   token = '';
   phase: Phase = 'loading';
   info: PublicInfo | null = null;

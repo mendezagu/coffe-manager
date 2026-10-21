@@ -233,7 +233,7 @@ export interface PublicItem {
 }
 
 export interface PublicInfo {
-  business: { name: string; logoUrl: string | null; currencyCode: string; locale: string };
+  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string };
   table: { name: string };
   requiresPin: boolean;
   autoConfirm: boolean;

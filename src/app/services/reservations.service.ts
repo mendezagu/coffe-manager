@@ -64,6 +64,7 @@ export interface ReserveInfo {
   city: string;
   phone: string;
   logoUrl: string | null;
+  brandColor?: string;
   slotMin: number;
   durationMin: number;
   maxParty: number;

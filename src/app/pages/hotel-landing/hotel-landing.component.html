@@ -19,8 +19,8 @@
     </div>
 
     <ng-container *ngIf="phase === 'ready' && info">
-      <header class="px-[20px] pt-[16px] pb-[48px] bg-forest text-white">
-        <div class="flex justify-center mb-[16px]"><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 28px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
+      <header class="px-[20px] pt-[20px] pb-[72px] bg-forest text-white">
+        <div class="flex justify-start mb-[24px]"><a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] text-white no-underline opacity-90 hover:opacity-100"><span class="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Powered by</span><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 17px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
       <span>Tav</span>
       <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
         <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
@@ -36,15 +36,15 @@
         <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
       </svg>
       <span>lapp</span>
-    </span></div>
-        <div class="flex items-center gap-[12px]">
+    </span></a></div>
+        <div class="flex items-center gap-[16px]">
           <span class="w-14 h-14 rounded-2xl bg-white/15 ring-2 ring-white/25 flex items-center justify-center flex-shrink-0"><mat-icon>hotel</mat-icon></span>
           <div class="min-w-0">
             <p class="m-0 text-xs font-medium text-white/80">Beneficio para huéspedes de</p>
-            <h1 class="m-0 mt-[2px] text-xl font-bold leading-tight break-words">{{ info.name }}</h1>
+            <h1 class="m-0 mt-[6px] text-xl font-bold leading-tight break-words">{{ info.name }}</h1>
           </div>
         </div>
-        <p class="m-0 mt-[12px] text-sm text-white/90">Comé con descuento en los restaurantes asociados.</p>
+        <p class="m-0 mt-[24px] text-sm leading-relaxed text-white/90">Comé con descuento en los restaurantes asociados.</p>
       </header>
 
       <!-- Solapas -->

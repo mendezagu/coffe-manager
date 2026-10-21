@@ -18,6 +18,7 @@ export interface TenantSettings {
   phone: string;
   ticketFooter: string;
   logoUrl: string | null;
+  brandColor: string;
   currencyCode: string;
   locale: string;
   shiftMorningStart: number;
@@ -81,6 +82,7 @@ const DEFAULTS: TenantSettings = {
   phone: '',
   ticketFooter: '',
   logoUrl: null,
+  brandColor: '#1b2822',
   currencyCode: 'ARS',
   locale: 'es-AR',
   shiftMorningStart: 6,

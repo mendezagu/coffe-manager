@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { brandStyle } from 'src/app/services/brand';
 import {
   Availability,
   BookingConfirmation,
@@ -56,6 +57,11 @@ export class ReserveComponent implements OnInit {
   cancelMsg = '';
 
   constructor(private route: ActivatedRoute, private api: ReservePublicService) {}
+
+  // Variables CSS con el color de marca del restaurante (el token `forest` las lee)
+  get brandStyle(): string {
+    return brandStyle(this.info?.brandColor);
+  }
 
   ngOnInit() {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
