@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GestionService } from 'src/app/services/gestionService';
 
-type Kind = 'sale' | 'order' | 'print' | 'waiter' | 'other';
+type Kind = 'sale' | 'order' | 'removal' | 'print' | 'waiter' | 'other';
 type KindFilter = 'all' | Kind;
 
 interface LogRow {
@@ -23,20 +23,23 @@ interface DayGroup {
 export const KIND_STYLE: Record<Kind, { label: string; icon: string; chip: string }> = {
   sale: { label: 'Cobros', icon: 'payments', chip: 'bg-cafe-green-50 text-cafe-green-700' },
   order: { label: 'Pedidos', icon: 'receipt_long', chip: 'bg-cafe-amber-50 text-cafe-amber-700' },
+  removal: { label: 'Eliminaciones', icon: 'delete_outline', chip: 'bg-cafe-red-50 text-cafe-red-700' },
   print: { label: 'Impresiones', icon: 'print', chip: 'bg-sage-100 text-sage-600' },
   waiter: { label: 'Mozos', icon: 'person', chip: 'bg-sky-50 text-sky-700' },
   other: { label: 'Otros', icon: 'history', chip: 'bg-sage-100 text-sage-600' },
 };
 
-const FILTERS: KindFilter[] = ['all', 'sale', 'order', 'print', 'waiter'];
+const FILTERS: KindFilter[] = ['all', 'sale', 'order', 'removal', 'print', 'waiter', 'other'];
 
 // Los registros no traen un tipo: se deduce de la frase con la que se guardaron
 function kindOf(text: string): Kind {
   const t = text.toLowerCase();
   if (t.includes('imprimió')) return 'print';
+  // quitar platos de una mesa ("Se eliminaron órdenes…", "Cambios en la mesa X: Eliminados…"): se ve aparte para poder auditarlo
+  if (/elimin|quit/.test(t)) return 'removal';
   if (t.includes('cobró') || t.includes('liberó')) return 'sale';
   if (t.includes('asignó el mozo')) return 'waiter';
-  if (/agregaron|actualizó|eliminó|modificó|quitó/.test(t)) return 'order';
+  if (/agregaron|actualizó|modificó|cambios en la mesa|cantidades/.test(t)) return 'order';
   return 'other';
 }
 
@@ -102,6 +105,11 @@ export class LogsComponent implements OnInit {
   get filtered(): LogRow[] {
     const q = this.query.trim().toLowerCase();
     return this.rows.filter((r) => (this.filter === 'all' || r.kind === this.filter) && (!q || r.text.toLowerCase().includes(q)));
+  }
+
+  // "Otros" solo aparece si hay registros que no encajan en ningún tipo
+  get visibleFilters(): KindFilter[] {
+    return this.filters.filter((f) => f !== 'other' || this.countOf('other') > 0);
   }
 
   countOf(f: KindFilter): number {

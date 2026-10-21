@@ -23,6 +23,47 @@
   </div>
 </ng-template>
 
+<!-- Banda del local: logo, nombre y mesa sobre fondo oscuro; la carta se apoya encima con esquinas redondeadas -->
+<ng-template #brandBanner>
+  <div class="bg-forest px-[20px] pt-[16px] pb-[48px] text-white">
+    <div class="flex justify-center mb-[16px]"><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 28px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
+      <span>Tav</span>
+      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
+        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#22322a" stroke="#5fae86" stroke-opacity=".35" />
+        <path d="M70 66 A24 24 0 0 1 36 74" fill="none" stroke-width="4" stroke-linecap="round" stroke="#5fae86" opacity=".18" />
+        <g fill="none" stroke="#5fae86" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
+          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
+          <path d="M39 50 V69" stroke-width="3.6" />
+        </g>
+        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
+        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
+      </svg>
+      <span>lapp</span>
+    </span></div>
+    <div class="flex items-center gap-[12px] min-w-0">
+      <div class="w-14 h-14 rounded-2xl bg-white/15 ring-2 ring-white/25 flex items-center justify-center text-white flex-shrink-0 overflow-hidden">
+        <img *ngIf="info?.business?.logoUrl; else cupIcon2" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="w-full h-full object-cover" />
+        <ng-template #cupIcon2><mat-icon>local_cafe</mat-icon></ng-template>
+      </div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
+          <h1 class="font-extrabold text-xl tracking-tight leading-tight m-0 break-words">{{ info?.business?.name }}</h1>
+          <span class="inline-flex items-center gap-[4px] px-[8px] py-[2px] rounded-full text-[10px] font-semibold bg-white/15 text-white flex-shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#5fae86] animate-pulse"></span>En vivo
+          </span>
+        </div>
+        <p class="text-sm text-white/80 font-medium mt-[2px] mb-0 flex items-center gap-[4px]">
+          <mat-icon class="!w-4 !h-4 !text-base !leading-4">place</mat-icon>
+          <span class="truncate">Mesa <span class="font-bold text-white">{{ info?.table?.name }}</span></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
 <div class="min-h-screen bg-[#F5F1EB] text-charcoal font-jakarta flex justify-center selection:bg-forest selection:text-white">
   <div class="w-full max-w-md bg-crema min-h-screen flex flex-col shadow-2xl relative pb-[112px] border-x-[1px] border-[#EAE4DC]/60">
 
@@ -46,11 +87,9 @@
 
     <!-- ===== Código de mesa ===== -->
     <ng-container *ngIf="phase === 'pin' && info">
-      <header class="sticky top-0 z-30 bg-crema/90 backdrop-blur-md border-b-[1px] border-[#EAE4DC] px-[16px] pt-[12px] pb-[10px]">
-        <ng-container *ngTemplateOutlet="brandRow"></ng-container>
-      </header>
+      <ng-container *ngTemplateOutlet="brandBanner"></ng-container>
 
-      <main class="px-[16px] pt-[20px] flex flex-col gap-[20px]">
+      <main class="relative -mt-[24px] rounded-t-3xl bg-crema px-[16px] pt-[20px] flex flex-col gap-[20px]">
         <section class="relative overflow-hidden rounded-2xl bg-crema-dark p-[24px] shadow-soft text-center flex flex-col items-center">
           <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-forest-soft blur-2xl pointer-events-none"></div>
           <div class="relative mb-[12px] flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm">
@@ -115,8 +154,9 @@
     <ng-container *ngIf="phase === 'ready' && info">
 
       <!-- ===== Encabezado ===== -->
-      <header class="sticky top-0 z-30 bg-crema/90 backdrop-blur-md border-b-[1px] border-[#EAE4DC] px-[16px] pt-[12px] pb-[10px]">
-        <div class="mb-[12px]"><ng-container *ngTemplateOutlet="brandRow"></ng-container></div>
+      <ng-container *ngTemplateOutlet="brandBanner"></ng-container>
+
+      <header class="sticky top-0 z-30 -mt-[24px] rounded-t-3xl bg-crema border-b-[1px] border-[#EAE4DC] px-[16px] pt-[16px] pb-[10px]">
 
         <!-- Llamar al mozo / pedir la cuenta -->
         <div class="grid grid-cols-2 gap-[8px] mb-[12px]">

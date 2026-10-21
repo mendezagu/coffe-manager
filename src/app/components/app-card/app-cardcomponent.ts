@@ -711,8 +711,15 @@ printTicket(tableId: string): void {
   this.gestionService.saveLog(logMessage);
 }
 
+  // "Ordenar" se bloquea si la mesa está administrada por otra, o si tiene un pedido por QR esperando:
+  // primero hay que aceptarlo o rechazarlo (si no, el pedido del cliente y el del mozo se pisarían)
+  orderBlocked(table: Table): boolean {
+    return !!table.controlledBy || this.qrRequestsOf(table) > 0;
+  }
+
   // Handler del botón Ordenar (evita usar pipes en template)
   orderButtonClicked(table: Table): void {
+    if (this.orderBlocked(table)) return;
     this.addMenuItems(table);
   }
 

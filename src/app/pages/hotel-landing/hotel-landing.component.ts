@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import QRCode from 'qrcode';
+import { Availability, BookingConfirmation, Slot, parseDay, toDayString } from 'src/app/services/reservations.service';
 import {
   HotelPublicInfo,
   HotelPublicService,
@@ -174,6 +175,7 @@ export class HotelLandingComponent implements OnInit {
   closeDialog() {
     this.dialogFor = null;
     this.result = null;
+    this.resFor = null;
   }
 
   ask() {
@@ -186,20 +188,7 @@ export class HotelLandingComponent implements OnInit {
         store.set('hotel_guest_name', this.guestName.trim());
         store.set('hotel_guest_doc', this.guestDocument.trim());
         store.set(`hotel_code_${this.slug}`, this.accessCode.trim());
-        const stored: StoredVoucher = {
-          code: v.code,
-          restaurantId: r.id,
-          restaurantName: v.restaurantName || r.name,
-          discountPct: v.discountPct,
-          conditions: v.conditions,
-          guestName: v.guestName,
-          validTo: v.validTo,
-          status: 'ISSUED',
-          redeemedAt: null,
-        };
-        this.vouchers = [stored, ...this.vouchers.filter((x) => x.code !== stored.code)];
-        this.saveVouchers();
-        this.ensureQr(stored.code);
+        const stored = this.keepVoucher(v, r);
         this.reused = !!v.reused;
         this.result = stored;
         this.pending = false;
@@ -212,6 +201,234 @@ export class HotelLandingComponent implements OnInit {
             : apiMessage(err, 'No se pudo pedir el voucher. Revisá tu conexión e intentá de nuevo.');
       },
     });
+  }
+
+  // Guarda en este celular el voucher que entregó el servidor
+  private keepVoucher(v: IssuedVoucher, r: HotelRestaurant): StoredVoucher {
+    const stored: StoredVoucher = {
+      code: v.code,
+      restaurantId: r.id,
+      restaurantName: v.restaurantName || r.name,
+      discountPct: v.discountPct,
+      conditions: v.conditions,
+      guestName: v.guestName,
+      validTo: v.validTo,
+      status: 'ISSUED',
+      redeemedAt: null,
+    };
+    this.vouchers = [stored, ...this.vouchers.filter((x) => x.code !== stored.code)];
+    this.saveVouchers();
+    this.ensureQr(stored.code);
+    return stored;
+  }
+
+  // ---- reservar mesa (independiente del voucher) ----
+
+  resFor: HotelRestaurant | null = null;
+  resStep: 'when' | 'details' | 'done' | 'waitlist' | 'waitlisted' = 'when';
+  party = 2;
+  resDays: { value: string; weekday: string; num: number; month: string }[] = [];
+  resDate = '';
+  avail: Availability | null = null;
+  loadingSlots = false;
+  resTime = '';
+  guestPhone = '';
+  resNotes = '';
+  // casilla "Quiero también mi descuento": opcional, la reserva se hace igual sin ella
+  wantVoucher = true;
+  resPending = false;
+  resError = '';
+  booked: BookingConfirmation | null = null;
+  bookedVoucher: StoredVoucher | null = null;
+  waitFrom = '';
+  waitTo = '';
+
+  openReserve(r: HotelRestaurant) {
+    this.resFor = r;
+    this.resStep = 'when';
+    this.party = Math.min(2, r.maxParty || 2);
+    this.resTime = '';
+    this.resError = '';
+    this.booked = null;
+    this.bookedVoucher = null;
+    this.guestPhone = store.get('hotel_guest_phone') ?? '';
+    const base = new Date();
+    this.resDays = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+      return {
+        value: toDayString(d),
+        weekday: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : d.toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', ''),
+        num: d.getDate(),
+        month: d.toLocaleDateString('es-AR', { month: 'short' }).replace('.', ''),
+      };
+    });
+    this.pickResDate(this.resDays[0].value);
+  }
+
+  closeReserve() {
+    this.resFor = null;
+  }
+
+  setParty(n: number) {
+    const max = this.resFor?.maxParty || 10;
+    if (n < 1 || n > max) return;
+    this.party = n;
+    this.loadSlots();
+  }
+
+  pickResDate(day: string) {
+    this.resDate = day;
+    this.resTime = '';
+    this.loadSlots();
+  }
+
+  private loadSlots() {
+    const r = this.resFor;
+    if (!r || !this.resDate) return;
+    const asked = this.resDate;
+    this.loadingSlots = true;
+    this.resError = '';
+    this.api.availability(this.slug, r.id, asked, this.party).subscribe({
+      next: (a) => {
+        if (asked !== this.resDate) return;
+        this.avail = a;
+        this.loadingSlots = false;
+        if (this.resTime && !a.slots.some((s) => s.time === this.resTime && s.available)) this.resTime = '';
+      },
+      error: (err) => {
+        this.loadingSlots = false;
+        this.resError = apiMessage(err, 'No pudimos ver los horarios. Probá de nuevo.');
+      },
+    });
+  }
+
+  get closedText(): string {
+    const c = this.avail?.closed;
+    return c === 'PASADO' ? 'Ese día ya pasó.' : c === 'LEJOS' ? 'Todavía no se puede reservar para ese día.' : c === 'DIA_CERRADO' ? 'Ese día no atiende con reserva.' : '';
+  }
+
+  pickSlot(s: Slot) {
+    if (s.available) this.resTime = s.time;
+  }
+
+  dayLabel(day: string): string {
+    const t = parseDay(day).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  get phoneOk(): boolean {
+    return this.guestPhone.replace(/\D/g, '').length >= 8;
+  }
+
+  // Con voucher hacen falta nombre y apellido y documento; sin voucher alcanza con un nombre
+  get canReserve(): boolean {
+    const base = this.guestName.trim().length >= 2 && this.phoneOk && this.accessCode.trim().length > 0 && !this.resPending;
+    return base && (!this.wantVoucher || (this.nameOk && this.documentOk));
+  }
+
+  goDetails() {
+    if (!this.resTime) return;
+    this.resError = '';
+    this.resStep = 'details';
+  }
+
+  backToWhen() {
+    this.resError = '';
+    this.resStep = 'when';
+  }
+
+  reserve() {
+    const r = this.resFor;
+    if (!r || !this.canReserve) return;
+    this.resPending = true;
+    this.resError = '';
+    this.api
+      .reserve(this.slug, {
+        restaurantId: r.id,
+        accessCode: this.accessCode.trim(),
+        date: this.resDate,
+        time: this.resTime,
+        partySize: this.party,
+        guestName: this.guestName.trim(),
+        guestPhone: this.guestPhone.trim(),
+        notes: this.resNotes.trim() || undefined,
+        wantVoucher: this.wantVoucher,
+        document: this.wantVoucher ? this.guestDocument.trim() : undefined,
+      })
+      .subscribe({
+        next: (res) => {
+          store.set('hotel_guest_name', this.guestName.trim());
+          store.set('hotel_guest_phone', this.guestPhone.trim());
+          store.set(`hotel_code_${this.slug}`, this.accessCode.trim());
+          if (this.wantVoucher) store.set('hotel_guest_doc', this.guestDocument.trim());
+          this.bookedVoucher = res.voucher ? this.keepVoucher(res.voucher, r) : null;
+          this.booked = res.reservation;
+          this.resPending = false;
+          this.resStep = 'done';
+        },
+        error: (err) => {
+          this.resPending = false;
+          if (err?.status === 409) {
+            // alguien tomó ese lugar mientras completaba los datos
+            this.resStep = 'when';
+            this.resTime = '';
+            this.loadSlots();
+            this.resError = 'Justo se ocupó ese horario. Elegí otro, por favor.';
+            return;
+          }
+          this.resError =
+            err?.status === 429
+              ? 'Demasiados intentos. Esperá unos minutos.'
+              : apiMessage(err, 'No se pudo reservar. Revisá tu conexión e intentá de nuevo.');
+        },
+      });
+  }
+
+  openWaitlist() {
+    const times = this.avail?.slots.map((s) => s.time) ?? [];
+    this.waitFrom = times[0] ?? '';
+    this.waitTo = times[times.length - 1] ?? '';
+    this.resError = '';
+    this.resStep = 'waitlist';
+  }
+
+  get waitOptions(): string[] {
+    return this.avail?.slots.map((s) => s.time) ?? [];
+  }
+
+  get canWait(): boolean {
+    return this.guestName.trim().length >= 2 && this.phoneOk && this.accessCode.trim().length > 0 && !!this.waitFrom && this.waitFrom <= this.waitTo && !this.resPending;
+  }
+
+  joinWaitlist() {
+    const r = this.resFor;
+    if (!r || !this.canWait) return;
+    this.resPending = true;
+    this.resError = '';
+    this.api
+      .reserveWaitlist(this.slug, {
+        restaurantId: r.id,
+        accessCode: this.accessCode.trim(),
+        date: this.resDate,
+        fromTime: this.waitFrom,
+        toTime: this.waitTo,
+        partySize: this.party,
+        guestName: this.guestName.trim(),
+        guestPhone: this.guestPhone.trim(),
+      })
+      .subscribe({
+        next: () => {
+          store.set('hotel_guest_name', this.guestName.trim());
+          store.set('hotel_guest_phone', this.guestPhone.trim());
+          store.set(`hotel_code_${this.slug}`, this.accessCode.trim());
+          this.resPending = false;
+          this.resStep = 'waitlisted';
+        },
+        error: (err) => {
+          this.resPending = false;
+          this.resError = apiMessage(err, 'No pudimos anotarte. Probá de nuevo.');
+        },
+      });
   }
 
   // ---- copiar y compartir ----

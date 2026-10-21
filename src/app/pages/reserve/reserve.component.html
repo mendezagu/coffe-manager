@@ -1,0 +1,226 @@
+<div class="flex min-h-screen justify-center bg-sage-100">
+<div class="flex min-h-screen w-full max-w-md flex-col bg-white shadow-2xl">
+  <!-- Cabecera única: marca de Tavolapp y datos del local sobre el mismo fondo oscuro -->
+  <div class="bg-forest px-5 pb-14 pt-4 text-white">
+    <div class="mx-auto w-full max-w-lg">
+      <div class="flex justify-center"><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
+      <span>Tav</span>
+      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
+        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#5fae86" />
+        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#22322a" stroke="#5fae86" stroke-opacity=".35" />
+        <path d="M70 66 A24 24 0 0 1 36 74" fill="none" stroke-width="4" stroke-linecap="round" stroke="#5fae86" opacity=".18" />
+        <g fill="none" stroke="#5fae86" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
+          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
+          <path d="M39 50 V69" stroke-width="3.6" />
+        </g>
+        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
+        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
+      </svg>
+      <span>lapp</span>
+    </span></div>
+      <div *ngIf="info" class="mt-5 flex items-center gap-3">
+        <img *ngIf="info.logoUrl" [src]="info.logoUrl" alt="" class="h-14 w-14 flex-none rounded-2xl bg-white object-contain p-1 ring-2 ring-white/30" />
+        <span *ngIf="!info.logoUrl" class="grid h-14 w-14 flex-none place-items-center rounded-2xl bg-white/15 text-white"><mat-icon>restaurant</mat-icon></span>
+        <div class="min-w-0">
+          <h1 class="m-0 break-words text-xl font-bold leading-tight">{{ info.name }}</h1>
+          <p class="m-0 flex items-center gap-1 text-sm text-white/80"><mat-icon class="!h-4 !w-4 !text-base">place</mat-icon><span class="min-w-0">{{ info.address }}<ng-container *ngIf="info.address && info.city">, </ng-container>{{ info.city }}</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="flex flex-1 flex-col pb-6">
+  <div class="mx-auto flex w-full max-w-lg flex-1 flex-col">
+
+    <p *ngIf="loading" class="mt-6 text-center text-sm text-sage-600">Cargando…</p>
+
+    <div *ngIf="notFound" class="mt-6 rounded-dialog bg-white p-8 text-center shadow-soft">
+      <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-sage-50 text-sage-300"><mat-icon class="!h-8 !w-8 !text-[32px]">event_busy</mat-icon></span>
+      <h1 class="m-0 mt-3 text-lg font-bold text-sage-900">Este restaurante no recibe reservas</h1>
+      <p class="m-0 mt-1 text-sm text-sage-600">Puede que el enlace esté mal o que las reservas estén pausadas.</p>
+    </div>
+
+    <ng-container *ngIf="info">
+      <!-- Encabezado del restaurante -->
+      <main class="relative -mt-9 rounded-t-3xl bg-white px-5 pb-2 pt-6">
+
+        <!-- 1. Cuándo -->
+        <section *ngIf="step === 'when'" aria-label="Elegir día y horario">
+          <h2 class="m-0 text-xl font-bold text-sage-900">Reservá tu mesa</h2>
+          <p class="m-0 mb-5 mt-1 text-sm text-sage-600">Elegí cuántos son, el día y la hora. Se confirma al instante.</p>
+
+          <p class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-sage-500">¿Cuántos son?</p>
+          <div class="mb-5 flex items-center justify-between rounded-xl border border-sage-200 p-2">
+            <button type="button" (click)="setParty(party - 1)" [disabled]="party <= 1" aria-label="Menos personas"
+              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-800 disabled:opacity-30"><mat-icon>remove</mat-icon></button>
+            <span class="text-lg font-bold text-sage-900" aria-live="polite">{{ party }} {{ party === 1 ? 'persona' : 'personas' }}</span>
+            <button type="button" (click)="setParty(party + 1)" [disabled]="party >= info.maxParty" aria-label="Más personas"
+              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-800 disabled:opacity-30"><mat-icon>add</mat-icon></button>
+          </div>
+          <p *ngIf="party >= info.maxParty" class="m-0 -mt-3 mb-4 text-xs text-sage-500">Para grupos más grandes, llamanos{{ info.phone ? ' al ' + info.phone : '' }}.</p>
+
+          <p class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-sage-500">¿Qué día?</p>
+          <div class="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="listbox" aria-label="Días">
+            <button *ngFor="let d of days" type="button" role="option" [attr.aria-selected]="d.value === date" [disabled]="d.closed" (click)="pickDate(d.value)"
+              class="flex h-[74px] w-16 flex-none flex-col items-center justify-center rounded-xl border text-center transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+              [ngClass]="d.value === date ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-50'">
+              <span class="text-[11px] font-bold uppercase">{{ d.weekday }}</span>
+              <span class="text-xl font-bold leading-tight">{{ d.num }}</span>
+              <span class="text-[11px] uppercase opacity-80">{{ d.month }}</span>
+            </button>
+          </div>
+
+          <p class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-sage-500">¿A qué hora?</p>
+          <p *ngIf="loadingSlots" class="m-0 text-sm text-sage-500">Buscando lugar…</p>
+          <p *ngIf="!loadingSlots && closedText" class="m-0 rounded-lg bg-sage-50 px-3 py-3 text-sm text-sage-700">{{ closedText }}</p>
+
+          <div *ngIf="!loadingSlots && avail && !avail.closed">
+            <p *ngIf="tooLate" class="m-0 rounded-lg bg-sage-50 px-3 py-3 text-sm text-sage-700">Ya no quedan horarios para reservar hoy. Probá con otro día{{ info.phone ? ' o llamanos al ' + info.phone : '' }}.</p>
+            <div *ngFor="let g of slotGroups" class="mb-4 last:mb-0">
+              <p class="m-0 mb-2 flex items-center gap-1.5 text-sm font-bold text-sage-700"><mat-icon class="!h-4 !w-4 !text-base text-sage-400">{{ g.icon }}</mat-icon>{{ g.label }}</p>
+              <div class="grid grid-cols-4 gap-2" role="listbox" [attr.aria-label]="'Horarios de ' + g.label">
+                <button *ngFor="let s of g.slots" type="button" role="option" [attr.aria-selected]="s.time === time" [disabled]="!s.available" (click)="pickSlot(s)"
+                  class="h-11 rounded-xl border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:border-transparent disabled:bg-sage-50 disabled:text-sage-300 disabled:line-through"
+                  [ngClass]="s.time === time ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-800 hover:border-cafe-green-700 hover:bg-cafe-green-50'">{{ s.time }}</button>
+              </div>
+            </div>
+            <p *ngIf="!tooLate" class="m-0 mt-3 text-xs text-sage-500">Los horarios tachados ya no tienen lugar.</p>
+
+            <div *ngIf="avail.full" class="mt-4 rounded-xl bg-cafe-amber-50 p-4 text-sm text-cafe-amber-900">
+              <p class="m-0 font-bold">Ese día está completo.</p>
+              <p class="m-0 mt-1">Anotate en la lista de espera y, si se libera un lugar, el restaurante te avisa.</p>
+              <button type="button" (click)="openWaitlist()" class="mt-3 h-11 rounded-xl border border-cafe-amber-500 bg-white px-4 text-sm font-bold text-cafe-amber-900 hover:bg-cafe-amber-100">Anotarme en la lista de espera</button>
+            </div>
+          </div>
+
+          <p *ngIf="error" role="alert" class="m-0 mt-4 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+
+          <button type="button" (click)="next()" [disabled]="!time"
+            class="mt-5 h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            Continuar
+          </button>
+          <button type="button" (click)="openCancel()" class="mt-3 w-full text-center text-sm font-medium text-sage-500 underline">Ya reservé y quiero cancelar</button>
+        </section>
+
+        <!-- 2. Datos -->
+        <form *ngIf="step === 'details'" (ngSubmit)="book()" autocomplete="on" aria-label="Tus datos">
+          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Cambiar</button>
+          <div class="mb-5 rounded-xl bg-cafe-green-50 p-3 text-sm font-bold text-cafe-green-900">
+            {{ dateLabel }} · {{ time }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}
+          </div>
+          <label class="mb-3 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">Tu nombre</span>
+            <input name="name" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <label class="mb-3 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">Teléfono (WhatsApp)</span>
+            <input name="phone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <label class="mb-3 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">Email (opcional)</span>
+            <input name="email" type="email" autocomplete="email" [(ngModel)]="email" maxlength="120" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <label class="mb-4 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">¿Algo que debamos saber? (opcional)</span>
+            <input name="notes" type="text" [(ngModel)]="notes" maxlength="300" placeholder="Cumpleaños, silla de bebé, alergias…" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+          <button type="submit" [disabled]="!detailsValid || sending"
+            class="h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            {{ sending ? 'Reservando…' : 'Confirmar reserva' }}
+          </button>
+        </form>
+
+        <!-- 3. Listo -->
+        <section *ngIf="step === 'done' && done" class="text-center" aria-live="polite">
+          <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700"><mat-icon class="!h-9 !w-9 !text-4xl">check_circle</mat-icon></span>
+          <h2 class="m-0 mt-3 text-xl font-bold text-sage-900">¡Reserva confirmada!</h2>
+          <p class="m-0 mt-1 text-sm text-sage-600">Te esperamos, {{ done.guestName }}.</p>
+          <dl class="mx-auto mt-5 max-w-xs space-y-2 rounded-xl bg-sage-50 p-4 text-left text-sm">
+            <div class="flex justify-between gap-3"><dt class="text-sage-500">Día</dt><dd class="m-0 text-right font-bold text-sage-900">{{ label(done.date) }}</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-sage-500">Hora</dt><dd class="m-0 font-bold text-sage-900">{{ done.time }}</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-sage-500">Personas</dt><dd class="m-0 font-bold text-sage-900">{{ done.partySize }}</dd></div>
+            <div *ngIf="done.address" class="flex justify-between gap-3"><dt class="text-sage-500">Dirección</dt><dd class="m-0 text-right font-bold text-sage-900">{{ done.address }}</dd></div>
+          </dl>
+          <p class="m-0 mt-5 text-xs font-bold uppercase tracking-wide text-sage-500">Tu código</p>
+          <p class="m-0 mt-1 font-mono text-3xl font-bold tracking-[0.2em] text-sage-900">{{ done.code }}</p>
+          <p class="m-0 mt-2 text-xs text-sage-500">Guardalo: lo necesitás para cancelar. Si no podés venir, avisanos.</p>
+          <button type="button" (click)="reset()" class="mt-6 h-11 rounded-xl border border-sage-200 px-5 text-sm font-bold text-sage-700 hover:bg-sage-50">Hacer otra reserva</button>
+        </section>
+
+        <!-- Lista de espera -->
+        <form *ngIf="step === 'waitlist'" (ngSubmit)="joinWaitlist()" aria-label="Lista de espera">
+          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
+          <h2 class="m-0 text-lg font-bold text-sage-900">Lista de espera</h2>
+          <p class="m-0 mb-4 mt-1 text-sm text-sage-600">{{ dateLabel }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}. Te escribimos por WhatsApp si se libera un lugar.</p>
+          <div class="mb-3 grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="mb-1.5 block text-xs font-bold text-sage-500">Desde</span>
+              <select name="from" [(ngModel)]="waitFrom" class="h-12 w-full rounded-xl border border-sage-200 bg-white px-3 text-base"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
+            </label>
+            <label class="block">
+              <span class="mb-1.5 block text-xs font-bold text-sage-500">Hasta</span>
+              <select name="to" [(ngModel)]="waitTo" class="h-12 w-full rounded-xl border border-sage-200 bg-white px-3 text-base"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
+            </label>
+          </div>
+          <label class="mb-3 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">Tu nombre</span>
+            <input name="wname" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <label class="mb-4 block">
+            <span class="mb-1.5 block text-xs font-bold text-sage-500">Teléfono (WhatsApp)</span>
+            <input name="wphone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+          </label>
+          <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+          <button type="submit" [disabled]="!waitValid || sending"
+            class="h-12 w-full rounded-xl bg-cafe-green-700 text-base font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+            {{ sending ? 'Anotando…' : 'Anotarme' }}
+          </button>
+        </form>
+
+        <section *ngIf="step === 'waitlisted'" class="text-center" aria-live="polite">
+          <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-cafe-amber-50 text-cafe-amber-700"><mat-icon class="!h-9 !w-9 !text-4xl">hourglass_top</mat-icon></span>
+          <h2 class="m-0 mt-3 text-xl font-bold text-sage-900">Estás en la lista</h2>
+          <p class="m-0 mt-1 text-sm text-sage-600">Si se libera un lugar, el restaurante te escribe al {{ phone }}. Esto no es una reserva confirmada.</p>
+          <button type="button" (click)="reset()" class="mt-6 h-11 rounded-xl border border-sage-200 px-5 text-sm font-bold text-sage-700 hover:bg-sage-50">Volver al inicio</button>
+        </section>
+
+        <!-- Cancelar -->
+        <form *ngIf="step === 'cancel'" (ngSubmit)="cancel()" aria-label="Cancelar reserva">
+          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
+          <h2 class="m-0 text-lg font-bold text-sage-900">Cancelar mi reserva</h2>
+          <p class="m-0 mb-4 mt-1 text-sm text-sage-600">Ingresá el código que te dimos y tu teléfono.</p>
+          <ng-container *ngIf="!cancelMsg">
+            <label class="mb-3 block">
+              <span class="mb-1.5 block text-xs font-bold text-sage-500">Código</span>
+              <input name="ccode" type="text" autocapitalize="characters" [(ngModel)]="cancelCode" maxlength="6" class="h-12 w-full rounded-xl border border-sage-200 px-3 font-mono text-base uppercase tracking-widest" />
+            </label>
+            <label class="mb-4 block">
+              <span class="mb-1.5 block text-xs font-bold text-sage-500">Teléfono</span>
+              <input name="cphone" type="tel" inputmode="tel" [(ngModel)]="cancelPhone" class="h-12 w-full rounded-xl border border-sage-200 px-3 text-base" />
+            </label>
+            <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+            <button type="submit" [disabled]="sending || !cancelCode.trim() || cancelPhone.replace('+', '').length < 6"
+              class="h-12 w-full rounded-xl bg-cafe-red-700 text-base font-bold text-white hover:bg-cafe-red-800 disabled:cursor-not-allowed disabled:opacity-40">
+              {{ sending ? 'Cancelando…' : 'Cancelar reserva' }}
+            </button>
+          </ng-container>
+          <p *ngIf="cancelMsg" role="status" class="m-0 rounded-lg bg-cafe-green-50 px-3 py-3 text-sm font-bold text-cafe-green-900">{{ cancelMsg }}</p>
+        </form>
+      </main>
+
+      <p *ngIf="info.phone" class="m-0 mt-4 text-center text-xs text-sage-500">¿Dudas? Llamanos al {{ info.phone }}.</p>
+    </ng-container>
+
+    <footer class="mt-auto pt-8 text-center">
+      <p class="m-0 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-xs text-sage-600">
+        <mat-icon class="!h-4 !w-4 !text-base text-cafe-green-700">restaurant_menu</mat-icon>
+        Reservas con <strong class="text-sage-800">Tavolapp</strong>
+      </p>
+    </footer>
+  </div>
+</div>
+</div>
+</div>

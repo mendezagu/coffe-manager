@@ -56,6 +56,11 @@
         <ng-container *ngTemplateOutlet="navItem; context: { key: 'caja', link: '/cash', icon: 'point_of_sale', label: 'Caja' }"></ng-container>
       </ng-container>
 
+      <!-- Reservas: solo si el negocio las activó -->
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && (settings.settings$ | async)?.reservationsEnabled && !(onboarding.basicsPending$ | async)">
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reservations', link: '/reservations', icon: 'event_seat', label: 'Reservas' }"></ng-container>
+      </ng-container>
+
       <!-- Negocio: los números -->
       <ng-container *ngIf="role === 'admin' && !(onboarding.setupPending$ | async)">
         <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Negocio</p>

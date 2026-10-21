@@ -211,12 +211,14 @@
           <div class="pt-[16px] flex flex-col gap-[8px]">
             <!-- Guía de la primera venta: paso 1 (el botón late para que se vea cuál tocar) -->
             <app-guide-hint *ngIf="isGuide(table) && !(table.orders && table.orders.length)" [step]="1" title="Ordená" text="Tocá Ordenar para abrir el pedido de esta mesa. Después te va a pedir el mozo y los platos."></app-guide-hint>
-            <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="orderButtonClicked(table)" [disabled]="table.controlledBy" [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)"
+            <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="orderButtonClicked(table)" [disabled]="orderBlocked(table)" [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length) && !orderBlocked(table)"
+              [attr.title]="qrRequestsOf(table) > 0 ? 'Primero aceptá o rechazá el pedido por QR' : null"
               class="w-full flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               [ngClass]="styleOf(table).primary">
               <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
               <span>Ordenar</span>
             </button>
+            <p *ngIf="qrRequestsOf(table) > 0 && !table.controlledBy" class="m-0 text-center text-xs font-medium opacity-90">Aceptá o rechazá el pedido por QR para poder ordenar.</p>
 
             <!-- Guía de la primera venta: paso 4 (pedir la cuenta) -->
             <app-guide-hint *ngIf="isGuide(table) && table.orders && table.orders.length" [step]="4" title="La cuenta" text="Cuando el cliente la pida, tocá Total. Órdenes muestra el detalle del pedido y la impresora vuelve a sacar la comanda."></app-guide-hint>

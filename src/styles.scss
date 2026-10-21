@@ -184,3 +184,21 @@ mat-icon {
     font-size: 16px !important;
   }
 }
+
+/* Selectores nativos con una flecha propia: la del navegador queda pegada al borde y desentona con el resto.
+   Los que ya traen su propia flecha dibujada llevan la clase "appearance-none" y no se tocan. */
+select:not([multiple]):not([size]):not(.appearance-none) {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  padding-right: 2.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2355655b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem 1.1rem;
+}
+
+select:not([multiple]):not([size]):not(.appearance-none):disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

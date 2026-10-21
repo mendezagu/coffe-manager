@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
 
 export interface SalesReport {
   range: { from: string; to: string; tz: string };
+  // configuración vigente de la comisión de mozos
+  commission: { enabled: boolean; pct: number };
   summary: {
     salesCount: number;
     totalAmount: number;
@@ -14,6 +16,8 @@ export interface SalesReport {
     itemsSold: number;
     salesWithoutDetail: number;
     tipsTotal: number;
+    // suma de las comisiones de todos los mozos en el rango
+    commissionTotal: number;
     // ganancia sobre lo vendido con receta (costo conocido); revenueWithoutCost es lo vendido sin costo
     costTotal: number;
     profit: number;
@@ -22,7 +26,7 @@ export interface SalesReport {
   };
   byDay: { date: string; salesCount: number; totalAmount: number }[];
   items: { name: string; quantity: number; amount: number; cost: number | null; profit: number | null }[];
-  byWaiter: { name: string; salesCount: number; totalAmount: number; tips: number }[];
+  byWaiter: { name: string; salesCount: number; totalAmount: number; tips: number; commission: number }[];
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
   // ventas con voucher de hotel: lo que trajo cada hotel y lo descontado
   byHotel: { hotelId: string; name: string; salesCount: number; totalAmount: number; discountTotal: number; averageTicket: number }[];

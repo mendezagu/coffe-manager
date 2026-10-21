@@ -39,7 +39,7 @@
               class="w-full h-11 pl-10 pr-3 bg-white border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 placeholder-sage-400" />
           </div>
           <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por tipo">
-            <button *ngFor="let f of filters" type="button" (click)="setFilter(f)" [attr.aria-pressed]="filter === f"
+            <button *ngFor="let f of visibleFilters" type="button" (click)="setFilter(f)" [attr.aria-pressed]="filter === f"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
               [ngClass]="filter === f ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'">
               {{ labelOf(f) }}

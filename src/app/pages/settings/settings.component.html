@@ -185,6 +185,39 @@
           </label>
         </section>
 
+        <!-- Comisión para los mozos -->
+        <section [class.hidden]="tab !== 'operacion'" class="bg-white rounded-card shadow-soft p-5 space-y-3">
+          <h2 class="font-bold text-sage-800 mb-1">Comisión para los mozos</h2>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="commissionEnabled" [(ngModel)]="form.commissionEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Ofrecer una comisión a los mozos</span>
+              <span class="block text-xs text-sage-500">Cada mozo gana un porcentaje de lo que se vende en las mesas que atendió. Lo ves calculado en Reportes, mozo por mozo.</span>
+            </span>
+          </label>
+
+          <div *ngIf="form.commissionEnabled" class="space-y-3">
+            <label class="block max-w-xs">
+              <span class="block text-xs font-bold text-sage-500 mb-1.5">Porcentaje de comisión</span>
+              <div class="flex items-center gap-2">
+                <input name="commissionPct" type="number" min="0.01" max="100" step="0.5" inputmode="decimal" required [(ngModel)]="form.commissionPct"
+                  class="w-28 px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+                <span class="text-sm text-sage-600">%</span>
+              </div>
+            </label>
+
+            <p *ngIf="form.commissionPct > 0" class="m-0 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm text-cafe-green-800">
+              Ejemplo: en una mesa de {{ 20000 | money }} atendida por un mozo, le corresponden <strong>{{ 20000 * form.commissionPct / 100 | money }}</strong> de comisión.
+            </p>
+            <ul class="m-0 list-disc space-y-1 pl-5 text-xs text-sage-500">
+              <li>Se calcula sobre lo vendido, ya con los descuentos y <strong>sin la propina</strong> (la propina es aparte).</li>
+              <li>Cada venta guarda el porcentaje que había al cobrar: si lo cambiás después, <strong>las ventas anteriores no se modifican</strong>.</li>
+              <li>Cuenta desde que activás la opción: lo cobrado antes no lleva comisión.</li>
+            </ul>
+          </div>
+        </section>
+
         <!-- Inventario -->
         <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5 space-y-3">
           <h2 class="font-bold text-sage-800 mb-1">Inventario</h2>
@@ -292,6 +325,107 @@
             <button type="button" (click)="testSound()" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-sage-300 text-sm font-bold text-sage-800">
               <mat-icon class="!w-5 !h-5 !text-xl">play_arrow</mat-icon> Probar sonido
             </button>
+          </div>
+        </section>
+
+        <!-- Reservas -->
+        <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-5 space-y-3">
+          <h2 class="font-bold text-sage-800 mb-1">Reservas de mesa</h2>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+            <input type="checkbox" name="reservationsEnabled" [(ngModel)]="form.reservationsEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Recibir reservas</span>
+              <span class="block text-xs text-sage-500">Tus clientes reservan desde una página propia, sin instalar nada. Vos las ves en la pantalla "Reservas", y si no hay lugar pueden anotarse en una lista de espera.</span>
+            </span>
+          </label>
+
+          <div *ngIf="form.reservationsEnabled" class="space-y-4">
+
+            <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
+              <p class="m-0 text-xs font-bold text-cafe-green-800">Dirección para compartir</p>
+              <div *ngIf="reservationLink; else linkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
+                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ reservationLink }}</code>
+                <button type="button" (click)="copyReservationLink()" class="inline-flex h-10 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
+                  <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
+                </button>
+              </div>
+              <ng-template #linkPending><p class="m-0 mt-1.5 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
+              <p class="m-0 mt-2 text-xs text-cafe-green-800">Ponela en tu Instagram, en WhatsApp, en Google Maps o en un QR en la puerta.</p>
+            </div>
+
+            <div>
+              <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">Días en que recibís reservas</p>
+              <div class="flex flex-wrap gap-1.5" role="group" aria-label="Días de la semana">
+                <button *ngFor="let d of dayNames" type="button" (click)="toggleDay(d.n)" [attr.aria-pressed]="hasDay(d.n)"
+                  class="h-10 min-w-[52px] rounded-full border px-3 text-sm font-bold transition-colors"
+                  [ngClass]="hasDay(d.n) ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-600 hover:bg-sage-100'">{{ d.label }}</button>
+              </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Primer horario para reservar</span>
+                <select name="reservationOpenMin" [(ngModel)]="form.reservationOpenMin" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let o of timeOptions" [ngValue]="o.value">{{ o.label }}</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Último horario para reservar</span>
+                <select name="reservationCloseMin" [(ngModel)]="form.reservationCloseMin" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let o of timeOptions" [ngValue]="o.value">{{ o.label }}</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Horarios que se ofrecen</span>
+                <select name="reservationSlotMin" [(ngModel)]="form.reservationSlotMin" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let m of slotOptions" [ngValue]="m">uno cada {{ m }} minutos</option>
+                </select>
+                <span class="block text-xs text-sage-500 mt-1.5">Por ejemplo, cada 30 minutos: 20:00, 20:30, 21:00…</span>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">¿Cuánto tiempo se queda cada grupo?</span>
+                <select name="reservationDurationMin" [(ngModel)]="form.reservationDurationMin" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let m of durationOptions" [ngValue]="m">{{ m / 60 | number: '1.0-1' }} {{ m === 60 ? 'hora' : 'horas' }}</option>
+                </select>
+                <span class="block text-xs text-sage-500 mt-1.5">Una reserva de las 21:00 ocupa lugar hasta ese tiempo después.</span>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">¿Cuántas personas entran en tu local a la vez?</span>
+                <input name="reservationCapacity" type="number" min="1" max="1000" step="1" required [(ngModel)]="form.reservationCapacity"
+                  class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+                <span class="block text-xs text-sage-500 mt-1.5">Contá personas, no mesas. Conviene dejar unos lugares libres para quienes llegan sin reservar.</span>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Grupo más grande que puede reservar por internet</span>
+                <input name="reservationMaxParty" type="number" min="1" max="1000" step="1" required [(ngModel)]="form.reservationMaxParty"
+                  class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+                <span class="block text-xs text-sage-500 mt-1.5">Para grupos más grandes, la página les pide que llamen al local.</span>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Se puede reservar con hasta</span>
+                <select name="reservationAdvanceDays" [(ngModel)]="form.reservationAdvanceDays" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let d of advanceOptions" [ngValue]="d">{{ d }} días de anticipación</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="block text-xs font-bold text-sage-500 mb-1.5">Anticipación mínima</span>
+                <select name="reservationNoticeMin" [(ngModel)]="form.reservationNoticeMin" class="w-full px-3 py-2.5 border border-sage-200 rounded-lg bg-white text-sm text-sage-900">
+                  <option *ngFor="let o of noticeOptions" [ngValue]="o.value">{{ o.label }}</option>
+                </select>
+              </label>
+            </div>
+
+            <ul class="m-0 list-disc space-y-1 pl-5 text-xs text-sage-500">
+              <li>
+                <strong>Así se calcula el lugar:</strong> si entran {{ form.reservationCapacity }} personas y cada grupo se queda
+                {{ form.reservationDurationMin / 60 | number: '1.0-1' }} {{ form.reservationDurationMin === 60 ? 'hora' : 'horas' }},
+                el sistema suma la gente reservada que coincide en el tiempo y deja de aceptar reservas cuando se llega a {{ form.reservationCapacity }}.
+                Cuando esa gente se va, el lugar vuelve a estar disponible.
+              </li>
+              <li>Cada reserva se confirma sola. Si se cae algún plan, cancelala desde "Reservas" y el lugar se libera.</li>
+              <li>Después de guardar, la pantalla <strong>Reservas</strong> aparece en el menú.</li>
+            </ul>
           </div>
         </section>
 

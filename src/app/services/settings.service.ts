@@ -35,6 +35,21 @@ export interface TenantSettings {
   cashierCanRemoveItems: boolean; // los cajeros pueden eliminar ítems de una orden
   tipEnabled: boolean;
   tipSuggestedPct: number;
+  // comisión para los mozos por las mesas que atendieron (porcentaje sobre lo vendido, sin propina)
+  commissionEnabled: boolean;
+  commissionPct: number;
+  // reservas de mesa: el negocio las habilita y define sus reglas (horarios en minutos desde la medianoche)
+  reservationsEnabled: boolean;
+  reservationSlug: string | null;
+  reservationOpenMin: number;
+  reservationCloseMin: number;
+  reservationDays: number[]; // 0 = domingo
+  reservationSlotMin: number;
+  reservationDurationMin: number;
+  reservationCapacity: number;
+  reservationMaxParty: number;
+  reservationAdvanceDays: number;
+  reservationNoticeMin: number;
   requireOpenRegister: boolean;
   // inventario: lo que el negocio eligió, lo que rige (elegido y permitido por el plan) y si bloquea pedidos sin stock
   inventoryEnabled: boolean;
@@ -81,6 +96,19 @@ const DEFAULTS: TenantSettings = {
   cashierCanRemoveItems: false,
   tipEnabled: false,
   tipSuggestedPct: 10,
+  commissionEnabled: false,
+  commissionPct: 0,
+  reservationsEnabled: false,
+  reservationSlug: null,
+  reservationOpenMin: 720,
+  reservationCloseMin: 1380,
+  reservationDays: [0, 1, 2, 3, 4, 5, 6],
+  reservationSlotMin: 30,
+  reservationDurationMin: 90,
+  reservationCapacity: 30,
+  reservationMaxParty: 10,
+  reservationAdvanceDays: 30,
+  reservationNoticeMin: 60,
   requireOpenRegister: true,
   inventoryEnabled: false,
   inventoryActive: false,

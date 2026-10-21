@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { Availability, BookingConfirmation } from './reservations.service';
 
 // ---------- Huésped (pantalla pública del hotel, sin sesión) ----------
 
@@ -14,6 +15,9 @@ export interface HotelRestaurant {
   logoUrl: string | null;
   discountPct: number;
   conditions: string;
+  // el restaurante recibe reservas: se ofrece "Reservar mesa"
+  reservable: boolean;
+  maxParty: number;
 }
 
 export interface HotelPublicInfo {
@@ -33,6 +37,24 @@ export interface IssuedVoucher {
   validTo: string;
   // true si el servidor devolvió el voucher que el huésped ya tenía vigente (en vez de crear otro)
   reused?: boolean;
+}
+
+export interface HotelReservationBody {
+  restaurantId: string;
+  accessCode: string;
+  date: string;
+  time: string;
+  partySize: number;
+  guestName: string;
+  guestPhone: string;
+  notes?: string;
+  wantVoucher?: boolean;
+  document?: string;
+}
+
+export interface HotelReservationResult {
+  reservation: BookingConfirmation;
+  voucher: IssuedVoucher | null;
 }
 
 // Estado de un voucher que el huésped ya tiene (lo calcula el servidor; EXPIRED = sin usar y vencido)
@@ -60,6 +82,23 @@ export class HotelPublicService {
 
   issue(slug: string, body: { restaurantId: string; guestName: string; document: string; accessCode: string }): Observable<IssuedVoucher> {
     return this.http.post<IssuedVoucher>(`${this.base}/${encodeURIComponent(slug)}/vouchers`, body);
+  }
+
+  availability(slug: string, restaurantId: string, date: string, party: number): Observable<Availability> {
+    return this.http.get<Availability>(`${this.base}/${encodeURIComponent(slug)}/reservations/availability`, {
+      params: { restaurantId, date, party: String(party) },
+    });
+  }
+
+  reserve(slug: string, body: HotelReservationBody): Observable<HotelReservationResult> {
+    return this.http.post<HotelReservationResult>(`${this.base}/${encodeURIComponent(slug)}/reservations`, body);
+  }
+
+  reserveWaitlist(
+    slug: string,
+    body: { restaurantId: string; accessCode: string; date: string; fromTime: string; toTime: string; partySize: number; guestName: string; guestPhone: string },
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/${encodeURIComponent(slug)}/reservations/waitlist`, body);
   }
 
   // Estado de los vouchers que el celular ya tiene (por sus códigos)

@@ -15,6 +15,8 @@ import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
 import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
+import { ReservationsComponent } from './pages/reservations/reservations.component';
+import { ReserveComponent } from './pages/reserve/reserve.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 import { guestGuard, pendingPasswordGuard, roleGuard } from './guards/auth.guard';
 import { onboardingGuard } from './guards/onboarding.guard';
@@ -32,6 +34,7 @@ const routes: Routes = [
   { path: 'admin/:section', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'inventory', component: InventoryComponent, canActivate: [roleGuard('admin')] },
   { path: 'cash', component: CashComponent, canActivate: [roleGuard('admin', 'cashier')] },
+  { path: 'reservations', component: ReservationsComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
   { path: 'settings', component: SettingsComponent, canActivate: [roleGuard('admin')] },
   { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },
@@ -41,6 +44,7 @@ const routes: Routes = [
   { path: 'mesa/:token', component: QrOrderComponent },
   // Pantalla pública del huésped (QR del hotel): sin sesión
   { path: 'hotel/:slug', component: HotelLandingComponent },
+  { path: 'reservar/:slug', component: ReserveComponent },
   // Portal del hotel: tiene su propio login (no usa el del personal de los restaurantes)
   { path: 'hotel-portal', component: HotelPortalComponent },
   { path: '**', redirectTo: '/home' }, // cocina y barra rebotan de /home a /kitchen (roleGuard)

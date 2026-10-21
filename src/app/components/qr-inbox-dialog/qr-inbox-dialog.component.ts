@@ -58,7 +58,13 @@ export class QrInboxDialogComponent implements OnInit {
     return c.type === 'BILL' ? 'Pide la cuenta' : 'Llama al mozo';
   }
 
+  // Si la mesa todavía no tiene mozo, hay que elegir uno antes de confirmar el pedido
+  needsWaiter(r: QrRequest): boolean {
+    return !r.hasWaiter && this.waiters.length > 0 && !this.waiterByRequest[r.id];
+  }
+
   confirm(r: QrRequest) {
+    if (this.needsWaiter(r)) return;
     if (this.busy.has(r.id)) return;
     this.busy.add(r.id);
     this.qr.confirm(r.id, this.waiterByRequest[r.id] || undefined).subscribe({

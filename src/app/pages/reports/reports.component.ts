@@ -49,6 +49,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
   readonly hotelsPreview = 5;
   hotelsExpanded = false;
 
+  // La comisión se muestra si el negocio la tiene activa, o si hay comisión en el período (aunque ya la hayan apagado)
+  get showCommission(): boolean {
+    return !!this.report && (this.report.commission.enabled || this.report.summary.commissionTotal > 0);
+  }
+
   get hotelRows() {
     const all = this.report?.byHotel ?? [];
     return this.hotelsExpanded ? all : all.slice(0, this.hotelsPreview);

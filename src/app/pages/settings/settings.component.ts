@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
+import { minToTime } from 'src/app/services/reservations.service';
 
 export interface Region {
   label: string;
@@ -47,6 +48,55 @@ export class SettingsComponent implements OnInit {
     { key: 'cuenta', label: 'Seguridad', icon: 'lock' },
   ];
   tab: SettingsTab = 'negocio';
+
+  // Reservas: opciones de los selectores y dirección pública
+  readonly timeOptions = Array.from({ length: 48 }, (_, i) => ({ value: i * 30, label: minToTime(i * 30) }));
+  readonly dayNames = [
+    { n: 1, label: 'Lun' },
+    { n: 2, label: 'Mar' },
+    { n: 3, label: 'Mié' },
+    { n: 4, label: 'Jue' },
+    { n: 5, label: 'Vie' },
+    { n: 6, label: 'Sáb' },
+    { n: 0, label: 'Dom' },
+  ];
+  readonly slotOptions = [15, 30, 60];
+  readonly durationOptions = [60, 90, 120, 150, 180, 240];
+  readonly advanceOptions = [7, 14, 30, 60, 90];
+  readonly noticeOptions = [
+    { value: 0, label: 'Sin mínimo' },
+    { value: 30, label: '30 minutos' },
+    { value: 60, label: '1 hora' },
+    { value: 120, label: '2 horas' },
+    { value: 180, label: '3 horas' },
+    { value: 360, label: '6 horas' },
+    { value: 1440, label: '1 día' },
+  ];
+
+  hasDay(n: number): boolean {
+    return !!this.form?.reservationDays.includes(n);
+  }
+
+  toggleDay(n: number) {
+    if (!this.form) return;
+    const days = this.form.reservationDays;
+    this.form.reservationDays = days.includes(n) ? days.filter((d) => d !== n) : [...days, n];
+  }
+
+  // La dirección que se comparte: se arma cuando se guardan los ajustes con las reservas activadas
+  get reservationLink(): string | null {
+    const slug = this.form?.reservationSlug;
+    return slug ? `${window.location.origin}/reservar/${slug}` : null;
+  }
+
+  copyReservationLink() {
+    const link = this.reservationLink;
+    if (!link) return;
+    navigator.clipboard?.writeText(link).then(
+      () => this.notify('Dirección copiada'),
+      () => this.notify('No se pudo copiar'),
+    );
+  }
 
   setTab(tab: SettingsTab) {
     this.tab = tab;
