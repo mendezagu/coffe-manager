@@ -301,13 +301,6 @@ checkout(
   return this.http.post<any>(`${this.apiUrl}/tables/${tableId}/checkout`, body);
 }
 
-// Eliminar todos los balances
-deleteAllBalances(): Observable<{ message: string }> {
-  return this.http.delete<{ message: string }>(`${this.apiUrl}/balances`).pipe(
-    catchError(this.handleError)
-  );
-}
-
   // 📌 Modificadores (tamaño, leche, extras…). Los errores del servidor pasan tal cual.
   getModifiers(): Observable<ModifierGroup[]> {
     return this.http.get<ModifierGroup[]>(`${this.apiUrl}/modifiers`);

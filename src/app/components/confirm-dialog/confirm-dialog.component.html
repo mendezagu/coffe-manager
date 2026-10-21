@@ -1,0 +1,24 @@
+<div role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-text" class="px-6 pb-5 pt-6">
+  <div class="flex items-start gap-4">
+    <span class="grid h-12 w-12 flex-none place-items-center rounded-full"
+      [ngClass]="danger ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-green-50 text-cafe-green-700'">
+      <mat-icon>{{ data.icon || (danger ? 'warning' : 'help_outline') }}</mat-icon>
+    </span>
+    <div class="min-w-0">
+      <h2 id="confirm-title" class="m-0 text-lg font-bold leading-snug text-sage-900">{{ data.title }}</h2>
+      <p id="confirm-text" class="m-0 mt-2 text-sm leading-relaxed text-sage-600">{{ data.message }}</p>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <button type="button" (click)="ref.close(false)"
+      class="h-11 rounded-xl border border-sage-200 bg-white px-5 text-sm font-bold text-sage-700 hover:bg-sage-50">
+      {{ data.cancelText || 'Cancelar' }}
+    </button>
+    <button type="button" (click)="ref.close(true)" [attr.cdkFocusInitial]="danger ? null : ''"
+      class="h-11 rounded-xl px-5 text-sm font-bold text-white"
+      [ngClass]="danger ? 'bg-cafe-red-700 hover:bg-cafe-red-800' : 'bg-cafe-green-700 hover:bg-cafe-green-800'">
+      {{ data.confirmText || 'Aceptar' }}
+    </button>
+  </div>
+</div>

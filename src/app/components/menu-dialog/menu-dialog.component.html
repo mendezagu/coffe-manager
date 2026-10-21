@@ -140,7 +140,7 @@
                 type="button"
                 class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 [ngClass]="addedItems[menu._id] ?
-                  'bg-cafe-mint-500 text-cafe-green-900 added-pop' :
+                  'bg-cafe-mint-500 text-[#0c1511] added-pop' :
                   (isSelected(menu) ? 'bg-cafe-green-700 text-white hover:bg-cafe-green-800' : 'bg-cafe-green-50 text-cafe-green-700 hover:bg-cafe-green-100')"
                 (click)="addItem(menu)" [disabled]="menu.availableUnits === 0"
                 [attr.aria-label]="(isSelected(menu) ? 'Agregar otra unidad de ' : 'Agregar ') + menu.name"

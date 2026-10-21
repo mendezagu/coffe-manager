@@ -9,7 +9,8 @@
     "test": "ng test",
     "deploy": "npm run build && npx angular-cli-ghpages --dir=dist/coffe-manager --no-silent",
     "build:app": "ng build --configuration=production --base-href=/ --output-path=dist/tavolapp-app",
-    "deploy:app": "node scripts/require-main.js && npm run build:app && npx wrangler deploy"
+    "deploy:app": "node scripts/require-main.js && npm run build:app && npx wrangler deploy",
+    "gen:dark": "node tools/gen-dark-theme.js"
   },
   "private": true,
   "dependencies": {

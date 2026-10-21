@@ -14,6 +14,13 @@
   <div class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-7xl mx-auto">
 
+    <!-- Turno nuevo: solo cambia lo que se muestra -->
+    <div *ngIf="shiftStart" class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-card bg-cafe-green-50 px-4 py-3 text-sm text-cafe-green-900">
+      <mat-icon class="!h-5 !w-5 !text-xl">schedule</mat-icon>
+      <span>Turno iniciado el <strong>{{ shiftStart | date: 'dd/MM HH:mm' }}</strong>. Ves solo lo cobrado desde entonces; el historial completo se conserva.</span>
+      <button type="button" (click)="showAllHistory()" class="font-bold underline">Ver todo el historial</button>
+    </div>
+
     <!-- Tabla -->
     <div class="bg-white rounded-card shadow-soft overflow-hidden mb-8">
       <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
@@ -170,8 +177,8 @@
 
     <div class="flex justify-center">
       <button
-        (click)="deleteBalance()"
-        class="flex items-center gap-2 px-6 py-3 bg-cafe-red-50 hover:bg-cafe-red-100 text-cafe-red-700 font-bold text-sm rounded-xl transition-all duration-200"
+        (click)="startNewShift()"
+        class="flex items-center gap-2 px-6 py-3 bg-sage-100 hover:bg-sage-200 text-sage-800 font-bold text-sm rounded-xl transition-all duration-200"
       >
         <mat-icon class="!text-xl">restart_alt</mat-icon>
         <span>Comenzar Nuevo Turno</span>

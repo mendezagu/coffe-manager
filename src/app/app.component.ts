@@ -15,6 +15,7 @@ import { QrCall, QrRequest, QrService } from './services/qr.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
 import { OnboardingService } from './services/onboarding.service';
 import { NavGuideService } from './services/nav-guide.service';
+import { ThemeMode, ThemeService } from './services/theme.service';
 
 // Rutas que ve gente sin cuenta del restaurante
 // (y el asistente de primeros pasos, que también va en pantalla completa, sin menú ni barra)
@@ -56,7 +57,8 @@ export class AppComponent {
     public qr: QrService,
     private dialog: MatDialog,
     public onboarding: OnboardingService,
-    public nav: NavGuideService
+    public nav: NavGuideService,
+    public theme: ThemeService
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
@@ -90,6 +92,18 @@ export class AppComponent {
   }
 
   userMenuOpen = false;
+
+  // Apariencia del panel (claro, oscuro o automático)
+  readonly themeOptions: { mode: ThemeMode; icon: string; label: string }[] = [
+    { mode: 'light', icon: 'light_mode', label: 'Claro' },
+    { mode: 'auto', icon: 'brightness_auto', label: 'Automático' },
+    { mode: 'dark', icon: 'dark_mode', label: 'Oscuro' },
+  ];
+
+  // El modo oscuro solo rige dentro del panel (con el menú lateral), no en pantallas de clientes ni en el ingreso
+  private syncTheme() {
+    this.theme.setShell(this.isLoggedIn && !this.publicPage);
+  }
 
   // "Agustín Méndez" -> "AM"
   initials(name: string): string {
@@ -185,8 +199,10 @@ export class AppComponent {
 
     // Qué página se está viendo
     this.publicPage = isPublicPath(this.router.url);
+    this.syncTheme();
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       this.publicPage = isPublicPath(e.urlAfterRedirects);
+      this.syncTheme();
       if (this.isAdminRole && !this.publicPage) this.onboarding.refreshPending();
       this.nav.visited(e.urlAfterRedirects);
     });
@@ -194,6 +210,7 @@ export class AppComponent {
     // Suscribirse a cambios en la autenticación
     this.userService.getAuthState().subscribe(user => {
       this.isLoggedIn = !!user; // Si hay usuario, true; si no, false
+      this.syncTheme();
     });
 
     //NUEVOOOO

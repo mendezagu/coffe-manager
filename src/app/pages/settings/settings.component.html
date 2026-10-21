@@ -26,7 +26,7 @@
       </button>
     </div>
 
-    <form *ngIf="form" [class.hidden]="tab === 'cuenta'" (ngSubmit)="save()" #f="ngForm" class="grid items-start gap-6"
+    <form *ngIf="form" [class.hidden]="tab === 'cuenta'" (ngSubmit)="save()" #f="ngForm" class="grid items-start gap-6 pb-24 sm:pb-0"
       [ngClass]="tab === 'negocio' ? 'lg:grid-cols-[1fr_320px]' : 'lg:grid-cols-[minmax(0,720px)]'">
 
       <div class="space-y-6">
@@ -530,9 +530,10 @@
         </section>
 
         <!-- Guardar: queda fijo abajo para no tener que bajar hasta el final de cada pestaña -->
-        <div class="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-sage-200 bg-sage-100/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:bg-white/95">
+        <!-- En el celular va fijo a la pantalla (si no, se va con la columna); en pantallas grandes queda pegado al final de la columna -->
+        <div class="fixed inset-x-0 bottom-0 z-20 flex flex-wrap items-center gap-3 border-t border-sage-200 bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] backdrop-blur sm:sticky sm:inset-x-auto sm:z-10 sm:rounded-xl sm:border sm:bg-white/95 sm:shadow-none">
           <button type="submit" [disabled]="f.invalid || !shiftsValid || saving"
-            class="px-6 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
             {{ saving ? 'Guardando…' : 'Guardar cambios' }}
           </button>
           <p *ngIf="f.invalid || !shiftsValid" class="m-0 text-xs font-medium text-cafe-red-700">Hay datos sin completar o turnos fuera de orden. Revisá todas las pestañas.</p>

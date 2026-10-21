@@ -25,7 +25,7 @@
         <span *ngIf="!info.logoUrl" class="grid h-14 w-14 flex-none place-items-center rounded-2xl bg-white/15 text-white"><mat-icon>restaurant</mat-icon></span>
         <div class="min-w-0">
           <h1 class="m-0 break-words text-xl font-bold leading-tight">{{ info.name }}</h1>
-          <p class="m-0 flex items-center gap-1 text-sm text-white/80"><mat-icon class="!h-4 !w-4 !text-base">place</mat-icon><span class="min-w-0">{{ info.address }}<ng-container *ngIf="info.address && info.city">, </ng-container>{{ info.city }}</span></p>
+          <p class="m-0 flex items-start gap-1 text-sm leading-snug text-white/80"><mat-icon class="!h-4 !w-4 !text-base mt-[1px] shrink-0">place</mat-icon><span class="min-w-0">{{ info.address }}<ng-container *ngIf="info.address && info.city">, </ng-container>{{ info.city }}</span></p>
         </div>
       </div>
     </div>

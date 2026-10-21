@@ -85,7 +85,7 @@
     <ng-template #navItem let-key="key" let-link="link" let-icon="icon" let-label="label">
       <div class="mb-1">
         <!-- La fila entera se resalta (no el botón): así el borde, el brillo y los íconos no se pisan -->
-        <div class="flex items-center rounded-xl border transition-colors"
+        <div class="flex items-center rounded-xl border-[1px] transition-colors"
           [ngClass]="nav.isNew(key) ? 'border-cafe-green-700/40 bg-cafe-green-50 nav-glow' : 'border-transparent'">
           <button mat-button [routerLink]="link" (click)="nav.markSeen(key)" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold"
             class="nav-item-btn !min-w-0 !flex-1 !rounded-xl !h-11 !justify-start"
@@ -111,6 +111,18 @@
     </ng-template>
 
 <div class="flex-1"></div>
+
+    <!-- Apariencia: claro, oscuro o automático (sigue al sistema) -->
+    <div class="mt-4 mb-3 px-1">
+      <p class="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-sage-400">Apariencia</p>
+      <div class="flex rounded-xl bg-sage-100 p-[3px]" role="radiogroup" aria-label="Apariencia">
+        <button *ngFor="let o of themeOptions" type="button" role="radio" [attr.aria-checked]="(theme.mode$ | async) === o.mode" [attr.aria-label]="o.label" [title]="o.label" (click)="theme.setMode(o.mode)"
+          class="nav-item-btn flex h-9 flex-1 items-center justify-center rounded-[10px] transition-colors"
+          [ngClass]="(theme.mode$ | async) === o.mode ? 'bg-white text-sage-900 shadow-soft' : 'text-sage-500 hover:text-sage-800'">
+          <mat-icon class="!h-5 !w-5 !text-xl">{{ o.icon }}</mat-icon>
+        </button>
+      </div>
+    </div>
 
     <button mat-button *ngIf="isLoggedIn" (click)="logout()" class="!bg-cafe-red-50 !text-cafe-red-700 !rounded-xl !h-11 !font-bold">
       <mat-icon fontIcon="logout"></mat-icon>

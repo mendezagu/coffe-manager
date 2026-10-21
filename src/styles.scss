@@ -202,3 +202,97 @@ select:not([multiple]):not([size]):not(.appearance-none):disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Que ninguna pantalla se pueda arrastrar hacia los costados en el celular: si algo se pasa del ancho, se recorta en vez de mover toda la página */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+mat-drawer-content,
+.mat-drawer-content {
+  overflow-x: hidden;
+}
+
+/* ===== Modo oscuro del panel interno (estilo Discord) =====
+   Las clases de color de las pantallas se traducen en _dark-theme.generated.scss (tools/gen-dark-theme.js);
+   acá va lo que no son clases: el fondo general, Angular Material y los campos. Solo rige con html.dark,
+   que se pone únicamente dentro del panel (nunca en la carta QR, las reservas, el hotel ni el ingreso). */
+@import 'dark-theme.generated';
+
+html.dark {
+  color-scheme: dark;
+  background: #313338;
+  --mdc-dialog-container-color: #2b2d31;
+  --mdc-dialog-subhead-color: #f2f3f5;
+  --mdc-dialog-supporting-text-color: #dbdee1;
+}
+
+html.dark body {
+  background: #313338;
+  color: #dbdee1;
+}
+
+html.dark app-root,
+html.dark .mat-drawer-container,
+html.dark .mat-drawer-content,
+html.dark mat-drawer-container,
+html.dark mat-drawer-content {
+  background-color: #313338 !important;
+  color: #dbdee1;
+}
+
+html.dark mat-drawer,
+html.dark .mat-drawer {
+  background-color: #2b2d31 !important;
+  color: #dbdee1;
+  border-right-color: #1e1f22 !important;
+}
+
+html.dark .custom-toolbar,
+html.dark .mat-toolbar {
+  background-color: #2b2d31 !important;
+  color: #dbdee1;
+  border-bottom-color: #1e1f22 !important;
+}
+
+html.dark .mat-mdc-dialog-surface,
+html.dark .mat-mdc-select-panel,
+html.dark .mat-mdc-menu-panel,
+html.dark .mat-mdc-autocomplete-panel {
+  background-color: #2b2d31 !important;
+  color: #dbdee1;
+}
+
+html.dark .mat-mdc-option,
+html.dark .mat-mdc-menu-item {
+  color: #dbdee1;
+}
+
+html.dark .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+html.dark .mat-mdc-menu-item:hover:not([disabled]) {
+  background-color: #35373c !important;
+}
+
+html.dark input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+html.dark select,
+html.dark textarea {
+  background-color: #1e1f22;
+  color: #dbdee1;
+  border-color: #3f4147;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #80848e;
+}
+
+html.dark select option {
+  background-color: #2b2d31;
+  color: #dbdee1;
+}
+
+html.dark hr {
+  border-color: #3f4147;
+}

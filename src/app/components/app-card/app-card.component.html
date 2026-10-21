@@ -180,7 +180,7 @@
 
             <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
             <button *ngIf="needsQrAttention(table)" type="button" (click)="openQrInbox(table)" [attr.aria-label]="'Atender pedidos QR de ' + table.name"
-              class="w-full mt-[12px] flex items-center gap-[8px] px-[10px] py-[8px] rounded-xl bg-white border-[1px] border-cafe-amber-200 text-cafe-amber-800 text-xs font-bold text-left hover:bg-cafe-amber-100 transition-colors">
+              class="w-full mt-[12px] flex items-center gap-[8px] px-[10px] py-[8px] rounded-xl bg-[#ffffff] border-[1px] border-[#f9c4a1] text-[#9a4a20] text-xs font-bold text-left hover:bg-[#fde0cc] transition-colors">
               <mat-icon class="!w-[18px] !h-[18px] !text-[18px] flex-shrink-0">qr_code_scanner</mat-icon>
               <span class="min-w-0 flex-1">
                 <ng-container *ngIf="qrRequestsOf(table) > 0">{{ qrRequestsOf(table) }} {{ qrRequestsOf(table) === 1 ? 'pedido por confirmar' : 'pedidos por confirmar' }}</ng-container>
