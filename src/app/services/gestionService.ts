@@ -129,7 +129,9 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
         id: table._id,
         available: table.orders.length === 0,
         waiterId: table.waiterId,
-        waiterName: table.waiter ? table.waiter.name : 'Sin asignar',
+        // La API manda el nombre del mozo en `waiterName` (null si no tiene). Antes se miraba `table.waiter`, que no
+        // existe, y el nombre se pisaba siempre con "Sin asignar" hasta que otra pantalla lo reponía.
+        waiterName: table.waiterName ?? (table.waiter ? table.waiter.name : 'Sin asignar'),
       }))),
       catchError(this.handleError)
     );
