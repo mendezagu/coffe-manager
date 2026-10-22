@@ -6,7 +6,7 @@
   <title>Tavolapp se mudó</title>
   <meta name="robots" content="noindex">
   <link rel="canonical" href="https://app.tavolapp.app/">
-  <meta http-equiv="refresh" content="3;url=https://app.tavolapp.app/">
+  <meta http-equiv="refresh" content="6;url=https://app.tavolapp.app/">
   <style>
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:#edf1ea;font-family:system-ui,'Segoe UI',Roboto,sans-serif;color:#1e2b24;text-align:center;padding:24px}
     main{max-width:420px}h1{font-size:22px;margin:0 0 8px}p{color:#55655b;line-height:1.5;margin:6px 0}
@@ -16,8 +16,9 @@
 <body>
   <main>
     <h1>Tavolapp tiene una nueva dirección</h1>
-    <p>Te estamos llevando a <b>app.tavolapp.app</b>…</p>
-    <a id="go" href="https://app.tavolapp.app/">Ir ahora</a>
+    <p>La app ahora está en <b>app.tavolapp.app</b>. Guardá esa dirección en favoritos.</p>
+    <p id="count" style="font-size:13px">Te llevamos en 5 segundos…</p>
+    <a id="go" href="https://app.tavolapp.app/">Ir a la nueva dirección</a>
   </main>
   <script>
     // Misma ruta en la dirección nueva (por ejemplo, los QR de mesa ya impresos siguen funcionando)
@@ -37,8 +38,14 @@
         .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
         .catch(function () {});
     }
-    cleanup.then(function () { location.replace(target); });
-    setTimeout(function () { location.replace(target); }, 1500);
+    // El cartel se queda 5 segundos (con cuenta regresiva) y después lleva solo; el botón lleva de inmediato
+    var left = 5;
+    var count = document.getElementById('count');
+    var tick = setInterval(function () {
+      left -= 1;
+      if (left <= 0) { clearInterval(tick); location.replace(target); }
+      else count.textContent = 'Te llevamos en ' + left + ' segundo' + (left === 1 ? '' : 's') + '…';
+    }, 1000);
   </script>
 </body>
 </html>
