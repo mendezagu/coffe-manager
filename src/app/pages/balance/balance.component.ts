@@ -3,6 +3,7 @@ import { GestionService, Table } from 'src/app/services/gestionService';
 import Chart from 'chart.js/auto';
 import { ConfirmService } from 'src/app/components/confirm-dialog/confirm-dialog.component';
 import { ShiftService } from 'src/app/services/shift.service';
+import { Subscription } from 'rxjs';
 
 interface SaleItem {
   name: string;
@@ -55,10 +56,18 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private gestionService: GestionService, private confirmDialog: ConfirmService, private shift: ShiftService) {}
 
+  private shiftSub?: Subscription;
+
   ngOnInit(): void {
     // Limpiar cualquier rastro antiguo de localBalances
     localStorage.removeItem('localBalances');
     this.loadBalance();
+    // El turno es del negocio: si otro dispositivo comienza uno nuevo, esta pantalla se pone en cero sola
+    this.shiftSub = this.shift.start$.subscribe((s) => {
+      this.shiftStart = s;
+      this.applyShift();
+    });
+    this.shift.refresh();
   }
 
   ngAfterViewInit(): void {
@@ -199,6 +208,7 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.shiftSub?.unsubscribe();
     if (this.tableChart) this.tableChart.destroy();
     if (this.waiterChart) this.waiterChart.destroy();
   }
@@ -214,8 +224,14 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       .subscribe((ok) => {
         if (!ok) return;
-        this.shiftStart = this.shift.begin();
-        this.applyShift();
+        // El turno queda guardado en el servidor: todos los dispositivos del negocio arrancan en cero
+        this.shift.begin().subscribe({
+          next: (d) => {
+            this.shiftStart = d;
+            this.applyShift();
+          },
+          error: () => alert('No se pudo comenzar el turno. Revisá la conexión e intentá de nuevo.'),
+        });
       });
   }
 

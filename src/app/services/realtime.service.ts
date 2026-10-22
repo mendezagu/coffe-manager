@@ -6,7 +6,7 @@ import { refreshStream } from '../utils/refresh-stream';
 import { UserService } from './user.service';
 
 // Qué cambió. 'orders' es para el cliente del QR (el estado de sus pedidos); el resto, para el personal.
-export type Topic = 'tables' | 'qr' | 'kitchen' | 'orders';
+export type Topic = 'tables' | 'qr' | 'kitchen' | 'orders' | 'shift';
 
 // Con la conexión en vivo basta una consulta de seguridad por minuto (por si se perdiera algún aviso)
 const SAFETY_MS = 60_000;
