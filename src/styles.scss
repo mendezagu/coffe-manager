@@ -91,6 +91,63 @@ mat-icon {
   box-shadow: 0 30px 60px -20px rgba(30, 43, 36, 0.45) !important;
 }
 
+/* Avisos (snackbar): tarjeta blanca con borde fino y sombra suave, como los diálogos y los avisos de QR.
+   El botón de acción (Cerrar) va en verde de marca. */
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #ffffff;
+  --mdc-snackbar-supporting-text-color: #1e2b24;
+  --mat-snack-bar-button-color: #1d5b3e;
+  --mdc-snackbar-container-shape: 16px;
+  margin: 16px !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: #ffffff !important;
+  border: 1px solid #e0e7dc;
+  border-left: 4px solid #1d5b3e;
+  border-radius: 16px !important;
+  box-shadow: 0 30px 60px -20px rgba(30, 43, 36, 0.45), 0 1px 2px rgba(30, 43, 36, 0.06) !important;
+  padding-right: 4px;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  color: #1e2b24 !important;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 14px 16px !important;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
+  color: #1d5b3e !important;
+  font-weight: 700;
+  letter-spacing: 0;
+  border-radius: 10px;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
+  background: #e7f2ec;
+}
+
+html.dark .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background: #2b2d31 !important;
+  border-color: #3a3d43;
+  border-left-color: #3f9d70;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .mat-mdc-snack-bar-container .mdc-snackbar__label {
+  color: #dbdee1 !important;
+}
+
+html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
+  color: #6fcf9f !important;
+}
+
+html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
+  background: rgba(111, 207, 159, 0.12);
+}
+
 /* Paneles de acordeón (admin) */
 .mat-expansion-panel:not([class*='mat-elevation-z']) {
   box-shadow: 0 1px 2px rgba(30, 43, 36, 0.05), 0 14px 30px -18px rgba(30, 43, 36, 0.28);
