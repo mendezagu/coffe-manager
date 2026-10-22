@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
@@ -67,6 +67,7 @@ export class OnboardingService {
   constructor(private http: HttpClient, users: UserService) {
     users.getAuthState().subscribe(() => {
       this.knownDone = false;
+      this.cache = undefined;
       this.pending.next(false);
       this.basics.next(false);
       this.adminBlocked.next(false);
@@ -83,10 +84,16 @@ export class OnboardingService {
     return this.pending.value;
   }
 
+  // Además, la última respuesta se reutiliza 2 segundos: al cargar, cada pantalla lo pide una tras otra (no a la vez).
+  // Las acciones que cambian lo que falta (plantilla, mesas) la descartan.
+  private cache?: { at: number; value: OnboardingStatus };
+
   status(): Observable<OnboardingStatus> {
+    if (this.cache && Date.now() - this.cache.at < 2000) return of(this.cache.value);
     if (this.inflight) return this.inflight;
     this.inflight = this.http.get<OnboardingStatus>(`${this.url}/status`).pipe(
       tap((s) => {
+        this.cache = { at: Date.now(), value: s };
         this.knownDone = s.done;
         this.pending.next(isSetupPending(s.counts));
         this.basics.next(isBasicsPending(s.counts));
@@ -105,14 +112,14 @@ export class OnboardingService {
   }
 
   applyTemplate(key: string): Observable<{ items: number; categories: number }> {
-    return this.http.post<{ items: number; categories: number }>(`${this.url}/template`, { key });
+    return this.http.post<{ items: number; categories: number }>(`${this.url}/template`, { key }).pipe(tap(() => (this.cache = undefined)));
   }
 
   removeTemplate(): Observable<{ items: number; categories: number }> {
-    return this.http.delete<{ items: number; categories: number }>(`${this.url}/template`);
+    return this.http.delete<{ items: number; categories: number }>(`${this.url}/template`).pipe(tap(() => (this.cache = undefined)));
   }
 
   createTables(count: number): Observable<{ created: number }> {
-    return this.http.post<{ created: number }>(`${this.url}/tables`, { count });
+    return this.http.post<{ created: number }>(`${this.url}/tables`, { count }).pipe(tap(() => (this.cache = undefined)));
   }
 }

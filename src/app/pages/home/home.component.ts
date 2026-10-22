@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CoffeService, MenuItem } from 'src/app/models/coffe.service';
+import { MenuItem } from 'src/app/models/coffe.service'; // solo el tipo: el servicio viejo de Firestore ya no se usa
 import { GestionService, Table } from 'src/app/services/gestionService';
 import { PrintService } from 'src/app/services/printService';
 import { OnboardingService, OnboardingStatus, isBasicsPending } from 'src/app/services/onboarding.service';
@@ -20,7 +20,6 @@ export class HomeComponent implements OnInit{
   setupStatus: OnboardingStatus | null = null;
 
   constructor(
-    private coffeService: CoffeService,
     private gestionService: GestionService,
     private printService: PrintService,
     private onboarding: OnboardingService,
