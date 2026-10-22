@@ -1,26 +1,12 @@
-/**
- * @license
- * Copyright Google LLC All Rights Reserved.
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
- */
-
-// tslint:disable:no-console
-
-self.addEventListener('install', event => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-
-  event.waitUntil(self.registration.unregister().then(() => {
-    console.log('NGSW Safety Worker - unregistered old service worker');
-  }));
-
-  event.waitUntil(caches.keys().then(cacheNames => {
-    const ngswCacheNames = cacheNames.filter(name => /^ngsw:/.test(name));
-    return Promise.all(ngswCacheNames.map(name => caches.delete(name)));
-  }));
+// La app se mudó a https://app.tavolapp.app. Este service worker reemplaza al anterior: se desinstala solo,
+// borra lo que había guardado y recarga las pestañas abiertas (que ya van a ver la redirección).
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (event) {
+  event.waitUntil((async function () {
+    var keys = await caches.keys();
+    await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    await self.registration.unregister();
+    var clients = await self.clients.matchAll({ type: 'window' });
+    clients.forEach(function (c) { c.navigate(c.url); });
+  })());
 });
