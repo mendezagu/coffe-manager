@@ -181,12 +181,13 @@ export class AppComponent {
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
       this.isAdminRole = role === 'admin';
-      // Mientras falten pasos obligatorios el menú lateral se acorta: se revisa cada tanto y al cambiar de pantalla
+      // Mientras falten pasos obligatorios el menú lateral se acorta: se revisa cada tanto y al cambiar de pantalla.
+      // Cuando ya no falta nada no hace falta seguir consultando cada 20 segundos.
       if (this.setupTimer) clearInterval(this.setupTimer);
       if (this.isAdminRole) {
         this.onboarding.refreshPending();
         this.setupTimer = setInterval(() => {
-          if (!this.publicPage) this.onboarding.refreshPending();
+          if (!this.publicPage && this.onboarding.setupPendingNow) this.onboarding.refreshPending();
         }, 20000);
       }
       this.qrRole = role;

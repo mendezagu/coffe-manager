@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
 
@@ -74,14 +74,29 @@ export class OnboardingService {
     });
   }
 
+  // Varias pantallas piden el estado a la vez al cargar (menú, Inicio, checklist, guardas): mientras hay una consulta
+  // en curso, todas comparten la misma respuesta en vez de pedir cada una la suya.
+  private inflight?: Observable<OnboardingStatus>;
+
+  // ¿Faltan pasos obligatorios? (último valor conocido)
+  get setupPendingNow(): boolean {
+    return this.pending.value;
+  }
+
   status(): Observable<OnboardingStatus> {
-    return this.http.get<OnboardingStatus>(`${this.url}/status`).pipe(tap((s) => {
-      this.knownDone = s.done;
-      this.pending.next(isSetupPending(s.counts));
-      this.basics.next(isBasicsPending(s.counts));
-      this.adminBlocked.next(isAdminLocked(s.counts));
-      this.guide.next(!isBasicsPending(s.counts) && s.counts.sales === 0);
-    }));
+    if (this.inflight) return this.inflight;
+    this.inflight = this.http.get<OnboardingStatus>(`${this.url}/status`).pipe(
+      tap((s) => {
+        this.knownDone = s.done;
+        this.pending.next(isSetupPending(s.counts));
+        this.basics.next(isBasicsPending(s.counts));
+        this.adminBlocked.next(isAdminLocked(s.counts));
+        this.guide.next(!isBasicsPending(s.counts) && s.counts.sales === 0);
+      }),
+      finalize(() => (this.inflight = undefined)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this.inflight;
   }
 
   // Vuelve a calcular qué falta (para el menú lateral); si falla, no se bloquea nada

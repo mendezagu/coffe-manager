@@ -195,6 +195,14 @@ updateQuantity(menu: MenuItem, event: Event): void {
       return;
     }
   
+    // La ventana de impresión se abre ahora, en el clic: si se abriera recién cuando el servidor responde,
+    // el navegador la bloquea cuando la respuesta tarda y la comanda no sale.
+    const printWin = this.tickets.preopen();
+    if (!printWin) {
+      alert('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes para este sitio y volvé a intentar.');
+      return;
+    }
+
     this.gestionService.addItemsToTable(this.data.id, this.selectedItems).subscribe(
       (updatedTable) => {
         this.data.orders = updatedTable.orders;
@@ -226,6 +234,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
               note: item.note,
             })),
           },
+          { win: printWin },
         );
         // Los platos ya quedaron guardados en la mesa: se cierra el diálogo y la pantalla de mesas se actualiza sola
         if (opened) this.dialogRef.close();
@@ -233,6 +242,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
           this.gestionService.saveLog(logMessage);
       },
       (error) => {
+        printWin.close();
         console.error("Error al actualizar la mesa:", error);
         alert(this.serverMessage(error, 'Ocurrió un error al actualizar la mesa antes de imprimir.'));
       }

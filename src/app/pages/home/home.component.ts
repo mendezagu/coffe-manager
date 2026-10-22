@@ -28,7 +28,7 @@ export class HomeComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
-    this.loadTables();
+    // Las mesas las pide y mantiene al día la tarjeta de mesas (app-card): acá no hacía falta pedirlas de nuevo
     if (this.users.currentRole() !== 'admin') {
       this.gate = 'free';
       return;

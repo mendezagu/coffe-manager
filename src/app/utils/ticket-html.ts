@@ -105,11 +105,20 @@ function page(kind: 'comanda' | 'cuenta', inner: string): string {
 ${inner}
     </div>
     <script>
-      window.print();
-      window.onafterprint = function() {
+      // El aviso de "ya se imprimió" se prepara ANTES de imprimir: en Chrome print() espera a que se cierre el
+      // cuadro de impresión, y un aviso preparado después llegaba tarde y la ventana quedaba abierta.
+      var finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        try { if (window.opener) window.opener.postMessage('closeDialog', '*'); } catch (e) {}
         window.close();
-        window.opener.postMessage('closeDialog', '*');
       }
+      window.onafterprint = finish;
+      var started = Date.now();
+      window.print();
+      // Si print() esperó a que se cerrara el cuadro (tardó) y el navegador no avisó, se cierra igual
+      if (Date.now() - started > 400) setTimeout(finish, 300);
     </script>
   </body>
 </html>`;
