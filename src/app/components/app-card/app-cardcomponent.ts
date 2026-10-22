@@ -453,7 +453,9 @@ export class CardComponent implements OnInit, OnDestroy {
         const waiter = this.waiters.find((w) => w._id === table.waiterId);
         return {
           ...table,
-          waiterName: waiter ? waiter.name : 'No asignado',
+          // El servidor ya manda el nombre del mozo con la mesa. La lista de mozos se pide aparte y al cargar
+          // la página puede llegar después que las mesas: sin este respaldo, el nombre aparecía recién al interactuar.
+          waiterName: waiter ? waiter.name : table.waiterId && table.waiterName?.trim() ? table.waiterName : 'No asignado',
           available: table.controlledBy ? false : table.available, // Ocupa las mesas vinculadas
           linkedTables: table.linkedTables || [] // Asegura que siempre haya un array
         };
