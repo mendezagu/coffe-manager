@@ -45,9 +45,12 @@ export interface LiveSummary {
 export class ReportsService {
   constructor(private http: HttpClient) {}
 
-  live(): Observable<LiveSummary> {
+  // since: cuándo empezó el turno en curso; con él, el resumen cuenta solo desde ahí y arranca en cero
+  live(since?: Date | null): Observable<LiveSummary> {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-    return this.http.get<LiveSummary>(`${environment.apiUrl}/reports/live`, { params: new HttpParams().set('tz', tz) });
+    let params = new HttpParams().set('tz', tz);
+    if (since) params = params.set('since', since.toISOString());
+    return this.http.get<LiveSummary>(`${environment.apiUrl}/reports/live`, { params });
   }
 
   // from/to: YYYY-MM-DD (inclusive). La zona horaria es la del navegador: define dónde empieza cada día.

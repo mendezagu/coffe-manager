@@ -62,6 +62,12 @@ export class AppComponent {
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
+    // La fecha y el turno de la barra se actualizan solos: en una tablet o PC que queda abierta toda la noche
+    // (o varios días) se quedaban con el valor del momento en que se cargó la app
+    setInterval(() => {
+      this.currentDate = this.getFormattedDate();
+      this.shift = this.settings.shiftLabel();
+    }, 30000);
     this.settings.settings$.subscribe(() => {
       this.shift = this.settings.shiftLabel();
       this.refreshStock(); // por si se activó o desactivó el inventario

@@ -14,11 +14,10 @@
   <div class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-7xl mx-auto">
 
-    <!-- Turno nuevo: solo cambia lo que se muestra -->
+    <!-- Turno en curso: el Balance cuenta solo desde acá; el historial completo está en Reportes -->
     <div *ngIf="shiftStart" class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-card bg-cafe-green-50 px-4 py-3 text-sm text-cafe-green-900">
       <mat-icon class="!h-5 !w-5 !text-xl">schedule</mat-icon>
-      <span>Turno iniciado el <strong>{{ shiftStart | date: 'dd/MM HH:mm' }}</strong>. Ves solo lo cobrado desde entonces; el historial completo se conserva.</span>
-      <button type="button" (click)="showAllHistory()" class="font-bold underline">Ver todo el historial</button>
+      <span>Turno iniciado el <strong>{{ shiftStart | date: 'dd/MM HH:mm' }}</strong>. Ves solo lo cobrado desde entonces. El historial completo está en <a routerLink="/reports" class="font-bold underline">Reportes</a>.</span>
     </div>
 
     <!-- Tabla -->

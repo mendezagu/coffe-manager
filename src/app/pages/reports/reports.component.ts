@@ -9,8 +9,10 @@ type Preset = 'today' | '7d' | '30d' | 'month' | 'custom';
 // de la barra es el dato, y el nombre va en la etiqueta, no en el color.
 const GREEN = '#1d5b3e';
 const GREEN_HOVER = '#154630';
-const INK = '#55655b'; // sage-600
-const GRID = '#e0e7dc'; // sage-200
+// Texto y líneas de los ejes: en el modo oscuro del panel se usan grises suaves (si no, las líneas claras se ven blancas)
+const isDark = () => document.documentElement.classList.contains('dark');
+const inkColor = () => (isDark() ? '#b5bac1' : '#55655b'); // sage-600
+const gridColor = () => (isDark() ? '#35373c' : '#e0e7dc'); // sage-200
 
 const PAYMENT_LABELS: Record<string, string> = {
   efectivo: 'Efectivo',
@@ -188,11 +190,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const horizontal = opts.horizontal;
     const valueAxis = {
       beginAtZero: true,
-      grid: { color: GRID },
+      grid: { color: gridColor() },
       border: { display: false },
-      ticks: { color: INK, callback: (v: string | number) => format(Number(v)) },
+      ticks: { color: inkColor(), callback: (v: string | number) => format(Number(v)) },
     };
-    const labelAxis = { grid: { display: false }, border: { color: GRID }, ticks: { color: INK, autoSkip: true, maxRotation: 0 } };
+    const labelAxis = { grid: { display: false }, border: { color: gridColor() }, ticks: { color: inkColor(), autoSkip: true, maxRotation: 0 } };
 
     this.charts.push(
       new Chart(ctx, {

@@ -207,12 +207,18 @@ select:not([multiple]):not([size]):not(.appearance-none):disabled {
 html,
 body {
   max-width: 100%;
+  overflow-x: hidden; /* iPhone con iOS anterior al 16 no entiende "clip": ahí se usa "hidden" */
   overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 mat-drawer-content,
 .mat-drawer-content {
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+  /* En iPhone un contenedor con overflow-x:hidden igual se puede arrastrar hacia los costados con el dedo.
+     Acá solo se permite el gesto vertical (y el zoom); las filas con scroll horizontal propio (pestañas, tablas) siguen funcionando. */
+  touch-action: pan-y pinch-zoom;
 }
 
 /* ===== Modo oscuro del panel interno (estilo Discord) =====
@@ -291,6 +297,12 @@ html.dark textarea::placeholder {
 html.dark select option {
   background-color: #2b2d31;
   color: #dbdee1;
+}
+
+/* Las tarjetas con la clase "border" de Bootstrap y borde transparente (por ejemplo, Administrar) muestran su gris claro:
+   en oscuro, uno suave. Solo las que llevan ambas clases: el resto de los bordes transparentes (como las filas del menú) siguen invisibles. */
+html.dark .border.border-transparent {
+  border-color: #3a3d43 !important;
 }
 
 html.dark hr {

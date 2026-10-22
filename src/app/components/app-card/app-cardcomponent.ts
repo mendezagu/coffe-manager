@@ -17,6 +17,7 @@ import { QrInbox, QrService } from 'src/app/services/qr.service';
 import { LiveSummary, ReportsService } from 'src/app/services/reports.service';
 import { QrInboxDialogComponent } from '../qr-inbox-dialog/qr-inbox-dialog.component';
 import { OnboardingService } from 'src/app/services/onboarding.service';
+import { ShiftService } from 'src/app/services/shift.service';
 import { Subscription } from 'rxjs';
 
 interface TableGroup {
@@ -34,6 +35,9 @@ interface TableGroup {
 export class CardComponent implements OnInit, OnDestroy {
   private tablesSub?: Subscription;
   private guideSub?: Subscription;
+  private shiftSub?: Subscription;
+  // Turno en curso: el resumen del Inicio cuenta solo desde que se comenzó y arranca en cero
+  shiftStart: Date | null = null;
   tables: Table[] = [];
   // Guía de la primera venta (ver OnboardingService): muestra qué botón tocar en la primera mesa
   guideOn = false;
@@ -60,6 +64,7 @@ export class CardComponent implements OnInit, OnDestroy {
     private tickets: TicketService,
     private realtime: RealtimeService,
     private onboarding: OnboardingService,
+    private shift: ShiftService,
   ) {
     this.role$ = this.userService.getRoleState();
   }
@@ -87,6 +92,15 @@ export class CardComponent implements OnInit, OnDestroy {
     // Pedidos y avisos QR por mesa (badge en la tarjeta)
     this.qrSub = this.qr.inbox$.subscribe((inbox) => (this.qrInbox = inbox));
 
+    // Al comenzar un turno nuevo (o cambiarlo desde otra pestaña) el resumen se vuelve a pedir
+    this.shiftSub = this.shift.start$.subscribe((s) => {
+      this.shiftStart = s;
+      if (this.roleValue === 'admin') {
+        this.live = null;
+        this.loadLive();
+      }
+    });
+
     // Suscribirse al rol para uso en handlers sin pipes en templates
     this.role$.subscribe(role => {
       this.roleValue = role;
@@ -103,6 +117,7 @@ export class CardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.tablesSub?.unsubscribe();
     this.guideSub?.unsubscribe();
+    this.shiftSub?.unsubscribe();
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
     this.dragEnd();
@@ -126,7 +141,7 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
   loadLive(): void {
-    this.reports.live().subscribe({ next: (l) => (this.live = l), error: () => {} });
+    this.reports.live(this.shiftStart).subscribe({ next: (l) => (this.live = l), error: () => {} });
   }
 
   // 45 -> "45 min"; 75 -> "1 h 15 min"

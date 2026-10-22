@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit } fr
 import { GestionService, Table } from 'src/app/services/gestionService';
 import Chart from 'chart.js/auto';
 import { ConfirmService } from 'src/app/components/confirm-dialog/confirm-dialog.component';
+import { ShiftService } from 'src/app/services/shift.service';
 
 interface SaleItem {
   name: string;
@@ -34,19 +35,17 @@ interface BalanceEntry {
   detailError?: boolean;
 }
 
-const SHIFT_KEY = 'balance_shift_start';
-
 @Component({
   selector: 'app-balance',
   templateUrl: './balance.component.html',
   styleUrls: ['./balance.component.scss']
 })
 export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
-  // Todo el historial; balanceData es lo que se ve (todo, o solo lo cobrado desde que se comenzó el turno)
+  // allData es todo lo guardado; balanceData es lo que se ve: solo lo cobrado desde que se comenzó el turno.
+  // Las ventas no se borran: el historial completo está en Reportes.
   private allData: BalanceEntry[] = [];
   balanceData: BalanceEntry[] = [];
-  // Cuándo se comenzó el turno actual (en este dispositivo). Solo cambia lo que se muestra: el historial no se borra.
-  shiftStart: Date | null = this.readShiftStart();
+  shiftStart: Date | null = this.shift.start;
   totalRevenue: number = 0;
   @ViewChild('tableChart') tableChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('waiterChart') waiterChartRef!: ElementRef<HTMLCanvasElement>;
@@ -54,7 +53,7 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
   private tableChart: Chart | null = null;
   private waiterChart: Chart | null = null;
 
-  constructor(private gestionService: GestionService, private confirmDialog: ConfirmService) {}
+  constructor(private gestionService: GestionService, private confirmDialog: ConfirmService, private shift: ShiftService) {}
 
   ngOnInit(): void {
     // Limpiar cualquier rastro antiguo de localBalances
@@ -209,26 +208,15 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
     this.confirmDialog
       .ask({
         title: '¿Comenzar un turno nuevo?',
-        message: 'El balance va a mostrar solo lo que se cobre desde ahora. No se borra nada: el historial y los reportes se conservan, y podés volver a ver todo cuando quieras.',
+        message: 'El Balance y el Inicio van a arrancar en cero y a contar solo lo que se cobre desde ahora. No se borra nada: todo el historial queda en Reportes.',
         confirmText: 'Comenzar turno',
         icon: 'restart_alt',
       })
       .subscribe((ok) => {
         if (!ok) return;
-        this.shiftStart = new Date();
-        try {
-          localStorage.setItem(SHIFT_KEY, this.shiftStart.toISOString());
-        } catch {}
+        this.shiftStart = this.shift.begin();
         this.applyShift();
       });
-  }
-
-  showAllHistory(): void {
-    this.shiftStart = null;
-    try {
-      localStorage.removeItem(SHIFT_KEY);
-    } catch {}
-    this.applyShift();
   }
 
   private applyShift(): void {
@@ -238,13 +226,4 @@ export class BalanceComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderCharts();
   }
 
-  private readShiftStart(): Date | null {
-    try {
-      const raw = localStorage.getItem(SHIFT_KEY);
-      const d = raw ? new Date(raw) : null;
-      return d && !isNaN(d.getTime()) ? d : null;
-    } catch {
-      return null;
-    }
-  }
 }

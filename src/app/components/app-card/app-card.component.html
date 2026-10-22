@@ -9,15 +9,15 @@
       <ng-container *ngIf="roleValue === 'admin'">
         <div class="bg-cafe-green-800 rounded-card shadow-soft p-[12px] sm:p-[16px] flex items-center justify-between gap-[8px] min-w-0" [ngClass]="summaryCardWidth">
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-cafe-green-200 m-0 truncate">Ventas de hoy</p>
+            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-cafe-green-200 m-0 truncate">{{ shiftStart ? 'Ventas del turno' : 'Ventas de hoy' }}</p>
             <p class="m-0 mt-[2px] text-xl sm:text-2xl font-bold text-white leading-tight truncate">{{ live ? (live.sales.total | money) : '—' }}</p>
             <p class="text-xs m-0 mt-[4px] flex items-center gap-[2px] truncate"
               [ngClass]="live?.changePct === null || live?.changePct === undefined ? 'text-cafe-green-200' : (live!.changePct! >= 0 ? 'text-cafe-green-100 font-medium' : 'text-cafe-red-200 font-medium')">
-              <ng-container *ngIf="live && live.changePct !== null; else noCompare">
+              <ng-container *ngIf="!shiftStart && live && live.changePct !== null; else noCompare">
                 <mat-icon class="!w-4 !h-4 !text-base">{{ live.changePct >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
                 {{ live.changePct >= 0 ? '+' : '' }}{{ live.changePct | number: '1.0-1' }}% vs. ayer
               </ng-container>
-              <ng-template #noCompare>{{ live ? live.sales.count + (live.sales.count === 1 ? ' venta' : ' ventas') : '' }}</ng-template>
+              <ng-template #noCompare>{{ live ? live.sales.count + (live.sales.count === 1 ? ' venta' : ' ventas') : '' }}<ng-container *ngIf="shiftStart"> · desde {{ shiftStart | date: 'HH:mm' }}</ng-container></ng-template>
             </p>
           </div>
         <span [ngClass]="summaryIconVisibility" class="w-10 h-10 rounded-xl bg-white/15 text-white items-center justify-center flex-shrink-0"><mat-icon fontSet="material-icons-outlined">receipt_long</mat-icon></span>
