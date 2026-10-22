@@ -78,11 +78,21 @@ export class MenuDialogComponent implements OnDestroy {
     window.removeEventListener('message', this.onPrintMessage);
   }
 
+  // Solo se atiende el aviso de la ventana de impresión que abrió ESTE diálogo (una ventana vieja que se cerró tarde
+  // no debe cerrar otro diálogo), y si los platos ya se guardaron no se devuelven: la tarjeta de mesas los cargaría otra vez.
   private onPrintMessage = (event: MessageEvent) => {
-    if (event.data === 'closeDialog') {
-      this.dialogRef.close(this.selectedItems); // Cerrar el diálogo
+    if (event.data === 'closeDialog' && event.source === this.printWin) {
+      this.dialogRef.close(this.saved ? undefined : this.selectedItems); // Cerrar el diálogo
     }
   };
+
+  saving = false; // se está guardando el pedido (el botón de imprimir queda bloqueado)
+  private saved = false; // los platos ya quedaron guardados en la mesa
+  private printWin: Window | null = null;
+  private batchId = ''; // identificador del envío actual; cambia si cambia lo seleccionado
+  private newId(): string {
+    return typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `b-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
 
   loadMenu(): void {
     this.gestionService.getMenu().subscribe((menus) => {
@@ -160,6 +170,7 @@ export class MenuDialogComponent implements OnDestroy {
     const index = this.selectedItems.findIndex(selected => (selected.lineKey ?? selected._id) === (item.lineKey ?? item._id));
     if (index > -1) {
       this.selectedItems[index].note = inputElement.value;
+      this.batchId = '';
     }
   }
 
@@ -173,6 +184,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
   const index = this.hasModifiers(menu) ? -1 : this.selectedItems.findIndex(item => item._id === menu._id);
   if (index > -1) {
     this.selectedItems[index].quantity = quantity;
+    this.batchId = '';
 
     // Obtener nombre del mozo (por si acaso cambia dinámicamente)
     const mozo = this.waiterName || (this.data.waiter?.name ?? 'Desconocido');
@@ -195,6 +207,10 @@ updateQuantity(menu: MenuItem, event: Event): void {
       return;
     }
   
+    // Un solo envío a la vez: con un servidor lento (arranque de Render, mala señal) la persona volvía a tocar el botón
+    // mientras esperaba, y los mismos platos se cargaban dos veces.
+    if (this.saving) return;
+
     // La ventana de impresión se abre ahora, en el clic: si se abriera recién cuando el servidor responde,
     // el navegador la bloquea cuando la respuesta tarda y la comanda no sale.
     const printWin = this.tickets.preopen();
@@ -202,9 +218,14 @@ updateQuantity(menu: MenuItem, event: Event): void {
       alert('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes para este sitio y volvé a intentar.');
       return;
     }
+    this.printWin = printWin;
+    this.saving = true;
+    // Identifica este envío: si llegara repetido (reintento de la red, un proxy), el servidor carga los platos una sola vez
+    if (!this.batchId) this.batchId = this.newId();
 
-    this.gestionService.addItemsToTable(this.data.id, this.selectedItems).subscribe(
+    this.gestionService.addItemsToTable(this.data.id, this.selectedItems, this.batchId).subscribe(
       (updatedTable) => {
+        this.saved = true;
         this.data.orders = updatedTable.orders;
         this.data.available = false; // Marcamos la mesa como ocupada
         this.canPrint = false; // 🔴 Deshabilitamos el botón de imprimir
@@ -242,6 +263,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
           this.gestionService.saveLog(logMessage);
       },
       (error) => {
+        this.saving = false;
         printWin.close();
         console.error("Error al actualizar la mesa:", error);
         alert(this.serverMessage(error, 'Ocurrió un error al actualizar la mesa antes de imprimir.'));
@@ -303,6 +325,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
       this.selectedItems[index].quantity = (this.selectedItems[index].quantity ?? 0) + (qty ?? 1);
     }
 
+    this.batchId = ''; // cambió lo seleccionado: es un envío distinto
     // Marcar el botón como "agregado" en el objeto auxiliar
     this.addedItems[menu._id] = true;
 
@@ -328,6 +351,7 @@ updateQuantity(menu: MenuItem, event: Event): void {
     if (index > -1) {
       this.selectedItems.splice(index, 1);
     }
+    this.batchId = '';
 
     // Actualizar el estado del botón de imprimir
     this.canPrint = this.selectedItems.length > 0;

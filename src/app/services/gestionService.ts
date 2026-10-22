@@ -158,7 +158,8 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
   }
 
   // 📌 Agregar ítems a la mesa
-  addItemsToTable(tableId: string, items: MenuItem[]): Observable<Table> {
+  // requestId: identifica este envío; si el servidor lo recibe repetido, carga los platos una sola vez
+  addItemsToTable(tableId: string, items: MenuItem[], requestId?: string): Observable<Table> {
     const formattedItems = items.map(item => ({
       id: item._id,
       quantity: item.quantity || 1,
@@ -168,7 +169,7 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
       modifiers: (item.selectedModifiers ?? []).map(m => m.optionId)
     }));
 
-    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems }).pipe(
+    return this.http.put<Table>(`${this.apiUrl}/tables/${tableId}/add-items`, { items: formattedItems, ...(requestId ? { requestId } : {}) }).pipe(
       map((table: Table) => {
         table.available = table.orders.length === 0;
         return table;
