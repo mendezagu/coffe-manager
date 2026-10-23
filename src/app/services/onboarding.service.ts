@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
@@ -51,6 +51,11 @@ export class OnboardingService {
   private pending = new BehaviorSubject<boolean>(false);
   readonly setupPending$ = this.pending.asObservable();
 
+  // Emite cada vez que se consulta el estado, con el resultado real (a diferencia de setupPending$, que arranca en false
+  // antes de saber nada): sirve para apagar ayudas de primeros pasos cuando el negocio ya terminó de configurarse
+  private loaded = new Subject<boolean>();
+  readonly setupLoaded$ = this.loaded.asObservable();
+
   // Falta el menú o las mesas (para el administrador; para el resto es siempre false)
   private basics = new BehaviorSubject<boolean>(false);
   readonly basicsPending$ = this.basics.asObservable();
@@ -94,6 +99,7 @@ export class OnboardingService {
     this.inflight = this.http.get<OnboardingStatus>(`${this.url}/status`).pipe(
       tap((s) => {
         this.cache = { at: Date.now(), value: s };
+        this.loaded.next(isSetupPending(s.counts));
         this.knownDone = s.done;
         this.pending.next(isSetupPending(s.counts));
         this.basics.next(isBasicsPending(s.counts));

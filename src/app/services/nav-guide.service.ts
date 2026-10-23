@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { OnboardingService } from './onboarding.service';
+import { UserService } from './user.service';
 
 export interface NavInfo {
   title: string;
@@ -45,8 +46,17 @@ export class NavGuideService {
   private active = false;
   private seen = new Set<string>();
 
-  constructor(onboarding: OnboardingService) {
+  constructor(onboarding: OnboardingService, private users: UserService) {
     this.load();
+    // Cuando el negocio ya terminó los primeros pasos, las ayudas y los resaltados se apagan (antes quedaban para siempre
+    // en los dispositivos donde alguna vez se había visto el negocio a medio configurar)
+    onboarding.setupLoaded$.subscribe((pending) => {
+      if (!pending && this.active) {
+        this.active = false;
+        this.seen.clear();
+        this.save();
+      }
+    });
     onboarding.setupPending$.subscribe((pending) => {
       if (pending && !this.active) {
         this.active = true;
@@ -55,13 +65,18 @@ export class NavGuideService {
     });
   }
 
+  // Las ayudas de primeros pasos son para quien configura el negocio (administrador), no para cajeros o mozos
+  private get forAdmin(): boolean {
+    return this.users.currentRole() === 'admin';
+  }
+
   isNew(key: string): boolean {
-    return this.active && !this.seen.has(key);
+    return this.active && this.forAdmin && !this.seen.has(key);
   }
 
   // El botón de ayuda se queda aunque ya se haya entrado a la sección (solo se apaga el resaltado de "nuevo")
   hasHelp(key: string): boolean {
-    return this.active && key in this.info;
+    return this.active && this.forAdmin && key in this.info;
   }
 
   markSeen(key: string) {
