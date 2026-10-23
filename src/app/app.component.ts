@@ -8,7 +8,10 @@ import { CashService } from './services/cash.service';
 import { InventoryService, InventorySummary } from './services/inventory.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, interval } from 'rxjs';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BUILD_INFO } from './build-info';
 import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
 import { QrCall, QrRequest, QrService } from './services/qr.service';
@@ -58,7 +61,9 @@ export class AppComponent {
     private dialog: MatDialog,
     public onboarding: OnboardingService,
     public nav: NavGuideService,
-    public theme: ThemeService
+    public theme: ThemeService,
+    private swUpdate: SwUpdate,
+    private snackBar: MatSnackBar
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
@@ -176,7 +181,37 @@ export class AppComponent {
     this.inventory.summary().subscribe({ next: (s) => (this.stock = s), error: () => {} });
   }
 
+  // Versión nueva de la app: sin esto, una tablet o PC que queda abierta (o instalada) sigue días con la versión vieja,
+  // con sus errores, y distintos dispositivos del mismo local terminan usando versiones distintas.
+  updateReady = false;
+  showUpdateBar = false; // barra fija con el aviso de versión nueva (si el aviso de abajo quedó tapado)
+  // Versión de esta copia de la app (commit y fecha de compilación), visible en el menú lateral
+  readonly build = BUILD_INFO;
+
+  applyUpdate() {
+    this.swUpdate.activateUpdate().catch(() => undefined).then(() => document.location.reload());
+  }
+
+  private watchUpdates() {
+    if (!this.swUpdate.isEnabled) return;
+    this.swUpdate.versionUpdates.pipe(filter((e): e is VersionReadyEvent => e.type === 'VERSION_READY')).subscribe(() => {
+      this.updateReady = true;
+      const ref = this.snackBar.open('Hay una versión nueva de Tavolapp.', 'Actualizar');
+      ref.onAction().subscribe(() => this.applyUpdate());
+      // Si otro aviso lo tapa (o se cierra sin tocar «Actualizar»), queda una barra fija arriba hasta que se actualice
+      ref.afterDismissed().subscribe(({ dismissedByAction }) => {
+        if (!dismissedByAction && this.updateReady) this.showUpdateBar = true;
+      });
+    });
+    this.swUpdate.unrecoverable.subscribe(() => document.location.reload());
+    // Buscar una versión nueva al abrir y cada 5 minutos (si no, el navegador puede tardar horas en enterarse)
+    const check = () => this.swUpdate.checkForUpdate().catch(() => false);
+    check();
+    interval(5 * 60_000).subscribe(check);
+  }
+
   ngOnInit() {
+    this.watchUpdates();
     this.qr.arrivals$.subscribe((a) => this.pushQrAlerts(a));
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
@@ -209,6 +244,11 @@ export class AppComponent {
     this.syncTheme();
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       this.publicPage = isPublicPath(e.urlAfterRedirects);
+      // Con una versión nueva lista, el próximo cambio de pantalla recarga la app: es un momento seguro (no corta un pedido)
+      if (this.updateReady) {
+        this.applyUpdate();
+        return;
+      }
       this.syncTheme();
       if (this.isAdminRole && !this.publicPage) this.onboarding.refreshPending();
       this.nav.visited(e.urlAfterRedirects);

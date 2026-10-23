@@ -8,10 +8,18 @@
           <p class="page-sub">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
         </div>
       </div>
-      <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
-        <input type="checkbox" [(ngModel)]="showTables" class="accent-[#1b2822] w-4 h-4" />
-        Ver como tablas
-      </label>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Tipo de gráfico">
+          <button type="button" (click)="setChartMode('bar')" class="px-2.5 py-1 rounded-md font-medium"
+            [ngClass]="chartMode === 'bar' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="chartMode === 'bar'">Barras</button>
+          <button type="button" (click)="setChartMode('pie')" class="px-2.5 py-1 rounded-md font-medium"
+            [ngClass]="chartMode === 'pie' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="chartMode === 'pie'">Torta</button>
+        </div>
+        <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
+          <input type="checkbox" [(ngModel)]="showTables" class="accent-[#1b2822] w-4 h-4" />
+          Ver como tablas
+        </label>
+      </div>
       <div class="flex w-full flex-wrap items-center gap-2">
       <div class="inline-flex flex-wrap p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Rango de fechas">
         <button *ngFor="let p of presets" type="button" (click)="selectPreset(p.key)"
@@ -110,8 +118,10 @@
           </div>
         </section>
 
+        <!-- Rankings en dos columnas: cada tarjeta ocupa su propio alto y las columnas se reparten solas -->
+        <div class="lg:col-span-2 lg:columns-2 lg:gap-x-4">
         <!-- Platos más vendidos -->
-        <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
+        <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 class="font-bold text-sage-800">Platos más vendidos</h2>
             <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Ordenar platos por">
@@ -124,7 +134,7 @@
             </div>
           </div>
           <p *ngIf="report.items.length === 0" class="text-sm text-sage-500 py-8 text-center">Todavía no hay ventas con detalle de platos en este rango.</p>
-          <div class="relative min-w-0" [hidden]="showTables || report.items.length === 0" [style.height.px]="topItems.length * 34 + 50"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
+          <div class="relative min-w-0" [hidden]="showTables || report.items.length === 0" [style.height.px]="chartHeight(topItems.length)"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
           <div *ngIf="showTables && report.items.length" class="max-h-80 overflow-y-auto">
             <table class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th><th *ngIf="hasCosts" class="py-1.5 text-right">Ganancia</th></tr></thead>
@@ -135,11 +145,11 @@
           </div>
         </section>
 
-        <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4">
+
           <!-- Ventas por mozo -->
-          <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
+          <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
-            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="report.byWaiter.length * 34 + 50"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
+            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byWaiter.length)"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Propinas</th><th *ngIf="showCommission" class="py-1.5 text-right">Comisión</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
@@ -149,7 +159,7 @@
           </section>
 
           <!-- Comisión de cada mozo -->
-          <section *ngIf="showCommission" class="min-w-0 bg-white rounded-card shadow-soft p-4" data-testid="commission">
+          <section *ngIf="showCommission" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4" data-testid="commission">
             <h2 class="font-bold text-sage-800 mb-1">Comisión por mozo</h2>
             <p class="text-xs text-sage-500 mb-3">Lo vendido en las mesas que atendió cada uno por el porcentaje de comisión de cada venta.</p>
             <ul class="m-0 list-none divide-y divide-sage-100 p-0">
@@ -165,13 +175,26 @@
           </section>
 
           <!-- Método de pago -->
-          <section class="min-w-0 bg-white rounded-card shadow-soft p-4">
+          <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-3">Método de pago</h2>
-            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="report.byPayment.length * 34 + 50"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
+            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byPayment.length)"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
               <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Método</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let p of report.byPayment"><td class="py-1.5">{{ paymentLabel(p.method) }}</td><td class="py-1.5 text-right">{{ p.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ p.totalAmount | money }}</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <!-- Mesas más ocupadas -->
+          <section *ngIf="report.byTable?.length" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-1">Mesas más ocupadas</h2>
+            <p class="text-xs text-sage-500 mb-3">Cuántas veces se cobró cada mesa en el período (las 10 primeras).</p>
+            <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byTable.length)"><canvas #tablesChart aria-label="Gráfico de las mesas más ocupadas"></canvas></div>
+            <table *ngIf="showTables" class="w-full text-sm">
+              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mesa</th><th class="py-1.5 text-right">Veces cobrada</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <tbody class="divide-y divide-sage-100">
+                <tr *ngFor="let t of report.byTable"><td class="py-1.5">{{ t.name }}</td><td class="py-1.5 text-right">{{ t.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ t.totalAmount | money }}</td></tr>
               </tbody>
             </table>
           </section>
@@ -217,7 +240,9 @@
       </section>
     </ng-container>
 
+    <!-- «Hoteles aliados» (descuento y pausa de cada alianza): oculto por ahora. Para volver a mostrarlo, descomentar la línea.
     <app-hotel-partnerships></app-hotel-partnerships>
+    -->
 
   </div>
   </div>

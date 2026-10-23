@@ -128,12 +128,23 @@
       <mat-icon fontIcon="logout"></mat-icon>
       Cerrar sesión
     </button>
+
+    <!-- Versión de esta copia de la app: sirve para comprobar de un vistazo si un equipo está actualizado -->
+    <div *ngIf="isLoggedIn" class="mt-2 text-center text-[11px] leading-tight text-sage-500">
+      <span [attr.title]="'Commit ' + build.commit">Versión {{ build.version }}<ng-container *ngIf="build.builtAt"> · {{ build.builtAt | date: 'dd/MM/yyyy HH:mm' }}</ng-container></span>
+      <button *ngIf="updateReady" type="button" (click)="applyUpdate()" class="mt-1 block w-full bg-transparent font-bold text-cafe-green-700 underline">Hay una versión nueva · Actualizar</button>
+    </div>
   </mat-drawer>
 
   <mat-drawer-content>
 
     <!-- Encabezado: solo con sesión iniciada -->
     <div *ngIf="isLoggedIn && !publicPage" class="sticky top-0 z-10">
+      <!-- Versión nueva lista: queda fija hasta que se actualiza (no la tapa ningún otro aviso) -->
+      <div *ngIf="showUpdateBar" role="status" class="flex items-center justify-between gap-3 bg-cafe-green-700 px-4 py-2 text-sm font-medium text-white">
+        <span>Hay una versión nueva de Tavolapp.</span>
+        <button type="button" (click)="applyUpdate()" class="rounded-lg bg-white px-3 py-1 text-xs font-bold text-cafe-green-800">Actualizar</button>
+      </div>
       <mat-toolbar class="custom-toolbar d-flex justify-content-between align-items-center">
 
         <!-- Izquierda: menú y marca -->

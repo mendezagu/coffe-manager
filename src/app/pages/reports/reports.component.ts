@@ -14,6 +14,9 @@ const isDark = () => document.documentElement.classList.contains('dark');
 const inkColor = () => (isDark() ? '#b5bac1' : '#55655b'); // sage-600
 const gridColor = () => (isDark() ? '#35373c' : '#e0e7dc'); // sage-200
 
+// Colores de las porciones de la torta: la gama de la marca y algunos tonos de apoyo bien distinguibles
+const PIE_COLORS = ['#1d5b3e', '#c98f3a', '#3f8f67', '#8a2a1c', '#7bbf9a', '#e2b66b', '#c9695a', '#55655b', '#b9dcc7', '#a7b4ab'];
+
 const PAYMENT_LABELS: Record<string, string> = {
   efectivo: 'Efectivo',
   transferencia: 'Transferencia',
@@ -30,6 +33,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   @ViewChild('itemsChart') itemsRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('waiterChart') waiterRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('paymentChart') paymentRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('tablesChart') tablesRef?: ElementRef<HTMLCanvasElement>;
 
   presets: { key: Preset; label: string }[] = [
     { key: 'today', label: 'Hoy' },
@@ -63,6 +67,33 @@ export class ReportsComponent implements OnInit, OnDestroy {
   itemsBy: 'amount' | 'quantity' | 'profit' = 'amount';
 
   private charts: Chart[] = [];
+
+  // Cómo se dibujan los rankings (platos, mozos, métodos de pago, mesas): barras o torta. Se recuerda en este dispositivo.
+  chartMode: 'bar' | 'pie' = this.readChartMode();
+
+  setChartMode(mode: 'bar' | 'pie') {
+    this.chartMode = mode;
+    try {
+      localStorage.setItem('reports_chart_mode', mode);
+    } catch {
+      /* sin almacenamiento: vale hasta cerrar la pantalla */
+    }
+    this.cdr.detectChanges(); // cambia la altura de las tarjetas antes de dibujar
+    this.renderCharts();
+  }
+
+  // Alto del gráfico: las barras crecen con la cantidad de filas; la torta tiene un alto fijo
+  chartHeight(rows: number): number {
+    return this.chartMode === 'pie' ? 300 : rows * 34 + 50;
+  }
+
+  private readChartMode(): 'bar' | 'pie' {
+    try {
+      return localStorage.getItem('reports_chart_mode') === 'pie' ? 'pie' : 'bar';
+    } catch {
+      return 'bar';
+    }
+  }
 
   constructor(private reports: ReportsService, public settings: SettingsService, private cdr: ChangeDetectorRef) {}
 
@@ -175,6 +206,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
       horizontal: true,
       afterLabel: (i) => `${r.byPayment[i].salesCount} ${r.byPayment[i].salesCount === 1 ? 'venta' : 'ventas'}`,
     });
+
+    // Cuántas veces se cobró cada mesa (las 10 más usadas)
+    this.bar(this.tablesRef, (r.byTable ?? []).map((t) => t.name), (r.byTable ?? []).map((t) => t.salesCount), 'Veces cobrada', (v) => String(v), {
+      horizontal: true,
+      afterLabel: (i) => `Vendió ${money(r.byTable[i].totalAmount)}`,
+    });
   }
 
   private bar(
@@ -188,6 +225,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const ctx = ref?.nativeElement.getContext('2d');
     if (!ctx) return;
     const horizontal = opts.horizontal;
+    // Los rankings (barras horizontales) pueden verse como torta; ventas por día siempre es de barras
+    if (horizontal && this.chartMode === 'pie') {
+      this.pie(ctx, labels, data, seriesName, format, opts.afterLabel);
+      return;
+    }
     const valueAxis = {
       beginAtZero: true,
       grid: { color: gridColor() },
@@ -227,6 +269,40 @@ export class ReportsComponent implements OnInit, OnDestroy {
             },
           },
           scales: horizontal ? { x: valueAxis, y: labelAxis } : { x: labelAxis, y: valueAxis },
+        },
+      }),
+    );
+  }
+
+  private pie(
+    ctx: CanvasRenderingContext2D,
+    labels: string[],
+    data: number[],
+    seriesName: string,
+    format: (v: number) => string,
+    afterLabel: (index: number) => string,
+  ) {
+    const total = data.reduce((a, b) => a + Math.max(0, b), 0) || 1;
+    this.charts.push(
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{ data, backgroundColor: PIE_COLORS, borderColor: isDark() ? '#2b2d31' : '#ffffff', borderWidth: 2 }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '52%',
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: inkColor(), boxWidth: 10, boxHeight: 10, padding: 10, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: (c) => `${c.label}: ${format(Number(c.parsed))} (${Math.round((Math.max(0, Number(c.parsed)) / total) * 100)} %)`,
+                afterLabel: (c) => afterLabel(c.dataIndex),
+              },
+            },
+          },
         },
       }),
     );
