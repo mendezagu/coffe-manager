@@ -5,15 +5,5 @@
 export const environment = {
   production: false,
   // Dirección de la API (backend NestJS) en desarrollo: la que corre en tu compu
-  apiUrl: 'http://localhost:3000/api',
-  // Firebase: solo lo que todavía usa la app (se está retirando)
-  firebase: {
-    apiKey: "AIzaSyBuYr748J1j9TCFcjUpuznXnk_4Jo8pPiQ",
-    authDomain: "nuovo-caffe.firebaseapp.com",
-    projectId: "nuovo-caffe",
-    storageBucket: "nuovo-caffe.appspot.com",
-    messagingSenderId: "1013495355496",
-    appId: "1:1013495355496:web:fdaaf0fb143f3f2c0303dd",
-    measurementId: "G-L1Q71BEWLK"
-  }
+  apiUrl: 'http://localhost:3000/api'
 };

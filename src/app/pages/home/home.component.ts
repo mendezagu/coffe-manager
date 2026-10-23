@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MenuItem } from 'src/app/models/coffe.service'; // solo el tipo: el servicio viejo de Firestore ya no se usa
+import { MenuItem } from 'src/app/models/coffe.models';
 import { GestionService, Table } from 'src/app/services/gestionService';
 import { PrintService } from 'src/app/services/printService';
 import { OnboardingService, OnboardingStatus, isBasicsPending } from 'src/app/services/onboarding.service';

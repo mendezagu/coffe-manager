@@ -34,8 +34,6 @@ import { LoginComponent } from './pages/login/login.component';
 import { MatTableModule } from '@angular/material/table';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
-import { environment } from 'src/environments/environment';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { UsersComponent } from './pages/users/users.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -53,13 +51,9 @@ import { PaymentPanelComponent } from './components/payment-panel/payment-panel.
 import { ModifierPickerDialogComponent } from './components/modifier-picker-dialog/modifier-picker-dialog.component';
 import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
 import { QrCodesComponent } from './pages/qr-codes/qr-codes.component';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { AngularFireModule } from '@angular/fire/compat';
-import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
 import { AppLoaderComponent } from './components/app-loader/app-loader.component';
@@ -108,7 +102,6 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     MoneyPipe,
     KitchenComponent,
     AdminPanelComponent,
-    StadisticsComponent,
     BalanceComponent,
     LogsComponent,
     QrOrderComponent,
@@ -155,11 +148,6 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     MatProgressSpinnerModule,
     
     HttpClientModule,
-    AngularFirestoreModule,
-    AngularFireModule.initializeApp(environment.firebase),
-
-    provideFirebaseApp(()=> initializeApp(environment.firebase)),
-    provideFirestore(() => getFirestore()),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable

@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
-import { StadisticsComponent } from './pages/stadistics/stadistics.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
@@ -37,7 +36,6 @@ const routes: Routes = [
   { path: 'reservations', component: ReservationsComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
   { path: 'settings', component: SettingsComponent, canActivate: [roleGuard('admin')] },
-  { path: 'stadistic', component: StadisticsComponent, canActivate: [roleGuard('admin')] },
   { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin')] },
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
   // Pantalla pública del cliente (QR de la mesa): sin sesión; lo único que da acceso es el código del QR

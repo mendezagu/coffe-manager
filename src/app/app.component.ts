@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CoffeService, Table } from './models/coffe.service';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
 import { AppUser, ROLE_LABELS, UserService } from './services/user.service';

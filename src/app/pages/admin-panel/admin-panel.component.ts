@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Observable } from 'rxjs';
 import { SettingsService } from 'src/app/services/settings.service';
-import { CoffeService, MenuItem} from 'src/app/models/coffe.service';
+import { MenuItem } from 'src/app/models/coffe.models';
 import { GestionService } from 'src/app/services/gestionService';
 import { AppUser, UserService } from 'src/app/services/user.service';
 import { Waiter } from 'src/app/services/gestionService';
