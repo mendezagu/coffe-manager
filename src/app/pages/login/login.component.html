@@ -354,71 +354,94 @@
   <div class="relative z-10 flex min-h-[calc(100vh-84px)] w-full items-center justify-center px-4 py-10">
     <div class="w-full max-w-[400px] bg-white rounded-card shadow-soft-lg p-6 sm:p-8">
 
-      <!-- Logo -->
-      <div class="flex justify-center mb-4" *ngIf="(settings.settings$ | async)?.logoUrl as logo">
-        <img
-          class="w-20 h-20 rounded-full object-cover ring-4 ring-sage-100 shadow-md"
-          [src]="logo"
-          [alt]="(settings.settings$ | async)?.name"
-        />
-      </div>
+      <!-- PASO 1: ¿a qué local entrás? -->
+      <form *ngIf="step === 'local'" (ngSubmit)="checkCode()" class="w-full">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cafe-green-50 text-cafe-green-700">
+          <mat-icon class="!h-7 !w-7 !text-[28px]">storefront</mat-icon>
+        </div>
+        <h2 class="text-center text-2xl font-bold text-sage-900">¿A qué local entrás?</h2>
+        <p class="text-center text-sage-500 text-sm mt-1 mb-6">Escribí el código de tu restaurante.</p>
 
-      <!-- Título -->
-      <h2 class="text-center text-2xl font-bold text-sage-900">{{ (settings.settings$ | async)?.name }}</h2>
-      <p class="text-center text-sage-500 text-sm mt-1 mb-6">Bienvenido</p>
+        <p *ngIf="passwordChanged" role="status" class="mb-4 flex items-start gap-2 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm font-medium text-cafe-green-800">
+          <mat-icon class="!h-5 !w-5 flex-none !text-xl">check_circle</mat-icon>
+          <span>Contraseña actualizada. Ingresá con tu contraseña nueva.</span>
+        </p>
 
-      <p *ngIf="passwordChanged" role="status" class="mb-4 flex items-start gap-2 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm font-medium text-cafe-green-800">
-        <mat-icon class="!h-5 !w-5 flex-none !text-xl">check_circle</mat-icon>
-        <span>Contraseña actualizada. Ingresá con tu contraseña nueva.</span>
-      </p>
+        <div class="mb-3">
+          <label for="local-code" class="block text-xs font-bold text-sage-500 mb-1.5">Código del local</label>
+          <input id="local-code" type="text" [formControl]="codeControl" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+            placeholder="por ejemplo: mi-restaurante"
+            class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
+        </div>
 
-      <!-- Formulario -->
-      <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
+        <label class="mb-4 flex cursor-pointer select-none items-center gap-2 text-sm text-sage-600">
+          <input type="checkbox" [(ngModel)]="rememberLocal" [ngModelOptions]="{ standalone: true }" class="h-4 w-4 accent-[#1d5b3e]" />
+          Recordar este local en este dispositivo
+        </label>
+
+        <p *ngIf="codeError" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ codeError }}</p>
+
+        <button type="submit" [disabled]="codeControl.invalid || checkingCode"
+          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ checkingCode ? 'Buscando…' : 'Continuar' }}
+        </button>
+        <button type="button" (click)="skipCode()" class="mt-3 block w-full bg-transparent text-center text-sm font-bold text-cafe-green-700 underline">No sé mi código</button>
+      </form>
+
+      <!-- PASO 2: usuario y contraseña, con el local confirmado -->
+      <form *ngIf="step === 'credentials'" [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
+        <div *ngIf="!local" class="mb-5 text-center">
+          <h2 class="text-2xl font-bold text-sage-900">Ingresá con tu usuario</h2>
+          <p class="mt-1 text-sm text-sage-500">Sin código del local. Si tu usuario está en más de un local, te lo vamos a pedir.</p>
+          <button type="button" (click)="backToCode()" class="mt-2 bg-transparent text-xs font-bold text-cafe-green-700 underline">Tengo el código</button>
+        </div>
+        <div *ngIf="local" class="mb-5 flex items-center gap-3 rounded-xl border border-sage-200 bg-sage-50 p-3">
+          <img *ngIf="local.logoUrl; else noLogo" [src]="local.logoUrl" [alt]="local.name" class="h-12 w-12 flex-none rounded-full object-cover ring-2 ring-sage-100" />
+          <ng-template #noLogo>
+            <span class="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-cafe-green-50 text-cafe-green-700"><mat-icon>storefront</mat-icon></span>
+          </ng-template>
+          <div class="min-w-0 flex-1">
+            <p class="m-0 truncate text-base font-bold text-sage-900">{{ local.name }}</p>
+            <p class="m-0 truncate text-xs text-sage-500">{{ local.city || 'Código: ' + local.code }}</p>
+          </div>
+          <button type="button" (click)="changeLocal()" class="flex-none bg-transparent text-xs font-bold text-cafe-green-700 underline">Cambiar</button>
+        </div>
+
+        <p *ngIf="passwordChanged" role="status" class="mb-4 flex items-start gap-2 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm font-medium text-cafe-green-800">
+          <mat-icon class="!h-5 !w-5 flex-none !text-xl">check_circle</mat-icon>
+          <span>Contraseña actualizada. Ingresá con tu contraseña nueva.</span>
+        </p>
 
         <div class="mb-4">
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Email</label>
-          <input
-            type="email"
-            formControlName="email"
-            required
-            class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
-          />
+          <label for="login-user" class="block text-xs font-bold text-sage-500 mb-1.5">Usuario</label>
+          <input id="login-user" type="text" formControlName="email" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
+            class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
         </div>
 
         <div class="mb-6">
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña</label>
-          <input
-            type="password"
-            appPasswordToggle
-            formControlName="password"
-            required
-            class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all"
-          />
+          <label for="login-pass" class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña</label>
+          <input id="login-pass" type="password" appPasswordToggle formControlName="password" required autocomplete="current-password"
+            class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
         </div>
 
         <p *ngIf="error" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
 
-        <!-- Botón de Iniciar Sesión -->
-        <button
-          type="submit"
-          [disabled]="formLogin.invalid || loading"
-          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" [disabled]="formLogin.invalid || loading"
+          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
           {{ loading ? 'Ingresando…' : 'Ingresar' }}
         </button>
-
-        <!-- Dos casos distintos: el personal de un local que ya usa Tavolapp, y un local nuevo que quiere empezar -->
-        <div class="mt-5 border-t border-sage-100 pt-4 text-center">
-          <p class="m-0 text-xs text-sage-500">¿Sos parte del equipo de un local? Pedile tu usuario al administrador.</p>
-          <p class="m-0 mt-3 text-sm font-medium text-sage-800">¿Querés usar Tavolapp en tu local?</p>
-          <a href="https://tavolapp.app/#demo" target="_blank" rel="noopener"
-            class="mt-2 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-cafe-green-700 text-sm font-bold text-cafe-green-700 no-underline transition-colors hover:bg-cafe-green-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
-            Solicitar mi cuenta
-            <mat-icon class="!w-4 !h-4 !text-base">arrow_outward</mat-icon>
-          </a>
-        </div>
-
       </form>
+
+      <!-- Dos casos distintos: el personal de un local que ya usa Tavolapp, y un local nuevo que quiere empezar -->
+      <div class="mt-5 border-t border-sage-100 pt-4 text-center">
+        <p class="m-0 text-xs text-sage-500">¿Sos parte del equipo de un local? Pedile el código y tu usuario al administrador.</p>
+        <p class="m-0 mt-3 text-sm font-medium text-sage-800">¿Querés usar Tavolapp en tu local?</p>
+        <a href="https://tavolapp.app/#demo" target="_blank" rel="noopener"
+          class="mt-2 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-cafe-green-700 text-sm font-bold text-cafe-green-700 no-underline transition-colors hover:bg-cafe-green-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
+          Solicitar mi cuenta
+          <mat-icon class="!w-4 !h-4 !text-base">arrow_outward</mat-icon>
+        </a>
+      </div>
     </div>
   </div>
 </div>

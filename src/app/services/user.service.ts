@@ -6,6 +6,14 @@ import { environment } from 'src/environments/environment';
 
 export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'bar';
 
+// Datos públicos de un local, para confirmar el código al ingresar
+export interface LocalInfo {
+  code: string;
+  name: string;
+  city: string;
+  logoUrl: string | null;
+}
+
 export interface AppUser {
   id: string;
   email: string;
@@ -53,9 +61,15 @@ export class UserService {
     }
   }
 
-  login({ email, password }: { email: string; password: string }): Observable<AppUser> {
+  // Nombre y logo de un local a partir de su código (para confirmar que se escribió bien antes de pedir la clave)
+  localInfo(code: string): Observable<LocalInfo> {
+    return this.http.get<LocalInfo>(`${this.baseUrl}/auth/local/${encodeURIComponent(code)}`);
+  }
+
+  // `email` es el usuario del local (puede ser un email); `code` es el código del local
+  login({ email, password, code }: { email: string; password: string; code?: string }): Observable<AppUser> {
     return this.http
-      .post<{ accessToken: string; user: any }>(`${this.baseUrl}/auth/login`, { email, password })
+      .post<{ accessToken: string; user: any }>(`${this.baseUrl}/auth/login`, { email, password, ...(code ? { code } : {}) })
       .pipe(
         tap((res) => this.storeToken(res.accessToken)),
         map((res) => fromApi(res.user)),

@@ -9,6 +9,8 @@ import { UserService } from './user.service';
 export interface TenantSettings {
   id: string;
   name: string;
+  // Código con el que el personal ingresa a este local (junto a su usuario)
+  loginCode?: string;
   legalName: string;
   taxIdLabel: string;
   taxId: string;

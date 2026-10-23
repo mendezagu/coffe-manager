@@ -32,6 +32,10 @@
       />
       <span class="block mt-3 text-sage-800 font-bold text-lg leading-tight break-words max-w-full">{{ (settings.settings$ | async)?.name }}</span>
       <span *ngIf="user$ | async as user" class="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
+      <!-- Código del local: cualquier persona del equipo lo ve acá, por si tiene que ingresar en otro dispositivo -->
+      <p *ngIf="(settings.settings$ | async)?.loginCode as code" class="m-0 mt-2 text-[11px] leading-tight text-sage-500">
+        Código del local: <strong class="font-mono text-sage-700 select-all">{{ code }}</strong>
+      </p>
     </div>
 
     <ng-container *ngIf="role$ | async as role">

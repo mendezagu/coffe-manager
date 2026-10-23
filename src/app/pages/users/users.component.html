@@ -1,4 +1,32 @@
 <div>
+    <!-- Código del local: con él y su usuario, el personal ingresa -->
+    <section *ngIf="loginCode" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-cafe-green-200 bg-cafe-green-50 p-4" aria-label="Código del local">
+      <div class="flex min-w-0 items-center gap-3">
+        <span class="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-green-700 text-white"><mat-icon>storefront</mat-icon></span>
+        <div class="min-w-0">
+          <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-cafe-green-800">El código de tu local</p>
+          <ng-container *ngIf="!editingCode; else editCode">
+            <p class="m-0 truncate font-mono text-2xl font-bold text-cafe-green-900">{{ loginCode }}</p>
+          </ng-container>
+          <ng-template #editCode>
+            <input type="text" [(ngModel)]="codeDraft" name="codeDraft" maxlength="40" autocomplete="off" autocapitalize="none" spellcheck="false" (keyup.enter)="saveCode()"
+              class="mt-1 w-56 max-w-full rounded-lg border border-cafe-green-200 bg-white px-3 py-1.5 font-mono text-base text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+          </ng-template>
+          <p class="m-0 mt-1 text-xs text-cafe-green-800">Tu personal ingresa con este código y su usuario.</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <ng-container *ngIf="!editingCode; else editButtons">
+          <button type="button" (click)="copyCode()" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-cafe-green-200 bg-white px-3 text-sm font-bold text-cafe-green-800"><mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar</button>
+          <button type="button" (click)="startEditCode()" class="inline-flex h-10 items-center rounded-lg border border-cafe-green-200 bg-white px-3 text-sm font-bold text-cafe-green-800">Cambiar</button>
+        </ng-container>
+        <ng-template #editButtons>
+          <button type="button" (click)="saveCode()" [disabled]="savingCode" class="inline-flex h-10 items-center rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white disabled:opacity-50">{{ savingCode ? 'Guardando…' : 'Guardar' }}</button>
+          <button type="button" (click)="editingCode = false" class="inline-flex h-10 items-center rounded-lg border border-cafe-green-200 bg-white px-3 text-sm font-bold text-cafe-green-800">Cancelar</button>
+        </ng-template>
+      </div>
+    </section>
+
     <!-- Alta -->
     <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-card p-5 mb-6 grid gap-3 sm:grid-cols-2">
       <h2 class="sm:col-span-2 font-bold text-sage-800">Nuevo usuario</h2>
@@ -10,8 +38,8 @@
       </label>
 
       <label class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Email</span>
-        <input name="email" type="email" [(ngModel)]="form.email" required email
+        <span class="block text-xs font-bold text-sage-500 mb-1.5">Usuario</span>
+        <input name="email" type="text" [(ngModel)]="form.email" required pattern="[A-Za-z0-9._@+\-]{3,60}" placeholder="por ejemplo: mozo1" autocomplete="off" autocapitalize="none" spellcheck="false"
           class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
 

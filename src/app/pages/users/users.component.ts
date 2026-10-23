@@ -27,7 +27,50 @@ export class UsersComponent implements OnInit {
   // Avisa al panel de administración que cambió la lista (para actualizar el contador de la tarjeta)
   @Output() changed = new EventEmitter<void>();
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar, private settings: SettingsService) {}
+  constructor(private userService: UserService, private snackBar: MatSnackBar, public settings: SettingsService) {}
+
+  // ---- Código del local ----
+  editingCode = false;
+  codeDraft = '';
+  savingCode = false;
+
+  get loginCode(): string {
+    return this.settings.value.loginCode ?? '';
+  }
+
+  copyCode() {
+    const code = this.loginCode;
+    if (!code) return;
+    const done = () => this.notify('Código copiado');
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code).then(done, done);
+    else done();
+  }
+
+  startEditCode() {
+    this.codeDraft = this.loginCode;
+    this.editingCode = true;
+  }
+
+  saveCode() {
+    const code = this.codeDraft.trim().toLowerCase();
+    if (!code || this.savingCode) return;
+    if (code === this.loginCode) {
+      this.editingCode = false;
+      return;
+    }
+    this.savingCode = true;
+    this.settings.update({ loginCode: code }).subscribe({
+      next: () => {
+        this.savingCode = false;
+        this.editingCode = false;
+        this.notify('Código actualizado. Avisale a tu personal: en cada dispositivo van a tener que escribirlo de nuevo.');
+      },
+      error: (err) => {
+        this.savingCode = false;
+        this.notify(this.errorMessage(err, 'No se pudo cambiar el código'));
+      },
+    });
+  }
 
   ngOnInit() {
     this.userService.getAuthState().subscribe((u) => (this.currentUserId = u?.id ?? null));
