@@ -367,7 +367,7 @@ export class TotalDialogComponent implements OnInit {
 
   printTicket(): void {
     // Un ticket con un pago que no cubre la cuenta mostraría importes que no se van a cobrar
-    if (this.payment && !this.payment.valid) return;
+    if (this.payment && !this.payment.printable) return;
     const tableName = this.tableName;
     const waiterName = this.waiterName;
     this.isTicketPrinted = true;

@@ -20,6 +20,8 @@ export interface PaymentValue {
   due: number; // cuenta + propina: lo que hay que cobrar en total
   payments: { method: string; amount: number; tendered?: number }[];
   valid: boolean;
+  printable: boolean; // el ticket se puede imprimir aunque todavía no se haya elegido el método
+  missingMethod: boolean; // hay un importe a cobrar sin método de pago elegido
   remaining: number; // lo que falta (>0) o sobra (<0) respecto de lo que hay que cobrar
   change: number; // vuelto total en efectivo
 }
@@ -39,7 +41,8 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   @Output() valueChange = new EventEmitter<PaymentValue>();
 
   methods = PAYMENT_METHODS;
-  rows: PayRow[] = [{ method: 'efectivo', amount: 0, tendered: null }];
+  // El método no viene elegido de antemano: quien cobra tiene que elegirlo a propósito ('' = sin elegir)
+  rows: PayRow[] = [{ method: '', amount: 0, tendered: null }];
 
   // Propina: ninguna, un porcentaje de la cuenta, o un monto libre
   tipMode: 'none' | 'pct' | 'custom' = 'none';
@@ -95,10 +98,8 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   // ---- filas de pago ----
 
   addRow() {
-    const used = new Set(this.rows.map((r) => r.method));
-    const method = this.methods.find((m) => !used.has(m.value))?.value ?? 'efectivo';
     this.splitN = 1;
-    this.rows.push({ method, amount: 0, tendered: null });
+    this.rows.push({ method: '', amount: 0, tendered: null });
     this.fillLast();
     this.emit();
   }
@@ -136,7 +137,7 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   setSplit(n: number) {
     const count = Math.max(1, Math.min(20, Math.floor(Number(n) || 1)));
     this.splitN = count;
-    this.rows = Array.from({ length: count }, (_, i) => this.rows[i] ?? { method: 'efectivo', amount: 0, tendered: null });
+    this.rows = Array.from({ length: count }, (_, i) => this.rows[i] ?? { method: '', amount: 0, tendered: null });
     this.rows.forEach((r) => (r.tendered = null));
     this.sync();
   }
@@ -150,6 +151,11 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   }
 
   // ---- cálculo ----
+
+  // Alguna fila con importe todavía no tiene método elegido
+  get missingMethod(): boolean {
+    return this.due > 0 && this.rows.some((r) => !r.method && round2(Number(r.amount) || 0) > 0);
+  }
 
   get paid(): number {
     return round2(this.rows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0));
@@ -201,7 +207,7 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
     const byMethod = new Map<string, { amount: number; tendered: number | null; anyTendered: boolean }>();
     for (const r of this.rows) {
       const amount = round2(Number(r.amount) || 0);
-      if (amount <= 0) continue;
+      if (amount <= 0 || !r.method) continue;
       const entry = byMethod.get(r.method) ?? { amount: 0, tendered: 0, anyTendered: false };
       entry.amount = round2(entry.amount + amount);
       if (r.method === 'efectivo' && r.tendered !== null && r.tendered !== undefined) {
@@ -221,14 +227,17 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
 
     const sum = round2(payments.reduce((s, p) => s + p.amount, 0));
     const due = this.due;
+    const missingMethod = this.missingMethod;
     const noShort = !this.rows.some((r) => this.cashShort(r));
-    const valid = noShort && (due === 0 ? payments.length === 0 || sum === 0 : payments.length > 0 && sum === due);
+    const valid = noShort && !missingMethod && (due === 0 ? payments.length === 0 || sum === 0 : payments.length > 0 && sum === due);
 
     const value: PaymentValue = {
       tip: this.tip,
       due,
       payments,
       valid,
+      printable: noShort && (valid || missingMethod),
+      missingMethod,
       remaining: round2(due - sum),
       change: round2(this.rows.reduce((s, r) => s + this.changeOf(r), 0)),
     };

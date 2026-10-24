@@ -39,10 +39,12 @@
 
     <div class="space-y-2">
       <div *ngFor="let row of rows; let i = index" class="p-2 bg-white border border-sage-200 rounded-lg">
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-end gap-2">
           <span *ngIf="splitN > 1" class="text-xs font-bold text-sage-500 w-full sm:w-auto">Persona {{ i + 1 }}</span>
           <select [(ngModel)]="row.method" (ngModelChange)="onMethodChange(row)" [attr.aria-label]="'Método de pago ' + (i + 1)"
-            class="flex-1 min-w-[130px] px-2 py-2 border border-sage-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+            [class.border-cafe-red-700]="!row.method && row.amount > 0" [class.border-sage-200]="!!row.method || !(row.amount > 0)"
+            class="flex-1 min-w-[130px] px-2 py-2 border rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+            <option value="" disabled>Elegí el método de pago</option>
             <option *ngFor="let m of methods" [value]="m.value">{{ m.label }}</option>
           </select>
           <label class="flex flex-col">
@@ -59,10 +61,10 @@
         </div>
 
         <!-- Efectivo: lo que entrega el cliente y el vuelto -->
-        <div *ngIf="row.method === 'efectivo'" class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          <label class="flex items-center gap-1.5 text-sage-600" title="Solo sirve para calcular el vuelto. No cambia el importe a cobrar.">
+        <div *ngIf="row.method === 'efectivo'" class="mt-2 pt-2 border-t border-sage-100 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+          <label class="flex items-center justify-between gap-3 text-sage-600 w-full sm:w-auto" title="Solo sirve para calcular el vuelto. No cambia el importe a cobrar.">
             El cliente entrega
-            <input type="number" min="0" step="any" [(ngModel)]="row.tendered" (ngModelChange)="onRowChange()" [attr.aria-label]="'Efectivo recibido ' + (i + 1)" placeholder="Para el vuelto"
+            <input type="number" min="0" step="any" [(ngModel)]="row.tendered" (ngModelChange)="onRowChange()" [attr.aria-label]="'Efectivo recibido ' + (i + 1)" placeholder="Monto"
               class="w-28 px-2 py-1.5 border border-sage-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
           </label>
           <span *ngIf="row.tendered !== null && !cashShort(row)" class="px-2 py-1 rounded-full bg-cafe-green-50 text-cafe-green-700 font-bold">
@@ -100,9 +102,10 @@
     </p>
 
     <!-- Estado del pago -->
+    <p *ngIf="missingMethod" role="alert" class="mt-2 mb-0 text-xs font-bold text-cafe-red-700">Elegí el método de pago para poder cobrar</p>
     <p *ngIf="remaining > 0.004" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-red-700">Falta cobrar {{ remaining | money }}</p>
     <p *ngIf="remaining < -0.004" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-red-700">Sobran {{ -remaining | money }}: los pagos superan el total</p>
-    <p *ngIf="remaining >= -0.004 && remaining <= 0.004 && due > 0" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-green-700">✓ El pago cubre el total</p>
+    <p *ngIf="remaining >= -0.004 && remaining <= 0.004 && due > 0 && !missingMethod" role="status" class="mt-2 mb-0 text-xs font-bold text-cafe-green-700">✓ El pago cubre el total</p>
   </div>
 
 </div>

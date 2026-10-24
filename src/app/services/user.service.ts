@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription, fromEvent, merge, timer } from 'rxjs';
+import { filter, map, tap, throttleTime } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 export type AppRole = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'bar';
@@ -54,6 +54,7 @@ export class UserService {
     // Si hay sesión guardada se revalida contra el servidor (rol actual, usuario activo).
     // Un 401 lo maneja el interceptor cerrando la sesión.
     if (this.getToken()) {
+      this.startKeepAlive();
       this.http.get<any>(`${this.baseUrl}/auth/me`).subscribe({
         next: (u) => this.setUser(fromApi(u)),
         error: () => {},
@@ -103,11 +104,13 @@ export class UserService {
   }
 
   // Cambia la contraseña del usuario con sesión (pide la actual). Después ya no se le exige el cambio.
-  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string; accessToken?: string }> {
     return this.http
-      .post<{ message: string }>(`${this.baseUrl}/auth/change-password`, { currentPassword, newPassword })
+      .post<{ message: string; accessToken?: string }>(`${this.baseUrl}/auth/change-password`, { currentPassword, newPassword })
       .pipe(
-        tap(() => {
+        tap((res) => {
+          // El servidor invalida las demás sesiones: esta sigue con el token nuevo
+          if (res.accessToken) this.storeToken(res.accessToken);
           const user = this.authState.value;
           if (user?.mustChangePassword) this.setUser({ ...user, mustChangePassword: false });
         }),
@@ -154,6 +157,61 @@ export class UserService {
       else localStorage.removeItem(USER_KEY);
     } catch {}
     this.authState.next(user);
+    if (user) this.startKeepAlive();
+    else this.stopKeepAlive();
+  }
+
+  // ---- Renovación de la sesión ----
+  // El token dura 12 horas desde que se pide. Se renueva solo si hay uso REAL: la persona tocó, escribió o volvió a la
+  // pantalla en los últimos 30 minutos. Así quien trabaja no se queda sin sesión a mitad del turno, pero un equipo
+  // abandonado (nadie lo toca) deja de renovarse y la sesión vence a las 12 horas de la última actividad.
+  // Excepción: las pantallas de cocina y barra, que se quedan mostrando pedidos sin que nadie las toque.
+  private keepAlive?: Subscription;
+  private lastActivity = Date.now();
+  private activityBound = false;
+
+  private bindActivity() {
+    if (this.activityBound) return;
+    this.activityBound = true;
+    const mark = () => (this.lastActivity = Date.now());
+    for (const ev of ['pointerdown', 'keydown', 'touchstart', 'wheel']) window.addEventListener(ev, mark, { passive: true });
+    // Volver a la pestaña (desbloquear la notebook, abrir la app) cuenta como presencia
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) mark();
+    });
+  }
+
+  private startKeepAlive() {
+    if (this.keepAlive && !this.keepAlive.closed) return;
+    this.bindActivity();
+    this.keepAlive = merge(
+      timer(60_000, 20 * 60_000),
+      fromEvent(document, 'visibilitychange').pipe(filter(() => !document.hidden)),
+      fromEvent(window, 'online'),
+    )
+      .pipe(throttleTime(60_000))
+      .subscribe(() => this.renewToken());
+  }
+
+  private stopKeepAlive() {
+    this.keepAlive?.unsubscribe();
+    this.keepAlive = undefined;
+  }
+
+  // ¿Hay alguien usando este equipo? (o es una pantalla que trabaja sola, como cocina o barra)
+  private inUse(): boolean {
+    const role = this.authState.value?.role;
+    if (role === 'kitchen' || role === 'bar') return true;
+    return Date.now() - this.lastActivity < 30 * 60_000;
+  }
+
+  private renewToken() {
+    if (!this.getToken() || !this.inUse()) return;
+    // Si el token ya venció, el servidor responde 401 y el interceptor cierra la sesión (es lo esperado)
+    this.http.post<{ accessToken: string }>(`/auth/refresh`, {}).subscribe({
+      next: (r) => this.storeToken(r.accessToken),
+      error: () => {},
+    });
   }
 
   private storeToken(token: string | null) {
