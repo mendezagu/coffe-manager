@@ -10,6 +10,7 @@ export interface NavInfo {
 // Qué hace cada sección del menú lateral, en una o dos frases (se ve al tocar la ayuda de un ítem nuevo)
 export const NAV_INFO: Record<string, NavInfo> = {
   reservations: { title: 'Reservas', text: 'Las reservas del día y la lista de espera. Tus clientes reservan desde una página propia y vos las ves acá.' },
+  counter: { title: 'Mostrador', text: 'Vendé y cobrá al instante, sin mesa: ideal para cafés al paso y pedidos para llevar.' },
   caja: { title: 'Caja', text: 'Abrila al empezar el día con el efectivo inicial y cerrala al terminar. Sin caja abierta no se puede cobrar.' },
   kitchen: { title: 'Cocina', text: 'Pantalla donde la cocina ve los pedidos y los marca como en preparación o listos.' },
   balance: { title: 'Balance', text: 'Lo que vendiste: totales por día, por turno y por forma de pago.' },
@@ -22,6 +23,7 @@ export const NAV_INFO: Record<string, NavInfo> = {
 
 // Ruta → ítem del menú, para dar por visto un ítem cuando se entra a su pantalla
 const ROUTES: [string, string][] = [
+  ['/counter', 'counter'],
   ['/cash', 'caja'],
   ['/reservations', 'reservations'],
   ['/kitchen', 'kitchen'],

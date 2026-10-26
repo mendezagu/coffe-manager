@@ -55,6 +55,11 @@
         </ng-container>
       </ng-container>
 
+      <!-- Mostrador: vender y cobrar sin mesa -->
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'counter', link: '/counter', icon: 'local_cafe', label: 'Mostrador' }"></ng-container>
+      </ng-container>
+
       <!-- Caja se habilita en cuanto hay menú, mesas y mozo: hace falta para completar los primeros pasos -->
       <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
         <ng-container *ngTemplateOutlet="navItem; context: { key: 'caja', link: '/cash', icon: 'point_of_sale', label: 'Caja' }"></ng-container>

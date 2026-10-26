@@ -43,6 +43,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
     { key: 'custom', label: 'Otro rango' },
   ];
   preset: Preset = '30d';
+  // qué ventas se miran: todas, solo las de mesas o solo las del mostrador
+  source: '' | 'mesa' | 'mostrador' = '';
+  sources: { key: '' | 'mesa' | 'mostrador'; label: string }[] = [
+    { key: '', label: 'Todo' },
+    { key: 'mesa', label: 'Mesas' },
+    { key: 'mostrador', label: 'Mostrador' },
+  ];
   from = '';
   to = '';
 
@@ -117,6 +124,33 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.load();
   }
 
+  selectSource(source: '' | 'mesa' | 'mostrador') {
+    this.source = source;
+    this.load();
+  }
+
+  // Horas con ventas (desde la primera hasta la última) y su altura relativa al pico.
+  // Se calcula una sola vez al llegar el reporte: un getter armaría objetos nuevos en cada ciclo de la pantalla.
+  hourBars: { hour: number; amount: number; count: number; pct: number; peak: boolean }[] = [];
+
+  private buildHourBars(): { hour: number; amount: number; count: number; pct: number; peak: boolean }[] {
+    const rows = this.report?.byHour ?? [];
+    const withSales = rows.filter((h) => h.salesCount > 0);
+    if (!withSales.length) return [];
+    const first = withSales[0].hour;
+    const last = withSales[withSales.length - 1].hour;
+    const max = Math.max(...withSales.map((h) => h.totalAmount));
+    return rows
+      .filter((h) => h.hour >= first && h.hour <= last)
+      .map((h) => ({ hour: h.hour, amount: h.totalAmount, count: h.salesCount, pct: max > 0 ? Math.round((h.totalAmount / max) * 100) : 0, peak: h.totalAmount === max }));
+  }
+
+  get counterShare(): number {
+    const s = this.report?.bySource;
+    const total = (s?.mesa.totalAmount ?? 0) + (s?.mostrador.totalAmount ?? 0);
+    return total > 0 ? Math.round(((s?.mostrador.totalAmount ?? 0) / total) * 100) : 0;
+  }
+
   applyCustom() {
     if (this.from && this.to) this.load();
   }
@@ -129,9 +163,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
     if (this.rangeInvalid) return;
     this.loading = true;
     this.error = '';
-    this.reports.sales(this.from, this.to).subscribe({
+    this.reports.sales(this.from, this.to, this.source || undefined).subscribe({
       next: (report) => {
         this.report = report;
+        this.hourBars = this.buildHourBars();
         this.loading = false;
         this.cdr.detectChanges(); // los canvas existen recién cuando hay datos
         this.renderCharts();

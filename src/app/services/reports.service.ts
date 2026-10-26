@@ -30,6 +30,10 @@ export interface SalesReport {
   byPayment: { method: string; salesCount: number; totalAmount: number }[];
   // mesas más ocupadas: cuántas veces se cobró cada una (las 10 primeras)
   byTable: { name: string; salesCount: number; totalAmount: number }[];
+  // de dónde vienen las ventas: mesas o mostrador
+  bySource: { mesa: { salesCount: number; totalAmount: number }; mostrador: { salesCount: number; totalAmount: number } };
+  // ventas por hora del día (0 a 23, en la zona del negocio)
+  byHour: { hour: number; salesCount: number; totalAmount: number }[];
   // ventas con voucher de hotel: lo que trajo cada hotel y lo descontado
   byHotel: { hotelId: string; name: string; salesCount: number; totalAmount: number; discountTotal: number; averageTicket: number }[];
 }
@@ -56,9 +60,10 @@ export class ReportsService {
   }
 
   // from/to: YYYY-MM-DD (inclusive). La zona horaria es la del navegador: define dónde empieza cada día.
-  sales(from: string, to: string): Observable<SalesReport> {
+  sales(from: string, to: string, source?: 'mesa' | 'mostrador'): Observable<SalesReport> {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-    const params = new HttpParams().set('from', from).set('to', to).set('tz', tz);
+    let params = new HttpParams().set('from', from).set('to', to).set('tz', tz);
+    if (source) params = params.set('source', source);
     return this.http.get<SalesReport>(`${environment.apiUrl}/reports/sales`, { params });
   }
 }

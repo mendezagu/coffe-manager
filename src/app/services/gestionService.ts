@@ -304,6 +304,22 @@ checkout(
   return this.http.post<any>(`${this.apiUrl}/tables/${tableId}/checkout`, body);
 }
 
+  // Venta por mostrador: se cobra sin mesa. El servidor calcula el total con los precios del menú.
+  counterCheckout(body: {
+    checkoutId: string;
+    items: { menuItemId: string; quantity: number }[];
+    takeaway: boolean;
+    payments: { method: string; amount: number; tendered?: number }[];
+    tip?: number;
+  }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/counter/checkout`, body);
+  }
+
+  // Fija o quita un producto de los favoritos de la caja del mostrador (solo admin)
+  setFavorite(itemId: string, isFavorite: boolean): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { isFavorite }).pipe(tap(() => this.menuCache$.next(null)));
+  }
+
   // 📌 Modificadores (tamaño, leche, extras…). Los errores del servidor pasan tal cual.
   getModifiers(): Observable<ModifierGroup[]> {
     return this.http.get<ModifierGroup[]>(`${this.apiUrl}/modifiers`);

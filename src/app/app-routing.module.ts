@@ -8,6 +8,7 @@ import { LogsComponent } from './components/logs/logs.component';
 import { KitchenComponent } from './pages/kitchen/kitchen.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { ReportsComponent } from './pages/reports/reports.component';
+import { CounterComponent } from './pages/counter/counter.component';
 import { CashComponent } from './pages/cash/cash.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'admin', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'admin/:section', component: AdminPanelComponent, canActivate: [roleGuard('admin')] },
   { path: 'inventory', component: InventoryComponent, canActivate: [roleGuard('admin')] },
+  { path: 'counter', component: CounterComponent, canActivate: [roleGuard('admin', 'cashier'), onboardingGuard] },
   { path: 'cash', component: CashComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reservations', component: ReservationsComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },

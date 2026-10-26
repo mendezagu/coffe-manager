@@ -28,6 +28,13 @@
           [attr.aria-pressed]="preset === p.key">{{ p.label }}</button>
       </div>
 
+      <div class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
+        <button *ngFor="let s of sources" type="button" (click)="selectSource(s.key)"
+          class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+          [ngClass]="source === s.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
+          [attr.aria-pressed]="source === s.key">{{ s.label }}</button>
+      </div>
+
       <div *ngIf="preset === 'custom'" class="flex flex-wrap items-center gap-2">
         <input type="date" [(ngModel)]="from" [max]="to" aria-label="Desde"
           class="px-3 py-1.5 border border-sage-200 rounded-lg text-sm bg-white" />
@@ -184,6 +191,33 @@
                 <tr *ngFor="let p of report.byPayment"><td class="py-1.5">{{ paymentLabel(p.method) }}</td><td class="py-1.5 text-right">{{ p.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ p.totalAmount | money }}</td></tr>
               </tbody>
             </table>
+          </section>
+
+          <!-- Mostrador y salón: solo si hay ventas de mostrador en el período -->
+          <section *ngIf="report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-1">Mostrador y salón</h2>
+            <p class="text-xs text-sage-500 mb-3">De dónde viene lo que vendiste en el período.</p>
+            <div class="flex h-3.5 overflow-hidden rounded-full bg-sage-100" role="img" [attr.aria-label]="'Mostrador ' + counterShare + ' por ciento'">
+              <div class="h-full bg-cafe-green-700" [style.width.%]="counterShare"></div>
+              <div class="h-full bg-cafe-green-200" [style.width.%]="100 - counterShare"></div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-sage-700">
+              <span><i class="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm bg-cafe-green-700"></i>Mostrador {{ report.bySource.mostrador.totalAmount | money }} · {{ report.bySource.mostrador.salesCount }} ventas</span>
+              <span><i class="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm bg-cafe-green-200"></i>Mesas {{ report.bySource.mesa.totalAmount | money }} · {{ report.bySource.mesa.salesCount }} ventas</span>
+            </div>
+          </section>
+
+          <!-- Ventas por hora -->
+          <section *ngIf="hourBars.length > 1" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-1">Ventas por hora</h2>
+            <p class="text-xs text-sage-500 mb-3">Cuándo se vende más en el período. La hora pico va en verde oscuro.</p>
+            <div class="flex h-32 items-end gap-1.5">
+              <div *ngFor="let h of hourBars" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1 text-[10px] text-sage-500"
+                [attr.title]="h.hour + ' h: ' + h.count + ' ventas'">
+                <div class="w-full rounded-t-md" [ngClass]="h.peak ? 'bg-cafe-green-700' : 'bg-cafe-green-200'" [style.height.%]="h.pct"></div>
+                {{ h.hour }}
+              </div>
+            </div>
           </section>
 
           <!-- Mesas más ocupadas -->

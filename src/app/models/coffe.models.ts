@@ -5,6 +5,7 @@ export interface MenuItem {
   price: number;
   quantity?: number; // Opcional, ya que no siempre se proporciona
   isPromo?: boolean;
+  isFavorite?: boolean; // fijado en la caja del mostrador
   categoryId?: string | null;
   modifierGroupIds?: string[];
   availableUnits?: number | null;
