@@ -36,6 +36,19 @@ export const FEATURE_LABELS: Record<string, string> = {
   hotels: 'Hoteles aliados y vouchers',
 };
 
+// Cómo se llama cada función en la lista de lo que incluye cada plan (para resaltar la que se pidió)
+export const FEATURE_GAIN: Record<string, string> = {
+  kitchen_bar_split: 'Separar cocina y barra',
+  qr_ordering: 'Pedido desde la mesa por QR',
+  inventory: 'Inventario, recetas y ganancia',
+  modifiers: 'Modificadores y extras',
+  advanced_reports: 'Reportes completos',
+  commission: 'Comisión de mozos',
+  reservations: 'Reservas de mesa',
+  logs: 'Historial de acciones (Logs)',
+  hotels: 'Hoteles aliados y vouchers',
+};
+
 // Plan actual del local y cómo pedir un cambio: el botón abre WhatsApp con el mensaje ya escrito hacia Tavolapp
 @Injectable({ providedIn: 'root' })
 export class PlanService {

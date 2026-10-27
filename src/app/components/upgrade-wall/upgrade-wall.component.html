@@ -1,25 +1,43 @@
-<div class="mx-auto flex max-w-2xl flex-col items-center rounded-card border border-sage-200 bg-white px-6 py-10 text-center shadow-soft sm:px-10">
-  <div class="mb-4 grid h-16 w-16 place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700">
-    <mat-icon class="!h-9 !w-9 !text-4xl">lock</mat-icon>
-  </div>
-  <p class="m-0 mb-2"><app-plan-badge [feature]="feature"></app-plan-badge></p>
-  <h2 class="m-0 text-xl font-bold text-sage-900">{{ title }}</h2>
-  <p class="m-0 mt-2 max-w-md text-sm text-sage-600">
-    <ng-container *ngIf="benefit">{{ benefit }} </ng-container>
-    Está disponible desde el plan <strong>{{ neededLabel }}</strong>. Tu plan hoy es <strong>{{ plans.currentLabel }}</strong>.
-  </p>
+<div class="relative mx-auto max-w-3xl overflow-hidden rounded-[24px] border border-sage-200 bg-white shadow-soft">
+  <!-- Franja de color arriba -->
+  <div class="h-2 w-full bg-[#12a150]"></div>
 
-  <div *ngIf="gains.length" class="mt-6 w-full max-w-md rounded-xl bg-sage-50 p-4 text-left">
-    <p class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-sage-500">Con el plan {{ targetLabel }} sumás</p>
-    <ul class="m-0 grid list-none gap-1.5 p-0 text-sm text-sage-800">
-      <li *ngFor="let g of gains" class="flex items-start gap-2">
-        <mat-icon class="!h-[18px] !w-[18px] flex-none !text-[18px] text-cafe-green-700">check_circle</mat-icon>{{ g }}
-      </li>
-    </ul>
-  </div>
+  <div class="grid gap-8 px-6 py-10 sm:px-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-center">
 
-  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-    <app-upgrade-button [feature]="feature"></app-upgrade-button>
-    <a routerLink="/plan" class="text-sm font-bold text-cafe-green-700 underline">Ver todos los planes</a>
+    <!-- Qué es y por qué está bloqueado -->
+    <div class="text-center md:text-left">
+      <div class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-cafe-green-700 text-white shadow-green md:mx-0">
+        <mat-icon class="!h-9 !w-9 !text-4xl">lock</mat-icon>
+      </div>
+      <p class="m-0 mb-3"><app-plan-badge [feature]="feature"></app-plan-badge></p>
+      <h2 class="m-0 text-2xl font-bold leading-tight text-sage-900">{{ title }}</h2>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-sage-600">
+        <ng-container *ngIf="benefit">{{ benefit }} </ng-container>
+      </p>
+      <p class="m-0 mt-3 text-sm text-sage-600">
+        Está en el plan <strong class="text-sage-900">{{ neededLabel }}</strong>. Hoy tenés el plan <strong class="text-sage-900">{{ plans.currentLabel }}</strong>.
+      </p>
+
+      <div class="mt-6 flex flex-col items-center gap-3 md:items-start">
+        <app-upgrade-button [feature]="feature"></app-upgrade-button>
+        <p class="m-0 text-xs text-sage-500">Te lo activamos en el momento.</p>
+        <a routerLink="/plan" class="text-sm font-bold text-cafe-green-700 underline">Ver todos los planes</a>
+      </div>
+    </div>
+
+    <!-- Lo que suma pasarse de plan: lo que pidió va primero y resaltado -->
+    <div *ngIf="gains.length" class="rounded-2xl bg-sage-50 p-5 text-left">
+      <p class="m-0 mb-3 text-xs font-bold uppercase tracking-wide text-sage-500">Con el plan {{ targetLabel }} sumás</p>
+      <ul class="m-0 grid list-none gap-2 p-0 text-sm text-sage-800">
+        <li *ngFor="let g of gains"
+          class="flex items-start gap-2.5 rounded-xl px-3 py-2"
+          [ngClass]="g === featured ? 'bg-cafe-green-50 font-bold text-cafe-green-800 ring-1 ring-cafe-green-700/30' : ''">
+          <span class="mt-px grid h-5 w-5 flex-none place-items-center rounded-full bg-cafe-green-700 text-white">
+            <mat-icon class="!h-[14px] !w-[14px] !text-[14px]">check</mat-icon>
+          </span>
+          {{ g }}
+        </li>
+      </ul>
+    </div>
   </div>
 </div>

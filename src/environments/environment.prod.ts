@@ -7,5 +7,5 @@ export const environment = {
   // Dirección de la API (backend NestJS) en producción (Render)
   apiUrl: 'https://resto-api-ljdn.onrender.com/api',
   // WhatsApp de Tavolapp al que llegan los pedidos de cambio de plan (formato internacional, solo números: 5491112345678)
-  salesWhatsapp: ''
+  salesWhatsapp: '5493546409616'
 };
