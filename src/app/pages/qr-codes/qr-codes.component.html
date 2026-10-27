@@ -3,10 +3,7 @@
 <ng-container *ngIf="!loading && view">
 
   <!-- Plan sin la función -->
-  <div *ngIf="!view.planIncluded" class="p-[18px] rounded-2xl bg-sage-100 text-sage-700 text-sm">
-    <p class="font-bold m-0 mb-[4px]">El pedido por QR no está incluido en tu plan</p>
-    <p class="m-0">Está disponible en un plan superior.</p>
-  </div>
+  <app-upgrade-wall *ngIf="!view.planIncluded" feature="qr_ordering" benefit="Tus clientes escanean el QR de la mesa y piden desde el celular, sin esperar al mozo."></app-upgrade-wall>
 
   <!-- Pedido por QR apagado: no se muestran ni se generan códigos -->
   <div *ngIf="view.planIncluded && !view.active" class="p-[20px] sm:p-[24px] rounded-2xl bg-sage-50 border-[1px] border-sage-200 flex flex-col sm:flex-row sm:items-center gap-[16px]">

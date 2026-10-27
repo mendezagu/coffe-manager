@@ -15,7 +15,7 @@
         <ng-container *ngIf="(settings.settings$ | async)?.features?.includes('inventory'); else noPlan">
           Activalo en <strong>Mi negocio</strong> para controlar el stock, calcular costos y marcar como agotados los platos que no se pueden preparar.
         </ng-container>
-        <ng-template #noPlan>El inventario no está incluido en tu plan actual. Está disponible en un plan superior.</ng-template>
+        <ng-template #noPlan>El inventario es parte del plan Pro.</ng-template>
       </p>
       <a routerLink="/settings" class="inline-block px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg no-underline">Ir a Mi negocio</a>
     </div>

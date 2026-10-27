@@ -31,7 +31,7 @@
           <mat-icon class="text-sage-300 group-hover:text-cafe-green-700 transition-colors">arrow_forward</mat-icon>
         </div>
         <div>
-          <h3 class="text-xl font-bold text-sage-900 m-0">{{ c.title }}</h3>
+          <h3 class="m-0 flex flex-wrap items-center gap-2 text-xl font-bold text-sage-900">{{ c.title }}<app-plan-badge *ngIf="c.feature" [feature]="c.feature"></app-plan-badge></h3>
           <p class="text-sm text-sage-500 mt-1 mb-0">{{ c.description }}</p>
         </div>
         <div class="mt-auto flex flex-wrap items-center gap-2">

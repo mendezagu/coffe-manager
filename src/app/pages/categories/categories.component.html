@@ -6,7 +6,8 @@
     </div>
     <div *ngIf="kitchenEnabled && !planAllowsSplit" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
       Con tu plan todos los pedidos van a la <strong>cocina</strong>.
-      Un plan superior permite enviar bebidas y otros platos a una barra con su propia pantalla.
+      Enviar bebidas y otros platos a una barra con su propia pantalla es parte del plan Pro.
+      <app-upgrade-button class="ml-1 inline-block align-middle" feature="kitchen_bar_split" [compact]="true"></app-upgrade-button>
     </div>
 
     <!-- Alta -->

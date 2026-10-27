@@ -25,6 +25,8 @@ interface AdminSectionInfo {
   icon: string;
   singular: string;
   plural: string;
+  // función del plan que usa esta sección (si no es del plan base, la tarjeta lleva su etiqueta)
+  feature?: string;
 }
 
 interface SectionCard extends AdminSectionInfo {
@@ -37,9 +39,9 @@ const SECTIONS: AdminSectionInfo[] = [
   { key: 'sectors', title: 'Sectores', description: 'Agrupa tus mesas por zona (Salón, Terraza…)', icon: 'grid_view', singular: 'sector', plural: 'sectores' },
   { key: 'menu', title: 'Menú', description: 'Platos y bebidas, con su precio y categoría', icon: 'restaurant_menu', singular: 'plato', plural: 'platos' },
   { key: 'categories', title: 'Categorías', description: 'Ordena el menú en secciones (Cafés, Tortas…)', icon: 'category', singular: 'categoría', plural: 'categorías' },
-  { key: 'modifiers', title: 'Modificadores', description: 'Tamaños, leches y extras con precio', icon: 'tune', singular: 'modificador', plural: 'modificadores' },
+  { key: 'modifiers', title: 'Modificadores', description: 'Tamaños, leches y extras con precio', icon: 'tune', singular: 'modificador', plural: 'modificadores', feature: 'modifiers' },
   { key: 'waiters', title: 'Mozos', description: 'Los nombres que se asignan a las mesas', icon: 'person', singular: 'mozo', plural: 'mozos' },
-  { key: 'qr', title: 'Códigos QR', description: 'Imprimí el QR de cada mesa para que pidan desde el celular', icon: 'qr_code_2', singular: 'mesa con QR', plural: 'mesas con QR' },
+  { key: 'qr', title: 'Códigos QR', description: 'Imprimí el QR de cada mesa para que pidan desde el celular', icon: 'qr_code_2', singular: 'mesa con QR', plural: 'mesas con QR', feature: 'qr_ordering' },
   { key: 'users', title: 'Usuarios', description: 'Cuentas del personal y qué puede hacer cada una', icon: 'group', singular: 'usuario', plural: 'usuarios' },
 ];
 

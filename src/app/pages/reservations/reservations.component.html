@@ -8,7 +8,7 @@
           <p class="page-sub">Las reservas del día y la lista de espera.</p>
         </div>
       </div>
-      <button type="button" (click)="openForm()"
+      <button *ngIf="!locked" type="button" (click)="openForm()"
         class="inline-flex h-11 items-center gap-2 rounded-xl bg-cafe-green-700 px-5 text-sm font-bold text-white shadow-green transition-colors hover:bg-cafe-green-800">
         <mat-icon class="!h-5 !w-5 !text-xl">add</mat-icon> Nueva reserva
       </button>
