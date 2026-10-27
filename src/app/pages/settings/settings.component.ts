@@ -191,6 +191,15 @@ export class SettingsComponent implements OnInit {
     return (this.form?.features ?? []).includes('qr_ordering');
   }
 
+  // ¿El plan del negocio incluye la comisión de mozos / las reservas?
+  get canCommission(): boolean {
+    return (this.form?.features ?? []).includes('commission');
+  }
+
+  get canReservations(): boolean {
+    return (this.form?.features ?? []).includes('reservations');
+  }
+
   // ¿El plan del negocio incluye separar cocina y barra?
   get canSplit(): boolean {
     return (this.form?.features ?? []).includes('kitchen_bar_split');

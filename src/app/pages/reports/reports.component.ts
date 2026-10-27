@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild 
 import Chart from 'chart.js/auto';
 import { ReportsService, SalesReport } from 'src/app/services/reports.service';
 import { SettingsService } from 'src/app/services/settings.service';
+import { PlanService } from 'src/app/services/plan.service';
 
 type Preset = 'today' | '7d' | '30d' | 'month' | 'custom';
 
@@ -102,7 +103,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private reports: ReportsService, public settings: SettingsService, private cdr: ChangeDetectorRef) {}
+  // El servidor devolvió que el plan no incluye los reportes completos (por si los datos del plan todavía no habían llegado)
+  forbidden = false;
+
+  constructor(private reports: ReportsService, public settings: SettingsService, private cdr: ChangeDetectorRef, public plans: PlanService) {}
+
+  get locked(): boolean {
+    return this.forbidden || this.plans.locked('advanced_reports');
+  }
 
   ngOnInit() {
     this.selectPreset('30d');
@@ -160,7 +168,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   }
 
   load() {
-    if (this.rangeInvalid) return;
+    if (this.rangeInvalid || this.locked) return;
     this.loading = true;
     this.error = '';
     this.reports.sales(this.from, this.to, this.source || undefined).subscribe({
@@ -173,6 +181,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loading = false;
+        if (err?.status === 403) {
+          this.forbidden = true;
+          return;
+        }
         const msg = err?.error?.message;
         this.error = (Array.isArray(msg) ? msg.join('. ') : msg) || 'No se pudo cargar el reporte.';
       },

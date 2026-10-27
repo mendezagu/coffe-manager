@@ -1,0 +1,6 @@
+<span *ngIf="view$ | async as v"
+  class="inline-flex flex-none items-center gap-[3px] rounded-full px-[8px] py-[1px] text-[10px] font-bold leading-[16px] tracking-wide"
+  [ngClass]="styleOf(v.plan)"
+  [attr.title]="v.locked ? 'Disponible en el plan ' + v.label : 'Incluido desde el plan ' + v.label">
+  <mat-icon *ngIf="v.locked" class="!h-[11px] !w-[11px] !text-[11px] !leading-[11px]">lock</mat-icon>{{ v.label }}
+</span>

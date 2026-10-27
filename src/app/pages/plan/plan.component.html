@@ -1,0 +1,43 @@
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner max-w-5xl">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>workspace_premium</mat-icon></div>
+        <div class="min-w-0">
+          <h1 class="page-title">Tu plan</h1>
+          <p class="page-sub">Hoy tenés el plan <strong>{{ plans.currentLabel }}</strong>. Si querés más funciones, pedí el cambio y te avisamos por WhatsApp.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 py-6 sm:px-8 sm:py-8">
+    <div class="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+      <div *ngFor="let p of order"
+        class="flex flex-col rounded-card border-2 bg-white p-5 shadow-soft"
+        [ngClass]="isCurrent(p) ? 'border-cafe-green-700' : 'border-transparent'">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="m-0 text-lg font-bold text-sage-900">{{ info[p].label }}</h2>
+          <span *ngIf="isCurrent(p)" class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-[11px] font-bold text-white">Tu plan</span>
+        </div>
+        <p class="m-0 mt-1 text-sm text-sage-600">{{ info[p].resume }}</p>
+        <ul class="m-0 mt-4 grid flex-1 content-start list-none gap-2 p-0 text-sm leading-snug text-sage-800">
+          <li *ngFor="let i of info[p].includes" class="flex items-start gap-2">
+            <mat-icon class="!h-[18px] !w-[18px] flex-none !text-[18px] text-cafe-green-700">check_circle</mat-icon>{{ i }}
+          </li>
+        </ul>
+        <div class="mt-5">
+          <ng-container *ngIf="isAbove(p)">
+            <a *ngIf="url(p) as link; else noPhone" [href]="link" target="_blank" rel="noopener noreferrer"
+              class="flex items-center justify-center gap-2 rounded-xl bg-cafe-green-700 px-4 py-3 text-sm font-bold text-white no-underline shadow-green hover:bg-cafe-green-800">
+              <mat-icon class="!h-5 !w-5 !text-xl">chat</mat-icon>Quiero pasarme a {{ info[p].label }}
+            </a>
+            <ng-template #noPhone><p class="m-0 text-xs text-sage-600">Pedile a tu contacto de Tavolapp pasarte a {{ info[p].label }}.</p></ng-template>
+          </ng-container>
+          <p *ngIf="isCurrent(p)" class="m-0 text-center text-xs font-bold text-cafe-green-700">Es el plan que tenés hoy</p>
+          <p *ngIf="!isCurrent(p) && !isAbove(p)" class="m-0 text-center text-xs text-sage-500">Ya lo tenés incluido</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

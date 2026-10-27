@@ -14,6 +14,7 @@ import { Waiter } from 'src/app/services/gestionService';
 import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
+import { PlanService } from 'src/app/services/plan.service';
 
 export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users' | 'qr';
 
@@ -138,6 +139,10 @@ export class AdminPanelComponent {
     });
   }
 
+  // La lista se recalcula en cada ciclo: sin esto Angular recrea las tarjetas entre que se aprieta y se suelta el mouse,
+  // y el clic se pierde
+  trackCard = (_: number, c: SectionCard) => c.key;
+
   get current(): AdminSectionInfo | null {
     return SECTIONS.find((s) => s.key === this.section) ?? null;
   }
@@ -161,6 +166,7 @@ export class AdminPanelComponent {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private settings: SettingsService,
+    public plans: PlanService,
     route: ActivatedRoute
   ) {
     route.paramMap.subscribe((params) => {

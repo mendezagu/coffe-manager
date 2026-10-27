@@ -22,7 +22,7 @@
 
     <!-- Inicio: una tarjeta por cada cosa que se puede administrar -->
     <div *ngIf="!section" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <a *ngFor="let c of cards" [routerLink]="['/admin', c.key]"
+      <a *ngFor="let c of cards; trackBy: trackCard" [routerLink]="['/admin', c.key]"
         class="group flex flex-col gap-4 p-6 bg-white rounded-card shadow-soft border border-transparent hover:border-cafe-green-200 hover:shadow-soft-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
         <div class="flex items-start justify-between">
           <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
@@ -307,7 +307,8 @@
     <!-- ADMINISTRAR MODIFICADORES -->
     <div *ngIf="section === 'modifiers'" class="bg-white rounded-card shadow-soft overflow-hidden">
       <div class="p-6 sm:p-8">
-        <app-modifiers (changed)="loadModifierGroups(); loadMenuItems()"></app-modifiers>
+        <app-upgrade-wall *ngIf="plans.locked('modifiers')" feature="modifiers" benefit="Ofrecé tamaños, leches y extras con precio al pedir cada plato."></app-upgrade-wall>
+        <app-modifiers *ngIf="!plans.locked('modifiers')" (changed)="loadModifierGroups(); loadMenuItems()"></app-modifiers>
       </div>
     </div>
 

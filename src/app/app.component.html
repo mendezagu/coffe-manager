@@ -33,6 +33,7 @@
       <span class="block mt-3 text-sage-800 font-bold text-lg leading-tight break-words max-w-full">{{ (settings.settings$ | async)?.name }}</span>
       <span *ngIf="user$ | async as user" class="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
       <!-- Código del local: cualquier persona del equipo lo ve acá, por si tiene que ingresar en otro dispositivo -->
+      <a *ngIf="(settings.settings$ | async)?.planLabel as planLabel" routerLink="/plan" title="Ver mi plan y pedir un cambio" class="mt-2 inline-flex items-center gap-1 rounded-full bg-sage-100 px-2.5 py-0.5 text-[11px] font-bold text-sage-700 no-underline hover:bg-sage-200">Plan {{ planLabel }}<mat-icon class="!h-3 !w-3 !text-[12px] !leading-[12px]">chevron_right</mat-icon></a>
       <p *ngIf="(settings.settings$ | async)?.loginCode as code" class="m-0 mt-2 text-[11px] leading-tight text-sage-500">
         Código del local: <strong class="font-mono text-sage-700 select-all">{{ code }}</strong>
       </p>
@@ -45,53 +46,54 @@
       <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
         <mat-icon fontIcon="storefront"></mat-icon>
         Inicio
+        <app-plan-badge plan="basic"></app-plan-badge>
         <span *ngIf="(qr.inbox$ | async) as q" [hidden]="(q.requests.length + q.calls.length) === 0"
           class="ml-auto min-w-[20px] px-1.5 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-5 text-center"
           [attr.aria-label]="(q.requests.length + q.calls.length) + ' pedidos QR esperando'">{{ q.requests.length + q.calls.length }}</span>
       </button>
       <ng-container *ngIf="!(onboarding.setupPending$ | async)">
         <ng-container *ngIf="role === 'kitchen' || role === 'bar' || (role === 'admin' && (settings.settings$ | async)?.kitchenEnabled)">
-          <ng-container *ngTemplateOutlet="navItem; context: { key: 'kitchen', link: '/kitchen', icon: 'restaurant', label: role === 'bar' ? 'Barra' : 'Cocina' }"></ng-container>
+          <ng-container *ngTemplateOutlet="navItem; context: { key: 'kitchen', link: '/kitchen', icon: 'restaurant', label: role === 'bar' ? 'Barra' : 'Cocina', plan: 'basic' }"></ng-container>
         </ng-container>
       </ng-container>
 
       <!-- Mostrador: vender y cobrar sin mesa -->
       <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'counter', link: '/counter', icon: 'local_cafe', label: 'Mostrador' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'counter', link: '/counter', icon: 'local_cafe', label: 'Mostrador', plan: 'basic' }"></ng-container>
       </ng-container>
 
       <!-- Caja se habilita en cuanto hay menú, mesas y mozo: hace falta para completar los primeros pasos -->
       <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'caja', link: '/cash', icon: 'point_of_sale', label: 'Caja' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'caja', link: '/cash', icon: 'point_of_sale', label: 'Caja', plan: 'basic' }"></ng-container>
       </ng-container>
 
-      <!-- Reservas: solo si el negocio las activó -->
-      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && (settings.settings$ | async)?.reservationsEnabled && !(onboarding.basicsPending$ | async)">
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reservations', link: '/reservations', icon: 'event_seat', label: 'Reservas' }"></ng-container>
+      <!-- Reservas: si el negocio las activó, o bloqueadas (con etiqueta) si su plan no las incluye -->
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && ((settings.settings$ | async)?.reservationsActive || plans.locked('reservations')) && !(onboarding.basicsPending$ | async)">
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reservations', link: '/reservations', icon: 'event_seat', label: 'Reservas', feature: 'reservations' }"></ng-container>
       </ng-container>
 
       <!-- Negocio: los números -->
       <ng-container *ngIf="role === 'admin' && !(onboarding.setupPending$ | async)">
         <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Negocio</p>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'balance', link: '/balance', icon: 'paid', label: 'Balance' }"></ng-container>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reports', link: '/reports', icon: 'bar_chart', label: 'Reportes' }"></ng-container>
-        <ng-container *ngIf="(settings.settings$ | async)?.inventoryActive">
-          <ng-container *ngTemplateOutlet="navItem; context: { key: 'inventory', link: '/inventory', icon: 'inventory_2', label: 'Inventario' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'balance', link: '/balance', icon: 'paid', label: 'Balance', plan: 'basic' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'reports', link: '/reports', icon: 'bar_chart', label: 'Reportes', feature: 'advanced_reports' }"></ng-container>
+        <ng-container *ngIf="(settings.settings$ | async)?.inventoryActive || plans.locked('inventory')">
+          <ng-container *ngTemplateOutlet="navItem; context: { key: 'inventory', link: '/inventory', icon: 'inventory_2', label: 'Inventario', feature: 'inventory' }"></ng-container>
         </ng-container>
       </ng-container>
 
       <!-- Configuración: casi nunca. Se habilita antes que el resto: en cuanto hay menú, mesas, mozo y caja -->
       <ng-container *ngIf="role === 'admin' && !(onboarding.adminLocked$ | async)">
         <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Configuración</p>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'admin', link: '/admin', icon: 'settings', label: 'Administrar' }"></ng-container>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'settings', link: '/settings', icon: 'business', label: 'Mi negocio' }"></ng-container>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'logs', link: '/logs', icon: 'lock', label: 'Logs' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'admin', link: '/admin', icon: 'settings', label: 'Administrar', plan: 'basic' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'settings', link: '/settings', icon: 'business', label: 'Mi negocio', plan: 'basic' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'logs', link: '/logs', icon: 'lock', label: 'Logs', feature: 'logs' }"></ng-container>
       </ng-container>
     </ng-container>
 
     <!-- Ítem del menú. Si es nuevo (se habilitó durante los primeros pasos) se resalta, con la etiqueta "Nuevo" y una
          ayuda que explica en una frase para qué sirve -->
-    <ng-template #navItem let-key="key" let-link="link" let-icon="icon" let-label="label">
+    <ng-template #navItem let-key="key" let-link="link" let-icon="icon" let-label="label" let-plan="plan" let-feature="feature">
       <div class="mb-1">
         <!-- La fila entera se resalta (no el botón): así el borde, el brillo y los íconos no se pisan -->
         <div class="flex items-center rounded-xl border-[1px] transition-colors"
@@ -101,6 +103,7 @@
             [ngClass]="nav.isNew(key) ? '!bg-transparent !text-cafe-green-800 !font-bold' : '!text-sage-600'">
             <mat-icon [fontIcon]="icon"></mat-icon>
             {{ label }}
+            <app-plan-badge class="ml-auto" [plan]="plan" [feature]="feature"></app-plan-badge>
           </button>
           <!-- La ayuda se queda siempre; "nuevo" solo cambia su color (oscuro mientras no se entró a la sección) -->
           <button *ngIf="nav.hasHelp(key)" type="button" (click)="nav.toggleHelp(key)" [attr.aria-expanded]="nav.helpOpen === key"

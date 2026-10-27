@@ -15,7 +15,11 @@
     </div>
   </header>
 
-  <div class="px-2 py-5 sm:px-8 sm:py-8">
+  <div *ngIf="locked" class="px-2 py-5 sm:px-8 sm:py-8">
+    <app-upgrade-wall feature="reservations" benefit="Tus clientes reservan solos desde una página propia y vos manejás el día y la lista de espera."></app-upgrade-wall>
+  </div>
+
+  <div *ngIf="!locked" class="px-2 py-5 sm:px-8 sm:py-8">
     <div class="mx-auto max-w-5xl space-y-5">
 
       <!-- Todavía no están activadas -->

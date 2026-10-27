@@ -225,13 +225,15 @@
 
         <!-- Comisión para los mozos -->
         <section [class.hidden]="tab !== 'operacion'" class="bg-white rounded-card shadow-soft p-[20px] space-y-3">
-          <h2 class="font-bold text-sage-800 mb-1">Comisión para los mozos</h2>
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Comisión para los mozos <app-plan-badge feature="commission"></app-plan-badge></h2>
 
-          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="commissionEnabled" [(ngModel)]="form.commissionEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canCommission || form.commissionEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="commissionEnabled" [(ngModel)]="form.commissionEnabled" [disabled]="!canCommission && !form.commissionEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Ofrecer una comisión a los mozos</span>
               <span class="block text-xs text-sage-500">Cada mozo gana un porcentaje de lo que se vende en las mesas que atendió. Lo ves calculado en Reportes, mozo por mozo.</span>
+              <span *ngIf="!canCommission" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-sage-500">No incluido en tu plan actual. <app-upgrade-button feature="commission" [compact]="true"></app-upgrade-button></span>
             </span>
           </label>
 
@@ -258,7 +260,7 @@
 
         <!-- Inventario -->
         <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-[20px] space-y-3">
-          <h2 class="font-bold text-sage-800 mb-1">Inventario</h2>
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Inventario <app-plan-badge feature="inventory"></app-plan-badge></h2>
           <p class="text-sm text-sage-600 m-0">
             Llevá la cuenta de insumos y productos: cada venta descuenta lo que consumió, los platos que no se pueden preparar aparecen como <strong>agotados</strong> y se calcula cuánto ganás con cada uno.
           </p>
@@ -269,7 +271,7 @@
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Usar inventario y stock</span>
               <span *ngIf="canInventory" class="block text-xs text-sage-500">Cuando lo actives vas a ver <a routerLink="/inventory" class="text-cafe-green-700 font-medium underline">Inventario</a> en el menú, para cargar insumos y recetas.</span>
-              <span *ngIf="!canInventory" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+              <span *ngIf="!canInventory" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-sage-500">No incluido en tu plan actual. <app-upgrade-button feature="inventory" [compact]="true"></app-upgrade-button></span>
             </span>
           </label>
 
@@ -313,7 +315,7 @@
 
         <!-- Pedido por QR -->
         <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-[20px]">
-          <h2 class="font-bold text-sage-800 mb-1">Pedido por QR en la mesa</h2>
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Pedido por QR en la mesa <app-plan-badge feature="qr_ordering"></app-plan-badge></h2>
           <p class="text-sm text-sage-600 mb-3">
             Cada mesa tiene un QR: el cliente lo escanea con su celular, ve la carta y manda su pedido. El mozo lo confirma desde el sistema y recién ahí pasa a la cocina.
           </p>
@@ -324,7 +326,7 @@
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Permitir pedidos por QR</span>
               <span *ngIf="canQr" class="block text-xs text-sage-500">Después imprimí los QR en <a routerLink="/admin/qr" class="text-cafe-green-700 font-medium underline">Administrar → Códigos QR</a>.</span>
-              <span *ngIf="!canQr" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+              <span *ngIf="!canQr" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-sage-500">No incluido en tu plan actual. <app-upgrade-button feature="qr_ordering" [compact]="true"></app-upgrade-button></span>
             </span>
           </label>
 
@@ -368,10 +370,11 @@
 
         <!-- Reservas -->
         <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-[20px] space-y-3">
-          <h2 class="font-bold text-sage-800 mb-1">Reservas de mesa</h2>
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Reservas de mesa <app-plan-badge feature="reservations"></app-plan-badge></h2>
 
-          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="reservationsEnabled" [(ngModel)]="form.reservationsEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canReservations || form.reservationsEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="reservationsEnabled" [(ngModel)]="form.reservationsEnabled" [disabled]="!canReservations && !form.reservationsEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Recibir reservas</span>
               <span class="block text-xs text-sage-500">Tus clientes reservan desde una página propia, sin instalar nada. Vos las ves en la pantalla "Reservas", y si no hay lugar pueden anotarse en una lista de espera.</span>
@@ -507,7 +510,7 @@
 
         <!-- Cocina y barra (solo si se usa la cocina) -->
         <section *ngIf="form.kitchenEnabled" [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-[20px]">
-          <h2 class="font-bold text-sage-800 mb-1">Cocina y barra</h2>
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Cocina y barra <app-plan-badge feature="kitchen_bar_split"></app-plan-badge></h2>
           <p class="text-sm text-sage-600 mb-3">
             Si lo activás, cada categoría del menú va a la pantalla de la cocina o a la de la barra, según el destino que le pongas.
             Si no, todos los pedidos van a la cocina.
@@ -524,7 +527,7 @@
                 <a routerLink="/admin/categories" class="text-cafe-green-700 font-medium underline">Categorías</a>.
                 Los usuarios con rol "Barra" ven solo lo que va a la barra.
               </span>
-              <span *ngIf="!canSplit" class="block text-xs text-sage-500">No incluido en tu plan actual. Disponible en un plan superior.</span>
+              <span *ngIf="!canSplit" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-sage-500">No incluido en tu plan actual. <app-upgrade-button feature="kitchen_bar_split" [compact]="true"></app-upgrade-button></span>
             </span>
           </label>
         </section>

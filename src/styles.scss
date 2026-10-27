@@ -365,3 +365,53 @@ html.dark .border.border-transparent {
 html.dark hr {
   border-color: #3f4147;
 }
+
+/* ---- Etiquetas de plan (Pro / Beneficios): colores fijos con brillo para que se noten, en claro y en oscuro ---- */
+.plan-pill {
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.plan-pill--pro {
+  background: #12a150;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 8px rgba(18, 161, 80, 0.65);
+  animation: plan-glow-pro 2.4s ease-in-out infinite;
+}
+.plan-pill--benefits {
+  background: #e0a100;
+  color: #2a1c00;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset, 0 0 8px rgba(224, 161, 0, 0.7);
+  animation: plan-glow-benefits 2.4s ease-in-out infinite;
+}
+/* barrido de luz que cruza la etiqueta */
+.plan-pill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg);
+  animation: plan-shine 3.2s ease-in-out infinite;
+}
+@keyframes plan-glow-pro {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 5px rgba(18, 161, 80, 0.5); }
+  50% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 13px rgba(40, 220, 120, 0.95); }
+}
+@keyframes plan-glow-benefits {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset, 0 0 5px rgba(224, 161, 0, 0.5); }
+  50% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset, 0 0 13px rgba(255, 200, 40, 0.95); }
+}
+@keyframes plan-shine {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-pill,
+  .plan-pill::after {
+    animation: none;
+  }
+}

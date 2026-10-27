@@ -1,0 +1,11 @@
+<ng-container *ngIf="target">
+  <a *ngIf="url; else noPhone" [href]="url" target="_blank" rel="noopener noreferrer"
+    class="inline-flex items-center justify-center gap-2 rounded-xl bg-cafe-green-700 font-bold text-white no-underline shadow-green transition-colors hover:bg-cafe-green-800"
+    [ngClass]="compact ? 'px-3 py-1.5 text-xs' : 'px-5 py-3 text-sm'">
+    <mat-icon [ngClass]="compact ? '!h-4 !w-4 !text-base' : '!h-5 !w-5 !text-xl'">chat</mat-icon>
+    Quiero pasarme a {{ label }}
+  </a>
+  <ng-template #noPhone>
+    <span class="text-xs font-medium text-sage-600">Pedile a tu contacto de Tavolapp pasarte al plan {{ label }}.</span>
+  </ng-template>
+</ng-container>

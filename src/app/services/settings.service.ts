@@ -28,7 +28,13 @@ export interface TenantSettings {
   shiftNightStart: number;
   // plan y funciones habilitadas
   plan: string;
+  planLabel?: string; // Esencial / Pro / Beneficios
   features: string[];
+  commissionActive?: boolean; // lo que rige (elegido y permitido por el plan)
+  reservationsActive?: boolean;
+  // plan más bajo que incluye cada función, y el nombre de cada plan (para las etiquetas)
+  featurePlans?: Record<string, 'basic' | 'pro' | 'benefits'>;
+  planLabels?: Record<string, string>;
   kitchenEnabled: boolean; // el negocio usa la pantalla de cocina (opcional, apagada por defecto)
   splitKitchenBar: boolean; // lo que el negocio eligió
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)

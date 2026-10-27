@@ -8,7 +8,7 @@
           <p class="page-sub">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-3">
+      <div *ngIf="!locked" class="flex flex-wrap items-center gap-3">
         <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Tipo de gráfico">
           <button type="button" (click)="setChartMode('bar')" class="px-2.5 py-1 rounded-md font-medium"
             [ngClass]="chartMode === 'bar' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="chartMode === 'bar'">Barras</button>
@@ -20,7 +20,7 @@
           Ver como tablas
         </label>
       </div>
-      <div class="flex w-full flex-wrap items-center gap-2">
+      <div *ngIf="!locked" class="flex w-full flex-wrap items-center gap-2">
       <div class="inline-flex flex-wrap p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Rango de fechas">
         <button *ngFor="let p of presets" type="button" (click)="selectPreset(p.key)"
           class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
@@ -48,7 +48,11 @@
     </div>
   </header>
 
-  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <div *ngIf="locked" class="px-4 py-6 sm:px-8 sm:py-8">
+    <app-upgrade-wall feature="advanced_reports" benefit="Mirá qué platos se venden más, a qué hora, qué mozo vende más y cuánto ganás."></app-upgrade-wall>
+  </div>
+
+  <div *ngIf="!locked" class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-6xl mx-auto">
 
     <p *ngIf="error" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>

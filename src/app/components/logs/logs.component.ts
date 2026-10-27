@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GestionService } from 'src/app/services/gestionService';
+import { SettingsService } from 'src/app/services/settings.service';
+import { PlanService } from 'src/app/services/plan.service';
 
 type Kind = 'sale' | 'order' | 'removal' | 'print' | 'waiter' | 'other';
 type KindFilter = 'all' | Kind;
@@ -61,7 +63,12 @@ export class LogsComponent implements OnInit {
   page = 1;
   pageSize = 20;
 
-  constructor(private gestionService: GestionService) {}
+  constructor(private gestionService: GestionService, public settings: SettingsService, public plans: PlanService) {}
+
+  // El historial es de Pro en adelante. Solo se bloquea cuando ya llegaron los datos del plan (si no, parpadearía al entrar)
+  get locked(): boolean {
+    return this.plans.locked('logs');
+  }
 
   ngOnInit(): void {
     this.rows = this.gestionService

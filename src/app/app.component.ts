@@ -18,6 +18,7 @@ import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-di
 import { OnboardingService } from './services/onboarding.service';
 import { NavGuideService } from './services/nav-guide.service';
 import { ThemeMode, ThemeService } from './services/theme.service';
+import { PlanService } from './services/plan.service';
 
 // Rutas que ve gente sin cuenta del restaurante
 // (y el asistente de primeros pasos, que también va en pantalla completa, sin menú ni barra)
@@ -62,7 +63,8 @@ export class AppComponent {
     public nav: NavGuideService,
     public theme: ThemeService,
     private swUpdate: SwUpdate,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public plans: PlanService,
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();

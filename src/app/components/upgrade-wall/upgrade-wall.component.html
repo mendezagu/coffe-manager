@@ -1,0 +1,25 @@
+<div class="mx-auto flex max-w-2xl flex-col items-center rounded-card border border-sage-200 bg-white px-6 py-10 text-center shadow-soft sm:px-10">
+  <div class="mb-4 grid h-16 w-16 place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700">
+    <mat-icon class="!h-9 !w-9 !text-4xl">lock</mat-icon>
+  </div>
+  <p class="m-0 mb-2"><app-plan-badge [feature]="feature"></app-plan-badge></p>
+  <h2 class="m-0 text-xl font-bold text-sage-900">{{ title }}</h2>
+  <p class="m-0 mt-2 max-w-md text-sm text-sage-600">
+    <ng-container *ngIf="benefit">{{ benefit }} </ng-container>
+    Está disponible desde el plan <strong>{{ neededLabel }}</strong>. Tu plan hoy es <strong>{{ plans.currentLabel }}</strong>.
+  </p>
+
+  <div *ngIf="gains.length" class="mt-6 w-full max-w-md rounded-xl bg-sage-50 p-4 text-left">
+    <p class="m-0 mb-2 text-xs font-bold uppercase tracking-wide text-sage-500">Con el plan {{ targetLabel }} sumás</p>
+    <ul class="m-0 grid list-none gap-1.5 p-0 text-sm text-sage-800">
+      <li *ngFor="let g of gains" class="flex items-start gap-2">
+        <mat-icon class="!h-[18px] !w-[18px] flex-none !text-[18px] text-cafe-green-700">check_circle</mat-icon>{{ g }}
+      </li>
+    </ul>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+    <app-upgrade-button [feature]="feature"></app-upgrade-button>
+    <a routerLink="/plan" class="text-sm font-bold text-cafe-green-700 underline">Ver todos los planes</a>
+  </div>
+</div>

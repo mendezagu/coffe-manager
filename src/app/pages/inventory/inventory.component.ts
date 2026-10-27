@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SettingsService } from 'src/app/services/settings.service';
+import { PlanService } from 'src/app/services/plan.service';
 
 type Tab = 'stock' | 'recipes' | 'count' | 'movements' | 'profit';
 
@@ -18,7 +19,11 @@ export class InventoryComponent implements OnInit {
   tab: Tab = 'stock';
   loaded = false;
 
-  constructor(public settings: SettingsService) {}
+  constructor(public settings: SettingsService, public plans: PlanService) {}
+
+  get locked(): boolean {
+    return this.plans.locked('inventory');
+  }
 
   ngOnInit() {
     // el estado vigente viene del servidor (el plan o el ajuste pudieron cambiar)

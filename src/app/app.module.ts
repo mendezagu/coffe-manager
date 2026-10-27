@@ -48,6 +48,10 @@ import { InventoryRecipesComponent } from './pages/inventory/inventory-recipes.c
 import { InventoryCountComponent } from './pages/inventory/inventory-count.component';
 import { InventoryMovementsComponent } from './pages/inventory/inventory-movements.component';
 import { InventoryProfitComponent } from './pages/inventory/inventory-profit.component';
+import { UpgradeButtonComponent } from './components/upgrade-button/upgrade-button.component';
+import { UpgradeWallComponent } from './components/upgrade-wall/upgrade-wall.component';
+import { PlanPageComponent } from './pages/plan/plan.component';
+import { PlanBadgeComponent } from './components/plan-badge/plan-badge.component';
 import { PaymentPanelComponent } from './components/payment-panel/payment-panel.component';
 import { ModifierPickerDialogComponent } from './components/modifier-picker-dialog/modifier-picker-dialog.component';
 import { MoneyPipe } from './pipes/money.pipe';
@@ -100,6 +104,10 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     InventoryMovementsComponent,
     InventoryProfitComponent,
     PaymentPanelComponent,
+    PlanBadgeComponent,
+    UpgradeButtonComponent,
+    UpgradeWallComponent,
+    PlanPageComponent,
     ModifierPickerDialogComponent,
     MoneyPipe,
     KitchenComponent,

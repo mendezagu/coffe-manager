@@ -14,6 +14,7 @@ import {
   toDayString,
 } from 'src/app/services/reservations.service';
 import { SettingsService } from 'src/app/services/settings.service';
+import { PlanService } from 'src/app/services/plan.service';
 
 const REFRESH_MS = 30000;
 
@@ -53,7 +54,12 @@ export class ReservationsComponent implements OnInit, OnDestroy {
     public settings: SettingsService,
     private gestion: GestionService,
     private snackBar: MatSnackBar,
+    public plans: PlanService,
   ) {}
+
+  get locked(): boolean {
+    return this.plans.locked('reservations');
+  }
 
   ngOnInit() {
     this.load();

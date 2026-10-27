@@ -8,7 +8,7 @@
           <p class="page-sub">Registro de eventos administrativos</p>
         </div>
       </div>
-      <button *ngIf="total > 0" type="button" (click)="clearLogs()"
+      <button *ngIf="total > 0 && !locked" type="button" (click)="clearLogs()"
         class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-red-50 text-cafe-red-700 hover:bg-cafe-red-100 transition-colors">
         <mat-icon class="!w-4 !h-4 !text-base">delete_sweep</mat-icon>
         Borrar historial
@@ -16,7 +16,12 @@
     </div>
   </header>
 
-  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <!-- El plan no lo incluye -->
+  <div *ngIf="locked" class="px-4 py-6 sm:px-8 sm:py-8">
+    <app-upgrade-wall feature="logs" benefit="Mirá quién cobró, qué se pidió y qué se eliminó, día por día."></app-upgrade-wall>
+  </div>
+
+  <div *ngIf="!locked" class="px-4 py-6 sm:px-8 sm:py-8">
     <div class="max-w-5xl mx-auto">
 
       <!-- Sin registros -->
