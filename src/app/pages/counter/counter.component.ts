@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Category, GestionService } from 'src/app/services/gestionService';
 import { CashService } from 'src/app/services/cash.service';
 import { SettingsService } from 'src/app/services/settings.service';
+import { PlanService } from 'src/app/services/plan.service';
 import { TicketService } from 'src/app/services/ticket.service';
 import { UserService } from 'src/app/services/user.service';
 import { MenuItem } from 'src/app/models/coffe.models';
@@ -61,6 +62,7 @@ export class CounterComponent implements OnInit, OnDestroy {
     private gestion: GestionService,
     private cash: CashService,
     public settings: SettingsService,
+    public plans: PlanService,
     private tickets: TicketService,
     private users: UserService,
     private snack: MatSnackBar,
@@ -131,8 +133,22 @@ export class CounterComponent implements OnInit, OnDestroy {
     return idx < 0 ? 'bg-sage-400' : CounterComponent.DOTS[idx % CounterComponent.DOTS.length];
   }
 
+  trackItem(_: number, i: MenuItem): string {
+    return i._id;
+  }
+
   inCart(i: MenuItem): number {
     return this.cart.get(i._id) ?? 0;
+  }
+
+  // El panel del pedido se muestra solo si hay algo en el pedido o acaba de registrarse una venta
+  get showOrder(): boolean {
+    return !!this.lastSale || this.itemsCount > 0;
+  }
+
+  // En el celular el pedido queda debajo de los productos: este botón lleva hasta él
+  scrollToOrder() {
+    document.getElementById('mostrador-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   get itemsCount(): number {
@@ -276,7 +292,7 @@ export class CounterComponent implements OnInit, OnDestroy {
     for (const p of sale.payments ?? []) summary.push({ text: `${labels[p.method] ?? p.method}: ${fmt(p.amount)}` });
     if (sale.change > 0) summary.push({ label: 'Vuelto:', value: fmt(sale.change) });
     const sold = this.tickets.printCuenta(
-      { tableName: sale.takeaway ? 'Mostrador · Para llevar' : 'Mostrador', waiterName: sale.cashierName || '', lines, summary },
+      { tableName: 'Mostrador', waiterName: '', counter: { takeaway: !!sale.takeaway, cashierName: sale.cashierName }, lines, summary },
       { windowSize: 'width=600,height=400' },
     );
     if (!sold) this.snack.open('El navegador bloqueó la impresión. Permití las ventanas emergentes.', 'Cerrar', { duration: 4000 });

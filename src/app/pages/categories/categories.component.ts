@@ -8,6 +8,9 @@ interface Row extends Category {
   editing?: boolean;
   editName?: string;
   editDestination?: Destination;
+  editSubtitle?: string;
+  editTagline?: string;
+  editLayout?: 'grid' | 'list' | 'hero';
 }
 
 @Component({
@@ -18,6 +21,12 @@ export class CategoriesComponent implements OnInit {
   categories: Row[] = [];
   loading = true;
   saving = false;
+
+  readonly layouts: { key: 'grid' | 'list' | 'hero'; label: string; hint: string }[] = [
+    { key: 'grid', label: 'Grilla', hint: 'Tarjetas de 2 columnas con foto' },
+    { key: 'list', label: 'Lista', hint: 'Una fila por plato, foto chica' },
+    { key: 'hero', label: 'Grande', hint: 'Foto a todo el ancho' },
+  ];
 
   newName = '';
   newDestination: Destination = 'KITCHEN';
@@ -82,6 +91,9 @@ export class CategoriesComponent implements OnInit {
     row.editing = true;
     row.editName = row.name;
     row.editDestination = row.destination;
+    row.editSubtitle = row.subtitle ?? '';
+    row.editTagline = row.tagline ?? '';
+    row.editLayout = row.layout ?? 'grid';
   }
 
   cancelEdit(row: Row) {
@@ -91,7 +103,10 @@ export class CategoriesComponent implements OnInit {
   saveEdit(row: Row) {
     const name = (row.editName ?? '').trim();
     if (!name) return;
-    const changes: { name?: string; destination?: Destination } = {};
+    const changes: { name?: string; destination?: Destination; subtitle?: string; tagline?: string; layout?: string } = {};
+    if ((row.editSubtitle ?? '').trim() !== (row.subtitle ?? '')) changes.subtitle = (row.editSubtitle ?? '').trim();
+    if ((row.editTagline ?? '').trim() !== (row.tagline ?? '')) changes.tagline = (row.editTagline ?? '').trim();
+    if (row.editLayout && row.editLayout !== (row.layout ?? 'grid')) changes.layout = row.editLayout;
     if (name !== row.name) changes.name = name;
     if (row.editDestination && row.editDestination !== row.destination) changes.destination = row.editDestination;
     if (!Object.keys(changes).length) return this.cancelEdit(row);

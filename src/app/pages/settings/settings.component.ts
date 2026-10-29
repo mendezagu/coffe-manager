@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
+import { BrandImages, BrandKind, MenuImageService } from 'src/app/services/menu-image.service';
+import { PlanService } from 'src/app/services/plan.service';
+import { AUTO_BACKGROUND_INTENSITY, AUTO_COVER_INTENSITY, backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
 import { minToTime } from 'src/app/services/reservations.service';
 import { BRAND_SWATCHES, DEFAULT_BRAND, brandStyle, legibleBrand } from 'src/app/services/brand';
 
@@ -105,6 +108,33 @@ export class SettingsComponent implements OnInit {
     this.form.reservationDays = days.includes(n) ? days.filter((d) => d !== n) : [...days, n];
   }
 
+  // Carta online: la dirección se arma al guardar con la carta activada
+  get menuLink(): string | null {
+    const slug = this.form?.menuSlug;
+    return slug ? `${window.location.origin}/carta/${slug}` : null;
+  }
+
+  copyMenuLink() {
+    const link = this.menuLink;
+    if (!link) return;
+    navigator.clipboard?.writeText(link).then(
+      () => this.notify('Dirección copiada'),
+      () => this.notify('No se pudo copiar'),
+    );
+  }
+
+  // QR de la carta, listo para imprimir y pegar en el local
+  async downloadMenuQr() {
+    const link = this.menuLink;
+    if (!link) return;
+    const QRCode = (await import('qrcode')).default;
+    const url = await QRCode.toDataURL(link, { width: 800, margin: 2, errorCorrectionLevel: 'M' });
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'qr-carta.png';
+    a.click();
+  }
+
   // La dirección que se comparte: se arma cuando se guardan los ajustes con las reservas activadas
   get reservationLink(): string | null {
     const slug = this.form?.reservationSlug;
@@ -129,7 +159,99 @@ export class SettingsComponent implements OnInit {
   // Sonido de aviso de pedidos QR: se guarda en este dispositivo apenas se cambia
   sound = { ...this.qr.sound };
 
-  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService) {}
+  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService, private images: MenuImageService, public plans: PlanService) {}
+
+  // Cómo vende el negocio: qué partes de la app se muestran
+  readonly salesModes = [
+    { key: 'both', label: 'Mostrador y mesas', hint: 'Restaurante o bar que también vende para llevar' },
+    { key: 'counter', label: 'Solo mostrador', hint: 'Pizzería, lomitería, café al paso, heladería' },
+    { key: 'tables', label: 'Solo mesas', hint: 'Atención en salón, sin venta en mostrador' },
+  ] as const;
+
+  // Portada y fondo de la carta: se suben y quedan guardadas en el momento (no hace falta apretar Guardar)
+  brandBusy: BrandKind | null = null;
+
+  get imagesAvailable(): boolean {
+    return !!this.form?.imagesAvailable;
+  }
+
+  async onBrandPicked(kind: BrandKind, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.brandBusy = kind;
+    try {
+      this.applyBrand(await this.images.uploadBrand(kind, file));
+      this.notify(kind === 'cover' ? 'Portada guardada' : 'Fondo guardado');
+    } catch (e: any) {
+      const msg = e?.error?.message ?? e?.message;
+      this.notify(Array.isArray(msg) ? msg.join('. ') : msg || 'No se pudo guardar la imagen');
+    } finally {
+      this.brandBusy = null;
+    }
+  }
+
+  removeBrand(kind: BrandKind) {
+    this.brandBusy = kind;
+    this.images.removeBrand(kind).subscribe({
+      next: (r) => {
+        this.applyBrand(r);
+        this.brandBusy = null;
+      },
+      error: () => {
+        this.brandBusy = null;
+        this.notify('No se pudo quitar la imagen');
+      },
+    });
+  }
+
+  // Intensidad de la portada y del fondo: automática (la decide el sistema) o a gusto con un deslizador. Se guarda al soltar.
+  readonly intensityAuto = { cover: AUTO_COVER_INTENSITY, background: AUTO_BACKGROUND_INTENSITY };
+  private intensityTimer: { [k in BrandKind]?: ReturnType<typeof setTimeout> } = {};
+
+  intensityOf(kind: BrandKind): number | null {
+    return (kind === 'cover' ? this.form?.coverIntensity : this.form?.backgroundIntensity) ?? null;
+  }
+
+  isAuto(kind: BrandKind): boolean {
+    return this.intensityOf(kind) === null;
+  }
+
+  // Valor que muestra el deslizador (el automático si está en automático)
+  sliderValue(kind: BrandKind): number {
+    return this.intensityOf(kind) ?? this.intensityAuto[kind];
+  }
+
+  // Vista previa: el mismo velo que usa la carta
+  veil(kind: BrandKind): string {
+    return kind === 'cover' ? coverVeil(this.intensityOf(kind)) : backgroundVeil(this.intensityOf(kind));
+  }
+
+  setIntensity(kind: BrandKind, value: number | null) {
+    if (!this.form) return;
+    if (kind === 'cover') this.form.coverIntensity = value;
+    else this.form.backgroundIntensity = value;
+    clearTimeout(this.intensityTimer[kind]);
+    this.intensityTimer[kind] = setTimeout(() => {
+      const change = kind === 'cover' ? { coverIntensity: value } : { backgroundIntensity: value };
+      this.settings.update(change).subscribe({
+        error: () => this.notify('No se pudo guardar la intensidad'),
+      });
+    }, 400);
+  }
+
+  toggleAuto(kind: BrandKind) {
+    this.setIntensity(kind, this.isAuto(kind) ? this.intensityAuto[kind] : null);
+  }
+
+  private applyBrand(r: BrandImages) {
+    if (this.form) {
+      this.form.coverImageUrl = r.coverImageUrl;
+      this.form.backgroundImageUrl = r.backgroundImageUrl;
+    }
+    this.settings.refresh().subscribe({ error: () => {} });
+  }
 
   saveSound() {
     this.qr.saveSound(this.sound);

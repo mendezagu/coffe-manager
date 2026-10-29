@@ -50,6 +50,8 @@ export interface CuentaRow {
 export interface CuentaData {
   tableName: string;
   waiterName: string;
+  // venta por mostrador: sin mesa ni mozo, el ticket dice cómo se lleva y quién cobró
+  counter?: { takeaway: boolean; cashierName?: string | null };
   lines: CuentaLine[];
   summary: CuentaRow[];
 }
@@ -170,6 +172,21 @@ ${items}
   );
 }
 
+// Pie del ticket: mesa y mozo, o los datos de una venta por mostrador (sin mesa ni mozo)
+function footer(data: CuentaData): string {
+  if (data.counter) {
+    const cashier = data.counter.cashierName?.trim();
+    return [
+      `      <p class="foot"><strong>Venta en mostrador</strong> · ${data.counter.takeaway ? 'Para llevar' : 'Lo consume en el local'}</p>`,
+      cashier ? `      <p class="foot"><strong>Cobró:</strong> ${escapeHtml(cashier)}</p>` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+  return `      <p class="foot"><strong>Nro de mesa:</strong> ${escapeHtml(data.tableName)}</p>
+      <p class="foot"><strong>Atendido por:</strong> ${escapeHtml(data.waiterName)}</p>`;
+}
+
 // Cuenta: el detalle con precios, el total y los pagos, para el cliente.
 export function buildCuenta(data: CuentaData, brand: TicketBrand, opts: TicketOptions = {}): string {
   const e = escapeHtml;
@@ -212,8 +229,7 @@ ${items}
         ${rows}
       </div>
       <div class="line"></div>
-      <p class="foot"><strong>Nro de mesa:</strong> ${e(data.tableName)}</p>
-      <p class="foot"><strong>Atendido por:</strong> ${e(data.waiterName)}</p>
+${footer(data)}
       <div class="line"></div>`
   );
 }

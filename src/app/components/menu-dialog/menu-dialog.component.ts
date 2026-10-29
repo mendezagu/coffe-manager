@@ -38,7 +38,14 @@ export class MenuDialogComponent implements OnDestroy {
     return (menu.modifierGroupIds ?? [])
       .map(id => this.modifierGroups.find(g => g._id === id))
       .filter((g): g is ModifierGroup => !!g)
-      .map(g => ({ ...g, options: g.options.filter(o => o.active) }))
+      .map(g => {
+        const own = menu.optionPrices ?? {};
+        const active = g.options.filter(o => o.active);
+        // si el plato le puso precio propio a alguna opción del grupo, solo se ofrecen esas (y suman la diferencia contra el precio del plato)
+        const priced = active.some(o => o._id in own);
+        const options = (priced ? active.filter(o => o._id in own) : active).map(o => (o._id in own ? { ...o, priceDelta: Math.round((own[o._id] - menu.price + Number.EPSILON) * 100) / 100 } : o));
+        return { ...g, options };
+      })
       .filter(g => g.options.length > 0);
   }
 

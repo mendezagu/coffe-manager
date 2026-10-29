@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { brandStyle } from 'src/app/services/brand';
@@ -103,7 +104,35 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     return brandStyle(this.info?.business?.brandColor);
   }
 
+  // Portada: foto en la banda de arriba, oscurecida para que se lea el nombre del local
+  get coverStyle(): Record<string, string> {
+    const url = this.info?.business?.coverUrl;
+    return url
+      ? {
+          'background-image': `${coverVeil(this.info?.business?.coverIntensity)}, url("${url.replace(/"/g, '%22')}")`,
+          'background-size': 'cover',
+          'background-position': 'center',
+        }
+      : {};
+  }
+
+  // Fondo: imagen detrás de la página, aclarada para que las tarjetas y los textos se lean bien
+  get pageStyle(): Record<string, string> {
+    const url = this.info?.business?.backgroundUrl;
+    return url
+      ? {
+          'background-image': `${backgroundVeil(this.info?.business?.backgroundIntensity)}, url("${url.replace(/"/g, '%22')}")`,
+          'background-size': 'cover',
+          'background-position': 'center',
+          'background-attachment': 'fixed',
+        }
+      : {};
+  }
+
   token = '';
+  // Carta online: la misma pantalla en modo "solo ver" (ruta /carta/:slug)
+  slug = '';
+  viewOnly = false;
   phase: Phase = 'loading';
   info: PublicInfo | null = null;
 
@@ -158,6 +187,12 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService) {}
 
   ngOnInit() {
+    this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    this.viewOnly = !!this.slug;
+    if (this.viewOnly) {
+      this.loadCarta();
+      return;
+    }
     this.token = this.route.snapshot.paramMap.get('token') ?? '';
     this.clientId = this.loadClientId();
     this.pin = store.get(sessionStorage, `qr-pin:${this.token}`) ?? '';
@@ -174,7 +209,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.ordersSub?.unsubscribe();
-    this.realtime.disconnectCustomer();
+    if (!this.viewOnly) this.realtime.disconnectCustomer();
     document.removeEventListener('visibilitychange', this.onVisible);
     if (this.bannerTimer) clearTimeout(this.bannerTimer);
     if (this.helpTimer) clearTimeout(this.helpTimer);
@@ -183,7 +218,24 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   // ---------- carga ----------
 
+  // Carta online: solo se trae el menú del local
+  private loadCarta() {
+    this.api.carta(this.slug).subscribe({
+      next: (info) => {
+        this.info = info;
+        document.title = `${info.business.name} · Carta`;
+        this.formatter = undefined;
+        this.phase = 'ready';
+      },
+      error: (err) => (this.phase = err.status === 404 ? 'notFound' : 'error'),
+    });
+  }
+
   load() {
+    if (this.viewOnly) {
+      this.loadCarta();
+      return;
+    }
     this.api.info(this.token, this.pin || undefined).subscribe({
       next: (info) => {
         this.info = info;
@@ -316,8 +368,36 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Colores de la etiqueta sobre la foto (clases completas para que Tailwind las encuentre)
+  private static readonly BADGES: Record<string, string> = {
+    terracotta: 'bg-[#c2703d] text-white',
+    green: 'bg-[#1f6f4a] text-white',
+    red: 'bg-[#d62f2f] text-white',
+    blue: 'bg-[#2f6fd6] text-white',
+    amber: 'bg-[#d98a14] text-white',
+    dark: 'bg-[#22322a] text-white',
+  };
+
+  badgeClass(color?: string): string {
+    return QrOrderComponent.BADGES[color ?? ''] ?? QrOrderComponent.BADGES['terracotta'];
+  }
+
+  // Destacados: carrusel de arriba (solo cuando no se está buscando ni filtrando por categoría)
+  get featuredItems(): PublicItem[] {
+    if (this.search || this.categoryId !== 'all') return [];
+    return (this.info?.menu?.items ?? []).filter((i) => i.featured);
+  }
+
+  // Cómo se dibuja un plato según el formato de su sección: sin foto, siempre va en formato lista
+  cardStyle(layout: string | undefined, item: PublicItem): 'grid' | 'list' | 'hero' {
+    if (!item.imageUrl) return 'list';
+    return layout === 'hero' ? 'hero' : layout === 'list' ? 'list' : 'grid';
+  }
+
+  trackSection = (_: number, g: { id: string }) => g.id;
+
   // Con búsqueda se ignora la categoría elegida
-  get grouped(): { name: string; items: PublicItem[] }[] {
+  get grouped(): { id: string; name: string; subtitle: string | null; tagline: string | null; layout: string; items: PublicItem[] }[] {
     const menu = this.info?.menu;
     if (!menu) return [];
     const byCat = new Map<string, PublicItem[]>();
@@ -328,7 +408,66 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     const order = [...menu.categories.map((c) => c.id), ''];
     return order
       .filter((id) => byCat.has(id))
-      .map((id) => ({ name: id ? menu.categories.find((c) => c.id === id)!.name : 'Otros', items: byCat.get(id)! }));
+      .map((id) => {
+        const cat = id ? menu.categories.find((c) => c.id === id) : undefined;
+        return { id, name: cat?.name ?? 'Otros', subtitle: cat?.subtitle ?? null, tagline: cat?.tagline ?? null, layout: cat?.layout ?? 'grid', items: byCat.get(id)! };
+      });
+  }
+
+  // ---- Opciones y precios (carta online: solo se ven, no se piden) ----
+
+  // Ficha de un plato con opciones
+  detailItem: PublicItem | null = null;
+
+  openDetail(item: PublicItem) {
+    if (this.hasOptions(item)) this.detailItem = item;
+  }
+
+  closeDetail() {
+    this.detailItem = null;
+  }
+
+  @HostListener('document:keydown.escape') onEscape() {
+    this.detailItem = null;
+  }
+
+  // Precio más bajo con el que se puede pedir: el base más lo mínimo de cada opción obligatoria
+  priceFrom(item: PublicItem): number {
+    return item.price + item.groups.filter((g) => g.required && g.options.length).reduce((sum, g) => sum + Math.min(...g.options.map((o) => o.priceDelta)), 0);
+  }
+
+  // "Desde" solo si una opción obligatoria cambia el precio (los extras opcionales no cuentan)
+  priceVaries(item: PublicItem): boolean {
+    return item.groups.some((g) => g.required && g.options.length > 1 && Math.min(...g.options.map((o) => o.priceDelta)) !== Math.max(...g.options.map((o) => o.priceDelta)));
+  }
+
+  priceText(item: PublicItem): string {
+    return (this.priceVaries(item) ? 'Desde ' : '') + this.money(this.priceFrom(item));
+  }
+
+  // Lo que suma o resta una opción
+  deltaLabel(delta: number): string {
+    if (!delta) return 'Sin costo';
+    return (delta > 0 ? '+ ' : '− ') + this.money(Math.abs(delta));
+  }
+
+  // ¿El grupo es obligatorio y cambia el precio? Entonces cada opción se muestra con su PRECIO FINAL (no con lo que "suma"),
+  // para que la más barata no parezca gratis.
+  groupSetsPrice(g: { required: boolean; options: { priceDelta: number }[] }): boolean {
+    if (!g.required || g.options.length < 2) return false;
+    const deltas = g.options.map((o) => o.priceDelta);
+    return Math.min(...deltas) !== Math.max(...deltas);
+  }
+
+  // Texto de cada opción en la ficha
+  optionLabel(item: PublicItem, g: PublicGroup, o: { priceDelta: number }): string {
+    if (this.groupSetsPrice(g)) {
+      // precio del plato con esta opción (más lo mínimo de los otros grupos obligatorios)
+      const others = item.groups.filter((x) => x !== g && x.required && x.options.length).reduce((sum, x) => sum + Math.min(...x.options.map((p) => p.priceDelta)), 0);
+      return this.money(item.price + others + o.priceDelta);
+    }
+    if (g.required && !o.priceDelta) return 'Incluido'; // obligatorio y sin cambio de precio: está incluido, no es gratis
+    return this.deltaLabel(o.priceDelta);
   }
 
   hasOptions(item: PublicItem) {

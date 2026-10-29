@@ -6,8 +6,16 @@ export interface MenuItem {
   quantity?: number; // Opcional, ya que no siempre se proporciona
   isPromo?: boolean;
   isFavorite?: boolean; // fijado en la caja del mostrador
+  imageUrl?: string | null; // foto del plato
+  description?: string | null; // descripción corta para la carta
+  badge?: string | null; // etiqueta sobre la foto ("Firma Casa")
+  badgeColor?: string;
+  featured?: boolean; // aparece en "Destacados"
+  visibleInMenu?: boolean; // false = oculto de la carta online y del pedido por QR (undefined = visible)
   categoryId?: string | null;
   modifierGroupIds?: string[];
+  // precio propio de algunas opciones en este plato: { idOpción: precio final }
+  optionPrices?: Record<string, number>;
   availableUnits?: number | null;
 }
 

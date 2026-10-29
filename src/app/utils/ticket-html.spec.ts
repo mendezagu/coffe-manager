@@ -69,4 +69,17 @@ describe('ticket-html (plantilla única de comanda y cuenta)', () => {
     expect(html).toContain("postMessage('closeDialog'");
     expect(html).not.toContain('location.reload');
   });
+
+  it('la cuenta de una venta por mostrador no habla de mesa ni de mozo', () => {
+    const html = buildCuenta(
+      { tableName: 'Mostrador', waiterName: '', counter: { takeaway: true, cashierName: 'Caro' }, lines: [{ name: 'Café', quantity: 1, amount: '$ 1.000' }], summary: [{ label: 'Total:', value: '$ 1.000', big: true }] },
+      brand,
+      { date },
+    );
+    expect(html).toContain('Venta en mostrador');
+    expect(html).toContain('Para llevar');
+    expect(html).toContain('Cobró:');
+    expect(html).not.toContain('Nro de mesa');
+    expect(html).not.toContain('Atendido por');
+  });
 });

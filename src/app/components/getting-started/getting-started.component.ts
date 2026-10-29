@@ -60,15 +60,20 @@ export class GettingStartedComponent implements OnInit {
       next: (s) => {
         this.status = s;
         const c = s.counts;
-        this.tasks = [
+        const counterOnly = this.onboarding.counterOnly;
+        const all: Task[] = [
           { title: 'Cargá tus platos', hint: 'Lo que vendés, con su precio', icon: 'restaurant_menu', link: ['/bienvenida'], done: c.menuItems > 0, cta: 'Cargar platos' },
           { title: 'Creá tus mesas', hint: 'Una por cada mesa del local', icon: 'table_restaurant', link: ['/bienvenida'], done: c.tables > 0, cta: 'Crear mesas' },
           { title: 'Sumá a tu mozo', hint: 'Quien atiende las mesas (si estás solo, tu nombre)', icon: 'person', link: ['/bienvenida'], done: c.waiters > 0, cta: 'Agregar mozo' },
           { title: 'Abrí la caja', hint: 'Hace falta para poder cobrar: abrila para empezar el día', icon: 'point_of_sale', link: ['/cash'], done: c.cashRegisters > 0, cta: 'Abrir caja' },
-          { title: 'Hacé tu primera venta', hint: 'Tocá una mesa, elegí Ordenar y cobrá', icon: 'receipt_long', link: null, done: c.sales > 0, cta: 'Elegí una mesa' },
+          counterOnly
+            ? { title: 'Hacé tu primera venta', hint: 'Tocá los productos y cobrá en el Mostrador', icon: 'receipt_long', link: ['/counter'], done: c.sales > 0, cta: 'Ir al Mostrador' }
+            : { title: 'Hacé tu primera venta', hint: 'Tocá una mesa, elegí Ordenar y cobrá', icon: 'receipt_long', link: null, done: c.sales > 0, cta: 'Elegí una mesa' },
         ];
+        // un negocio de mostrador no necesita mesas ni mozos
+        this.tasks = counterOnly ? all.filter((t) => t.icon !== 'table_restaurant' && t.icon !== 'person') : all;
         // Aparece mientras falte algún paso obligatorio
-        this.visible = isSetupPending(c);
+        this.visible = isSetupPending(c, counterOnly);
       },
       error: () => (this.visible = false),
     });

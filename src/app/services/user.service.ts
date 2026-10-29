@@ -208,7 +208,7 @@ export class UserService {
   private renewToken() {
     if (!this.getToken() || !this.inUse()) return;
     // Si el token ya venció, el servidor responde 401 y el interceptor cierra la sesión (es lo esperado)
-    this.http.post<{ accessToken: string }>(`/auth/refresh`, {}).subscribe({
+    this.http.post<{ accessToken: string }>(`${this.baseUrl}/auth/refresh`, {}).subscribe({
       next: (r) => this.storeToken(r.accessToken),
       error: () => {},
     });

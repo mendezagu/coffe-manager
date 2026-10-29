@@ -22,7 +22,7 @@ import { PlanService } from './services/plan.service';
 
 // Rutas que ve gente sin cuenta del restaurante
 // (y el asistente de primeros pasos, que también va en pantalla completa, sin menú ni barra)
-const PUBLIC_PREFIXES = ['/mesa/', '/hotel/', '/reservar/', '/hotel-portal', '/bienvenida', '/cambiar-clave'];
+const PUBLIC_PREFIXES = ['/mesa/', '/carta/', '/hotel/', '/reservar/', '/hotel-portal', '/bienvenida', '/cambiar-clave'];
 export const isPublicPath = (url: string) => PUBLIC_PREFIXES.some((p) => url.split('?')[0].split('#')[0].startsWith(p));
 
 @Component({
@@ -78,6 +78,8 @@ export class AppComponent {
       this.shift = this.settings.shiftLabel();
       this.refreshStock(); // por si se activó o desactivó el inventario
       this.refreshQrWatch(); // por si se activó o desactivó el pedido por QR
+      // un negocio que no usa mesas no tiene qué hacer en el Inicio de mesas: va al Mostrador
+      if (this.plans.loaded && !this.plans.showTables && this.router.url.startsWith('/home')) this.router.navigateByUrl('/counter');
     });
     this.role$ = this.userService.getRoleState();
     this.user$ = this.userService.getAuthState();

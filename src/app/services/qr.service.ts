@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { RealtimeService } from './realtime.service';
 
@@ -222,25 +222,39 @@ export interface PublicGroup {
   options: PublicOption[];
 }
 
+// Sección de la carta: subtítulo, texto a la derecha del título y cómo se muestran sus platos
+export interface PublicCategory {
+  id: string;
+  name: string;
+  subtitle?: string | null;
+  tagline?: string | null;
+  layout?: 'grid' | 'list' | 'hero' | string;
+}
+
 export interface PublicItem {
   id: string;
   name: string;
   price: number;
   categoryId: string | null;
   isPromo: boolean;
+  imageUrl?: string | null;
+  description?: string | null;
+  badge?: string | null;
+  badgeColor?: string;
+  featured?: boolean;
   soldOut: boolean;
   groups: PublicGroup[];
 }
 
 export interface PublicInfo {
-  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string };
+  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string; coverUrl?: string | null; backgroundUrl?: string | null; coverIntensity?: number | null; backgroundIntensity?: number | null };
   table: { name: string };
   requiresPin: boolean;
   autoConfirm: boolean;
   kitchen: boolean; // el negocio usa la cocina: solo entonces hay "en cocina" y "listo"
   limits: { maxPending: number; minSecondsBetweenSends: number };
   pinOk: boolean;
-  menu?: { categories: { id: string; name: string }[]; items: PublicItem[] };
+  menu?: { categories: PublicCategory[]; items: PublicItem[] };
 }
 
 export type ClientStep = 'RECEIVED' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'REJECTED' | 'CANCELLED';
@@ -276,6 +290,24 @@ export class QrPublicService {
 
   private headers(pin?: string) {
     return pin ? { headers: new HttpHeaders({ 'x-table-pin': pin }) } : {};
+  }
+
+  // Carta online (sin mesa, sin código y sin pedir): se adapta a la misma forma para usar la misma pantalla
+  carta(slug: string): Observable<PublicInfo> {
+    return this.http
+      .get<{ business: PublicInfo['business']; menu: NonNullable<PublicInfo['menu']> }>(`${environment.apiUrl}/public/carta/${encodeURIComponent(slug)}`)
+      .pipe(
+        map((r) => ({
+          business: r.business,
+          table: { name: '' },
+          requiresPin: false,
+          autoConfirm: false,
+          kitchen: false,
+          limits: { maxPending: 0, minSecondsBetweenSends: 0 },
+          pinOk: true,
+          menu: r.menu,
+        })),
+      );
   }
 
   info(token: string, pin?: string): Observable<PublicInfo> {

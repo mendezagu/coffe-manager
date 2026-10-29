@@ -40,6 +40,8 @@ html.dark .bg-white\/20 { background-color: rgba(43, 45, 49, 0.2) !important; }
 html.dark .bg-white\/40 { background-color: rgba(43, 45, 49, 0.4) !important; }
 html.dark .bg-white\/50 { background-color: rgba(43, 45, 49, 0.5) !important; }
 html.dark .bg-white\/70 { background-color: rgba(43, 45, 49, 0.7) !important; }
+html.dark .bg-white\/80 { background-color: rgba(43, 45, 49, 0.8) !important; }
+html.dark .bg-white\/90 { background-color: rgba(43, 45, 49, 0.9) !important; }
 html.dark .bg-white\/95 { background-color: rgba(43, 45, 49, 0.95) !important; }
 html.dark .bg-yellow-100 { background-color: #645525 !important; }
 html.dark .bg-yellow-50 { background-color: #514829 !important; }
@@ -82,6 +84,7 @@ html.dark .hover\:text-cafe-green-700:hover { color: #a7c3b4 !important; }
 html.dark .hover\:text-cafe-red-700:hover { color: #e0a397 !important; }
 html.dark .hover\:text-sage-700:hover { color: #c4c9ce !important; }
 html.dark .hover\:text-sage-800:hover { color: #dbdee1 !important; }
+@media (min-width: 1024px) { html.dark .lg\:border-sage-200 { border-color: #3f4147 !important; } }
 html.dark .placeholder-sage-400::placeholder { color: #80848e !important; }
 html.dark .ring-cafe-amber-200 { --tw-ring-color: #8c5a3e !important; }
 html.dark .ring-cafe-amber-300 { --tw-ring-color: #a56541 !important; }

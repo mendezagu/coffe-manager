@@ -49,8 +49,10 @@ import { InventoryCountComponent } from './pages/inventory/inventory-count.compo
 import { InventoryMovementsComponent } from './pages/inventory/inventory-movements.component';
 import { InventoryProfitComponent } from './pages/inventory/inventory-profit.component';
 import { UpgradeButtonComponent } from './components/upgrade-button/upgrade-button.component';
+import { SizeImportComponent } from './components/size-import/size-import.component';
 import { UpgradeWallComponent } from './components/upgrade-wall/upgrade-wall.component';
 import { PlanPageComponent } from './pages/plan/plan.component';
+import { DragScrollDirective } from './directives/drag-scroll.directive';
 import { PlanBadgeComponent } from './components/plan-badge/plan-badge.component';
 import { PaymentPanelComponent } from './components/payment-panel/payment-panel.component';
 import { ModifierPickerDialogComponent } from './components/modifier-picker-dialog/modifier-picker-dialog.component';
@@ -105,7 +107,9 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     InventoryProfitComponent,
     PaymentPanelComponent,
     PlanBadgeComponent,
+    DragScrollDirective,
     UpgradeButtonComponent,
+    SizeImportComponent,
     UpgradeWallComponent,
     PlanPageComponent,
     ModifierPickerDialogComponent,

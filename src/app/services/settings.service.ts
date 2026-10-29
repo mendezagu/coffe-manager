@@ -48,6 +48,15 @@ export interface TenantSettings {
   commissionEnabled: boolean;
   commissionPct: number;
   // reservas de mesa: el negocio las habilita y define sus reglas (horarios en minutos desde la medianoche)
+  coverImageUrl?: string | null; // portada de la carta
+  backgroundImageUrl?: string | null; // fondo de la carta
+  coverIntensity?: number | null; // cuánto se ve la portada (0 a 100); null = automática
+  backgroundIntensity?: number | null; // cuánto se ve el fondo (0 a 100); null = automático
+  imagesAvailable?: boolean; // el servidor tiene configurado el almacenamiento de fotos
+  menuPublicEnabled?: boolean; // carta online (para ver el menú, sin pedir)
+  salesMode?: 'both' | 'counter' | 'tables'; // cómo vende el negocio: define qué partes de la app se muestran
+  addons?: string[]; // funciones sueltas sumadas al plan
+  menuSlug?: string | null;
   reservationsEnabled: boolean;
   reservationSlug: string | null;
   reservationOpenMin: number;

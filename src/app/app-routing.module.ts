@@ -44,6 +44,8 @@ const routes: Routes = [
   { path: 'logs', component: LogsComponent, canActivate: [roleGuard('admin')] },
   // Pantalla pública del cliente (QR de la mesa): sin sesión; lo único que da acceso es el código del QR
   { path: 'mesa/:token', component: QrOrderComponent },
+  // Carta online: la misma pantalla del QR de mesa, pero solo para ver (sin pedir ni código)
+  { path: 'carta/:slug', component: QrOrderComponent },
   // Pantalla pública del huésped (QR del hotel): sin sesión
   { path: 'hotel/:slug', component: HotelLandingComponent },
   { path: 'reservar/:slug', component: ReserveComponent },

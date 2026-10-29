@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
 import { finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
+import { SettingsService } from './settings.service';
 
 export interface OnboardingTemplate {
   key: string;
@@ -29,15 +30,17 @@ export interface OnboardingStatus {
 
 // Lo mínimo para operar: menú, mesas, al menos un mozo, caja abierta una vez y una primera venta.
 // Hasta cumplirlo el menú lateral muestra solo Inicio y Cerrar sesión, y el checklist no se puede ocultar.
-export const isSetupPending = (c: OnboardingStatus['counts']): boolean =>
-  !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0 && c.cashRegisters > 0 && c.sales > 0);
+// Un negocio que vende solo en mostrador (counterOnly) no necesita mesas ni mozos.
+export const isSetupPending = (c: OnboardingStatus['counts'], counterOnly = false): boolean =>
+  counterOnly ? !(c.menuItems > 0 && c.cashRegisters > 0 && c.sales > 0) : !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0 && c.cashRegisters > 0 && c.sales > 0);
 
 // Lo básico para usar el tablero: menú, mesas y un mozo (sin mozo no se puede ordenar). Con eso se habilita Caja.
-export const isBasicsPending = (c: OnboardingStatus['counts']): boolean => !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0);
+export const isBasicsPending = (c: OnboardingStatus['counts'], counterOnly = false): boolean =>
+  counterOnly ? !(c.menuItems > 0) : !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0);
 
 // La sección Configuración del menú se habilita antes que el resto: falta la primera venta y ya está disponible.
-export const isAdminLocked = (c: OnboardingStatus['counts']): boolean =>
-  !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0 && c.cashRegisters > 0);
+export const isAdminLocked = (c: OnboardingStatus['counts'], counterOnly = false): boolean =>
+  counterOnly ? !(c.menuItems > 0 && c.cashRegisters > 0) : !(c.menuItems > 0 && c.tables > 0 && c.waiters > 0 && c.cashRegisters > 0);
 
 // Asistente de primeros pasos y checklist del inicio: un negocio nuevo lo ve hasta terminarlo o saltearlo.
 @Injectable({ providedIn: 'root' })
@@ -46,6 +49,11 @@ export class OnboardingService {
 
   // Una vez que se sabe que el negocio terminó el asistente no se vuelve a preguntar (hasta cambiar de sesión)
   knownDone = false;
+
+  // ¿El negocio vende solo en mostrador? Entonces no se le piden mesas ni mozos
+  get counterOnly(): boolean {
+    return this.settings.value.salesMode === 'counter';
+  }
 
   // Faltan pasos obligatorios (solo se calcula para el administrador; para el resto es siempre false)
   private pending = new BehaviorSubject<boolean>(false);
@@ -69,7 +77,7 @@ export class OnboardingService {
   private guide = new BehaviorSubject<boolean>(false);
   readonly guideActive$ = this.guide.asObservable();
 
-  constructor(private http: HttpClient, users: UserService) {
+  constructor(private http: HttpClient, users: UserService, private settings: SettingsService) {
     users.getAuthState().subscribe(() => {
       this.knownDone = false;
       this.cache = undefined;
@@ -99,12 +107,13 @@ export class OnboardingService {
     this.inflight = this.http.get<OnboardingStatus>(`${this.url}/status`).pipe(
       tap((s) => {
         this.cache = { at: Date.now(), value: s };
-        this.loaded.next(isSetupPending(s.counts));
+        const only = this.counterOnly;
+        this.loaded.next(isSetupPending(s.counts, only));
         this.knownDone = s.done;
-        this.pending.next(isSetupPending(s.counts));
-        this.basics.next(isBasicsPending(s.counts));
-        this.adminBlocked.next(isAdminLocked(s.counts));
-        this.guide.next(!isBasicsPending(s.counts) && s.counts.sales === 0);
+        this.pending.next(isSetupPending(s.counts, only));
+        this.basics.next(isBasicsPending(s.counts, only));
+        this.adminBlocked.next(isAdminLocked(s.counts, only));
+        this.guide.next(!only && !isBasicsPending(s.counts) && s.counts.sales === 0);
       }),
       finalize(() => (this.inflight = undefined)),
       shareReplay({ bufferSize: 1, refCount: false }),

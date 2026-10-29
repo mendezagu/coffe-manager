@@ -2,20 +2,26 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { SettingsService } from './settings.service';
 
-export type PlanKey = 'basic' | 'pro' | 'benefits';
+export type PlanKey = 'takeaway' | 'basic' | 'pro' | 'benefits';
+// Planes con salón, de menor a mayor. Takeaway va aparte: es para negocios que venden solo en mostrador.
 export const PLAN_ORDER: PlanKey[] = ['basic', 'pro', 'benefits'];
 
 // Qué incluye cada plan (la lista que se le muestra al dueño del local)
 export const PLAN_INFO: Record<PlanKey, { label: string; resume: string; includes: string[] }> = {
+  takeaway: {
+    label: 'Takeaway',
+    resume: 'Para vender en mostrador, sin mesas',
+    includes: ['Mostrador (venta sin mesa)', 'Caja con turnos', 'Carta QR para ver el menú', 'Modificadores y tamaños', 'Balance y reporte básico', 'Sin mesas, mozos ni reservas'],
+  },
   basic: {
     label: 'Esencial',
     resume: 'Para trabajar todo el día',
-    includes: ['Mesas, pedidos y cobro (varios métodos, dividir y cobro parcial)', 'Mostrador (venta sin mesa)', 'Caja con turnos', 'Pantalla de cocina', 'Carta QR para ver el menú', 'Balance y reporte básico'],
+    includes: ['Mesas, pedidos y cobro (varios métodos, dividir y cobro parcial)', 'Caja con turnos', 'Pantalla de cocina', 'Carta QR para ver el menú', 'Balance y reporte básico'],
   },
   pro: {
     label: 'Pro',
     resume: 'Ordená tu negocio y ahorrá plata',
-    includes: ['Todo lo de Esencial', 'Separar cocina y barra', 'Pedido desde la mesa por QR', 'Inventario, recetas y ganancia', 'Modificadores y extras', 'Reportes completos', 'Comisión de mozos', 'Reservas de mesa', 'Historial de acciones (Logs)'],
+    includes: ['Todo lo de Esencial', 'Mostrador (venta sin mesa)', 'Separar cocina y barra', 'Pedido desde la mesa por QR', 'Inventario, recetas y ganancia', 'Modificadores y extras', 'Reportes completos', 'Comisión de mozos', 'Reservas de mesa', 'Historial de acciones (Logs)'],
   },
   benefits: {
     label: 'Beneficios',
@@ -25,6 +31,8 @@ export const PLAN_INFO: Record<PlanKey, { label: string; resume: string; include
 };
 
 export const FEATURE_LABELS: Record<string, string> = {
+  tables: 'Salón: mesas, mozos y sectores',
+  counter_sales: 'Mostrador (venta sin mesa)',
   kitchen_bar_split: 'Separar cocina y barra',
   inventory: 'Inventario y stock',
   qr_ordering: 'Pedido por QR en la mesa',
@@ -38,6 +46,7 @@ export const FEATURE_LABELS: Record<string, string> = {
 
 // Cómo se llama cada función en la lista de lo que incluye cada plan (para resaltar la que se pidió)
 export const FEATURE_GAIN: Record<string, string> = {
+  counter_sales: 'Mostrador (venta sin mesa)',
   kitchen_bar_split: 'Separar cocina y barra',
   qr_ordering: 'Pedido desde la mesa por QR',
   inventory: 'Inventario, recetas y ganancia',
@@ -61,7 +70,7 @@ export class PlanService {
 
   get current(): PlanKey {
     const plan = this.settings.value.plan as PlanKey;
-    return PLAN_ORDER.includes(plan) ? plan : 'pro';
+    return plan === 'takeaway' || PLAN_ORDER.includes(plan) ? plan : 'pro';
   }
 
   get currentLabel(): string {
@@ -70,6 +79,21 @@ export class PlanService {
 
   has(feature: string): boolean {
     return (this.settings.value.features ?? []).includes(feature);
+  }
+
+  // Cómo vende el negocio (sin dato todavía se muestra todo, para que no parpadee)
+  get salesMode(): 'both' | 'counter' | 'tables' {
+    return this.settings.value.salesMode ?? 'both';
+  }
+
+  // ¿Se muestra el salón (Inicio con mesas, mozos, sectores, reservas)? Sí si el plan o un extra lo incluye y el negocio no vende solo en mostrador
+  get showTables(): boolean {
+    return this.salesMode !== 'counter' && !this.locked('tables');
+  }
+
+  // ¿Se muestra el Mostrador? Si el plan no lo incluye pero el negocio también vende en mostrador, se muestra bloqueado (con etiqueta)
+  get showCounter(): boolean {
+    return this.salesMode !== 'tables';
   }
 
   // Bloqueada = ya se sabe el plan y no incluye la función

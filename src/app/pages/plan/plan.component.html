@@ -5,62 +5,98 @@
         <div class="page-header__icon"><mat-icon>workspace_premium</mat-icon></div>
         <div class="min-w-0">
           <h1 class="page-title">Tu plan</h1>
-          <p class="page-sub">Hoy tenés el plan <strong>{{ plans.currentLabel }}</strong>. Elegí el que mejor le queda a tu negocio.</p>
+          <p class="page-sub">Hoy tenés el plan <strong>{{ plans.currentLabel }}</strong>.</p>
         </div>
       </div>
     </div>
   </header>
 
   <div class="px-4 py-8 sm:px-8 sm:py-10">
-    <div class="mx-auto grid max-w-5xl items-stretch gap-5 md:grid-cols-3">
+    <div class="mx-auto max-w-5xl space-y-10">
 
-      <article *ngFor="let p of order"
-        class="relative flex flex-col overflow-hidden rounded-[22px] border bg-white p-6 shadow-soft transition-transform duration-200 md:hover:-translate-y-1"
-        [ngClass]="isCurrent(p) ? 'border-cafe-green-700 ring-2 ring-cafe-green-700/30' : p === 'pro' ? 'border-cafe-green-200' : 'border-sage-200'">
+      <!-- Tu plan de hoy: una tarjeta ancha, con lo que incluye en dos columnas -->
+      <section class="rounded-[24px] border border-cafe-green-700/40 bg-white p-6 shadow-soft sm:p-8" aria-label="Tu plan de hoy">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-12">
+          <div class="flex-none lg:w-[280px]">
+            <div class="flex items-center gap-3">
+              <div class="grid h-14 w-14 place-items-center rounded-2xl"
+                [ngClass]="current === 'benefits' ? 'bg-[#f8ecd0] text-[#7a5200]' : current === 'pro' ? 'bg-cafe-green-700 text-white' : 'bg-cafe-green-50 text-cafe-green-700'">
+                <mat-icon class="!h-8 !w-8 !text-[32px]">{{ icon(current) }}</mat-icon>
+              </div>
+              <span class="rounded-full bg-cafe-green-700 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Tu plan</span>
+            </div>
+            <h2 class="m-0 mt-4 text-2xl font-bold text-sage-900">{{ info[current].label }}</h2>
+            <p class="m-0 mt-1 text-sm text-sage-600">{{ info[current].resume }}</p>
+            <p class="m-0 mt-4 inline-flex items-center gap-2 rounded-xl bg-cafe-green-50 px-3 py-2 text-sm font-bold text-cafe-green-700">
+              <mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>Activo hoy
+            </p>
+          </div>
 
-        <!-- Cinta: el plan que tiene hoy, o el recomendado -->
-        <span *ngIf="isCurrent(p)" class="absolute right-4 top-4 rounded-full bg-cafe-green-700 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Tu plan</span>
-        <span *ngIf="!isCurrent(p) && p === 'pro'" class="absolute right-4 top-4 rounded-full bg-[#12a150] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Recomendado</span>
-
-        <div class="grid h-12 w-12 place-items-center rounded-2xl"
-          [ngClass]="p === 'benefits' ? 'bg-[#f8ecd0] text-[#7a5200]' : p === 'pro' ? 'bg-cafe-green-700 text-white' : 'bg-sage-100 text-sage-600'">
-          <mat-icon class="!h-7 !w-7 !text-[28px]">{{ icon(p) }}</mat-icon>
+          <div class="min-w-0 flex-1 lg:border-l lg:border-sage-200 lg:pl-12">
+            <p class="m-0 mb-4 text-xs font-bold uppercase tracking-wide text-sage-500">{{ base(current) ? base(current) + ', y además' : 'Incluye' }}</p>
+            <ul class="m-0 grid list-none gap-x-8 gap-y-3 p-0 text-sm leading-snug text-sage-800 sm:grid-cols-2">
+              <li *ngFor="let i of items(current)" class="flex items-start gap-2.5">
+                <span class="mt-px grid h-5 w-5 flex-none place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700">
+                  <mat-icon class="!h-[14px] !w-[14px] !text-[14px]">check</mat-icon>
+                </span>
+                {{ i }}
+              </li>
+            </ul>
+          </div>
         </div>
+      </section>
 
-        <h2 class="m-0 mt-4 text-xl font-bold text-sage-900">{{ info[p].label }}</h2>
-        <p class="m-0 mt-1 text-sm text-sage-600">{{ info[p].resume }}</p>
+      <!-- Otros planes -->
+      <section *ngIf="others.length" aria-label="Otros planes">
+        <p role="heading" aria-level="2" class="m-0 text-lg font-bold text-sage-900">{{ current === 'takeaway' ? 'Si sumás mesas y salón' : 'Pasate a un plan más completo' }}</p>
+        <p class="m-0 mb-5 mt-1 text-sm text-sage-600">{{ current === 'takeaway' ? 'Los planes con salón también incluyen el Mostrador desde Pro.' : 'Te lo activamos en el momento, sin perder nada de lo que ya cargaste.' }}</p>
 
-        <div class="my-5 h-px bg-sage-200"></div>
+        <div class="grid items-stretch gap-5" [ngClass]="others.length === 1 ? 'max-w-md' : others.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'">
+          <article *ngFor="let p of others"
+            class="relative flex flex-col rounded-[22px] border bg-white p-6 shadow-soft transition-transform duration-200 md:hover:-translate-y-1"
+            [ngClass]="p === 'pro' ? 'border-cafe-green-200' : 'border-sage-200'">
 
-        <p *ngIf="base(p)" class="m-0 mb-3 text-xs font-bold uppercase tracking-wide text-sage-500">{{ base(p) }}, y además</p>
-        <p *ngIf="!base(p)" class="m-0 mb-3 text-xs font-bold uppercase tracking-wide text-sage-500">Incluye</p>
+            <span *ngIf="p === 'pro'" class="absolute right-4 top-4 rounded-full bg-[#12a150] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#ffffff]">Recomendado</span>
 
-        <ul class="m-0 grid flex-1 content-start list-none gap-2.5 p-0 text-sm leading-snug text-sage-800">
-          <li *ngFor="let i of items(p)" class="flex items-start gap-2.5">
-            <span class="mt-px grid h-5 w-5 flex-none place-items-center rounded-full"
-              [ngClass]="p === 'benefits' ? 'bg-[#f8ecd0] text-[#7a5200]' : 'bg-cafe-green-50 text-cafe-green-700'">
-              <mat-icon class="!h-[14px] !w-[14px] !text-[14px]">check</mat-icon>
-            </span>
-            {{ i }}
-          </li>
-        </ul>
+            <div class="flex items-center gap-3">
+              <div class="grid h-11 w-11 flex-none place-items-center rounded-2xl"
+                [ngClass]="p === 'benefits' ? 'bg-[#f8ecd0] text-[#7a5200]' : p === 'pro' ? 'bg-cafe-green-700 text-white' : 'bg-sage-100 text-sage-600'">
+                <mat-icon class="!h-6 !w-6 !text-2xl">{{ icon(p) }}</mat-icon>
+              </div>
+              <div class="min-w-0">
+                <h3 class="m-0 text-lg font-bold text-sage-900">{{ info[p].label }}</h3>
+                <p class="m-0 text-xs text-sage-600">{{ info[p].resume }}</p>
+              </div>
+            </div>
 
-        <div class="mt-6">
-          <ng-container *ngIf="isAbove(p)">
-            <a *ngIf="url(p) as link; else noPhone" [href]="link" target="_blank" rel="noopener noreferrer"
-              class="flex h-12 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold no-underline transition-colors"
-              [ngClass]="p === 'benefits' ? 'bg-[#e0a100] text-[#2a1c00] hover:bg-[#c99000]' : 'bg-cafe-green-700 text-white shadow-green hover:bg-cafe-green-800'">
-              <mat-icon class="!h-5 !w-5 flex-none !text-xl">chat</mat-icon>Pasarme a {{ info[p].label }}
-            </a>
-            <ng-template #noPhone><p class="m-0 text-center text-xs text-sage-600">Pedile a tu contacto de Tavolapp pasarte a {{ info[p].label }}.</p></ng-template>
-            <p class="m-0 mt-2 text-center text-xs text-sage-500">Te lo activamos en el momento</p>
-          </ng-container>
-          <p *ngIf="isCurrent(p)" class="m-0 flex h-12 items-center justify-center gap-2 rounded-xl bg-cafe-green-50 text-sm font-bold text-cafe-green-700">
-            <mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>Es tu plan de hoy
-          </p>
-          <p *ngIf="!isCurrent(p) && !isAbove(p)" class="m-0 flex h-12 items-center justify-center text-sm text-sage-500">Ya lo tenés incluido</p>
+            <div class="my-4 h-px bg-sage-200"></div>
+
+            <p class="m-0 mb-3 text-xs font-bold uppercase tracking-wide text-sage-500">{{ base(p) ? base(p) + ', y además' : 'Incluye' }}</p>
+            <ul class="m-0 grid flex-1 content-start list-none gap-2 p-0 text-sm leading-snug text-sage-800">
+              <li *ngFor="let i of items(p)" class="flex items-start gap-2.5">
+                <span class="mt-px grid h-5 w-5 flex-none place-items-center rounded-full"
+                  [ngClass]="p === 'benefits' ? 'bg-[#f8ecd0] text-[#7a5200]' : 'bg-cafe-green-50 text-cafe-green-700'">
+                  <mat-icon class="!h-[14px] !w-[14px] !text-[14px]">check</mat-icon>
+                </span>
+                {{ i }}
+              </li>
+            </ul>
+
+            <div class="mt-6">
+              <a *ngIf="url(p) as link; else noPhone" [href]="link" target="_blank" rel="noopener noreferrer"
+                class="flex h-12 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold no-underline transition-colors"
+                [ngClass]="p === 'benefits' ? 'bg-[#e0a100] text-[#2a1c00] hover:bg-[#c99000]' : 'bg-cafe-green-700 text-[#ffffff] shadow-green hover:bg-cafe-green-800'">
+                <mat-icon class="!h-5 !w-5 flex-none !text-xl">chat</mat-icon>Pasarme a {{ info[p].label }}
+              </a>
+              <ng-template #noPhone><p class="m-0 text-center text-xs text-sage-600">Pedile a tu contacto de Tavolapp pasarte a {{ info[p].label }}.</p></ng-template>
+            </div>
+          </article>
         </div>
-      </article>
+      </section>
+
+      <p *ngIf="!others.length" class="m-0 flex items-center justify-center gap-2 rounded-2xl bg-white p-5 text-center text-sm font-bold text-cafe-green-700 shadow-soft">
+        <mat-icon class="!h-5 !w-5 !text-xl">verified</mat-icon>Tenés el plan más completo.
+      </p>
     </div>
   </div>
 </div>

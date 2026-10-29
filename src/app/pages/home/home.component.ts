@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit{
     this.onboarding.status().subscribe({
       next: (s) => {
         this.setupStatus = s;
-        this.gate = isBasicsPending(s.counts) ? 'blocked' : 'free';
+        this.gate = isBasicsPending(s.counts, this.onboarding.counterOnly) ? 'blocked' : 'free';
       },
       // sin el estado no se puede saber qué falta: nunca se bloquea el uso de la app
       error: () => (this.gate = 'free'),

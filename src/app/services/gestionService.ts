@@ -17,6 +17,9 @@ export interface MenuItem {
   categoryId?: string | null;
   // ids de los modificadores que ofrece el plato (el detalle está en getModifiers())
   modifierGroupIds?: string[];
+  // precio propio de algunas opciones en este plato (cada tamaño): { idOpción: precio final }
+  optionPrices?: Record<string, number>;
+  imageUrl?: string | null; // foto del plato
   // opciones elegidas al pedirlo (solo en la selección del mozo) y en las órdenes ya hechas
   selectedModifiers?: OrderModifier[];
   modifiers?: OrderModifier[];
@@ -57,6 +60,17 @@ export interface ModifierGroupInput {
   options?: { id?: string; name: string; priceDelta?: number; active?: boolean }[];
 }
 
+// Datos del plato que se ven en la carta (todos opcionales)
+export interface MenuCarta {
+  description?: string;
+  badge?: string;
+  badgeColor?: string;
+  featured?: boolean;
+  visibleInMenu?: boolean;
+  // precio final de cada tamaño en este plato; sin la clave, la opción suma lo de siempre
+  optionPrices?: Record<string, number | null>;
+}
+
 export type Destination = 'KITCHEN' | 'BAR';
 
 export interface Category {
@@ -64,6 +78,10 @@ export interface Category {
   name: string;
   position: number;
   destination: Destination;
+  // carta: subtítulo, texto a la derecha del título y formato de los platos
+  subtitle?: string | null;
+  tagline?: string | null;
+  layout?: 'grid' | 'list' | 'hero';
   itemsCount?: number;
 }
 
@@ -315,6 +333,11 @@ checkout(
     return this.http.post<any>(`${this.apiUrl}/counter/checkout`, body);
   }
 
+  // Muestra u oculta un plato en la carta online y en el pedido por QR
+  setMenuVisibility(itemId: string, visibleInMenu: boolean): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { visibleInMenu }).pipe(tap(() => this.menuCache$.next(null)));
+  }
+
   // Fija o quita un producto de los favoritos de la caja del mostrador (solo admin)
   setFavorite(itemId: string, isFavorite: boolean): Observable<MenuItem> {
     return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { isFavorite }).pipe(tap(() => this.menuCache$.next(null)));
@@ -354,7 +377,7 @@ checkout(
     return this.http.post<Category>(`${this.apiUrl}/categories`, { name, destination });
   }
 
-  editCategory(id: string, changes: { name?: string; destination?: Destination }): Observable<Category> {
+  editCategory(id: string, changes: { name?: string; destination?: Destination; subtitle?: string; tagline?: string; layout?: string }): Observable<Category> {
     return this.http.put<Category>(`${this.apiUrl}/categories/${id}`, changes);
   }
 
@@ -396,11 +419,18 @@ refreshMenu(): Observable<MenuItem[]> {
   }
 
   // categoryId: id para asignarla, null para quitarla
-  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false, categoryId: string | null = null, modifierGroupIds?: string[]): Observable<MenuItem> {
+  editMenuItem(itemId: string, newName: string, newPrice: number, isPromo: boolean = false, categoryId: string | null = null, modifierGroupIds?: string[], carta?: MenuCarta): Observable<MenuItem> {
     // modifierGroupIds: lista completa de lo que ofrece el plato; sin enviarla no se tocan
-    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo, categoryId, modifierGroupIds }).pipe(
+    return this.http.put<MenuItem>(`${this.apiUrl}/menu/${itemId}`, { name: newName, price: newPrice, isPromo, categoryId, modifierGroupIds, ...(carta ?? {}) }).pipe(
       tap(() => this.menuCache$.next(null)), // Invalidar caché
       catchError(this.handleError)
+    );
+  }
+
+  // Carga platos con precio por tamaño desde una planilla (crea o actualiza por nombre)
+  importSizes(input: { groupName: string; sizes: string[]; rows: { name: string; category: string; prices: (number | null)[] }[] }): Observable<{ created: number; updated: number; total: number; groupName: string }> {
+    return this.http.post<{ created: number; updated: number; total: number; groupName: string }>(`${this.apiUrl}/menu/import-sizes`, input).pipe(
+      tap(() => this.menuCache$.next(null)),
     );
   }
 

@@ -43,7 +43,7 @@
 
       <!-- Operación: lo que se usa todo el día -->
       <p class="px-3 mt-4 mb-1 text-[11px] font-bold uppercase tracking-wider text-sage-400">Operación</p>
-      <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar'" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+      <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar' && plans.showTables" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
         <mat-icon fontIcon="storefront"></mat-icon>
         Inicio
         <app-plan-badge plan="basic"></app-plan-badge>
@@ -58,8 +58,8 @@
       </ng-container>
 
       <!-- Mostrador: vender y cobrar sin mesa -->
-      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && !(onboarding.basicsPending$ | async)">
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'counter', link: '/counter', icon: 'local_cafe', label: 'Mostrador', plan: 'basic' }"></ng-container>
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && plans.showCounter && !(onboarding.basicsPending$ | async)">
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'counter', link: '/counter', icon: 'local_cafe', label: 'Mostrador', feature: 'counter_sales' }"></ng-container>
       </ng-container>
 
       <!-- Caja se habilita en cuanto hay menú, mesas y mozo: hace falta para completar los primeros pasos -->
@@ -68,7 +68,7 @@
       </ng-container>
 
       <!-- Reservas: si el negocio las activó, o bloqueadas (con etiqueta) si su plan no las incluye -->
-      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && ((settings.settings$ | async)?.reservationsActive || plans.locked('reservations')) && !(onboarding.basicsPending$ | async)">
+      <ng-container *ngIf="(role === 'admin' || role === 'cashier') && plans.showTables && ((settings.settings$ | async)?.reservationsActive || plans.locked('reservations')) && !(onboarding.basicsPending$ | async)">
         <ng-container *ngTemplateOutlet="navItem; context: { key: 'reservations', link: '/reservations', icon: 'event_seat', label: 'Reservas', feature: 'reservations' }"></ng-container>
       </ng-container>
 

@@ -66,6 +66,29 @@
             <option value="KITCHEN">Cocina</option>
             <option value="BAR">Barra</option>
           </select>
+          <!-- Cómo se ve la sección en la carta -->
+          <div class="w-full basis-full grid gap-2.5 rounded-xl bg-sage-50 p-3 sm:grid-cols-2">
+            <label class="block">
+              <span class="block text-xs font-bold text-sage-500 mb-1">Subtítulo (opcional)</span>
+              <input [(ngModel)]="c.editSubtitle" maxlength="60" placeholder="Ej: Granos tostados en casa" class="w-full px-3 py-1.5 border border-sage-300 rounded-lg text-sm bg-white" />
+            </label>
+            <label class="block">
+              <span class="block text-xs font-bold text-sage-500 mb-1">Texto a la derecha (opcional)</span>
+              <input [(ngModel)]="c.editTagline" maxlength="30" placeholder="Ej: Favoritos del día" class="w-full px-3 py-1.5 border border-sage-300 rounded-lg text-sm bg-white" />
+            </label>
+            <div class="sm:col-span-2">
+              <span class="block text-xs font-bold text-sage-500 mb-1">Cómo se muestran sus platos</span>
+              <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Formato de la sección">
+                <button *ngFor="let l of layouts" type="button" (click)="c.editLayout = l.key" role="radio" [attr.aria-checked]="c.editLayout === l.key"
+                  class="flex-1 min-w-[120px] rounded-lg border px-3 py-2 text-left text-sm transition-colors"
+                  [ngClass]="c.editLayout === l.key ? 'border-cafe-green-700 bg-cafe-green-50 text-cafe-green-800' : 'border-sage-200 bg-white text-sage-700 hover:bg-sage-50'">
+                  <span class="block font-bold">{{ l.label }}</span>
+                  <span class="block text-[11px] text-sage-500">{{ l.hint }}</span>
+                </button>
+              </div>
+              <p class="m-0 mt-1 text-[11px] text-sage-500">Los platos sin foto siempre se muestran en lista.</p>
+            </div>
+          </div>
           <button type="button" (click)="saveEdit(c)" class="px-3 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold rounded-lg">Guardar</button>
           <button type="button" (click)="cancelEdit(c)" class="px-3 py-1.5 border border-sage-200 text-sage-700 text-sm font-medium rounded-lg hover:bg-sage-50">Cancelar</button>
         </ng-container>

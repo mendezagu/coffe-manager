@@ -15,6 +15,7 @@ import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
 import { PlanService } from 'src/app/services/plan.service';
+import { MenuImageService } from 'src/app/services/menu-image.service';
 
 export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users' | 'qr';
 
@@ -65,6 +66,14 @@ export class AdminPanelComponent {
   // Pestañas de las listas: mesas por sector y platos por categoría ('all' = todas)
   tableTab = 'all';
   menuTab = 'all';
+  // Filtro de la lista del menú por visibilidad en la carta: todos, solo los que se ven o solo los ocultos
+  menuVisibility: 'all' | 'visible' | 'hidden' = 'all';
+  visFilterOpen = false; // menú desplegable del filtro
+  readonly visOptions: { key: 'all' | 'visible' | 'hidden'; label: string; icon: string }[] = [
+    { key: 'all', label: 'Todos', icon: 'list' },
+    { key: 'visible', label: 'Visibles en la carta', icon: 'visibility' },
+    { key: 'hidden', label: 'Ocultos de la carta', icon: 'visibility_off' },
+  ];
 
   get tableTabs(): FilterTab[] {
     const tabs: FilterTab[] = [{ key: 'all', label: 'Todas', count: this.tables.length }];
@@ -113,6 +122,25 @@ export class AdminPanelComponent {
   categories: Category[] = [];
   modifierGroups: ModifierGroup[] = [];
   editItemId?: string;
+  // Datos de la carta del plato que se edita
+  editItemDescription = '';
+  editItemBadge = '';
+  editItemBadgeColor = 'terracotta';
+  editItemFeatured = false;
+  editItemVisible = true;
+  // Precio final de cada opción en este plato ("Chico" 3800, "Jarro" 4000…). Vacío = ese tamaño no se ofrece.
+  // Solo para los grupos obligatorios de una opción (el tamaño) que el plato ofrece y tiene "precios propios" activados.
+  showSizeImport = false; // panel de carga por planilla
+  editOwnGroups = new Set<string>();
+  editOptionPrices: Record<string, number | null> = {};
+  readonly badgeColors: { key: string; label: string; swatch: string }[] = [
+    { key: 'terracotta', label: 'Terracota', swatch: 'bg-[#c2703d]' },
+    { key: 'green', label: 'Verde', swatch: 'bg-[#1f6f4a]' },
+    { key: 'red', label: 'Rojo', swatch: 'bg-[#d62f2f]' },
+    { key: 'blue', label: 'Azul', swatch: 'bg-[#2f6fd6]' },
+    { key: 'amber', label: 'Ámbar', swatch: 'bg-[#d98a14]' },
+    { key: 'dark', label: 'Oscuro', swatch: 'bg-[#22322a]' },
+  ];
   editItemName: string = '';
   editItemPrice: number = 0;
   editItemIsPromo: boolean = false;
@@ -135,7 +163,7 @@ export class AdminPanelComponent {
   // Tarjetas del inicio. El contador sale de los datos que ya carga este componente.
   get cards(): SectionCard[] {
     const uncategorized = this.categories.length > 0 ? this.menuItems.filter((m) => !m.categoryId).length : 0;
-    return SECTIONS.map((s) => {
+    return SECTIONS.filter((s) => this.plans.showTables || !['tables', 'sectors', 'waiters', 'qr'].includes(s.key)).map((s) => {
       const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, modifiers: this.modifierGroups.length, waiters: this.waiters.length, users: this.users.length, qr: this.tables.length }[s.key];
       return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : s.key === 'qr' && !this.settings.value.qrActive ? 'Desactivado' : '' };
     });
@@ -169,6 +197,7 @@ export class AdminPanelComponent {
     private snackBar: MatSnackBar,
     private settings: SettingsService,
     public plans: PlanService,
+    private menuImages: MenuImageService,
     route: ActivatedRoute
   ) {
     route.paramMap.subscribe((params) => {
@@ -198,10 +227,11 @@ export class AdminPanelComponent {
   get filteredMenuItems() {
     const tab = this.activeMenuTab;
     const inTab = tab === 'all' ? this.menuItems : this.menuItems.filter((item) => (tab === 'none' ? !item.categoryId : item.categoryId === tab));
+    const byVisibility = inTab.filter((item) => this.menuVisibility === 'all' || (this.menuVisibility === 'visible') === this.isVisible(item));
     if (!this.searchTerm) {
-      return inTab;
+      return byVisibility;
     }
-    return inTab.filter(item =>
+    return byVisibility.filter(item =>
       item.name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
@@ -365,6 +395,54 @@ export class AdminPanelComponent {
       : [...this.editItemGroupIds, id];
   }
 
+  // Grupos que pueden tener precio propio por plato: obligatorios y de una sola opción (el tamaño)
+  isSizeGroup(g: ModifierGroup): boolean {
+    return g.required && g.selection === 'SINGLE';
+  }
+
+  // Activa o desactiva los precios propios de un grupo; al activar, parte de lo que hoy cuesta cada opción
+  toggleOwnPrices(g: ModifierGroup) {
+    if (this.editOwnGroups.has(g._id)) {
+      this.editOwnGroups.delete(g._id);
+      g.options.forEach((o) => delete this.editOptionPrices[o._id]);
+      return;
+    }
+    this.editOwnGroups.add(g._id);
+    g.options.filter((o) => o.active).forEach((o) => (this.editOptionPrices[o._id] = Math.round(((Number(this.editItemPrice) || 0) + o.priceDelta) * 100) / 100));
+  }
+
+  // Los precios que se guardan: solo los de grupos ofrecidos con precios propios, y sin los vacíos
+  private ownPricesToSave(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const g of this.modifierGroups) {
+      if (!this.editOwnGroups.has(g._id) || !this.editItemGroupIds.includes(g._id)) continue;
+      for (const o of g.options) {
+        const v = this.editOptionPrices[o._id];
+        if (v !== null && v !== undefined && (v as unknown) !== '' && Number.isFinite(Number(v))) out[o._id] = Number(v);
+      }
+    }
+    return out;
+  }
+
+  // El precio base del plato pasa a ser el más bajo de sus tamaños (es el "Desde" de la carta)
+  get ownPricesMin(): number | null {
+    const v = Object.values(this.ownPricesToSave());
+    return v.length ? Math.min(...v) : null;
+  }
+
+  // Después de cargar una planilla: platos, tamaños y categorías pueden haber cambiado
+  onSizesImported() {
+    this.showSizeImport = false;
+    this.loadModifierGroups();
+    this.loadCategories();
+    this.gestionService.refreshMenu().subscribe((menuItems) => (this.menuItems = menuItems));
+    this.categoriesPanel?.load();
+  }
+
+  hasOwnPrices(item: MenuItem): boolean {
+    return !!item.optionPrices && Object.keys(item.optionPrices).length > 0;
+  }
+
   loadCategories() {
     this.gestionService.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
   }
@@ -394,6 +472,100 @@ export class AdminPanelComponent {
     }
   }
 
+  // ¿Se ve en la carta online y en el pedido por QR? (los platos de antes no tienen el dato: se ven)
+  isVisible(item: MenuItem): boolean {
+    return item.visibleInMenu !== false;
+  }
+
+  // Cierra el menú del filtro (clic afuera o Escape). Es un método que no devuelve nada: una expresión que da false en el template cancela el clic (rompía todos los checkboxes)
+  closeVisFilter(event?: Event, host?: HTMLElement): void {
+    if (this.visFilterOpen && (!event || !host || !host.contains(event.target as Node))) this.visFilterOpen = false;
+  }
+
+  setVisibility(v: 'all' | 'visible' | 'hidden') {
+    this.menuVisibility = v;
+    this.visFilterOpen = false;
+  }
+
+  visCountOf(v: 'all' | 'visible' | 'hidden'): number {
+    return v === 'all' ? this.menuItems.length : v === 'visible' ? this.visibleCount : this.hiddenCount;
+  }
+
+  get visFilterLabel(): string {
+    return this.visOptions.find((o) => o.key === this.menuVisibility)?.label ?? 'Todos';
+  }
+
+  get visibleCount(): number {
+    return this.menuItems.filter((m) => this.isVisible(m)).length;
+  }
+
+  get hiddenCount(): number {
+    return this.menuItems.length - this.visibleCount;
+  }
+
+  // Interruptor de cada fila: cambia al instante y vuelve atrás si el servidor no lo guarda
+  toggleVisibility(item: MenuItem) {
+    const next = !this.isVisible(item);
+    item.visibleInMenu = next;
+    this.gestionService.setMenuVisibility(item._id, next).subscribe({
+      next: () => this.snackBar.open(next ? 'Visible en la carta' : 'Oculto de la carta', 'Cerrar', { duration: 2000 }),
+      error: () => {
+        item.visibleInMenu = !next;
+        this.snackBar.open('No se pudo cambiar. Probá de nuevo.', 'Cerrar', { duration: 3500 });
+      },
+    });
+  }
+
+  // Foto del plato: id del que se está subiendo o quitando (para mostrar "Subiendo…")
+  imageBusy: string | null = null;
+
+  // El plato que se está editando en el diálogo (para mostrar y cambiar su foto)
+  get editItem(): MenuItem | undefined {
+    return this.menuItems.find((m) => m._id === this.editItemId);
+  }
+
+  badgeSwatch(key: string): string {
+    return this.badgeColors.find((c) => c.key === key)?.swatch ?? 'bg-[#c2703d]';
+  }
+
+  get imagesAvailable(): boolean {
+    return !!this.settings.value.imagesAvailable;
+  }
+
+  async onImagePicked(item: MenuItem, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // permite volver a elegir la misma foto
+    if (!file) return;
+    this.imageBusy = item._id;
+    try {
+      const updated = await this.menuImages.upload(item._id, file);
+      item.imageUrl = updated.imageUrl ?? null;
+      this.gestionService.refreshMenu().subscribe({ error: () => {} });
+      this.snackBar.open('Foto guardada', 'Cerrar', { duration: 2500 });
+    } catch (e: any) {
+      const msg = e?.error?.message ?? e?.message;
+      this.snackBar.open(Array.isArray(msg) ? msg.join('. ') : msg || 'No se pudo guardar la foto', 'Cerrar', { duration: 5000 });
+    } finally {
+      this.imageBusy = null;
+    }
+  }
+
+  removeImage(item: MenuItem) {
+    this.imageBusy = item._id;
+    this.menuImages.remove(item._id).subscribe({
+      next: () => {
+        item.imageUrl = null;
+        this.imageBusy = null;
+        this.gestionService.refreshMenu().subscribe({ error: () => {} });
+      },
+      error: () => {
+        this.imageBusy = null;
+        this.snackBar.open('No se pudo quitar la foto', 'Cerrar', { duration: 4000 });
+      },
+    });
+  }
+
   startEditingMenu(item: MenuItem) {
     this.editItemId = item._id;
     this.editItemName = item.name;
@@ -401,12 +573,28 @@ export class AdminPanelComponent {
     this.editItemIsPromo = !!item.isPromo;
     this.editItemCategoryId = item.categoryId ?? '';
     this.editItemGroupIds = [...(item.modifierGroupIds ?? [])];
+    this.editItemDescription = item.description ?? '';
+    this.editItemBadge = item.badge ?? '';
+    this.editItemBadgeColor = item.badgeColor ?? 'terracotta';
+    this.editItemFeatured = !!item.featured;
+    this.editItemVisible = item.visibleInMenu !== false;
+    this.editOptionPrices = { ...(item.optionPrices ?? {}) };
+    this.editOwnGroups = new Set(this.modifierGroups.filter((g) => g.options.some((o) => o._id in this.editOptionPrices)).map((g) => g._id));
     this.openEditDialog(this.editMenuDialog, () => (this.editItemId = undefined));
   }
 
   saveMenuItemEdit() {
     if (this.editItemId !== undefined) {
-      this.gestionService.editMenuItem(this.editItemId, this.editItemName, this.editItemPrice, this.editItemIsPromo, this.editItemCategoryId || null, this.editItemGroupIds).subscribe(() => {
+      const optionPrices = this.ownPricesToSave();
+      const lowest = Object.values(optionPrices).length ? Math.min(...Object.values(optionPrices)) : null;
+      this.gestionService.editMenuItem(this.editItemId, this.editItemName, lowest ?? this.editItemPrice, this.editItemIsPromo, this.editItemCategoryId || null, this.editItemGroupIds, {
+        optionPrices,
+        description: this.editItemDescription,
+        badge: this.editItemBadge,
+        badgeColor: this.editItemBadgeColor,
+        featured: this.editItemFeatured,
+        visibleInMenu: this.editItemVisible,
+      }).subscribe(() => {
         this.gestionService.refreshMenu().subscribe((menuItems) => {
           this.menuItems = menuItems;
         });

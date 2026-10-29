@@ -7,6 +7,7 @@ import { OnboardingService, OnboardingStatus, OnboardingTemplate, isSetupPending
 import { SettingsService } from 'src/app/services/settings.service';
 import { REGIONS, Region } from 'src/app/pages/settings/settings.component';
 import { shrinkImage } from 'src/app/utils/shrink-image';
+import { MenuImageService } from 'src/app/services/menu-image.service';
 
 const STEPS = [
   { label: 'Tu negocio', icon: 'storefront' },
@@ -70,6 +71,7 @@ export class OnboardingComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
+    private menuImages: MenuImageService,
   ) {}
 
   ngOnInit() {
@@ -94,13 +96,13 @@ export class OnboardingComponent implements OnInit {
       next: (s) => {
         this.status = s;
         // Si ya está todo hecho, no tiene nada que hacer acá (si salteó el asistente pero falta algo, sigue acá)
-        if (first && s.done && !isSetupPending(s.counts)) return void this.router.navigate(['/home']);
+        if (first && s.done && !isSetupPending(s.counts, this.counterOnly)) return void this.router.navigate([this.homeUrl]);
         if (first) {
           if (s.counts.tables > 0) this.tableCount = 0;
           // Arranca en lo primero que falta (o en el paso que se tocó en la lista de primeros pasos)
           const wanted = Number(this.route.snapshot.queryParamMap.get('step'));
           const c = s.counts;
-          const auto = c.menuItems === 0 ? (c.tables > 0 ? 1 : 0) : c.tables === 0 ? 2 : c.waiters === 0 ? 3 : 4;
+          const auto = this.counterOnly ? (c.menuItems === 0 ? 0 : 4) : c.menuItems === 0 ? (c.tables > 0 ? 1 : 0) : c.tables === 0 ? 2 : c.waiters === 0 ? 3 : 4;
           this.step = Number.isInteger(wanted) && wanted >= 0 && wanted < STEPS.length && this.route.snapshot.queryParamMap.has('step') ? wanted : auto;
         }
         this.loading = false;
@@ -125,10 +127,28 @@ export class OnboardingComponent implements OnInit {
     return this.steps[this.step];
   }
 
+  // Un negocio que vende solo en mostrador no pasa por los pasos de mesas y equipo
+  get counterOnly(): boolean {
+    return this.settings.value.salesMode === 'counter';
+  }
+
+  get homeUrl(): string {
+    return this.counterOnly ? '/counter' : '/home';
+  }
+
+  // Los pasos que se muestran en el progreso, cada uno con su posición real
+  get visibleSteps(): { label: string; icon: string; idx: number }[] {
+    return this.steps.map((s, idx) => ({ ...s, idx })).filter((s) => !(this.counterOnly && (s.idx === 2 || s.idx === 3)));
+  }
+
+  get visiblePosition(): number {
+    return this.visibleSteps.findIndex((s) => s.idx === this.step) + 1;
+  }
+
   back() {
     if (this.busy || this.step === 0) return;
     this.error = '';
-    this.goTo(this.step - 1);
+    this.goTo(this.counterOnly && this.step === 4 ? 1 : this.step - 1);
   }
 
   private goTo(step: number) {
@@ -157,13 +177,13 @@ export class OnboardingComponent implements OnInit {
       case 0:
         return 'Guardar y seguir';
       case 1:
-        return 'Seguir con las mesas';
+        return this.counterOnly ? 'Seguir' : 'Seguir con las mesas';
       case 2:
         return this.tableCount > 0 ? `Crear ${this.tableCount} ${this.tableCount === 1 ? 'mesa' : 'mesas'}` : 'Seguir';
       case 3:
         return 'Seguir';
       default:
-        return 'Ir a mis mesas';
+        return this.counterOnly ? 'Ir al Mostrador' : 'Ir a mis mesas';
     }
   }
 
@@ -171,7 +191,7 @@ export class OnboardingComponent implements OnInit {
     if (this.busy || !this.canContinue) return;
     this.error = '';
     if (this.step === 0) return this.saveBusiness();
-    if (this.step === 1) return this.goTo(2);
+    if (this.step === 1) return this.goTo(this.counterOnly ? 4 : 2);
     if (this.step === 2) return this.saveTables();
     if (this.step === 3) return this.goTo(4);
     this.finish();
@@ -188,7 +208,7 @@ export class OnboardingComponent implements OnInit {
     this.settings.update({ onboardingDone: true }).subscribe({
       next: () => {
         this.onboarding.knownDone = true;
-        this.router.navigate(['/home']);
+        this.router.navigate([this.homeUrl]);
       },
       error: (err) => {
         this.busy = false;
@@ -348,6 +368,57 @@ export class OnboardingComponent implements OnInit {
     });
   }
 
+  // ---- Fotos de los platos (opcionales): se pueden poner al agregar un plato o después, en cada fila ----
+
+  get imagesAvailable(): boolean {
+    return !!this.settings.value.imagesAvailable;
+  }
+
+  newPhoto: File | null = null;
+  newPhotoPreview: string | null = null;
+  photoBusyId: string | null = null;
+
+  onNewPhoto(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Elegí una foto (JPG, PNG o WebP).';
+      return;
+    }
+    this.error = '';
+    this.clearNewPhoto();
+    this.newPhoto = file;
+    this.newPhotoPreview = URL.createObjectURL(file);
+  }
+
+  clearNewPhoto() {
+    if (this.newPhotoPreview) URL.revokeObjectURL(this.newPhotoPreview);
+    this.newPhoto = null;
+    this.newPhotoPreview = null;
+  }
+
+  // Foto de un plato que ya está en la lista
+  async onItemPhoto(item: MenuItem, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.photoBusyId = item._id;
+    this.error = '';
+    try {
+      const updated = await this.menuImages.upload(item._id, file);
+      item.imageUrl = updated.imageUrl ?? null;
+      this.reload();
+    } catch (e: any) {
+      const msg = e?.error?.message ?? e?.message;
+      this.error = (Array.isArray(msg) ? msg.join('. ') : msg) || 'No se pudo guardar la foto. Probá de nuevo.';
+    } finally {
+      this.photoBusyId = null;
+    }
+  }
+
   get canAddItem(): boolean {
     return this.newName.trim().length > 0 && this.newPrice !== null && this.newPrice >= 0;
   }
@@ -360,10 +431,20 @@ export class OnboardingComponent implements OnInit {
     this.resolveCategory(wanted).subscribe({
       next: (categoryId) => {
         this.gestion.addMenuItem(this.newName.trim(), Number(this.newPrice), false, categoryId).subscribe({
-          next: () => {
+          next: async (created) => {
+            // la foto es opcional: si falla, el plato queda cargado igual y se avisa
+            const photo = this.newPhoto;
+            if (photo && this.imagesAvailable) {
+              try {
+                await this.menuImages.upload(created._id, photo);
+              } catch {
+                this.error = 'El plato se agregó, pero la foto no se pudo subir. Probá de nuevo desde la lista o más tarde en Administrar → Menú.';
+              }
+            }
             this.busy = false;
             this.newName = '';
             this.newPrice = null;
+            this.clearNewPhoto();
             this.reload();
           },
           error: () => {

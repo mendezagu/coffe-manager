@@ -197,11 +197,18 @@
     <!-- ADMINISTRAR MENU -->
     <div *ngIf="section === 'menu'" class="bg-white rounded-card shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
+          <!-- Cargar una planilla con precio por tamaño -->
+          <app-size-import *ngIf="showSizeImport" [existing]="menuItems" (imported)="onSizesImported()" (closed)="showSizeImport = false"></app-size-import>
+
           <!-- Agregar ítem -->
           <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
             <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">add_circle</mat-icon>
               Agregar Ítem al Menú
+              <button *ngIf="!showSizeImport" type="button" (click)="showSizeImport = true" class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-100">
+                <mat-icon class="!w-4 !h-4 !text-base">table_chart</mat-icon>
+                Cargar planilla con tamaños
+              </button>
             </h3>
             <div class="flex flex-col sm:flex-row gap-3">
               <input class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" [(ngModel)]="newItemName" placeholder="Nombre del ítem (ej: Café Americano)" />
@@ -236,6 +243,28 @@
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista del Menú
           </h3>
+          <!-- Filtro desplegable: qué se ve y qué está oculto en la carta -->
+          <div class="relative mb-3 flex justify-end" #visMenu (document:click)="closeVisFilter($event, visMenu)" (keydown.escape)="closeVisFilter()">
+            <button type="button" (click)="visFilterOpen = !visFilterOpen" [attr.aria-expanded]="visFilterOpen" aria-haspopup="menu" aria-label="Filtrar por visibilidad en la carta"
+              class="inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-sm font-bold transition-colors"
+              [ngClass]="menuVisibility !== 'all' ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:bg-sage-100'">
+              <mat-icon class="!h-5 !w-5 !text-xl">filter_list</mat-icon>
+              <span *ngIf="menuVisibility !== 'all'">{{ visFilterLabel }}</span>
+              <mat-icon class="!h-5 !w-5 !text-xl transition-transform" [class.rotate-180]="visFilterOpen">expand_more</mat-icon>
+            </button>
+            <div *ngIf="visFilterOpen" role="menu" aria-label="Visibilidad en la carta"
+              class="absolute right-0 top-full z-20 mt-1.5 w-64 overflow-hidden rounded-xl border border-sage-200 bg-white py-1 shadow-soft-lg">
+              <p class="m-0 px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-sage-400">Mostrar en la lista</p>
+              <button *ngFor="let o of visOptions" type="button" role="menuitemradio" [attr.aria-checked]="menuVisibility === o.key" (click)="setVisibility(o.key)"
+                class="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-sage-50"
+                [ngClass]="menuVisibility === o.key ? 'font-bold text-cafe-green-700' : 'text-sage-800'">
+                <mat-icon class="!h-5 !w-5 !text-xl">{{ o.icon }}</mat-icon>
+                <span class="flex-1">{{ o.label }}</span>
+                <span class="text-xs text-sage-500">{{ visCountOf(o.key) }}</span>
+                <mat-icon *ngIf="menuVisibility === o.key" class="!h-5 !w-5 !text-xl">check</mat-icon>
+              </button>
+            </div>
+          </div>
           <app-filter-tabs *ngIf="categories.length > 0" class="mb-3 block" label="Platos por categoría" [tabs]="menuTabsList" [selected]="activeMenuTab" (selectedChange)="menuTab = $event"></app-filter-tabs>
           <div class="overflow-x-auto rounded-card shadow-soft bg-white">
             <table class="w-full">
@@ -255,6 +284,12 @@
                   </th>
                   <th class="px-6 py-4 text-left font-medium text-xs text-sage-500">
                     <div class="flex items-center gap-2">
+                      <mat-icon class="!w-4 !h-4 !text-base">visibility</mat-icon>
+                      En la carta
+                    </div>
+                  </th>
+                  <th class="px-6 py-4 text-left font-medium text-xs text-sage-500">
+                    <div class="flex items-center gap-2">
                       <mat-icon class="!w-4 !h-4 !text-base">settings</mat-icon>
                       Acciones
                     </div>
@@ -267,16 +302,43 @@
                     [class.bg-sage-50]="i % 2 === 0">
 
                   <td class="px-6 py-4 text-sage-900 font-bold">
+                    <div class="flex items-center gap-3">
+                      <!-- Foto del plato: tocar para elegir o cambiar -->
+                      <ng-container *ngIf="imagesAvailable; else noPhoto">
+                        <label class="relative grid h-14 w-14 flex-none cursor-pointer place-items-center overflow-hidden rounded-xl border border-sage-200 bg-sage-50 text-sage-400 hover:border-cafe-green-700"
+                          [attr.title]="item.imageUrl ? 'Cambiar la foto' : 'Agregar una foto'">
+                          <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="'Foto de ' + item.name" class="h-full w-full object-cover" loading="lazy" />
+                          <mat-icon *ngIf="!item.imageUrl && imageBusy !== item._id" class="!h-6 !w-6 !text-2xl">add_a_photo</mat-icon>
+                          <span *ngIf="imageBusy === item._id" class="absolute inset-0 grid place-items-center bg-white/80 text-[10px] font-bold text-cafe-green-700">Subiendo…</span>
+                          <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="imageBusy === item._id" (change)="onImagePicked(item, $event)" [attr.aria-label]="'Foto de ' + item.name" />
+                        </label>
+                      </ng-container>
+                      <ng-template #noPhoto></ng-template>
+                      <div class="min-w-0">
                     {{ item.name }}
                     <span *ngIf="item.isPromo" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold align-middle">Promo</span>
                     <span *ngIf="categoryName(item.categoryId)" class="ml-2 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-[10px] font-bold align-middle">{{ categoryName(item.categoryId) }}</span>
                     <span *ngIf="item.modifierGroupIds?.length" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">{{ item.modifierGroupIds!.length }} {{ item.modifierGroupIds!.length === 1 ? 'modificador' : 'modificadores' }}</span>
+                        <button *ngIf="imagesAvailable && item.imageUrl" type="button" (click)="removeImage(item)" [disabled]="imageBusy === item._id"
+                          class="ml-2 align-middle text-[11px] font-medium text-cafe-red-700 underline">Quitar foto</button>
+                      </div>
+                    </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
                       <mat-icon class="!w-4 !h-4 !text-base text-cafe-green-600">payments</mat-icon>
-                      <span class="text-cafe-green-700 font-bold">${{ item.price }}</span>
+                      <span *ngIf="hasOwnPrices(item)" class="text-[11px] text-sage-500">desde</span><span class="text-cafe-green-700 font-bold">${{ item.price }}</span>
                     </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <button type="button" role="switch" [attr.aria-checked]="isVisible(item)" (click)="toggleVisibility(item)"
+                      [attr.aria-label]="(isVisible(item) ? 'Ocultar ' : 'Mostrar ') + item.name + ' en la carta'"
+                      [attr.title]="isVisible(item) ? 'Visible en la carta: tocá para ocultarlo' : 'Oculto de la carta: tocá para mostrarlo'"
+                      class="relative inline-flex h-6 w-11 flex-none items-center rounded-full transition-colors"
+                      [ngClass]="isVisible(item) ? 'bg-cafe-green-700' : 'bg-sage-300'">
+                      <span class="absolute h-5 w-5 rounded-full bg-white shadow transition-all" [ngClass]="isVisible(item) ? 'left-[22px]' : 'left-0.5'"></span>
+                    </button>
+                    <span class="ml-2 align-middle text-[11px] font-bold" [ngClass]="isVisible(item) ? 'text-sage-500' : 'text-cafe-red-700'">{{ isVisible(item) ? 'Visible' : 'Oculto' }}</span>
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex gap-2">
@@ -419,6 +481,28 @@
 
     <mat-dialog-content class="!px-[20px] !py-[8px]">
       <div class="space-y-[12px]">
+        <!-- Foto del plato -->
+        <div *ngIf="editItem as it">
+          <span class="block text-xs font-bold text-sage-500 mb-1.5">Foto</span>
+          <div *ngIf="imagesAvailable; else photosOff" class="flex items-center gap-[14px]">
+            <div class="relative grid h-24 w-24 flex-none place-items-center overflow-hidden rounded-2xl border border-sage-200 bg-sage-50 text-sage-400">
+              <img *ngIf="it.imageUrl" [src]="it.imageUrl" [alt]="'Foto de ' + it.name" class="h-full w-full object-cover" />
+              <mat-icon *ngIf="!it.imageUrl" class="!h-8 !w-8 !text-[32px]">image</mat-icon>
+              <span *ngIf="imageBusy === it._id" class="absolute inset-0 grid place-items-center bg-white/80 text-[11px] font-bold text-cafe-green-700">Subiendo…</span>
+            </div>
+            <div class="flex min-w-0 flex-col items-start gap-[8px]">
+              <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-[14px] py-[9px] text-sm font-bold text-sage-700 hover:bg-sage-50">
+                <mat-icon class="!h-4 !w-4 !text-base">add_a_photo</mat-icon>{{ it.imageUrl ? 'Cambiar foto' : 'Elegir foto' }}
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="imageBusy === it._id" (change)="onImagePicked(it, $event)" aria-label="Foto del plato" />
+              </label>
+              <button *ngIf="it.imageUrl" type="button" (click)="removeImage(it)" [disabled]="imageBusy === it._id" class="text-xs font-medium text-cafe-red-700 underline">Quitar foto</button>
+              <p class="m-0 text-[11px] text-sage-500">Se achica sola. Se guarda al elegirla, no hace falta apretar Guardar.</p>
+            </div>
+          </div>
+          <ng-template #photosOff>
+            <p class="m-0 rounded-xl bg-sage-50 px-[12px] py-[10px] text-xs text-sage-500">Las fotos de los platos todavía no están activadas en este servidor.</p>
+          </ng-template>
+        </div>
         <div>
           <label class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</label>
           <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
@@ -520,16 +604,71 @@
             <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
           </select>
         </div>
+        <!-- Cómo se ve en la carta: todo opcional -->
+        <div class="rounded-xl border border-sage-200 bg-sage-50 p-[12px] space-y-[10px]">
+          <p class="m-0 text-xs font-bold text-sage-600">En la carta (opcional)</p>
+          <div>
+            <label class="block text-xs font-bold text-sage-500 mb-1">Descripción corta</label>
+            <textarea [(ngModel)]="editItemDescription" maxlength="160" rows="2" placeholder="Ej: Espresso doble con leche texturizada"
+              class="w-full px-[12px] py-[8px] border border-sage-300 rounded-xl bg-white text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700"></textarea>
+            <p class="m-0 mt-0.5 text-right text-[10px] text-sage-400">{{ editItemDescription.length }}/160</p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-sage-500 mb-1">Etiqueta sobre la foto</label>
+            <input [(ngModel)]="editItemBadge" maxlength="20" placeholder="Ej: Firma Casa, Nuevo, Favorito"
+              class="w-full px-[12px] py-[8px] border border-sage-300 rounded-xl bg-white text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+            <div *ngIf="editItemBadge.trim()" class="mt-[8px] flex flex-wrap items-center gap-[8px]">
+              <button *ngFor="let c of badgeColors" type="button" (click)="editItemBadgeColor = c.key" [attr.aria-label]="'Color ' + c.label" [attr.aria-pressed]="editItemBadgeColor === c.key"
+                class="h-7 w-7 rounded-full ring-offset-2 transition" [ngClass]="[c.swatch, editItemBadgeColor === c.key ? 'ring-2 ring-sage-700' : '']"></button>
+              <span class="ml-1 rounded-lg px-[10px] py-[3px] text-[11px] font-bold text-white" [ngClass]="badgeSwatch(editItemBadgeColor)">{{ editItemBadge }}</span>
+            </div>
+          </div>
+          <label class="flex items-start gap-[10px] cursor-pointer select-none">
+            <input type="checkbox" class="w-5 h-5 mt-0.5 accent-cafe-green-700 cursor-pointer" [(ngModel)]="editItemVisible" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Visible en la carta</span>
+              <span class="block text-xs text-sage-500">Si lo destildás, no aparece en la carta online ni en el pedido por QR. Tu equipo lo sigue viendo.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-[10px] cursor-pointer select-none">
+            <input type="checkbox" class="w-5 h-5 mt-0.5 accent-cafe-green-700 cursor-pointer" [(ngModel)]="editItemFeatured" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Destacado</span>
+              <span class="block text-xs text-sage-500">Aparece arriba de la carta, en el carrusel de destacados.</span>
+            </span>
+          </label>
+        </div>
         <div *ngIf="modifierGroups.length">
           <span class="block text-xs font-bold text-sage-500 mb-1.5">Opciones que se ofrecen al pedirlo</span>
           <div class="space-y-1.5">
-            <label *ngFor="let g of modifierGroups" class="flex items-center gap-[10px] px-[12px] py-[8px] bg-sage-50 rounded-xl border border-sage-200 cursor-pointer select-none">
-              <input type="checkbox" class="w-5 h-5 accent-cafe-green-700 cursor-pointer" [checked]="editItemGroupIds.includes(g._id)" (change)="toggleEditGroup(g._id)" />
-              <span class="text-sm">
-                <span class="font-bold text-sage-900">{{ g.name }}</span>
-                <span class="text-xs text-sage-500"> · {{ g.selection === 'SINGLE' ? 'una opción' : 'varias' }}{{ g.required ? ', obligatorio' : '' }}</span>
-              </span>
-            </label>
+            <div *ngFor="let g of modifierGroups" class="bg-sage-50 rounded-xl border border-sage-200">
+              <label class="flex items-center gap-[10px] px-[12px] py-[8px] cursor-pointer select-none">
+                <input type="checkbox" class="w-5 h-5 accent-cafe-green-700 cursor-pointer" [checked]="editItemGroupIds.includes(g._id)" (change)="toggleEditGroup(g._id)" />
+                <span class="text-sm">
+                  <span class="font-bold text-sage-900">{{ g.name }}</span>
+                  <span class="text-xs text-sage-500"> · {{ g.selection === 'SINGLE' ? 'una opción' : 'varias' }}{{ g.required ? ', obligatorio' : '' }}</span>
+                </span>
+              </label>
+
+              <!-- Precio propio de cada tamaño en este plato -->
+              <div *ngIf="isSizeGroup(g) && editItemGroupIds.includes(g._id)" class="px-[12px] pb-[12px] pt-[2px] border-t border-sage-200">
+                <label class="mt-[10px] flex items-start gap-[10px] cursor-pointer select-none">
+                  <input type="checkbox" class="w-4 h-4 mt-0.5 accent-cafe-green-700 cursor-pointer" [checked]="editOwnGroups.has(g._id)" (change)="toggleOwnPrices(g)" />
+                  <span class="text-sm">
+                    <span class="block font-bold text-sage-900">Precio propio de cada {{ g.name.toLowerCase() }} en este plato</span>
+                    <span class="block text-xs text-sage-500">Escribí cuánto cuesta el plato en cada una. Si dejás una vacía, ese {{ g.name.toLowerCase() }} no se ofrece en este plato.</span>
+                  </span>
+                </label>
+                <div *ngIf="editOwnGroups.has(g._id)" class="mt-[10px] grid grid-cols-2 gap-[8px]">
+                  <label *ngFor="let o of g.options" class="block" [class.hidden]="!o.active">
+                    <span class="block text-xs font-bold text-sage-500 mb-1">{{ o.name }}</span>
+                    <input type="number" min="0" step="any" [(ngModel)]="editOptionPrices[o._id]" [name]="'ownprice' + o._id" placeholder="No se ofrece"
+                      class="w-full px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+                  </label>
+                </div>
+                <p *ngIf="editOwnGroups.has(g._id) && ownPricesMin !== null" class="m-0 mt-[8px] text-xs text-sage-500">En la carta se ve <strong class="text-sage-800">Desde {{ ownPricesMin | number }}</strong>. El precio de arriba pasa a ser el más bajo al guardar.</p>
+              </div>
+            </div>
           </div>
         </div>
         <label class="flex items-start gap-[12px] px-[12px] py-[10px] bg-sage-50 rounded-xl border border-sage-200 cursor-pointer select-none">
