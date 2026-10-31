@@ -28,7 +28,7 @@
           [attr.aria-pressed]="preset === p.key">{{ p.label }}</button>
       </div>
 
-      <div class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
+      <div *ngIf="plans.showTables" class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
         <button *ngFor="let s of sources" type="button" (click)="selectSource(s.key)"
           class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
           [ngClass]="source === s.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
@@ -82,7 +82,7 @@
             {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto
           </p>
         </div>
-        <div *ngIf="showCommission" class="min-w-0 bg-white rounded-card shadow-soft p-4">
+        <div *ngIf="showCommission && plans.showTables" class="min-w-0 bg-white rounded-card shadow-soft p-4">
           <p class="text-xs font-bold text-sage-500">Comisión de mozos</p>
           <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.commissionTotal | money }}</p>
           <p *ngIf="report.commission.enabled" class="text-xs text-sage-500 mt-0.5">{{ report.commission.pct }}% de lo vendido</p>
@@ -157,8 +157,8 @@
         </section>
 
 
-          <!-- Ventas por mozo -->
-          <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+          <!-- Ventas por mozo: solo si el negocio tiene salón -->
+          <section *ngIf="plans.showTables" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
             <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byWaiter.length)"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
@@ -170,7 +170,7 @@
           </section>
 
           <!-- Comisión de cada mozo -->
-          <section *ngIf="showCommission" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4" data-testid="commission">
+          <section *ngIf="showCommission && plans.showTables" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4" data-testid="commission">
             <h2 class="font-bold text-sage-800 mb-1">Comisión por mozo</h2>
             <p class="text-xs text-sage-500 mb-3">Lo vendido en las mesas que atendió cada uno por el porcentaje de comisión de cada venta.</p>
             <ul class="m-0 list-none divide-y divide-sage-100 p-0">
@@ -197,17 +197,21 @@
             </table>
           </section>
 
-          <!-- Mostrador y salón: solo si hay ventas de mostrador en el período -->
-          <section *ngIf="report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-1">Mostrador y salón</h2>
-            <p class="text-xs text-sage-500 mb-3">De dónde viene lo que vendiste en el período.</p>
-            <div class="flex h-3.5 overflow-hidden rounded-full bg-sage-100" role="img" [attr.aria-label]="'Mostrador ' + counterShare + ' por ciento'">
-              <div class="h-full bg-cafe-green-700" [style.width.%]="counterShare"></div>
-              <div class="h-full bg-cafe-green-200" [style.width.%]="100 - counterShare"></div>
-            </div>
-            <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-sage-700">
-              <span><i class="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm bg-cafe-green-700"></i>Mostrador {{ report.bySource.mostrador.totalAmount | money }} · {{ report.bySource.mostrador.salesCount }} ventas</span>
-              <span><i class="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm bg-cafe-green-200"></i>Mesas {{ report.bySource.mesa.totalAmount | money }} · {{ report.bySource.mesa.salesCount }} ventas</span>
+          <!-- Mostrador y mesas: solo si hay ventas de mostrador en el período -->
+          <section *ngIf="plans.showTables && report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+            <h2 class="font-bold text-sage-800 mb-1">Mostrador y mesas</h2>
+            <p class="text-xs text-sage-500 mb-3">Cuánto vendiste en cada lugar y qué parte del total es cada uno.</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl bg-cafe-green-50 p-3">
+                <p class="m-0 flex items-center gap-1.5 text-xs font-bold text-cafe-green-700"><mat-icon class="!h-4 !w-4 !text-base">delivery_dining</mat-icon>Mostrador</p>
+                <p class="m-0 mt-1 text-xl font-bold text-sage-900">{{ report.bySource.mostrador.totalAmount | money }}</p>
+                <p class="m-0 mt-0.5 text-xs text-sage-600">{{ report.bySource.mostrador.salesCount }} {{ report.bySource.mostrador.salesCount === 1 ? 'venta' : 'ventas' }} · <strong>{{ counterShare }}%</strong> del total</p>
+              </div>
+              <div class="rounded-xl bg-sage-50 p-3">
+                <p class="m-0 flex items-center gap-1.5 text-xs font-bold text-sage-600"><mat-icon class="!h-4 !w-4 !text-base">table_restaurant</mat-icon>Mesas</p>
+                <p class="m-0 mt-1 text-xl font-bold text-sage-900">{{ report.bySource.mesa.totalAmount | money }}</p>
+                <p class="m-0 mt-0.5 text-xs text-sage-600">{{ report.bySource.mesa.salesCount }} {{ report.bySource.mesa.salesCount === 1 ? 'venta' : 'ventas' }} · <strong>{{ 100 - counterShare }}%</strong> del total</p>
+              </div>
             </div>
           </section>
 
@@ -225,7 +229,7 @@
           </section>
 
           <!-- Mesas más ocupadas -->
-          <section *ngIf="report.byTable?.length" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+          <section *ngIf="plans.showTables && report.byTable?.length" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-1">Mesas más ocupadas</h2>
             <p class="text-xs text-sage-500 mb-3">Cuántas veces se cobró cada mesa en el período (las 10 primeras).</p>
             <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byTable.length)"><canvas #tablesChart aria-label="Gráfico de las mesas más ocupadas"></canvas></div>

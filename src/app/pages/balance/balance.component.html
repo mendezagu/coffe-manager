@@ -4,15 +4,31 @@
       <div class="flex min-w-0 items-center gap-4">
         <div class="page-header__icon"><mat-icon>account_balance_wallet</mat-icon></div>
         <div class="min-w-0">
-          <h1 class="page-title">Balance de Mesas</h1>
-          <p class="page-sub">Resumen de mesas liberadas y recaudación</p>
+          <h1 class="page-title">{{ activeView === 'takeaway' ? 'Balance de ventas' : 'Balance de Mesas' }}</h1>
+          <p class="page-sub">{{ activeView === 'takeaway' ? 'Resumen de ventas y recaudación del turno' : 'Resumen de mesas liberadas y recaudación' }}</p>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <div *ngIf="ready" class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-7xl mx-auto">
+
+    <!-- Negocio con mesas y takeaway: una pestaña para cada uno -->
+    <div *ngIf="hasTabs" class="mb-5 inline-flex rounded-xl bg-sage-200/70 p-[3px]" role="tablist" aria-label="Tipo de venta">
+      <button type="button" role="tab" (click)="setView('mesas')" [attr.aria-selected]="activeView === 'mesas'"
+        class="flex items-center gap-[6px] rounded-[10px] px-[16px] py-[9px] text-sm transition-colors"
+        [ngClass]="activeView === 'mesas' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600 font-medium'">
+        <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">table_restaurant</mat-icon>Mesas
+        <span class="text-xs font-normal opacity-60">{{ countMesas }}</span>
+      </button>
+      <button type="button" role="tab" (click)="setView('takeaway')" [attr.aria-selected]="activeView === 'takeaway'"
+        class="flex items-center gap-[6px] rounded-[10px] px-[16px] py-[9px] text-sm transition-colors"
+        [ngClass]="activeView === 'takeaway' ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600 font-medium'">
+        <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">delivery_dining</mat-icon>Takeaway
+        <span class="text-xs font-normal opacity-60">{{ countTakeaway }}</span>
+      </button>
+    </div>
 
     <!-- Turno en curso: el Balance cuenta solo desde acá; el historial completo está en Reportes -->
     <div *ngIf="shiftStart" class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-card bg-cafe-green-50 px-4 py-3 text-sm text-cafe-green-900">
@@ -26,18 +42,34 @@
         <table class="w-full">
           <thead>
             <tr class="bg-sage-50">
-              <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
-                <div class="flex items-center gap-2">
-                  <mat-icon class="!w-4 !h-4 !text-base">table_restaurant</mat-icon>
-                  Mesa
-                </div>
-              </th>
-              <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
-                <div class="flex items-center gap-2">
-                  <mat-icon class="!w-4 !h-4 !text-base">person</mat-icon>
-                  Mozo
-                </div>
-              </th>
+              <ng-container *ngIf="activeView === 'mesas'">
+                <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
+                  <div class="flex items-center gap-2">
+                    <mat-icon class="!w-4 !h-4 !text-base">table_restaurant</mat-icon>
+                    Mesa
+                  </div>
+                </th>
+                <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
+                  <div class="flex items-center gap-2">
+                    <mat-icon class="!w-4 !h-4 !text-base">person</mat-icon>
+                    Mozo
+                  </div>
+                </th>
+              </ng-container>
+              <ng-container *ngIf="activeView === 'takeaway'">
+                <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
+                  <div class="flex items-center gap-2">
+                    <mat-icon class="!w-4 !h-4 !text-base">schedule</mat-icon>
+                    Hora
+                  </div>
+                </th>
+                <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
+                  <div class="flex items-center gap-2">
+                    <mat-icon class="!w-4 !h-4 !text-base">delivery_dining</mat-icon>
+                    Cómo salió
+                  </div>
+                </th>
+              </ng-container>
               <th class="px-4 py-3 text-left font-medium text-xs text-sage-500">
                 <div class="flex items-center gap-2">
                   <mat-icon class="!w-4 !h-4 !text-base">payment</mat-icon>
@@ -53,26 +85,49 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-sage-100">
-            <ng-container *ngFor="let entry of balanceData; let i = index">
+            <ng-container *ngFor="let entry of rows; let i = index; trackBy: trackEntry">
             <tr (click)="toggleDetail(entry)"
                 class="hover:bg-sage-50 transition-colors duration-150 cursor-pointer"
                 [class.bg-sage-50]="i % 2 === 0">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-sage-100">
-                    <mat-icon class="!w-5 !h-5 !text-xl text-sage-700">restaurant</mat-icon>
+
+              <!-- Mesas: mesa y mozo -->
+              <ng-container *ngIf="activeView === 'mesas'">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-sage-100">
+                      <mat-icon class="!w-5 !h-5 !text-xl text-sage-700">restaurant</mat-icon>
+                    </div>
+                    <span class="text-sage-900 font-bold">{{ entry.tableName }}</span>
                   </div>
-                  <span class="text-sage-900 font-bold">{{ entry.tableName }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full bg-cafe-green-700 flex items-center justify-center">
-                    <span class="text-white font-bold text-sm">{{ entry.waiterName.charAt(0).toUpperCase() }}</span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-cafe-green-700 flex items-center justify-center">
+                      <span class="text-white font-bold text-sm">{{ entry.waiterName.charAt(0).toUpperCase() }}</span>
+                    </div>
+                    <span class="text-sage-700 font-semibold">{{ entry.waiterName }}</span>
                   </div>
-                  <span class="text-sage-700 font-semibold">{{ entry.waiterName }}</span>
-                </div>
-              </td>
+                </td>
+              </ng-container>
+
+              <!-- Takeaway: hora y cómo salió (sin mesa ni mozo) -->
+              <ng-container *ngIf="activeView === 'takeaway'">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-sage-100">
+                      <mat-icon class="!w-5 !h-5 !text-xl text-sage-700">receipt_long</mat-icon>
+                    </div>
+                    <span class="text-sage-900 font-bold">{{ entry.date | date: 'HH:mm' }} <span class="font-normal text-xs text-sage-500">{{ entry.date | date: 'dd/MM' }}</span></span>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="inline-flex items-center gap-2 text-sage-700 font-semibold">
+                    <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">{{ entry.takeaway ? 'delivery_dining' : 'storefront' }}</mat-icon>
+                    {{ howLabel(entry) }}
+                  </div>
+                </td>
+              </ng-container>
+
               <td class="px-4 py-3">
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs bg-sage-50 text-sage-700 border border-sage-200">
                   <span *ngIf="entry.paymentMethod === 'efectivo'">💵</span>
@@ -156,21 +211,35 @@
         <div class="flex items-center gap-1.5 px-4 py-2 bg-white/15 rounded-lg">
           <mat-icon class="!text-white !text-lg">trending_up</mat-icon>
           <span class="text-white font-bold text-sm">
-            {{ balanceData.length }} mesas
+            {{ rows.length }} {{ activeView === 'takeaway' ? (rows.length === 1 ? 'venta' : 'ventas') : 'mesas' }}
           </span>
         </div>
       </div>
     </div>
 
-    <!-- Gráficos: Mesas y Mozos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- Mesas: qué mesas y qué mozos -->
+    <div *ngIf="activeView === 'mesas'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="bg-white rounded-card shadow-soft p-4">
         <h3 class="text-sm font-bold text-sage-900 mb-3">Mesas más ocupadas</h3>
-        <canvas #tableChart width="400" height="200"></canvas>
+        <canvas #tableChart width="800" height="260"></canvas>
       </div>
       <div class="bg-white rounded-card shadow-soft p-4">
         <h3 class="text-sm font-bold text-sage-900 mb-3">Mozos - mesas atendidas</h3>
-        <canvas #waiterChart width="400" height="200"></canvas>
+        <div class="relative mx-auto h-[260px] max-w-[340px]"><canvas #waiterChart></canvas></div>
+      </div>
+    </div>
+
+    <!-- Takeaway: cómo pagan y a qué hora se vende -->
+    <div *ngIf="activeView === 'takeaway'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="bg-white rounded-card shadow-soft p-4">
+        <h3 class="text-sm font-bold text-sage-900 mb-3">Cómo pagan</h3>
+        <p *ngIf="!rows.length" class="m-0 py-10 text-center text-sm text-sage-500">Todavía no hay ventas en este turno.</p>
+        <div class="relative mx-auto h-[260px] max-w-[340px]" [class.hidden]="!rows.length"><canvas #methodChart></canvas></div>
+      </div>
+      <div class="bg-white rounded-card shadow-soft p-4">
+        <h3 class="text-sm font-bold text-sage-900 mb-3">Ventas por hora</h3>
+        <p *ngIf="!rows.length" class="m-0 py-10 text-center text-sm text-sage-500">Todavía no hay ventas en este turno.</p>
+        <canvas #hourChart width="800" height="200" [class.hidden]="!rows.length"></canvas>
       </div>
     </div>
 

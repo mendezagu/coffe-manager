@@ -31,21 +31,7 @@
 
       <div class="space-y-6">
 
-        <!-- Cómo vende: define qué partes de la app se muestran -->
-        <section *ngIf="plans.has('tables') && plans.has('counter_sales')" [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-[20px]">
-          <h2 class="font-bold text-sage-800 mb-1">¿Cómo vendés?</h2>
-          <p class="m-0 mb-3 text-xs text-sage-500">Tu plan incluye mesas y mostrador. Elegí cuáles querés ver en la app; el resto se oculta y lo podés volver a mostrar cuando quieras.</p>
-          <div class="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Cómo vendés">
-            <label *ngFor="let m of salesModes" class="flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-sm transition-colors"
-              [ngClass]="form.salesMode === m.key ? 'border-cafe-green-700 bg-cafe-green-50' : 'border-sage-200 bg-white hover:bg-sage-50'">
-              <input type="radio" name="salesMode" [value]="m.key" [(ngModel)]="form.salesMode" class="mt-0.5 h-4 w-4 accent-cafe-green-700" />
-              <span>
-                <span class="block font-bold text-sage-900">{{ m.label }}</span>
-                <span class="block text-xs text-sage-500">{{ m.hint }}</span>
-              </span>
-            </label>
-          </div>
-        </section>
+        <!-- (El modo de venta —mostrador, mesas o ambos— lo define la Consola de plataforma, no el dueño) -->
 
         <!-- Marca -->
         <section [class.hidden]="tab !== 'negocio'" class="bg-white rounded-card shadow-soft p-[20px]">

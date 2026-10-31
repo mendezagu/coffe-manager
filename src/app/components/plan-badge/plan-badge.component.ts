@@ -30,6 +30,8 @@ export class PlanBadgeComponent {
       map((s) => {
         const featurePlans = (s as any).featurePlans as Record<string, PlanKey> | undefined;
         const labels = ((s as any).planLabels as Record<PlanKey, string> | undefined) ?? FALLBACK_LABELS;
+        // Si el negocio ya tiene la función (por su plan o por un extra), no hace falta la etiqueta: solo se muestra lo que no tiene
+        if (this.feature && ((s as any).features as string[] | undefined)?.includes(this.feature)) return null;
         const needed: PlanKey | undefined = this.plan || (featurePlans ? featurePlans[this.feature] : undefined);
         // Lo que trae el plan base no se etiqueta: las etiquetas marcan solo lo que suma Pro o Beneficios
         if (!needed || needed === 'basic') return null;

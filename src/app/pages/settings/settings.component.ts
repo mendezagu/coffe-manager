@@ -3,7 +3,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
 import { BrandImages, BrandKind, MenuImageService } from 'src/app/services/menu-image.service';
-import { PlanService } from 'src/app/services/plan.service';
 import { AUTO_BACKGROUND_INTENSITY, AUTO_COVER_INTENSITY, backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
 import { minToTime } from 'src/app/services/reservations.service';
 import { BRAND_SWATCHES, DEFAULT_BRAND, brandStyle, legibleBrand } from 'src/app/services/brand';
@@ -159,14 +158,7 @@ export class SettingsComponent implements OnInit {
   // Sonido de aviso de pedidos QR: se guarda en este dispositivo apenas se cambia
   sound = { ...this.qr.sound };
 
-  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService, private images: MenuImageService, public plans: PlanService) {}
-
-  // Cómo vende el negocio: qué partes de la app se muestran
-  readonly salesModes = [
-    { key: 'both', label: 'Mostrador y mesas', hint: 'Restaurante o bar que también vende para llevar' },
-    { key: 'counter', label: 'Solo mostrador', hint: 'Pizzería, lomitería, café al paso, heladería' },
-    { key: 'tables', label: 'Solo mesas', hint: 'Atención en salón, sin venta en mostrador' },
-  ] as const;
+  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService, private images: MenuImageService) {}
 
   // Portada y fondo de la carta: se suben y quedan guardadas en el momento (no hace falta apretar Guardar)
   brandBusy: BrandKind | null = null;
