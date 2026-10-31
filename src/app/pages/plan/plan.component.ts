@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PLAN_INFO, PLAN_ORDER, PlanKey, PlanService } from 'src/app/services/plan.service';
 
 // Ícono y tono de cada plan (el tono se usa en las clases de la plantilla)
@@ -10,6 +10,9 @@ const PLAN_ICON: Record<PlanKey, string> = { takeaway: 'takeout_dining', basic: 
   templateUrl: './plan.component.html',
 })
 export class PlanPageComponent {
+  // Dentro de otra pantalla (Mi negocio): sin encabezado ni fondo propios
+  @Input() embedded = false;
+
   readonly info = PLAN_INFO;
 
   constructor(public plans: PlanService) {}
@@ -33,7 +36,8 @@ export class PlanPageComponent {
 
   // Los planes a los que puede pasarse (los de arriba; un negocio takeaway ve los de salón)
   get others(): PlanKey[] {
-    return this.order.filter((p) => this.isAbove(p));
+    // Beneficios (hoteles y vouchers) todavía no se ofrece: queda oculto hasta habilitar todo lo de hoteles
+    return this.order.filter((p) => this.isAbove(p) && p !== 'benefits');
   }
 
   isAbove(plan: PlanKey): boolean {

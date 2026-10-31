@@ -28,7 +28,7 @@
           [attr.aria-pressed]="preset === p.key">{{ p.label }}</button>
       </div>
 
-      <div *ngIf="plans.showTables" class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
+      <div *ngIf="plans.showTables && counterOn" class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
         <button *ngFor="let s of sources" type="button" (click)="selectSource(s.key)"
           class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
           [ngClass]="source === s.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
@@ -198,7 +198,7 @@
           </section>
 
           <!-- Mostrador y mesas: solo si hay ventas de mostrador en el período -->
-          <section *ngIf="plans.showTables && report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+          <section *ngIf="plans.showTables && counterOn && report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
             <h2 class="font-bold text-sage-800 mb-1">Mostrador y mesas</h2>
             <p class="text-xs text-sage-500 mb-3">Cuánto vendiste en cada lugar y qué parte del total es cada uno.</p>
             <div class="grid grid-cols-2 gap-3">

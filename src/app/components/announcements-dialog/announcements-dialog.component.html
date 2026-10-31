@@ -1,0 +1,58 @@
+<div class="flex max-h-[88vh] flex-col bg-white">
+
+  <!-- Encabezado -->
+  <header class="flex items-center gap-3 border-b border-sage-200 px-5 py-4">
+    <span class="grid h-10 w-10 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
+      <mat-icon>{{ isPopup ? 'campaign' : 'notifications' }}</mat-icon>
+    </span>
+    <div class="min-w-0 flex-1">
+      <p role="heading" aria-level="2" class="m-0 text-lg font-bold text-sage-900">{{ isPopup ? 'Qué hay de nuevo en Tavolapp' : 'Novedades' }}</p>
+      <p *ngIf="!isPopup" class="m-0 text-xs text-sage-500">Lo último que sumamos o mejoramos.</p>
+    </div>
+    <button type="button" (click)="close()" aria-label="Cerrar" class="grid h-9 w-9 flex-none place-items-center rounded-lg text-sage-500 hover:bg-sage-100">
+      <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
+    </button>
+  </header>
+
+  <!-- Contenido -->
+  <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+    <p *ngIf="loading" class="m-0 py-8 text-center text-sm text-sage-500">Cargando…</p>
+    <p *ngIf="error" class="m-0 py-8 text-center text-sm text-cafe-red-700">No se pudieron cargar las novedades. Probá de nuevo en un rato.</p>
+    <div *ngIf="!loading && !error && !items.length" class="flex flex-col items-center gap-2 py-10 text-center text-sage-500">
+      <mat-icon class="!h-10 !w-10 !text-[40px] text-sage-300">notifications_none</mat-icon>
+      <p class="m-0 text-sm">Todavía no hay novedades. Cuando sumemos algo, lo vas a ver acá.</p>
+    </div>
+
+    <article *ngFor="let a of items; trackBy: trackItem" class="mb-4 rounded-2xl border p-4 last:mb-0"
+      [ngClass]="!a.read && !isPopup ? 'border-cafe-green-700/40 bg-cafe-green-50/60' : 'border-sage-200 bg-white'">
+      <div class="flex flex-wrap items-center gap-2">
+        <span *ngIf="!a.read && !isPopup" class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#ffffff]">Nuevo</span>
+        <span *ngIf="a.important" class="rounded-full bg-cafe-red-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cafe-red-700">Importante</span>
+        <span *ngIf="a.publishedAt" class="text-xs text-sage-500">{{ a.publishedAt | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <p role="heading" aria-level="3" class="m-0 mt-2 text-base font-bold text-sage-900">{{ a.title }}</p>
+      <div class="news-rich mt-1.5 text-sm leading-relaxed text-sage-700" [innerHTML]="rich(a.body)"></div>
+
+      <div *ngIf="a.images.length" class="mt-3 grid gap-2" [ngClass]="a.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'">
+        <button *ngFor="let img of a.images" type="button" (click)="zoom = img.url" class="block overflow-hidden rounded-xl border border-sage-200 bg-sage-100 p-0" aria-label="Ver la imagen en grande">
+          <img *ngIf="img.url" [src]="img.url" alt="" loading="lazy" class="block h-auto w-full object-cover" />
+        </button>
+      </div>
+    </article>
+  </div>
+
+  <!-- Pie -->
+  <footer class="flex items-center justify-end gap-2 border-t border-sage-200 px-5 py-3">
+    <ng-container *ngIf="isPopup">
+      <button type="button" (click)="close()" class="h-11 rounded-xl px-4 text-sm font-bold text-sage-600 hover:bg-sage-100">Después</button>
+      <button type="button" (click)="understood()" class="h-11 rounded-xl bg-cafe-green-700 px-6 text-sm font-bold text-[#ffffff] shadow-green hover:bg-cafe-green-800">Entendido</button>
+    </ng-container>
+    <button *ngIf="!isPopup" type="button" (click)="close()" class="h-11 rounded-xl bg-cafe-green-700 px-6 text-sm font-bold text-[#ffffff] hover:bg-cafe-green-800">Cerrar</button>
+  </footer>
+</div>
+
+<!-- Imagen en grande -->
+<div *ngIf="zoom" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 p-4" (click)="zoom = null" role="dialog" aria-label="Imagen en grande">
+  <img [src]="zoom" alt="" class="max-h-full max-w-full rounded-xl object-contain" />
+  <button type="button" class="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-sage-800" aria-label="Cerrar la imagen"><mat-icon>close</mat-icon></button>
+</div>

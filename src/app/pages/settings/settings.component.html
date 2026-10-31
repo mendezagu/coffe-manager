@@ -26,7 +26,7 @@
       </button>
     </div>
 
-    <form *ngIf="form" [class.hidden]="tab === 'cuenta'" (ngSubmit)="save()" #f="ngForm" class="grid items-start gap-6 pb-24 sm:pb-0"
+    <form *ngIf="form" [class.hidden]="tab === 'cuenta' || tab === 'plan'" (ngSubmit)="save()" #f="ngForm" class="grid items-start gap-6 pb-24 sm:pb-0"
       [ngClass]="tab === 'negocio' ? 'lg:grid-cols-[1fr_320px]' : 'lg:grid-cols-[minmax(0,720px)]'">
 
       <div class="space-y-6">
@@ -655,6 +655,9 @@
     </form>
 
     <!-- Mi contraseña (fuera del formulario de arriba: no puede haber un formulario dentro de otro) -->
+    <!-- Plan: lo mismo que la pantalla "Tu plan", dentro de Mi negocio -->
+    <app-plan-page *ngIf="tab === 'plan'" [embedded]="true"></app-plan-page>
+
     <section id="mi-contrasena" [class.hidden]="tab !== 'cuenta'" class="max-w-[460px] rounded-card bg-white p-[20px] shadow-soft">
       <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">
         <mat-icon class="text-cafe-green-700">lock</mat-icon>

@@ -33,7 +33,6 @@
       <span class="block mt-3 text-sage-800 font-bold text-lg leading-tight break-words max-w-full">{{ (settings.settings$ | async)?.name }}</span>
       <span *ngIf="user$ | async as user" class="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
       <!-- Código del local: cualquier persona del equipo lo ve acá, por si tiene que ingresar en otro dispositivo -->
-      <a *ngIf="(settings.settings$ | async)?.planLabel as planLabel" routerLink="/plan" title="Ver mi plan y pedir un cambio" class="mt-2 inline-flex items-center gap-1 rounded-full bg-sage-100 px-2.5 py-0.5 text-[11px] font-bold text-sage-700 no-underline hover:bg-sage-200">Plan {{ planLabel }}<mat-icon class="!h-3 !w-3 !text-[12px] !leading-[12px]">chevron_right</mat-icon></a>
       <p *ngIf="(settings.settings$ | async)?.loginCode as code" class="m-0 mt-2 text-[11px] leading-tight text-sage-500">
         Código del local: <strong class="font-mono text-sage-700 select-all">{{ code }}</strong>
       </p>
@@ -168,6 +167,14 @@
 
         <!-- Derecha: alertas, caja, turno y usuario -->
         <div class="d-flex align-items-center gap-2">
+
+          <!-- Novedades de Tavolapp (solo el administrador): campanita con las que todavía no leyó -->
+          <button *ngIf="(role$ | async) === 'admin'" type="button" (click)="openNews()"
+            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-sage-100 text-sage-600 hover:bg-sage-200 transition-colors"
+            [attr.aria-label]="(news.unread$ | async)?.count ? 'Novedades de Tavolapp: ' + (news.unread$ | async)?.count + ' sin leer' : 'Novedades de Tavolapp'" title="Novedades de Tavolapp">
+            <mat-icon class="!w-6 !h-6 !text-2xl">{{ (news.unread$ | async)?.count ? 'notifications_active' : 'notifications_none' }}</mat-icon>
+            <span *ngIf="(news.unread$ | async)?.count as n" class="absolute -top-0.5 -right-0.5 min-w-[18px] px-1 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-[18px] text-center">{{ n }}</span>
+          </button>
 
           <!-- Alertas: solo aparecen si hay algo que atender -->
           <button *ngIf="(qr.inbox$ | async) as q" [hidden]="!q.active || (q.requests.length + q.calls.length) === 0" type="button" (click)="openQrInbox()"

@@ -28,7 +28,7 @@ export const REGIONS: Region[] = [
   { label: 'Estados Unidos (USD)', currencyCode: 'USD', locale: 'en-US' },
 ];
 
-type SettingsTab = 'negocio' | 'operacion' | 'funciones' | 'cuenta';
+type SettingsTab = 'negocio' | 'operacion' | 'funciones' | 'plan' | 'cuenta';
 
 const LOGO_MAX_SIDE = 256;
 const LOGO_MAX_CHARS = 300_000;
@@ -48,6 +48,7 @@ export class SettingsComponent implements OnInit {
     { key: 'negocio', label: 'Negocio', icon: 'storefront' },
     { key: 'operacion', label: 'Operación', icon: 'tune' },
     { key: 'funciones', label: 'Funciones', icon: 'extension' },
+    { key: 'plan', label: 'Plan', icon: 'workspace_premium' },
     { key: 'cuenta', label: 'Seguridad', icon: 'lock' },
   ];
   tab: SettingsTab = 'negocio';

@@ -60,6 +60,7 @@ import { MoneyPipe } from './pipes/money.pipe';
 import { AdminPanelComponent } from './pages/admin-panel/admin-panel.component';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
+import { AnnouncementsDialogComponent } from './components/announcements-dialog/announcements-dialog.component';
 import { QrCodesComponent } from './pages/qr-codes/qr-codes.component';
 import { BalanceComponent } from './pages/balance/balance.component';
 import { LogsComponent } from './components/logs/logs.component';
@@ -120,6 +121,7 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     LogsComponent,
     QrOrderComponent,
     QrInboxDialogComponent,
+    AnnouncementsDialogComponent,
     QrCodesComponent,
     AppLoaderComponent,
     HotelLandingComponent,

@@ -331,14 +331,16 @@
                     </div>
                   </td>
                   <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
                     <button type="button" role="switch" [attr.aria-checked]="isVisible(item)" (click)="toggleVisibility(item)"
                       [attr.aria-label]="(isVisible(item) ? 'Ocultar ' : 'Mostrar ') + item.name + ' en la carta'"
                       [attr.title]="isVisible(item) ? 'Visible en la carta: tocá para ocultarlo' : 'Oculto de la carta: tocá para mostrarlo'"
                       class="relative inline-flex h-6 w-11 flex-none items-center rounded-full transition-colors"
                       [ngClass]="isVisible(item) ? 'bg-cafe-green-700' : 'bg-sage-300'">
-                      <span class="absolute h-5 w-5 rounded-full bg-white shadow transition-all" [ngClass]="isVisible(item) ? 'left-[22px]' : 'left-0.5'"></span>
+                      <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all" [ngClass]="isVisible(item) ? 'left-[22px]' : 'left-0.5'"></span>
                     </button>
-                    <span class="ml-2 align-middle text-[11px] font-bold" [ngClass]="isVisible(item) ? 'text-sage-500' : 'text-cafe-red-700'">{{ isVisible(item) ? 'Visible' : 'Oculto' }}</span>
+                    <span class="w-[52px] text-[11px] font-bold leading-none" [ngClass]="isVisible(item) ? 'text-sage-500' : 'text-cafe-red-700'">{{ isVisible(item) ? 'Visible' : 'Oculto' }}</span>
+                    </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex gap-2">

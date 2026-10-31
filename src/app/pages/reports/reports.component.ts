@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import Chart from 'chart.js/auto';
 import { ReportsService, SalesReport } from 'src/app/services/reports.service';
@@ -112,11 +113,28 @@ export class ReportsComponent implements OnInit, OnDestroy {
     return this.forbidden || this.plans.locked('advanced_reports');
   }
 
+  // ¿El negocio usa el Mostrador? Si no, el reporte cuenta solo las mesas y no ofrece nada de mostrador
+  get counterOn(): boolean {
+    return this.plans.showCounter;
+  }
+
+  private effectiveSource(): '' | 'mesa' | 'mostrador' {
+    return this.plans.loaded && !this.counterOn && this.plans.showTables ? 'mesa' : this.source;
+  }
+
+  private lastSource: string | null = null;
+  private settingsSub?: Subscription;
+
   ngOnInit() {
     this.selectPreset('30d');
+    // el plan llega del servidor: si cambia lo que se pide (mostrador sí o no), se vuelve a cargar
+    this.settingsSub = this.settings.settings$.subscribe(() => {
+      if (this.report && this.effectiveSource() !== this.lastSource) this.load();
+    });
   }
 
   ngOnDestroy() {
+    this.settingsSub?.unsubscribe();
     this.destroyCharts();
   }
 
@@ -171,7 +189,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
     if (this.rangeInvalid || this.locked) return;
     this.loading = true;
     this.error = '';
-    this.reports.sales(this.from, this.to, this.source || undefined).subscribe({
+    const source = this.effectiveSource();
+    this.lastSource = source;
+    this.reports.sales(this.from, this.to, source || undefined).subscribe({
       next: (report) => {
         this.report = report;
         this.hourBars = this.buildHourBars();

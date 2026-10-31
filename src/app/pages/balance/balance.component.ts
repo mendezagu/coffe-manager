@@ -99,7 +99,7 @@ export class BalanceComponent implements OnInit, OnDestroy {
   }
 
   private get hasCounter(): boolean {
-    return this.plans.showCounter && this.plans.has('counter_sales');
+    return this.plans.showCounter;
   }
 
   // Mesas y takeaway a la vez: dos pestañas
@@ -190,7 +190,8 @@ export class BalanceComponent implements OnInit, OnDestroy {
     this.countTakeaway = takeaway.length;
 
     const view = this.activeView;
-    const shown = tabs ? (view === 'takeaway' ? takeaway : mesas) : this.balanceData;
+    // sin mostrador activo, el balance cuenta solo las mesas; sin salón, todo es takeaway
+    const shown = tabs ? (view === 'takeaway' ? takeaway : mesas) : this.hasSalon && !this.hasCounter ? mesas : this.balanceData;
     // en takeaway, lo último primero
     this.rows = view === 'takeaway' ? [...shown].reverse() : shown;
     this.totalRevenue = shown.reduce((sum, entry) => sum + entry.totalAmount, 0);

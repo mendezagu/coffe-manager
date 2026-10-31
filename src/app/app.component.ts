@@ -15,6 +15,8 @@ import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
 import { QrCall, QrRequest, QrService } from './services/qr.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
+import { AnnouncementsDialogComponent } from './components/announcements-dialog/announcements-dialog.component';
+import { AnnouncementsService } from './services/announcements.service';
 import { OnboardingService } from './services/onboarding.service';
 import { NavGuideService } from './services/nav-guide.service';
 import { ThemeMode, ThemeService } from './services/theme.service';
@@ -65,6 +67,7 @@ export class AppComponent {
     private swUpdate: SwUpdate,
     private snackBar: MatSnackBar,
     public plans: PlanService,
+    public news: AnnouncementsService,
   ) {
     this.currentDate = this.getFormattedDate();
     this.shift = this.settings.shiftLabel();
@@ -172,6 +175,14 @@ export class AppComponent {
     this.dialog.open(QrInboxDialogComponent, { data: { tableId: alert.tableId }, width: '600px', maxWidth: '96vw', autoFocus: false });
   }
 
+  // Novedades de Tavolapp
+  private newsTimer?: ReturnType<typeof setInterval>;
+  private popupShown = new Set<string>();
+
+  openNews() {
+    this.dialog.open(AnnouncementsDialogComponent, { data: { mode: 'list' }, width: '600px', maxWidth: '96vw', autoFocus: false });
+  }
+
   openQrInbox() {
     this.dialog.open(QrInboxDialogComponent, { data: null, width: '600px', maxWidth: '96vw', autoFocus: false });
   }
@@ -216,6 +227,13 @@ export class AppComponent {
   ngOnInit() {
     this.watchUpdates();
     this.qr.arrivals$.subscribe((a) => this.pushQrAlerts(a));
+    // Una novedad importante sin leer se muestra en una ventana, una sola vez por sesión
+    this.news.unread$.subscribe((u) => {
+      // no en los primeros pasos de un local nuevo: ahí todavía no tiene nada que "ver de nuevo"
+      if (!u.popup || this.popupShown.has(u.popup.id) || this.publicPage || !this.isAdminRole || this.router.url.startsWith('/bienvenida')) return;
+      this.popupShown.add(u.popup.id);
+      this.dialog.open(AnnouncementsDialogComponent, { data: { mode: 'popup', item: u.popup }, width: '560px', maxWidth: '96vw', autoFocus: false });
+    });
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {
       this.isAdminRole = role === 'admin';
@@ -227,6 +245,14 @@ export class AppComponent {
         this.setupTimer = setInterval(() => {
           if (!this.publicPage && this.onboarding.setupPendingNow) this.onboarding.refreshPending();
         }, 20000);
+      }
+      // Novedades de Tavolapp: solo para el administrador del local
+      if (this.newsTimer) clearInterval(this.newsTimer);
+      if (this.isAdminRole) {
+        this.news.refresh();
+        this.newsTimer = setInterval(() => this.news.refresh(), 300000);
+      } else {
+        this.news.clear();
       }
       this.qrRole = role;
       this.refreshQrWatch();

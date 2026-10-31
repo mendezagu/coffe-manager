@@ -415,3 +415,55 @@ html.dark hr {
     animation: none;
   }
 }
+
+/* Barras de desplazamiento finas y discretas: sin flechas, el cursor es una píldora suave que aparece sobre el fondo */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(27, 40, 34, 0.28) transparent;
+}
+html.dark * {
+  scrollbar-color: rgba(219, 222, 225, 0.3) transparent;
+}
+/* Navegadores sin scrollbar-color (Safari anterior): mismo aspecto con la sintaxis de WebKit */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(27, 40, 34, 0.28);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(27, 40, 34, 0.45);
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: rgba(219, 222, 225, 0.3);
+  }
+}
+
+/* Texto con formato de las novedades */
+.news-rich p {
+  margin: 0 0 6px;
+}
+.news-rich p:last-child {
+  margin-bottom: 0;
+}
+.news-rich ul {
+  margin: 4px 0 8px;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.news-rich li {
+  margin: 2px 0;
+}
+.news-rich strong {
+  font-weight: 700;
+  color: inherit;
+}

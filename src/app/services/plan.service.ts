@@ -91,9 +91,9 @@ export class PlanService {
     return this.salesMode !== 'counter' && !this.locked('tables');
   }
 
-  // ¿Se muestra el Mostrador? Si el plan no lo incluye pero el negocio también vende en mostrador, se muestra bloqueado (con etiqueta)
+  // ¿Se muestra todo lo del Mostrador (menú, pestañas, reportes)? Solo si el negocio lo tiene (por su plan o un extra) y no vende solo en mesas
   get showCounter(): boolean {
-    return this.salesMode !== 'tables';
+    return this.loaded && this.salesMode !== 'tables' && this.has('counter_sales');
   }
 
   // Bloqueada = ya se sabe el plan y no incluye la función
