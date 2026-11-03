@@ -53,6 +53,12 @@ module.exports = {
           light: 'rgb(var(--brand-light-rgb, 34 50 42) / <alpha-value>)',
           soft: 'rgb(var(--brand-soft-rgb, 234 240 236) / <alpha-value>)',
         },
+        // Pantalla del cliente, diseño "Nuovo": superficies cálidas, tinta y verde de apoyo (el color de marca es `forest`)
+        'surface': { DEFAULT: '#fef8f4', low: '#f8f3ef', mid: '#f2ede9', high: '#ece7e3', highest: '#e6e2de', lowest: '#ffffff' },
+        'ink': { DEFAULT: '#1d1b19', variant: '#424844' },
+        'line': { DEFAULT: '#727974', soft: '#c1c8c3' },
+        'leaf': { DEFAULT: '#2b694f', container: '#aff1ce', dim: '#94d4b3', ink: '#002114', ink2: '#0b5138' },
+        'tertiary': { container: '#4d2d07', fixed: '#ffdcbd', ink: '#2c1600' },
         'charcoal': '#1A2521',
         'muted': '#63736C',
         // Ámbar: mesa con un pedido por QR esperando confirmación. Misma profundidad que el verde y el ladrillo.
@@ -98,6 +104,7 @@ module.exports = {
         sans: ['Roboto', 'system-ui', '-apple-system', 'sans-serif'],
         // Solo la pantalla del cliente (pedido por QR)
         jakarta: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        inter: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
         'elegant': '0 4px 15px rgba(0, 0, 0, 0.1)',

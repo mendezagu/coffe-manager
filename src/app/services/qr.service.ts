@@ -178,7 +178,7 @@ export class QrService implements OnDestroy {
   }
 
   // Dos tonos cortos. Si el navegador no deja reproducir sonido, simplemente no suena.
-  private beep(force = false) {
+  beep(force = false) {
     if (!force && (!this.sound.enabled || this.sound.volume <= 0)) return;
     try {
       this.audio ??= new AudioContext();
@@ -247,7 +247,7 @@ export interface PublicItem {
 }
 
 export interface PublicInfo {
-  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string; coverUrl?: string | null; backgroundUrl?: string | null; coverIntensity?: number | null; backgroundIntensity?: number | null };
+  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string; coverUrl?: string | null; backgroundUrl?: string | null; coverIntensity?: number | null; backgroundIntensity?: number | null; address?: string; phone?: string };
   table: { name: string };
   requiresPin: boolean;
   autoConfirm: boolean;

@@ -123,7 +123,7 @@
           <p *ngIf="!imagesAvailable" class="m-0 rounded-xl bg-sage-50 px-3 py-2.5 text-xs text-sage-500">Las imágenes todavía no están activadas en este servidor.</p>
 
           <div *ngIf="imagesAvailable" class="grid gap-3 sm:grid-cols-2">
-            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba, detrás del logo y el nombre. Va mejor una foto horizontal del local o de tus platos.', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de las tarjetas de los platos. Se aclara solo para que se lea bien.', url: form.backgroundImageUrl }]"
+            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba, detrás del logo y el nombre. Va mejor una foto horizontal del local o de tus platos. Al 100% se ve tal cual.', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de las tarjetas de los platos. Se aclara para que se lea bien; al 100% se ve tal cual.', url: form.backgroundImageUrl }]"
               class="rounded-xl border border-sage-200 bg-sage-50 p-3">
               <p class="m-0 text-sm font-bold text-sage-900">{{ b.title }}</p>
               <p class="m-0 mt-0.5 text-xs text-sage-500">{{ b.hint }}</p>
@@ -464,6 +464,104 @@
             <ng-template #menuLinkPending>
               <p class="m-0 mt-1 text-sm text-sage-700">Guardá los cambios y acá aparece la dirección y el QR de tu carta.</p>
             </ng-template>
+          </div>
+        </section>
+
+        <!-- Tienda online: pedidos para retirar o con envío -->
+        <section [class.hidden]="tab !== 'funciones'" class="bg-white rounded-card shadow-soft p-[20px] space-y-3">
+          <h2 class="mb-1 flex items-center gap-2 font-bold text-sage-800">Tienda online <app-plan-badge feature="online_store"></app-plan-badge></h2>
+
+          <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
+            [ngClass]="canStore || form.deliveryEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
+            <input type="checkbox" name="deliveryEnabled" [(ngModel)]="form.deliveryEnabled" [disabled]="!canStore && !form.deliveryEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <span class="text-sm">
+              <span class="block font-bold text-sage-900">Recibir pedidos por internet</span>
+              <span class="block text-xs text-sage-500">Tus clientes eligen de tu carta, arman el pedido y lo retiran o lo reciben en su casa. Usa lo que ya tenés cargado en el menú.</span>
+            </span>
+          </label>
+
+          <div *ngIf="form.deliveryEnabled" class="space-y-4">
+
+            <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
+              <p class="m-0 text-xs font-bold text-cafe-green-800">Dirección para compartir</p>
+              <div *ngIf="storeLink; else storeLinkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
+                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ storeLink }}</code>
+                <button type="button" (click)="copyStoreLink()" class="inline-flex h-10 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
+                  <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
+                </button>
+                <a [href]="storeLink" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
+                  <mat-icon class="!h-4 !w-4 !text-base">open_in_new</mat-icon> Ver
+                </a>
+                <button type="button" (click)="downloadStoreQr()" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
+                  <mat-icon class="!h-4 !w-4 !text-base">qr_code_2</mat-icon> Descargar QR
+                </button>
+              </div>
+              <ng-template #storeLinkPending><p class="m-0 mt-1.5 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
+              <p class="m-0 mt-2 text-xs text-cafe-green-800">Ponela en tu Instagram, en WhatsApp, en Google Maps o en un QR en el mostrador.</p>
+            </div>
+
+            <div>
+              <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">¿Cómo lo reciben tus clientes?</p>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+                  <input type="checkbox" name="deliveryPickup" [(ngModel)]="form.deliveryPickup" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <span class="text-sm"><span class="block font-bold text-sage-900">Retiro en el local</span><span class="block text-xs text-sage-500">Pasan a buscarlo, sin costo.</span></span>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+                  <input type="checkbox" name="deliveryHome" [(ngModel)]="form.deliveryHome" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <span class="text-sm"><span class="block font-bold text-sage-900">Envío a domicilio</span><span class="block text-xs text-sage-500">Hacés delivery. El cliente deja su dirección.</span></span>
+                </label>
+              </div>
+              <label *ngIf="form.deliveryHome" class="mt-3 block max-w-xs">
+                <span class="mb-1 block text-xs font-bold text-sage-500">Costo del envío (fijo)</span>
+                <input type="number" name="deliveryFee" [(ngModel)]="form.deliveryFee" min="0" step="0.01" placeholder="0" class="h-11 w-full rounded-xl border border-sage-300 bg-white px-3 text-sm font-semibold text-sage-900" />
+                <span class="mt-1 block text-xs text-sage-500">Se suma al total cuando el cliente elige envío. Poné 0 para envío sin cargo.</span>
+              </label>
+            </div>
+
+            <div>
+              <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">¿Cómo te pagan?</p>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+                  <input type="checkbox" name="deliveryPayCash" [(ngModel)]="form.deliveryPayCash" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <span class="text-sm"><span class="block font-bold text-sage-900">Efectivo</span><span class="block text-xs text-sage-500">Pagan al retirar o al recibir.</span></span>
+                </label>
+                <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
+                  <input type="checkbox" name="deliveryPayTransfer" [(ngModel)]="form.deliveryPayTransfer" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <span class="text-sm"><span class="block font-bold text-sage-900">Transferencia bancaria</span><span class="block text-xs text-sage-500">Les mostramos tus datos para que transfieran.</span></span>
+                </label>
+              </div>
+              <label *ngIf="form.deliveryPayTransfer" class="mt-3 block">
+                <span class="mb-1 block text-xs font-bold text-sage-500">Tus datos bancarios</span>
+                <textarea name="deliveryBankInfo" [(ngModel)]="form.deliveryBankInfo" rows="3" maxlength="400" placeholder="Ej: Alias: nuovo.caffe&#10;CBU: 0000000000000000000000&#10;Titular: Nuovo Caffe SRL"
+                  class="w-full rounded-xl border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"></textarea>
+                <span class="mt-1 block text-xs text-sage-500">Lo ve el cliente cuando elige transferencia. Cada uno de tus clientes lo ve solo al hacer su pedido.</span>
+              </label>
+            </div>
+
+            <div>
+              <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">¿A dónde te llegan los pedidos?</p>
+              <div class="grid gap-2 sm:grid-cols-3">
+                <label *ngFor="let d of deliveryDests" class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer select-none"
+                  [ngClass]="form.deliveryDest === d.value ? 'border-cafe-green-700 bg-cafe-green-50' : 'border-sage-200 bg-sage-50'">
+                  <input type="radio" name="deliveryDest" [value]="d.value" [(ngModel)]="form.deliveryDest" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <span class="text-sm"><span class="block font-bold text-sage-900">{{ d.label }}</span><span class="block text-xs text-sage-500">{{ d.hint }}</span></span>
+                </label>
+              </div>
+              <label *ngIf="form.deliveryDest !== 'system'" class="mt-3 block max-w-sm">
+                <span class="mb-1 block text-xs font-bold text-sage-500">Tu número de WhatsApp (con código de país)</span>
+                <input type="tel" name="deliveryWhatsapp" [(ngModel)]="form.deliveryWhatsapp" maxlength="30" placeholder="Ej: 5491122334455" class="h-11 w-full rounded-xl border border-sage-300 bg-white px-3 text-sm font-semibold text-sage-900" />
+                <span class="mt-1 block text-xs text-sage-500">Solo números: 54 (Argentina), 9 y tu número sin el 0 ni el 15.</span>
+              </label>
+            </div>
+
+            <label class="block max-w-xs">
+              <span class="mb-1 block text-xs font-bold text-sage-500">Tiempo de preparación aproximado (minutos)</span>
+              <input type="number" name="deliveryPrepMin" [(ngModel)]="form.deliveryPrepMin" min="5" max="240" step="5" class="h-11 w-full rounded-xl border border-sage-300 bg-white px-3 text-sm font-semibold text-sage-900" />
+              <span class="mt-1 block text-xs text-sage-500">Se le muestra al cliente cuando aceptás su pedido.</span>
+            </label>
+
+            <p class="m-0 text-xs text-sage-500">Los pedidos entran en la pantalla <strong>Pedidos online</strong>, con un aviso sonoro. Ahí los aceptás, los preparás y los cobrás al entregarlos. Podés pausar la tienda cuando no quieras recibir más.</p>
           </div>
         </section>
 

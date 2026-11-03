@@ -13,6 +13,7 @@ import { CounterComponent } from './pages/counter/counter.component';
 import { CashComponent } from './pages/cash/cash.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { QrOrderComponent } from './pages/qr-order/qr-order.component';
+import { DeliveryOrdersComponent } from './pages/delivery-orders/delivery-orders.component';
 import { HotelLandingComponent } from './pages/hotel-landing/hotel-landing.component';
 import { HotelPortalComponent } from './pages/hotel-portal/hotel-portal.component';
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
@@ -38,6 +39,7 @@ const routes: Routes = [
   { path: 'counter', component: CounterComponent, canActivate: [roleGuard('admin', 'cashier'), onboardingGuard] },
   { path: 'cash', component: CashComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reservations', component: ReservationsComponent, canActivate: [roleGuard('admin', 'cashier')] },
+  { path: 'delivery-orders', component: DeliveryOrdersComponent, canActivate: [roleGuard('admin', 'cashier')] },
   { path: 'reports', component: ReportsComponent, canActivate: [roleGuard('admin')] },
   { path: 'settings', component: SettingsComponent, canActivate: [roleGuard('admin')] },
   { path: 'balance', component: BalanceComponent, canActivate: [roleGuard('admin')] },
@@ -46,6 +48,8 @@ const routes: Routes = [
   { path: 'mesa/:token', component: QrOrderComponent },
   // Carta online: la misma pantalla del QR de mesa, pero solo para ver (sin pedir ni código)
   { path: 'carta/:slug', component: QrOrderComponent },
+  // Tienda online: la misma pantalla con carrito, retiro o envío y seguimiento del pedido
+  { path: 'delivery/:slug', component: QrOrderComponent, data: { store: true } },
   // Pantalla pública del huésped (QR del hotel): sin sesión
   { path: 'hotel/:slug', component: HotelLandingComponent },
   { path: 'reservar/:slug', component: ReserveComponent },

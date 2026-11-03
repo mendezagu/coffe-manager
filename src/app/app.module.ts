@@ -76,6 +76,7 @@ import { PasswordToggleDirective } from './directives/password-toggle.directive'
 import { CustomSelectDirective } from './directives/custom-select.directive';
 import { FilterTabsComponent } from './components/filter-tabs/filter-tabs.component';
 import { ReservationsComponent } from './pages/reservations/reservations.component';
+import { DeliveryOrdersComponent } from './pages/delivery-orders/delivery-orders.component';
 import { ReserveComponent } from './pages/reserve/reserve.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
@@ -135,6 +136,7 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     CustomSelectDirective,
     FilterTabsComponent,
     ReservationsComponent,
+    DeliveryOrdersComponent,
     ReserveComponent,
     ConfirmDialogComponent,
     ChangePasswordComponent,

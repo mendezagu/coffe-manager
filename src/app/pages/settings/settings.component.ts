@@ -64,6 +64,12 @@ export class SettingsComponent implements OnInit {
     { n: 6, label: 'Sáb' },
     { n: 0, label: 'Dom' },
   ];
+  // A dónde llegan los pedidos de la tienda online
+  readonly deliveryDests: { value: 'system' | 'whatsapp' | 'both'; label: string; hint: string }[] = [
+    { value: 'system', label: 'Al sistema', hint: 'Aparecen en Pedidos online, con aviso sonoro.' },
+    { value: 'whatsapp', label: 'Por WhatsApp', hint: 'Al pedir, se arma el mensaje para tu WhatsApp.' },
+    { value: 'both', label: 'Las dos', hint: 'Quedan en el sistema y también te avisan por WhatsApp.' },
+  ];
   readonly slotOptions = [15, 30, 60];
   readonly durationOptions = [60, 90, 120, 150, 180, 240];
   readonly advanceOptions = [7, 14, 30, 60, 90];
@@ -132,6 +138,37 @@ export class SettingsComponent implements OnInit {
     const a = document.createElement('a');
     a.href = url;
     a.download = 'qr-carta.png';
+    a.click();
+  }
+
+  // Tienda online: ¿el plan la incluye? La dirección (/delivery/<nombre>) se arma al guardar con la tienda activada
+  get canStore(): boolean {
+    return (this.form?.features ?? []).includes('online_store');
+  }
+
+  get storeLink(): string | null {
+    const slug = this.form?.menuSlug;
+    return slug ? `${window.location.origin}/delivery/${slug}` : null;
+  }
+
+  copyStoreLink() {
+    const link = this.storeLink;
+    if (!link) return;
+    navigator.clipboard?.writeText(link).then(
+      () => this.notify('Dirección copiada'),
+      () => this.notify('No se pudo copiar'),
+    );
+  }
+
+  // QR de la tienda, listo para imprimir y pegar en el local
+  async downloadStoreQr() {
+    const link = this.storeLink;
+    if (!link) return;
+    const QRCode = (await import('qrcode')).default;
+    const url = await QRCode.toDataURL(link, { width: 800, margin: 2, errorCorrectionLevel: 'M' });
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'qr-tienda-online.png';
     a.click();
   }
 

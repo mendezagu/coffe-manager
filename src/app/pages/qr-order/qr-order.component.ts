@@ -1,9 +1,11 @@
 import { backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { brandStyle } from 'src/app/services/brand';
 import { RealtimeService } from 'src/app/services/realtime.service';
+import { DeliveryMode, DeliveryPay, DeliveryPublicService, DeliveryStatus, StoreConfig, StoreInfo, StoreOrderView } from 'src/app/services/delivery.service';
 import { ClientOrders, ClientRequest, ClientStep, PublicGroup, PublicInfo, PublicItem, QrPublicService } from 'src/app/services/qr.service';
 
 interface CartLine {
@@ -20,11 +22,11 @@ interface CartLine {
 type Phase = 'loading' | 'notFound' | 'error' | 'pin' | 'ready';
 
 // Cómo avanza un pedido (lo que ve el cliente)
-const STEPS: { step: ClientStep; label: string }[] = [
-  { step: 'RECEIVED', label: 'Recibido' },
-  { step: 'CONFIRMED', label: 'Confirmado' },
-  { step: 'PREPARING', label: 'En cocina' },
-  { step: 'READY', label: 'Listo' },
+const STEPS: { step: ClientStep; label: string; icon: string }[] = [
+  { step: 'RECEIVED', label: 'Recibido', icon: 'inbox' },
+  { step: 'CONFIRMED', label: 'Confirmado', icon: 'task_alt' },
+  { step: 'PREPARING', label: 'En cocina', icon: 'restaurant' },
+  { step: 'READY', label: 'Listo', icon: 'room_service' },
 ];
 
 // Sin cocina el pedido termina cuando el mozo lo confirma
@@ -119,17 +121,35 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   // Fondo: imagen detrás de la página, aclarada para que las tarjetas y los textos se lean bien
   get pageStyle(): Record<string, string> {
     const url = this.info?.business?.backgroundUrl;
-    return url
-      ? {
-          'background-image': `${backgroundVeil(this.info?.business?.backgroundIntensity)}, url("${url.replace(/"/g, '%22')}")`,
-          'background-size': 'cover',
-          'background-position': 'center',
-          'background-attachment': 'fixed',
-        }
-      : {};
+    if (!url) return {};
+    // Una imagen vertical (con el dibujo en los bordes) recortada a pantalla completa pierde los costados: se ajusta al ancho y se repite hacia abajo.
+    const portrait = this.backgroundIsPortrait(url);
+    return {
+      'background-image': `${backgroundVeil(this.info?.business?.backgroundIntensity)}, url("${url.replace(/"/g, '%22')}")`,
+      'background-size': portrait ? '100% auto' : 'cover',
+      'background-position': portrait ? 'center top' : 'center',
+      'background-repeat': portrait ? 'repeat-y' : 'no-repeat',
+      'background-attachment': portrait ? 'scroll' : 'fixed',
+    };
+  }
+
+  private backgroundRatios = new Map<string, number>();
+
+  private backgroundIsPortrait(url: string): boolean {
+    const known = this.backgroundRatios.get(url);
+    if (known === undefined) {
+      this.backgroundRatios.set(url, 1);
+      const img = new Image();
+      img.onload = () => this.backgroundRatios.set(url, img.naturalWidth / (img.naturalHeight || 1));
+      img.src = url;
+      return false;
+    }
+    return known < 0.9;
   }
 
   token = '';
+  // Tienda online (ruta /delivery/:slug): la misma pantalla, con carrito, datos de entrega y seguimiento
+  storeMode = false;
   // Carta online: la misma pantalla en modo "solo ver" (ruta /carta/:slug)
   slug = '';
   viewOnly = false;
@@ -184,13 +204,26 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   private helpTimer?: ReturnType<typeof setTimeout>;
   private formatter?: Intl.NumberFormat;
 
-  constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService) {}
+  constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService, private delivery: DeliveryPublicService) {}
 
   ngOnInit() {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.viewOnly = !!this.slug;
+    this.storeMode = this.route.snapshot.data['store'] === true;
+    this.viewOnly = !!this.slug && !this.storeMode;
     if (this.viewOnly) {
       this.loadCarta();
+      return;
+    }
+    if (this.storeMode) {
+      this.clientId = this.loadClientId();
+      this.cart = this.readCart();
+      this.readCheckout();
+      this.myTokens = this.readTokens();
+      this.loadStore();
+      // El estado de los pedidos se consulta cada pocos segundos mientras la pantalla está abierta
+      this.trackTimer = setInterval(() => {
+        if (this.phase === 'ready' && !document.hidden && this.myTokens.length) this.refreshMyOrders();
+      }, 8000);
       return;
     }
     this.token = this.route.snapshot.paramMap.get('token') ?? '';
@@ -209,7 +242,8 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.ordersSub?.unsubscribe();
-    if (!this.viewOnly) this.realtime.disconnectCustomer();
+    if (!this.viewOnly && !this.storeMode) this.realtime.disconnectCustomer();
+    if (this.trackTimer) clearInterval(this.trackTimer);
     document.removeEventListener('visibilitychange', this.onVisible);
     if (this.bannerTimer) clearTimeout(this.bannerTimer);
     if (this.helpTimer) clearTimeout(this.helpTimer);
@@ -232,6 +266,10 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   load() {
+    if (this.storeMode) {
+      this.loadStore();
+      return;
+    }
     if (this.viewOnly) {
       this.loadCarta();
       return;
@@ -272,6 +310,15 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   get steps() {
     return this.kitchen ? STEPS : STEPS_NO_KITCHEN;
+  }
+
+  // Textos e íconos de los pasos del pedido (los dibuja el "stepper" de la pantalla)
+  get stepLabels(): string[] {
+    return this.steps.map((s) => s.label);
+  }
+
+  get stepIcons(): string[] {
+    return this.steps.map((s) => s.icon);
   }
 
   private get liveSteps(): ClientStep[] {
@@ -688,7 +735,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   get activeCount() {
-    return this.liveRequests.length;
+    return this.storeMode ? this.activeOrders.length : this.liveRequests.length;
   }
 
   // Número del pedido en esta mesa para este celular: el más viejo es el 1
@@ -751,6 +798,263 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ---------- tienda online ----------
+
+  private trackTimer?: ReturnType<typeof setInterval>;
+
+  get cartKey(): string {
+    return this.storeMode ? `delivery-cart:${this.slug}` : `qr-cart:${this.token}`;
+  }
+
+  get shop(): StoreConfig | null {
+    return (this.info as StoreInfo | null)?.store ?? null;
+  }
+
+  // Sin pedir: la carta online, o una tienda en pausa (se puede mirar pero no agregar)
+  get browseOnly(): boolean {
+    return this.viewOnly || (this.storeMode && !!this.shop?.paused);
+  }
+
+  checkout: { name: string; phone: string; mode: DeliveryMode; address: string; pay: DeliveryPay; note: string } = {
+    name: '',
+    phone: '',
+    mode: 'pickup',
+    address: '',
+    pay: 'cash',
+    note: '',
+  };
+  checkoutError = '';
+  // Pedido recién enviado (muestra los pasos siguientes: datos bancarios, WhatsApp)
+  sentOrder: { order: StoreOrderView; stored: boolean } | null = null;
+  myTokens: { token: string; number: number | null }[] = [];
+  myOrders: StoreOrderView[] = [];
+
+  private loadStore() {
+    this.delivery.info(this.slug).subscribe({
+      next: (info) => {
+        this.info = info;
+        document.title = `${info.business.name} · Pedidos online`;
+        this.formatter = undefined;
+        this.phase = 'ready';
+        const s = info.store;
+        if (this.checkout.mode === 'pickup' && !s.pickup && s.home) this.checkout.mode = 'delivery';
+        if (this.checkout.mode === 'delivery' && !s.home) this.checkout.mode = 'pickup';
+        if (this.checkout.pay === 'cash' && !s.payCash && s.payTransfer) this.checkout.pay = 'transfer';
+        if (this.checkout.pay === 'transfer' && !s.payTransfer) this.checkout.pay = 'cash';
+        this.dropUnavailableFromCart();
+        if (this.myTokens.length) this.refreshMyOrders();
+      },
+      error: (err) => (this.phase = err.status === 404 ? 'notFound' : this.info ? this.phase : 'error'),
+    });
+  }
+
+  get deliveryFee(): number {
+    return this.checkout.mode === 'delivery' ? this.shop?.fee ?? 0 : 0;
+  }
+
+  get orderTotal(): number {
+    return this.cartTotal + this.deliveryFee;
+  }
+
+  get activeOrders(): StoreOrderView[] {
+    return this.myOrders.filter((o) => this.isLiveStatus(o.status));
+  }
+
+  get pastOrders(): StoreOrderView[] {
+    return this.myOrders.filter((o) => !this.isLiveStatus(o.status));
+  }
+
+  isLiveStatus(s: DeliveryStatus) {
+    return s === 'PENDING' || s === 'ACCEPTED' || s === 'READY';
+  }
+
+  storeSteps(o: StoreOrderView): { status: DeliveryStatus; label: string }[] {
+    return [
+      { status: 'PENDING', label: 'Recibido' },
+      { status: 'ACCEPTED', label: 'Preparando' },
+      { status: 'READY', label: o.mode === 'delivery' ? 'En camino' : 'Listo para retirar' },
+    ];
+  }
+
+  storeLabels(o: StoreOrderView): string[] {
+    return this.storeSteps(o).map((s) => s.label);
+  }
+
+  storeIcons(o: StoreOrderView): string[] {
+    return ['inbox', 'restaurant', o.mode === 'delivery' ? 'two_wheeler' : 'shopping_bag'];
+  }
+
+  storeStepIndex(o: StoreOrderView): number {
+    return this.storeSteps(o).findIndex((s) => s.status === o.status);
+  }
+
+  storeStatusText(o: StoreOrderView): string {
+    switch (o.status) {
+      case 'PENDING':
+        return 'Esperando que el local acepte tu pedido';
+      case 'ACCEPTED':
+        return o.prepMin ? `Lo están preparando · unos ${o.prepMin} min` : 'Lo están preparando';
+      case 'READY':
+        return o.mode === 'delivery' ? 'Tu pedido salió hacia tu dirección' : 'Ya podés pasar a retirarlo';
+      default:
+        return '';
+    }
+  }
+
+  storePastLabel(s: DeliveryStatus): string {
+    return s === 'COMPLETED' ? 'Entregado' : s === 'REJECTED' ? 'No se pudo tomar' : 'Cancelado';
+  }
+
+  setMode(mode: DeliveryMode) {
+    this.checkout.mode = mode;
+    this.checkoutError = '';
+  }
+
+  private readCheckout() {
+    try {
+      const saved = JSON.parse(store.get(localStorage, 'delivery-customer') ?? 'null');
+      if (saved && typeof saved === 'object') {
+        this.checkout.name = String(saved.name ?? '').slice(0, 60);
+        this.checkout.phone = String(saved.phone ?? '').slice(0, 25);
+        this.checkout.address = String(saved.address ?? '').slice(0, 160);
+      }
+    } catch {
+      /* sin datos guardados */
+    }
+  }
+
+  private readTokens(): { token: string; number: number | null }[] {
+    try {
+      const parsed = JSON.parse(store.get(localStorage, `delivery-orders:${this.slug}`) ?? '[]');
+      return Array.isArray(parsed) ? parsed.filter((t) => t && typeof t.token === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveTokens() {
+    store.set(localStorage, `delivery-orders:${this.slug}`, this.myTokens.length ? JSON.stringify(this.myTokens) : null);
+  }
+
+  refreshMyOrders() {
+    if (!this.myTokens.length) {
+      this.myOrders = [];
+      return;
+    }
+    // Un pedido que el servidor ya no conoce (404) se quita de la lista; un corte de red lo deja como estaba
+    const calls = this.myTokens.map((t) =>
+      this.delivery.track(this.slug, t.token).pipe(catchError((err) => of(err?.status === 404 ? 'gone' : null))),
+    );
+    forkJoin(calls).subscribe((results) => {
+      const gone = new Set<string>();
+      const fresh: StoreOrderView[] = [];
+      results.forEach((r, i) => {
+        if (r === 'gone') gone.add(this.myTokens[i].token);
+        else if (r) fresh.push(r as StoreOrderView);
+        else {
+          const prev = this.myOrders.find((o) => o.token === this.myTokens[i].token);
+          if (prev) fresh.push(prev);
+        }
+      });
+      if (gone.size) {
+        this.myTokens = this.myTokens.filter((t) => !gone.has(t.token));
+        this.saveTokens();
+      }
+      this.myOrders = fresh.sort((a, b) => (b.number ?? 0) - (a.number ?? 0));
+    });
+  }
+
+  sendStore() {
+    if (this.sending || this.cart.length === 0 || !this.shop) return;
+    const c = this.checkout;
+    const digits = c.phone.replace(/\D/g, '');
+    if (c.name.trim().length < 2) return this.fail('Escribí tu nombre');
+    if (digits.length < 6) return this.fail('Escribí un teléfono para que el local pueda avisarte');
+    if (c.mode === 'delivery' && c.address.trim().length < 4) return this.fail('Escribí la dirección de entrega');
+    this.checkoutError = '';
+    this.sending = true;
+    // WhatsApp se abre en una pestaña que se pide ahora, con el toque del cliente: si se abriera recién cuando
+    // llega la respuesta del servidor, el navegador del celular la bloquearía como ventana emergente.
+    const waWindow = this.shop.whatsapp ? window.open('', '_blank') : null;
+    store.set(localStorage, 'delivery-customer', JSON.stringify({ name: c.name.trim(), phone: c.phone.trim(), address: c.address.trim() }));
+    this.delivery
+      .create(this.slug, {
+        clientId: this.clientId,
+        customerName: c.name.trim(),
+        phone: c.phone.trim(),
+        mode: c.mode,
+        address: c.mode === 'delivery' ? c.address.trim() : undefined,
+        payMethod: c.pay,
+        note: c.note.trim() || undefined,
+        items: this.cart.map((l) => ({
+          menuItemId: l.itemId,
+          quantity: l.quantity,
+          note: l.note.trim() || undefined,
+          optionIds: l.optionIds.length ? l.optionIds : undefined,
+        })),
+      })
+      .subscribe({
+        next: (res) => {
+          this.sending = false;
+          this.cart = [];
+          this.saveCart();
+          this.cartOpen = false;
+          this.checkout.note = '';
+          this.sentOrder = res;
+          if (waWindow) waWindow.location.href = this.whatsappLink(res.order);
+          if (res.stored && res.order.token) {
+            this.myTokens = [{ token: res.order.token, number: res.order.number }, ...this.myTokens].slice(0, 8);
+            this.saveTokens();
+            this.refreshMyOrders();
+          }
+          this.tab = 'orders';
+          window.scrollTo({ top: 0 });
+        },
+        error: (err) => {
+          this.sending = false;
+          waWindow?.close();
+          this.checkoutError = this.errorText(err);
+          // Si un producto ya no está o se agotó, se refresca la carta para que el cliente lo vea
+          if (err.status === 400 || err.status === 409) this.loadStore();
+        },
+      });
+  }
+
+  private fail(text: string) {
+    this.checkoutError = text;
+  }
+
+  cancelStoreOrder(o: StoreOrderView) {
+    if (!o.token) return;
+    this.delivery.cancel(this.slug, o.token).subscribe({
+      next: () => {
+        this.say('ok', 'Pedido cancelado');
+        this.refreshMyOrders();
+      },
+      error: (err) => {
+        this.say('error', this.errorText(err));
+        this.refreshMyOrders();
+      },
+    });
+  }
+
+  // El pedido listo para mandar por WhatsApp (el precio es el que calculó el servidor)
+  whatsappLink(o: StoreOrderView): string {
+    const lines: string[] = [`Hola ${this.info?.business.name ?? ''}! Quiero hacer un pedido${o.number ? ` (#${o.number})` : ''}:`, ''];
+    for (const l of o.items) {
+      lines.push(`${l.quantity}x ${l.name}${l.extras.length ? ` (${l.extras.join(', ')})` : ''} - ${this.money(l.unitPrice * l.quantity)}`);
+      if (l.note) lines.push(`   Aclaración: ${l.note}`);
+    }
+    lines.push('');
+    if (o.deliveryFee > 0) lines.push(`Envío: ${this.money(o.deliveryFee)}`);
+    lines.push(`Total: ${this.money(o.total)}`, '');
+    lines.push(o.mode === 'delivery' ? `Envío a: ${o.address}` : 'Retiro en el local');
+    lines.push(`Pago: ${o.payMethod === 'transfer' ? 'transferencia' : 'efectivo'}`);
+    lines.push(`Nombre: ${o.customerName}`, `Teléfono: ${o.phone}`);
+    if (o.note) lines.push(`Aclaración: ${o.note}`);
+    return `https://wa.me/${this.shop?.whatsapp ?? ''}?text=${encodeURIComponent(lines.join('\n'))}`;
+  }
+
   // ---------- utilidades ----------
 
   private say(kind: 'ok' | 'error', text: string) {
@@ -778,7 +1082,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   private readCart(): CartLine[] {
     try {
-      const parsed = JSON.parse(store.get(sessionStorage, `qr-cart:${this.token}`) ?? '[]');
+      const parsed = JSON.parse(store.get(sessionStorage, this.cartKey) ?? '[]');
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
@@ -786,7 +1090,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   private saveCart() {
-    store.set(sessionStorage, `qr-cart:${this.token}`, this.cart.length ? JSON.stringify(this.cart) : null);
+    store.set(sessionStorage, this.cartKey, this.cart.length ? JSON.stringify(this.cart) : null);
   }
 
   private loadClientId(): string {

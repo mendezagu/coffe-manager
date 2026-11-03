@@ -1,0 +1,148 @@
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner max-w-6xl">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>shopping_bag</mat-icon></div>
+        <div class="min-w-0">
+          <h1 class="page-title">Pedidos online</h1>
+          <p class="page-sub">Lo que piden tus clientes desde la tienda: aceptalo, prepará y entregá.</p>
+        </div>
+      </div>
+      <button *ngIf="!locked && settings.value.deliveryActive" type="button" (click)="pause(!settings.value.deliveryPaused)"
+        class="inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold transition-colors"
+        [ngClass]="settings.value.deliveryPaused ? 'bg-cafe-green-700 text-white shadow-green hover:bg-cafe-green-800' : 'border border-sage-300 bg-white text-sage-800 hover:bg-sage-50'">
+        <mat-icon class="!h-5 !w-5 !text-xl">{{ settings.value.deliveryPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+        {{ settings.value.deliveryPaused ? 'Volver a recibir pedidos' : 'Pausar pedidos' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="locked" class="px-2 py-5 sm:px-8 sm:py-8">
+    <app-upgrade-wall feature="online_store" benefit="Tus clientes piden desde un link o un QR, para retirar o con envío, y el pedido te llega al instante."></app-upgrade-wall>
+  </div>
+
+  <div *ngIf="!locked" class="px-2 py-5 sm:px-8 sm:py-8">
+    <div class="mx-auto max-w-6xl space-y-5">
+
+      <!-- Todavía no está activada -->
+      <div *ngIf="!settings.value.deliveryActive" class="rounded-card border border-cafe-amber-200 bg-cafe-amber-50 p-4 text-sm text-cafe-amber-900">
+        <strong>La tienda online está apagada.</strong> Activala en <a routerLink="/settings" class="font-bold underline">Mi negocio → Funciones</a> para que tus clientes puedan pedir.
+      </div>
+
+      <div *ngIf="settings.value.deliveryActive && settings.value.deliveryPaused" class="flex items-center gap-2 rounded-card border border-cafe-red-200 bg-cafe-red-50 p-4 text-sm font-semibold text-cafe-red-700">
+        <mat-icon>pause_circle</mat-icon> La tienda está en pausa: tus clientes ven la carta pero no pueden pedir.
+      </div>
+
+      <!-- Dirección para compartir -->
+      <div *ngIf="settings.value.deliveryActive && link" class="flex flex-wrap items-center gap-2 rounded-card bg-white p-3 shadow-soft">
+        <mat-icon class="text-cafe-green-700">link</mat-icon>
+        <code class="min-w-0 flex-1 break-all text-sm text-sage-800">{{ link }}</code>
+        <button type="button" (click)="copyLink()" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-sage-200 px-3 text-sm font-bold text-sage-700 hover:bg-sage-50">
+          <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
+        </button>
+        <a [href]="link" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-sage-200 px-3 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
+          <mat-icon class="!h-4 !w-4 !text-base">open_in_new</mat-icon> Ver tienda
+        </a>
+      </div>
+
+      <p *ngIf="error" class="m-0 rounded-card bg-cafe-red-50 p-3 text-sm font-semibold text-cafe-red-700" role="alert">{{ error }}</p>
+
+      <ng-container *ngIf="delivery.inbox$ | async as inbox">
+        <div *ngIf="settings.value.deliveryActive && !inbox.orders.length" class="rounded-card bg-white p-10 text-center shadow-soft">
+          <mat-icon class="!h-12 !w-12 !text-5xl text-sage-300">shopping_bag</mat-icon>
+          <p class="m-0 mt-2 text-sm text-sage-600">Todavía no hay pedidos. Cuando llegue uno, suena un aviso y aparece acá.</p>
+        </div>
+
+        <!-- Columnas: nuevos → en preparación → listos -->
+        <div class="grid gap-4 lg:grid-cols-3">
+          <section *ngFor="let col of columns" class="min-w-0 space-y-3">
+            <h2 class="m-0 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-sage-600">
+              <mat-icon class="!h-5 !w-5 !text-xl">{{ col.icon }}</mat-icon>{{ col.title }}
+              <span class="rounded-full bg-white px-2 py-0.5 text-xs text-sage-700 shadow-sm">{{ inColumn(inbox.orders, col).length }}</span>
+            </h2>
+
+            <article *ngFor="let o of inColumn(inbox.orders, col); trackBy: trackOrder" class="rounded-card bg-white p-4 shadow-soft">
+              <ng-container *ngTemplateOutlet="orderBody; context: { $implicit: o }"></ng-container>
+
+              <div class="mt-3 flex flex-col gap-2">
+                <ng-container *ngIf="o.status === 'PENDING'">
+                  <button type="button" (click)="accept(o)" [disabled]="busy.has(o.id)" class="h-11 rounded-xl bg-cafe-green-700 text-sm font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:opacity-50">Aceptar pedido</button>
+                </ng-container>
+                <ng-container *ngIf="o.status === 'ACCEPTED'">
+                  <button type="button" (click)="ready(o)" [disabled]="busy.has(o.id)" class="h-11 rounded-xl bg-cafe-green-700 text-sm font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:opacity-50">
+                    {{ o.mode === 'delivery' ? 'Listo: sale a domicilio' : 'Listo para retirar' }}
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="o.status === 'READY'">
+                  <label class="flex items-center gap-2 text-xs font-bold text-sage-600">
+                    Se cobró con
+                    <select [ngModel]="payChoice[o.id] || (o.payMethod === 'transfer' ? 'transferencia' : 'efectivo')" (ngModelChange)="payChoice[o.id] = $event" [name]="'pay-' + o.id"
+                      class="h-9 flex-1 rounded-lg border border-sage-200 bg-white px-2 text-sm font-semibold text-sage-800">
+                      <option value="efectivo">Efectivo</option>
+                      <option value="transferencia">Transferencia</option>
+                      <option value="tarjeta">Tarjeta</option>
+                      <option value="qr">QR</option>
+                    </select>
+                  </label>
+                  <button type="button" (click)="complete(o)" [disabled]="busy.has(o.id)" class="h-11 rounded-xl bg-cafe-green-700 text-sm font-bold text-white shadow-green hover:bg-cafe-green-800 disabled:opacity-50">
+                    Entregado y cobrado · {{ o.total | money }}
+                  </button>
+                </ng-container>
+                <button type="button" (click)="reject(o)" [disabled]="busy.has(o.id)" class="h-9 rounded-xl bg-cafe-red-50 text-xs font-bold text-cafe-red-700 hover:bg-cafe-red-100 disabled:opacity-50">
+                  {{ o.status === 'PENDING' ? 'Rechazar' : 'Cancelar pedido' }}
+                </button>
+              </div>
+            </article>
+
+            <p *ngIf="!inColumn(inbox.orders, col).length" class="m-0 rounded-card border border-dashed border-sage-300 p-4 text-center text-xs text-sage-500">Sin pedidos</p>
+          </section>
+        </div>
+
+        <!-- Terminados de las últimas horas -->
+        <section *ngIf="closed(inbox.orders).length" class="space-y-3">
+          <button type="button" (click)="showClosed = !showClosed" [attr.aria-expanded]="showClosed" class="flex items-center gap-2 text-sm font-bold text-sage-600">
+            <mat-icon>{{ showClosed ? 'expand_less' : 'expand_more' }}</mat-icon>Terminados hoy ({{ closed(inbox.orders).length }})
+          </button>
+          <div *ngIf="showClosed" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <article *ngFor="let o of closed(inbox.orders); trackBy: trackOrder" class="rounded-card bg-white p-4 opacity-80 shadow-soft">
+              <p class="m-0 mb-2 text-xs font-bold" [ngClass]="o.status === 'COMPLETED' ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ statusLabel(o.status) }}<ng-container *ngIf="o.rejectReason"> · {{ o.rejectReason }}</ng-container></p>
+              <ng-container *ngTemplateOutlet="orderBody; context: { $implicit: o }"></ng-container>
+            </article>
+          </div>
+        </section>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Datos de un pedido -->
+<ng-template #orderBody let-o>
+  <div class="flex items-start justify-between gap-2">
+    <div class="min-w-0">
+      <p class="m-0 text-lg font-extrabold text-sage-900">#{{ o.number }} · {{ o.customerName }}</p>
+      <p class="m-0 text-xs text-sage-500">{{ o.createdAt | date: 'HH:mm' }} · {{ o.mode === 'delivery' ? 'Envío a domicilio' : 'Retira en el local' }} · {{ payLabel(o.payMethod) }}</p>
+    </div>
+    <p class="m-0 flex-none text-lg font-extrabold text-cafe-green-700">{{ o.total | money }}</p>
+  </div>
+
+  <ul class="m-0 mt-3 list-none space-y-1.5 p-0">
+    <li *ngFor="let l of o.items" class="text-sm text-sage-800">
+      <span class="font-extrabold">{{ l.quantity }}×</span> {{ l.name }}
+      <span *ngIf="l.extras.length" class="text-sage-500"> · {{ l.extras.join(', ') }}</span>
+      <span *ngIf="l.note" class="block text-xs italic text-sage-500">"{{ l.note }}"</span>
+    </li>
+  </ul>
+  <p *ngIf="o.deliveryFee > 0" class="m-0 mt-1.5 text-xs text-sage-500">Incluye envío de {{ o.deliveryFee | money }}</p>
+
+  <div class="mt-3 space-y-1 rounded-xl bg-sage-50 p-3 text-sm text-sage-700">
+    <p *ngIf="o.mode === 'delivery'" class="m-0 flex items-start gap-1.5"><mat-icon class="!h-4 !w-4 !text-base text-sage-500">place</mat-icon><span class="break-words">{{ o.address }}</span></p>
+    <p *ngIf="o.note" class="m-0 flex items-start gap-1.5"><mat-icon class="!h-4 !w-4 !text-base text-sage-500">notes</mat-icon><span class="break-words">{{ o.note }}</span></p>
+    <p class="m-0 flex flex-wrap items-center gap-2">
+      <mat-icon class="!h-4 !w-4 !text-base text-sage-500">call</mat-icon>
+      <a [href]="'tel:' + o.phone" class="font-semibold text-sage-800">{{ o.phone }}</a>
+      <a [href]="waLink(o)" target="_blank" rel="noopener" class="ml-auto inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-xs font-bold text-cafe-green-700 no-underline ring-1 ring-sage-200 hover:bg-sage-100">
+        <mat-icon class="!h-4 !w-4 !text-base">chat</mat-icon> WhatsApp
+      </a>
+    </p>
+  </div>
+</ng-template>

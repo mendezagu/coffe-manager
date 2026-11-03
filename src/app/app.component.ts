@@ -14,6 +14,7 @@ import { BUILD_INFO } from './build-info';
 import { GestionService } from './services/gestionService';
 import { MatDialog } from '@angular/material/dialog';
 import { QrCall, QrRequest, QrService } from './services/qr.service';
+import { DeliveryService } from './services/delivery.service';
 import { QrInboxDialogComponent } from './components/qr-inbox-dialog/qr-inbox-dialog.component';
 import { AnnouncementsDialogComponent } from './components/announcements-dialog/announcements-dialog.component';
 import { AnnouncementsService } from './services/announcements.service';
@@ -60,6 +61,7 @@ export class AppComponent {
     public cash: CashService,
     private inventory: InventoryService,
     public qr: QrService,
+    public delivery: DeliveryService,
     private dialog: MatDialog,
     public onboarding: OnboardingService,
     public nav: NavGuideService,
@@ -101,6 +103,8 @@ export class AppComponent {
   private refreshQrWatch() {
     const staff = this.qrRole === 'admin' || this.qrRole === 'cashier' || this.qrRole === 'waiter';
     this.qr.watch(staff && !!this.settings.value.qrActive);
+    // Pedidos de la tienda online: los reciben el administrador y el cajero
+    this.delivery.watch((this.qrRole === 'admin' || this.qrRole === 'cashier') && !!this.settings.value.deliveryActive);
   }
 
   // Ícono según el turno (mañana, tarde o noche)

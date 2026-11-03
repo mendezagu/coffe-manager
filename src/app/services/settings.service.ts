@@ -80,6 +80,19 @@ export interface TenantSettings {
   qrRequirePin: boolean;
   // el asistente de primeros pasos ya se terminó (o se salteó)
   onboardingDone: boolean;
+  // tienda online (/delivery/<local>): lo que eligió el negocio y lo que rige (elegido y permitido por el plan)
+  deliveryEnabled: boolean;
+  deliveryActive: boolean;
+  deliveryPaused: boolean;
+  deliveryPickup: boolean;
+  deliveryHome: boolean;
+  deliveryFee: number;
+  deliveryDest: 'system' | 'whatsapp' | 'both';
+  deliveryWhatsapp: string;
+  deliveryPayCash: boolean;
+  deliveryPayTransfer: boolean;
+  deliveryBankInfo: string;
+  deliveryPrepMin: number;
 }
 
 export type SettingsUpdate = Partial<Omit<TenantSettings, 'id'>>;
@@ -137,6 +150,18 @@ const DEFAULTS: TenantSettings = {
   qrAutoConfirm: false,
   qrRequirePin: false,
   onboardingDone: true,
+  deliveryEnabled: false,
+  deliveryActive: false,
+  deliveryPaused: false,
+  deliveryPickup: true,
+  deliveryHome: false,
+  deliveryFee: 0,
+  deliveryDest: 'system',
+  deliveryWhatsapp: '',
+  deliveryPayCash: true,
+  deliveryPayTransfer: false,
+  deliveryBankInfo: '',
+  deliveryPrepMin: 30,
 };
 
 @Injectable({ providedIn: 'root' })
