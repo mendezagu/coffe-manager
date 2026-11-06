@@ -48,9 +48,22 @@ export function legibleBrand(hex: string): string {
 const triple = (c: Rgb) => c.join(' ');
 
 // Variables CSS (como "r g b") para el contenedor de la pantalla del cliente
-export function brandStyle(hex: string | null | undefined): string {
-  if (!hex || !parse(hex)) return '';
-  const base = parse(legibleBrand(hex)) as Rgb;
+// En la carta oscura el color se aclara para que botones y acentos se distingan del fondo
+export function brandStyle(hex: string | null | undefined, dark = false): string {
+  if (!hex || !parse(hex)) {
+    if (!dark) return '';
+    hex = DEFAULT_BRAND;
+  }
+  let base = parse(legibleBrand(hex)) as Rgb;
+  if (dark) {
+    base = mix(base, WHITE, 0.28);
+    return [
+      `--brand-rgb: ${triple(base)}`,
+      `--brand-hover-rgb: ${triple(mix(base, BLACK, 0.18))}`,
+      `--brand-light-rgb: ${triple(mix(base, WHITE, 0.1))}`,
+      `--brand-soft-rgb: ${triple(mix(base, [30, 31, 34], 0.78))}`,
+    ].join('; ');
+  }
   return [
     `--brand-rgb: ${triple(base)}`,
     `--brand-hover-rgb: ${triple(mix(base, BLACK, 0.25))}`,

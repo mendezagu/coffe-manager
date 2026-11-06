@@ -176,16 +176,28 @@ html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
     @apply bg-white border-b border-sage-200;
   }
   .page-header__inner {
-    @apply mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-4 px-4 py-5 sm:px-8 sm:py-6;
+    @apply mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-8 sm:py-4;
   }
   .page-header__icon {
-    @apply grid h-12 w-12 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700;
+    @apply grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-green-700 text-white shadow-green;
   }
+  /* Material le pisa el peso y el tamaño a los h1: por eso van con !important */
   .page-title {
-    @apply m-0 text-2xl font-bold leading-tight tracking-tight text-sage-900 sm:text-[28px];
+    @apply tracking-tight text-sage-900;
+    margin: 0 !important;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+  @media (min-width: 640px) {
+    .page-title {
+      font-size: 24px !important;
+    }
   }
   .page-sub {
-    @apply m-0 mt-0.5 text-sm text-sage-500;
+    @apply text-[13px] leading-snug text-sage-500;
+    margin: 2px 0 0 !important;
   }
 }
 
@@ -311,6 +323,23 @@ html.dark .mat-drawer {
   background-color: #2b2d31 !important;
   color: #dbdee1;
   border-right-color: #1e1f22 !important;
+}
+
+html.dark .page-header {
+  background-color: #2b2d31;
+  border-bottom-color: #1e1f22;
+}
+
+html.dark .page-header__icon {
+  background-color: #2e7a57;
+}
+
+html.dark .page-title {
+  color: #f2f3f5;
+}
+
+html.dark .page-sub {
+  color: #949ba4;
 }
 
 html.dark .custom-toolbar,

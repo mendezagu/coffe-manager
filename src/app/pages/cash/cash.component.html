@@ -1,7 +1,24 @@
 <!-- Caja. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a Tailwind;
      por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
-<div class="w-full min-h-screen bg-sage-100 px-[12px] sm:px-6 lg:px-8 py-[16px] sm:py-6 lg:py-8">
-  <div class="max-w-[1400px] mx-auto flex flex-col gap-[16px] sm:gap-[24px]">
+<div class="w-full min-h-screen bg-sage-100">
+  <header class="page-header">
+    <div class="page-header__inner">
+      <div class="flex min-w-0 items-center gap-4">
+        <div class="page-header__icon"><mat-icon>point_of_sale</mat-icon></div>
+        <div class="min-w-0">
+          <h2 class="page-title">Caja</h2>
+          <p class="page-sub">El efectivo y los cobros del turno.</p>
+        </div>
+      </div>
+      <span *ngIf="state" class="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[6px] text-xs font-bold tracking-wide"
+        [ngClass]="state.open ? 'bg-cafe-green-50 text-cafe-green-800' : 'bg-cafe-red-50 text-cafe-red-700'">
+        <span class="h-2 w-2 rounded-full" [ngClass]="state.open ? 'bg-cafe-green-600' : 'bg-cafe-red-700'"></span>{{ state.open ? 'ABIERTA' : 'CERRADA' }}
+      </span>
+    </div>
+  </header>
+
+  <div class="px-4 py-6 sm:px-8 sm:py-8">
+  <div class="max-w-7xl mx-auto flex flex-col gap-[16px] sm:gap-[24px]">
 
     <p *ngIf="loading" class="text-sage-600 text-sm m-0">Cargando…</p>
 
@@ -30,7 +47,7 @@
         </div>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-[8px]">
-            <h1 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">No hay caja abierta</h1>
+            <h2 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">No hay caja abierta</h2>
             <span class="inline-flex items-center gap-[6px] px-[10px] py-[2px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold tracking-wide">
               <span class="w-2 h-2 rounded-full bg-cafe-red-700"></span>CERRADA
             </span>
@@ -68,7 +85,7 @@
           </div>
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-[8px]">
-              <h1 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">Caja del turno</h1>
+              <h2 class="text-xl sm:text-2xl font-bold text-sage-900 tracking-tight m-0">Caja del turno</h2>
               <span class="inline-flex items-center gap-[6px] px-[10px] py-[2px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold tracking-wide">
                 <span class="w-2 h-2 rounded-full bg-cafe-green-700 animate-pulse"></span>ABIERTA
               </span>
@@ -422,4 +439,5 @@
       </form>
     </div>
   </div>
+</div>
 </div>

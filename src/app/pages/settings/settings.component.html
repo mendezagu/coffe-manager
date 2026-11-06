@@ -1,6 +1,6 @@
 <div class="w-full min-h-screen bg-sage-100">
   <header class="page-header">
-    <div class="page-header__inner max-w-5xl">
+    <div class="page-header__inner">
       <div class="flex min-w-0 items-center gap-4">
         <div class="page-header__icon"><mat-icon>store</mat-icon></div>
         <div class="min-w-0">
@@ -12,7 +12,7 @@
   </header>
 
   <div class="px-4 py-6 sm:px-8 sm:py-8">
-  <div class="max-w-5xl mx-auto">
+  <div class="mx-auto max-w-7xl">
     <p *ngIf="!form" class="text-sage-600 text-sm">Cargando…</p>
 
     <!-- Pestañas: cada una agrupa un tema, así la página no es una sola lista larguísima -->
@@ -120,6 +120,20 @@
             </ul>
           </div>
 
+          <!-- Estilo de la carta del cliente -->
+          <div>
+            <p class="m-0 text-xs font-bold text-sage-700">Estilo de la carta</p>
+            <div class="mt-1.5 inline-flex rounded-lg border border-sage-200 bg-sage-50 p-0.5" role="radiogroup" aria-label="Estilo de la carta">
+              <button type="button" role="radio" *ngFor="let t of [{ v: 'light', label: 'Clara', icon: 'light_mode' }, { v: 'dark', label: 'Oscura', icon: 'dark_mode' }]"
+                [attr.aria-checked]="(form.menuTheme || 'light') === t.v" (click)="setMenuTheme(t.v)"
+                class="inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-bold transition-colors"
+                [ngClass]="(form.menuTheme || 'light') === t.v ? 'bg-white text-sage-900 shadow-sm' : 'text-sage-500 hover:text-sage-700'">
+                <mat-icon class="!h-4 !w-4 !text-base">{{ t.icon }}</mat-icon>{{ t.label }}
+              </button>
+            </div>
+            <p class="m-0 mt-1 text-[11px] text-sage-500">Cómo ven tus clientes la carta online, la tienda y el pedido por QR. Si usás un fondo oscuro, elegí la oscura.</p>
+          </div>
+
           <p *ngIf="!imagesAvailable" class="m-0 rounded-xl bg-sage-50 px-3 py-2.5 text-xs text-sage-500">Las imágenes todavía no están activadas en este servidor.</p>
 
           <div *ngIf="imagesAvailable" class="grid gap-3 sm:grid-cols-2">
@@ -159,6 +173,7 @@
                   <span>{{ b.kind === 'cover' ? 'Más visible' : 'Más visible' }}</span>
                 </div>
               </div>
+
             </div>
           </div>
         </section>

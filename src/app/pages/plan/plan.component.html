@@ -1,6 +1,6 @@
 <div class="w-full" [ngClass]="embedded ? '' : 'min-h-screen bg-sage-100'">
   <header *ngIf="!embedded" class="page-header">
-    <div class="page-header__inner max-w-5xl">
+    <div class="page-header__inner">
       <div class="flex min-w-0 items-center gap-4">
         <div class="page-header__icon"><mat-icon>workspace_premium</mat-icon></div>
         <div class="min-w-0">
@@ -11,8 +11,8 @@
     </div>
   </header>
 
-  <div [ngClass]="embedded ? '' : 'px-4 py-8 sm:px-8 sm:py-10'">
-    <div class="mx-auto max-w-5xl space-y-10">
+  <div [ngClass]="embedded ? '' : 'px-4 py-6 sm:px-8 sm:py-8'">
+    <div class="mx-auto max-w-7xl space-y-10">
 
       <!-- Tu plan de hoy: una tarjeta ancha, con lo que incluye en dos columnas -->
       <section class="rounded-[24px] border border-cafe-green-700/40 bg-white p-6 shadow-soft sm:p-8" aria-label="Tu plan de hoy">

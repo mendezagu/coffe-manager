@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Category, GestionService } from 'src/app/services/gestionService';
@@ -46,6 +46,13 @@ export class CounterComponent implements OnInit, OnDestroy {
   cat = ALL;
   term = '';
   takeaway = true;
+
+  // Lista compacta (más productos por pantalla): la elección queda guardada en este equipo
+  compact = this.readCompact();
+  // Solo el administrador: mientras está activo se ve la estrella para fijar favoritos
+  editFavs = false;
+
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   // lo que lleva el cliente: id del producto -> cantidad
   cart = new Map<string, number>();
@@ -121,6 +128,60 @@ export class CounterComponent implements OnInit, OnDestroy {
     return this.items.filter((i) => this.matches(i));
   }
 
+  // Sin filtros, los favoritos ya están arriba: no se repiten en el resto de la lista
+  get dedupe(): boolean {
+    return !this.editFavs && this.cat === ALL && !this.term.trim() && this.favorites.length > 0;
+  }
+
+  get rest(): MenuItem[] {
+    return this.dedupe ? this.visible.filter((i) => !i.isFavorite) : this.visible;
+  }
+
+  private readCompact(): boolean {
+    try {
+      return localStorage.getItem('counter_compact') === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  setCompact(value: boolean) {
+    this.compact = value;
+    try {
+      localStorage.setItem('counter_compact', value ? '1' : '0');
+    } catch {
+      /* sin almacenamiento: queda solo para esta sesión */
+    }
+  }
+
+  // Enter en el buscador: suma el primer resultado y deja el buscador listo para el siguiente
+  searchEnter() {
+    const first = this.visible.find((i) => !this.soldOut(i));
+    if (!first) return;
+    this.add(first);
+    this.term = '';
+  }
+
+  // Ctrl + K lleva al buscador; Ctrl + Enter cobra
+  @HostListener('document:keydown', ['$event'])
+  onKey(e: KeyboardEvent) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      this.searchInput?.nativeElement.focus();
+      this.searchInput?.nativeElement.select();
+    } else if (e.key === 'Enter' && this.canCharge) {
+      e.preventDefault();
+      this.charge();
+    }
+  }
+
+  // Precio para la tarjeta: sin los ceros de los centavos cuando es un monto redondo ($ 22.500 en vez de $ 22.500,00)
+  shortPrice(n: number): string {
+    const s = this.settings.format(n);
+    return Number.isInteger(n) ? s.replace(/[.,]0+$/, '') : s;
+  }
+
   categoryName(i: MenuItem): string {
     return this.categories.find((c) => c._id === i.categoryId)?.name ?? '';
   }
@@ -146,9 +207,20 @@ export class CounterComponent implements OnInit, OnDestroy {
     return !!this.lastSale || this.itemsCount > 0;
   }
 
-  // En el celular el pedido queda debajo de los productos: este botón lleva hasta él
-  scrollToOrder() {
-    document.getElementById('mostrador-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // El pedido y el cobro se abren desde el botón flotante, en un diálogo
+  orderOpen = false;
+
+  openOrder() {
+    this.orderOpen = true;
+  }
+
+  closeOrder() {
+    this.orderOpen = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.closeOrder();
   }
 
   get itemsCount(): number {
@@ -201,11 +273,18 @@ export class CounterComponent implements OnInit, OnDestroy {
     const q = (this.cart.get(id) ?? 0) + delta;
     if (q <= 0) this.cart.delete(id);
     else this.cart.set(id, Math.min(99, q));
+    if (this.cart.size === 0) this.orderOpen = false;
+  }
+
+  // "Vaciar" borra todo el pedido: se pide confirmar para que un toque de más no lo pierda
+  confirmClear() {
+    if (window.confirm('¿Vaciar el pedido?')) this.clear();
   }
 
   clear() {
     this.touchOrder();
     this.cart.clear();
+    this.orderOpen = false;
   }
 
   // Si el pedido cambia, es otro cobro: nuevo identificador y se limpia el resultado anterior
@@ -232,6 +311,14 @@ export class CounterComponent implements OnInit, OnDestroy {
   get cashBlocked(): boolean {
     const s = this.cash.value;
     return !!s && s.requireOpenRegister && !s.open;
+  }
+
+  // Estado de la caja para el encabezado
+  get cashChip(): { text: string; tone: 'ok' | 'bad' | 'idle' } | null {
+    const s = this.cash.value;
+    if (!s) return null;
+    if (s.open) return { text: 'Caja abierta', tone: 'ok' };
+    return s.requireOpenRegister ? { text: 'Caja cerrada', tone: 'bad' } : { text: 'Caja sin abrir', tone: 'idle' };
   }
 
   get canCharge(): boolean {
@@ -274,6 +361,7 @@ export class CounterComponent implements OnInit, OnDestroy {
   newSale() {
     this.lastSale = null;
     this.error = '';
+    this.orderOpen = false;
   }
 
   printTicket() {

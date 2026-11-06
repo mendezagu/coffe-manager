@@ -41,13 +41,21 @@
       <div *ngFor="let row of rows; let i = index" class="p-2 bg-white border border-sage-200 rounded-lg">
         <div class="flex flex-wrap items-end gap-2">
           <span *ngIf="splitN > 1" class="text-xs font-bold text-sage-500 w-full sm:w-auto">Persona {{ i + 1 }}</span>
-          <select [(ngModel)]="row.method" (ngModelChange)="onMethodChange(row)" [attr.aria-label]="'Método de pago ' + (i + 1)"
+          <div *ngIf="variant === 'pos'" class="grid w-full grid-cols-4 gap-[6px]" role="radiogroup" [attr.aria-label]="'Método de pago ' + (i + 1)">
+            <button *ngFor="let m of methods" type="button" role="radio" [attr.aria-checked]="row.method === m.value" (click)="row.method = m.value; onMethodChange(row)"
+              class="flex flex-col items-center justify-center gap-[4px] rounded-xl border px-[4px] py-[10px] transition-all active:scale-95"
+              [ngClass]="row.method === m.value ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-600 hover:border-sage-300 hover:text-sage-900'">
+              <mat-icon class="!h-[22px] !w-[22px] !text-[22px]" [ngClass]="row.method === m.value ? 'text-white' : 'text-cafe-green-700'">{{ m.icon }}</mat-icon>
+              <span class="text-[11px] font-bold">{{ m.short }}</span>
+            </button>
+          </div>
+          <select *ngIf="variant !== 'pos'" [(ngModel)]="row.method" (ngModelChange)="onMethodChange(row)" [attr.aria-label]="'Método de pago ' + (i + 1)"
             [class.border-cafe-red-700]="!row.method && row.amount > 0" [class.border-sage-200]="!!row.method || !(row.amount > 0)"
             class="flex-1 min-w-[190px] px-2 py-2 border rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
             <option value="" disabled>Elegí el método de pago</option>
             <option *ngFor="let m of methods" [value]="m.value">{{ m.label }}</option>
           </select>
-          <label class="flex flex-col">
+          <label class="flex flex-col" *ngIf="variant !== 'pos' || rows.length > 1 || splitN > 1">
             <span class="text-[10px] font-bold text-sage-500 leading-none mb-0.5">Importe a cobrar</span>
             <input type="number" min="0" step="any" [(ngModel)]="row.amount" (ngModelChange)="onRowChange(i)" [attr.aria-label]="'Importe a cobrar con este método ' + (i + 1)"
               [readOnly]="splitN > 1 || rows.length === 1"
@@ -61,7 +69,32 @@
         </div>
 
         <!-- Efectivo: lo que entrega el cliente y el vuelto -->
-        <div *ngIf="row.method === 'efectivo'" class="mt-2 pt-2 border-t border-sage-100 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+        <div *ngIf="row.method === 'efectivo' && variant === 'pos'" class="mt-[10px] flex flex-col gap-[10px] rounded-2xl border border-sage-100 bg-sage-50 p-[12px]">
+          <div class="flex items-center justify-between gap-[8px]">
+            <span class="text-xs font-semibold text-sage-900" title="Solo sirve para calcular el vuelto. No cambia el importe a cobrar.">Importe recibido</span>
+            <span class="flex items-center gap-[4px] rounded-xl border border-sage-200 bg-white px-[8px] py-[6px] shadow-sm">
+              <span class="text-sm font-bold text-sage-500">$</span>
+              <input type="number" min="0" step="any" [(ngModel)]="row.tendered" (ngModelChange)="onRowChange()" [attr.aria-label]="'Efectivo recibido ' + (i + 1)" placeholder="0"
+                class="w-24 bg-transparent text-right text-base font-extrabold text-sage-900 focus:outline-none" />
+            </span>
+          </div>
+          <div class="flex flex-wrap gap-[6px]">
+            <button type="button" (click)="row.tendered = row.amount; onRowChange()"
+              class="rounded-xl border border-sage-200 bg-white px-[10px] py-[6px] text-xs font-medium text-cafe-green-700 shadow-sm transition-colors hover:bg-cafe-green-50">Exacto ({{ row.amount | money }})</button>
+            <button *ngFor="let v of quickAmounts(row)" type="button" (click)="row.tendered = v; onRowChange()"
+              class="rounded-xl border px-[10px] py-[6px] text-xs font-medium shadow-sm transition-colors"
+              [ngClass]="row.tendered === v ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-100'">{{ v | money }}</button>
+          </div>
+          <div *ngIf="row.tendered !== null && !cashShort(row)" class="flex items-center justify-between rounded-xl border border-cafe-green-200 bg-cafe-green-50 px-[12px] py-[8px] text-cafe-green-800">
+            <span class="flex items-center gap-[6px] text-xs font-bold"><mat-icon class="!h-5 !w-5 !text-xl">currency_exchange</mat-icon>Vuelto a entregar</span>
+            <span class="font-jakarta text-lg font-extrabold">{{ changeOf(row) | money }}</span>
+          </div>
+          <p *ngIf="cashShort(row)" role="alert" class="m-0 rounded-xl bg-cafe-red-50 px-[12px] py-[8px] text-xs font-bold text-cafe-red-700">
+            Entrega {{ row.amount - (row.tendered || 0) | money }} de menos que el importe
+          </p>
+        </div>
+
+        <div *ngIf="row.method === 'efectivo' && variant !== 'pos'" class="mt-2 pt-2 border-t border-sage-100 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
           <label class="flex items-center justify-between gap-3 text-sage-600 w-full sm:w-auto" title="Solo sirve para calcular el vuelto. No cambia el importe a cobrar.">
             El cliente entrega
             <input type="number" min="0" step="any" [(ngModel)]="row.tendered" (ngModelChange)="onRowChange()" [attr.aria-label]="'Efectivo recibido ' + (i + 1)" placeholder="Monto"
@@ -81,7 +114,10 @@
       Escribí el <strong>importe a cobrar</strong> con cada método: el último se completa solo con lo que falta.
     </p>
 
-    <div class="mt-2 flex flex-wrap items-center gap-2">
+    <button *ngIf="variant === 'pos' && !moreOptions && rows.length === 1 && splitN === 1" type="button" (click)="moreOptions = true"
+      class="mt-2 text-xs font-medium text-sage-500 underline-offset-2 hover:text-sage-800 hover:underline">Más opciones: varios métodos o dividir la cuenta</button>
+
+    <div *ngIf="variant !== 'pos' || moreOptions || rows.length > 1 || splitN > 1" class="mt-2 flex flex-wrap items-center gap-2">
       <button type="button" (click)="addRow()" [disabled]="splitN > 1"
         class="px-3 py-1.5 text-xs font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
         + Pagar con otro método

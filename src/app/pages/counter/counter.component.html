@@ -2,7 +2,7 @@
      por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
 <div class="w-full min-h-screen bg-sage-100">
   <header class="page-header">
-    <div class="page-header__inner max-w-[1400px]">
+    <div class="page-header__inner">
       <div class="flex min-w-0 items-center gap-4">
         <div class="page-header__icon"><mat-icon>local_cafe</mat-icon></div>
         <div class="min-w-0">
@@ -10,16 +10,23 @@
           <p class="page-sub">Vendé y cobrá al instante, sin mesa.</p>
         </div>
       </div>
+      <!-- Estado de la caja: a un toque de abrirla o revisarla -->
+      <a *ngIf="cashChip as c" routerLink="/cash" title="Ir a Caja"
+        class="inline-flex items-center gap-[8px] rounded-full border px-[12px] py-[6px] text-xs font-semibold no-underline transition-colors hover:shadow-soft"
+        [ngClass]="c.tone === 'ok' ? 'border-cafe-green-200 bg-cafe-green-50 text-cafe-green-800' : (c.tone === 'bad' ? 'border-cafe-red-200 bg-cafe-red-50 text-cafe-red-700' : 'border-sage-200 bg-sage-50 text-sage-600')">
+        <span class="h-2 w-2 rounded-full" [ngClass]="c.tone === 'ok' ? 'bg-cafe-green-600' : (c.tone === 'bad' ? 'bg-cafe-red-700' : 'bg-sage-400')"></span>
+        {{ c.text }}
+        <mat-icon class="!h-4 !w-4 !text-base opacity-60">chevron_right</mat-icon>
+      </a>
     </div>
   </header>
 
   <app-upgrade-wall *ngIf="plans.locked('counter_sales')" feature="counter_sales" benefit="Vendé y cobrá al instante, sin mesa: ideal para el mostrador, el para llevar y la barra."></app-upgrade-wall>
 
-  <div *ngIf="!plans.locked('counter_sales')" class="px-[12px] py-[16px] sm:px-8 sm:py-8">
-    <div class="mx-auto max-w-[1400px]">
+  <div *ngIf="!plans.locked('counter_sales')" class="px-4 py-6 sm:px-8 sm:py-8">
+    <div class="mx-auto max-w-7xl">
       <!-- Negocio de mostrador: los primeros pasos viven acá (no tiene la pantalla de mesas) -->
       <app-getting-started *ngIf="plans.salesMode === 'counter'" class="mb-[16px] block"></app-getting-started>
-
 
       <!-- Caja cerrada y el negocio la exige -->
       <div *ngIf="cashBlocked" role="alert" class="mb-[16px] flex flex-wrap items-center gap-[12px] rounded-card border border-cafe-red-200 bg-cafe-red-50 p-[16px] text-sm text-cafe-red-700">
@@ -35,187 +42,277 @@
       </div>
 
       <ng-container *ngIf="!loading && items.length > 0">
-        <!-- Buscador y cómo se lleva el pedido: la tarjeta del pedido arranca a esta misma altura -->
-        <div class="mb-[16px] flex flex-wrap items-center gap-[10px]">
-          <div class="relative min-w-[200px] flex-1">
-            <mat-icon class="pointer-events-none absolute left-[10px] top-1/2 -translate-y-1/2 !h-5 !w-5 !text-xl text-sage-400">search</mat-icon>
-            <input type="search" [(ngModel)]="term" aria-label="Buscar producto" placeholder="Buscar producto"
-              class="h-12 w-full rounded-xl border border-sage-200 bg-white pl-[36px] pr-[12px] text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
-          </div>
-          <div class="flex rounded-xl bg-sage-200/70 p-[3px]" role="group" aria-label="Cómo se lleva el pedido">
-            <button type="button" (click)="takeaway = true" [attr.aria-pressed]="takeaway"
-              class="flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-xs font-medium transition-colors"
-              [ngClass]="takeaway ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
-              <mat-icon class="!h-4 !w-4 !text-base">shopping_bag</mat-icon>Para llevar</button>
-            <button type="button" (click)="takeaway = false" [attr.aria-pressed]="!takeaway"
-              class="flex items-center gap-[6px] rounded-[10px] px-[12px] py-[8px] text-xs font-medium transition-colors"
-              [ngClass]="!takeaway ? 'bg-white text-cafe-green-700 shadow-soft font-bold' : 'text-sage-600'">
-              <mat-icon class="!h-4 !w-4 !text-base">storefront</mat-icon>Lo como acá</button>
-          </div>
-        </div>
+        <!-- Vista dividida: productos a la izquierda y el ticket siempre a la vista a la derecha (en el celular, el ticket se abre desde el botón flotante) -->
+        <div class="grid grid-cols-1 items-start gap-[20px] pb-[96px] lg:grid-cols-[minmax(0,1fr)_400px] lg:pb-0">
 
-        <!-- Categorías: todas a la vista, sin barra de desplazamiento -->
-        <div class="mb-[20px] flex flex-wrap gap-[8px]" role="tablist" aria-label="Categorías">
-          <button *ngFor="let c of chips; trackBy: trackChip" type="button" role="tab" (click)="cat = c.id" [attr.aria-selected]="cat === c.id"
-            class="flex items-center gap-[8px] rounded-full border py-[9px] pl-[12px] pr-[16px] text-sm font-medium transition-colors"
-            [ngClass]="cat === c.id ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300 hover:bg-sage-50'">
-            <mat-icon class="!h-[18px] !w-[18px] !text-[18px]" [ngClass]="cat === c.id ? 'text-white' : 'text-cafe-green-700'">{{ c.icon }}</mat-icon>
-            {{ c.name }}
-            <span class="text-xs font-normal" [ngClass]="cat === c.id ? 'text-white/70' : 'text-sage-400'">{{ c.count }}</span>
+          <!-- ===== Productos ===== -->
+          <div class="min-w-0">
+            <!-- Buscador y categorías: quedan fijos arriba al desplazarse -->
+            <div class="sticky top-[56px] z-[9] -mt-[4px] bg-sage-100 pb-[10px] pt-[8px] sm:top-[64px]">
+              <div class="mb-[10px] flex flex-wrap items-center gap-[10px]">
+                <div class="relative min-w-[200px] flex-1 sm:max-w-[380px]">
+                  <mat-icon class="pointer-events-none absolute left-[10px] top-1/2 -translate-y-1/2 !h-5 !w-5 !text-xl text-sage-400">search</mat-icon>
+                  <input #searchInput type="search" [(ngModel)]="term" (keydown.enter)="searchEnter()" aria-label="Buscar producto" placeholder="Buscar producto"
+                    class="h-12 w-full rounded-xl border border-sage-200 bg-white pl-[36px] pr-[64px] text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                  <kbd class="pointer-events-none absolute right-[10px] top-1/2 hidden -translate-y-1/2 rounded bg-sage-100 px-[6px] py-[2px] text-[10px] font-semibold text-sage-500 sm:block">Ctrl K</kbd>
+                </div>
+
+                <!-- Fotos grandes o lista compacta -->
+                <div class="flex rounded-xl bg-sage-200/70 p-[3px]" role="group" aria-label="Cómo se ven los productos">
+                  <button type="button" (click)="setCompact(false)" [attr.aria-pressed]="!compact" aria-label="Tarjetas con foto" title="Tarjetas con foto"
+                    class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="!compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
+                    <mat-icon class="!h-5 !w-5 !text-xl">grid_view</mat-icon></button>
+                  <button type="button" (click)="setCompact(true)" [attr.aria-pressed]="compact" aria-label="Lista compacta" title="Lista compacta: caben más productos"
+                    class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
+                    <mat-icon class="!h-5 !w-5 !text-xl">view_list</mat-icon></button>
+                </div>
+
+                <!-- Solo el administrador: la estrella de favoritos queda escondida para no tocarla en plena venta -->
+                <button *ngIf="isAdmin" type="button" (click)="editFavs = !editFavs" [attr.aria-pressed]="editFavs"
+                  class="flex h-12 items-center gap-[6px] rounded-xl border px-[12px] text-xs font-semibold transition-colors"
+                  [ngClass]="editFavs ? 'border-[#d49a12] bg-[#fbf1d6] text-[#8a5a0b]' : 'border-sage-200 bg-white text-sage-600 hover:text-sage-900'">
+                  <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">{{ editFavs ? 'check' : 'star_outline' }}</mat-icon>{{ editFavs ? 'Listo' : 'Editar favoritos' }}
+                </button>
+              </div>
+
+              <!-- Categorías: todas a la vista, sin barra de desplazamiento -->
+              <div class="flex flex-wrap gap-[8px]" role="tablist" aria-label="Categorías">
+                <button *ngFor="let c of chips; trackBy: trackChip" type="button" role="tab" (click)="cat = c.id" [attr.aria-selected]="cat === c.id"
+                  class="flex items-center gap-[8px] rounded-full border py-[8px] pl-[12px] pr-[16px] text-sm font-medium transition-colors"
+                  [ngClass]="cat === c.id ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300 hover:bg-sage-50'">
+                  <mat-icon class="!h-[18px] !w-[18px] !text-[18px]" [ngClass]="cat === c.id ? 'text-white' : 'text-cafe-green-700'">{{ c.icon }}</mat-icon>
+                  {{ c.name }}
+                  <span class="text-xs font-normal" [ngClass]="cat === c.id ? 'text-white/70' : 'text-sage-400'">{{ c.count }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Tarjeta de producto con foto -->
+            <ng-template #productCard let-i>
+              <div role="button" tabindex="0" (click)="add(i)" (keydown.enter)="add(i)" (keydown.space)="add(i); $event.preventDefault()"
+                [attr.aria-label]="'Agregar ' + i.name + ', ' + (i.price | money)" [attr.aria-disabled]="soldOut(i)"
+                class="group relative flex cursor-pointer select-none flex-col justify-between overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl active:scale-[0.98]"
+                [ngClass]="[inCart(i) ? 'border-cafe-green-700 ring-1 ring-cafe-green-700/40' : 'border-sage-100 hover:border-sage-200', soldOut(i) ? '!cursor-not-allowed' : '']">
+
+                <!-- Foto (o el ícono de la categoría si todavía no tiene) -->
+                <div class="relative h-36 w-full overflow-hidden bg-sage-100" [class.opacity-45]="soldOut(i)">
+                  <img *ngIf="i.imageUrl" [src]="i.imageUrl" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div *ngIf="!i.imageUrl" class="grid h-full w-full place-items-center text-sage-300">
+                    <mat-icon class="!h-11 !w-11 !text-[44px]">{{ iconOf(i) }}</mat-icon>
+                  </div>
+                </div>
+
+                <!-- Sobre la foto: cantidad en el pedido, promo y favorito (solo al editar favoritos) -->
+                <span *ngIf="inCart(i)" class="absolute left-[10px] top-[10px] grid h-7 min-w-[28px] place-items-center rounded-full bg-cafe-green-700 px-[8px] text-xs font-bold text-white shadow-green">{{ inCart(i) }}</span>
+                <span *ngIf="i.isPromo && !soldOut(i)" class="absolute left-[10px] rounded-full bg-tertiary-container px-[10px] py-[2px] text-[11px] font-semibold uppercase tracking-wide text-tertiary-fixed shadow" [ngClass]="inCart(i) ? 'top-[44px]' : 'top-[10px]'">Promo</span>
+                <button *ngIf="isAdmin && editFavs" type="button" (click)="toggleFavorite(i, $event)" [attr.aria-label]="i.isFavorite ? 'Quitar de favoritos' : 'Fijar como favorito'"
+                  class="absolute right-[10px] top-[10px] grid h-9 w-9 place-items-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-colors hover:bg-white"
+                  [ngClass]="i.isFavorite ? 'text-[#d49a12]' : 'text-sage-500 hover:text-[#d49a12]'">
+                  <mat-icon class="!h-5 !w-5 !text-xl">{{ i.isFavorite ? 'star' : 'star_outline' }}</mat-icon>
+                </button>
+                <span *ngIf="soldOut(i)" class="absolute inset-x-0 top-[calc(4.5rem-12px)] mx-auto w-fit rounded-full bg-cafe-red-700 px-[12px] py-[4px] text-xs font-bold text-[#ffffff] shadow-soft">Agotado</span>
+
+                <div class="flex flex-1 flex-col gap-[4px] p-[16px]" [class.opacity-45]="soldOut(i)">
+                  <span *ngIf="categoryName(i)" class="truncate text-[11px] font-semibold uppercase tracking-wide text-cafe-green-700">{{ categoryName(i) }}</span>
+                  <span class="line-clamp-1 text-base font-semibold leading-snug text-sage-900" [attr.title]="i.name">{{ i.name }}</span>
+                  <span class="mt-[8px] flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[6px] border-t border-sage-100 pt-[8px]">
+                    <span class="flex flex-col">
+                      <span class="text-[11px] font-semibold text-sage-500">Precio</span>
+                      <span class="whitespace-nowrap font-jakarta text-lg font-bold leading-tight text-sage-900">{{ shortPrice(i.price) }}</span>
+                    </span>
+                    <!-- botón de agregar: deja claro que tocar la tarjeta suma al pedido -->
+                    <span *ngIf="!soldOut(i)" class="ml-auto grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-green-700 text-white shadow-green transition-all group-hover:bg-cafe-green-800 group-active:scale-95" aria-hidden="true">
+                      <mat-icon class="!h-[22px] !w-[22px] !text-[22px]">add</mat-icon>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- Fila compacta: foto chica, nombre y precio; entran muchos más productos por pantalla -->
+            <ng-template #productRow let-i>
+              <div role="button" tabindex="0" (click)="add(i)" (keydown.enter)="add(i)" (keydown.space)="add(i); $event.preventDefault()"
+                [attr.aria-label]="'Agregar ' + i.name + ', ' + (i.price | money)" [attr.aria-disabled]="soldOut(i)"
+                class="group relative flex cursor-pointer select-none items-center gap-[10px] rounded-xl border bg-white p-[8px] shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                [ngClass]="[inCart(i) ? 'border-cafe-green-700 ring-1 ring-cafe-green-700/40' : 'border-sage-100 hover:border-sage-200', soldOut(i) ? '!cursor-not-allowed' : '']">
+                <div class="relative h-14 w-14 flex-none overflow-hidden rounded-lg bg-sage-100" [class.opacity-45]="soldOut(i)">
+                  <img *ngIf="i.imageUrl" [src]="i.imageUrl" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover" />
+                  <div *ngIf="!i.imageUrl" class="grid h-full w-full place-items-center text-sage-300"><mat-icon class="!h-6 !w-6 !text-2xl">{{ iconOf(i) }}</mat-icon></div>
+                  <span *ngIf="inCart(i)" class="absolute left-[3px] top-[3px] grid h-5 min-w-[20px] place-items-center rounded-full bg-cafe-green-700 px-[5px] text-[11px] font-bold text-white shadow-green">{{ inCart(i) }}</span>
+                </div>
+                <div class="min-w-0 flex-1" [class.opacity-45]="soldOut(i)">
+                  <span class="flex items-center gap-[6px]">
+                    <span class="truncate text-sm font-semibold text-sage-900" [attr.title]="i.name">{{ i.name }}</span>
+                    <span *ngIf="i.isPromo && !soldOut(i)" class="flex-none rounded-full bg-tertiary-container px-[6px] py-[1px] text-[9px] font-semibold uppercase tracking-wide text-tertiary-fixed">Promo</span>
+                  </span>
+                  <span class="block truncate text-[11px] text-sage-500">{{ soldOut(i) ? 'Agotado' : categoryName(i) }}</span>
+                  <span class="block whitespace-nowrap font-jakarta text-[15px] font-bold leading-tight text-sage-900">{{ shortPrice(i.price) }}</span>
+                </div>
+                <button *ngIf="isAdmin && editFavs" type="button" (click)="toggleFavorite(i, $event)" [attr.aria-label]="i.isFavorite ? 'Quitar de favoritos' : 'Fijar como favorito'"
+                  class="grid h-9 w-9 flex-none place-items-center rounded-full hover:bg-sage-100" [ngClass]="i.isFavorite ? 'text-[#d49a12]' : 'text-sage-400 hover:text-[#d49a12]'">
+                  <mat-icon class="!h-5 !w-5 !text-xl">{{ i.isFavorite ? 'star' : 'star_outline' }}</mat-icon>
+                </button>
+                <span *ngIf="!soldOut(i)" class="grid h-9 w-9 flex-none place-items-center rounded-lg bg-cafe-green-700 text-white shadow-green transition-all group-hover:bg-cafe-green-800 group-active:scale-95" aria-hidden="true">
+                  <mat-icon class="!h-5 !w-5 !text-xl">add</mat-icon>
+                </span>
+              </div>
+            </ng-template>
+
+            <!-- Favoritos -->
+            <ng-container *ngIf="favorites.length || (isAdmin && !term)">
+              <div class="mb-[12px] flex items-center justify-between border-b border-sage-200 pb-[8px]">
+                <div class="flex items-center gap-[8px] font-jakarta text-[17px] font-bold text-sage-900">
+                  <mat-icon class="!h-[22px] !w-[22px] !text-[22px] text-[#d49a12]">star</mat-icon>Favoritos
+                </div>
+                <span *ngIf="favorites.length" class="rounded-full bg-sage-100 px-[10px] py-[2px] text-xs font-medium text-sage-600">{{ favorites.length }} fijados</span>
+              </div>
+              <div *ngIf="favorites.length" class="mb-[24px] grid" [ngClass]="compact ? 'grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-[10px]' :'grid-cols-[repeat(auto-fill,minmax(max(160px,calc((100%_-_48px)/4)),1fr))]'">
+                <ng-container *ngFor="let i of favorites; trackBy: trackItem"><ng-container *ngTemplateOutlet="compact ? productRow : productCard; context: { $implicit: i }"></ng-container></ng-container>
+              </div>
+              <div *ngIf="!favorites.length" class="mb-[24px] flex items-center gap-[10px] rounded-2xl border border-dashed border-sage-300 bg-white/50 px-[14px] py-[14px] text-sm text-sage-500">
+                <mat-icon class="!h-5 !w-5 !text-xl text-sage-400">star_outline</mat-icon>
+                Tocá "Editar favoritos" y después la estrella de un producto para fijarlo acá y vender más rápido.
+              </div>
+            </ng-container>
+
+            <!-- Resto de los productos (sin repetir los favoritos) -->
+            <ng-container *ngIf="rest.length || !favorites.length">
+              <div class="mb-[12px] flex items-center justify-between border-b border-sage-200 pb-[8px]">
+                <div class="flex items-center gap-[8px] font-jakarta text-[17px] font-bold text-sage-900">
+                  <mat-icon class="!h-[22px] !w-[22px] !text-[22px] text-cafe-green-700">local_cafe</mat-icon>{{ cat === 'all' ? (dedupe ? 'Más productos' : 'Todos los productos') : 'Productos' }}
+                </div>
+                <span class="rounded-full bg-sage-100 px-[10px] py-[2px] text-xs font-medium text-sage-600">{{ rest.length }} {{ rest.length === 1 ? 'producto' : 'productos' }}</span>
+              </div>
+              <p *ngIf="rest.length === 0" class="m-0 rounded-card bg-white p-[20px] text-center text-sm text-sage-600 shadow-soft">No encontramos productos con ese filtro.</p>
+              <div class="grid" [ngClass]="compact ? 'grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-[10px]' : 'grid-cols-[repeat(auto-fill,minmax(max(160px,calc((100%_-_48px)/4)),1fr))] gap-[16px]'">
+                <ng-container *ngFor="let i of rest; trackBy: trackItem"><ng-container *ngTemplateOutlet="compact ? productRow : productCard; context: { $implicit: i }"></ng-container></ng-container>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Botón flotante (solo celular y tablet): abre el ticket -->
+          <button *ngIf="showOrder && !orderOpen" type="button" (click)="openOrder()" aria-haspopup="dialog"
+            class="fixed inset-x-[12px] bottom-[12px] z-40 flex items-center justify-between rounded-2xl bg-cafe-green-700 py-[10px] pl-[12px] pr-[16px] text-white shadow-green transition-all hover:bg-cafe-green-800 active:scale-[0.98] sm:inset-x-auto sm:right-[16px] sm:min-w-[300px] lg:hidden">
+            <span class="flex items-center gap-[10px]">
+              <span class="relative grid h-11 w-11 place-items-center rounded-xl bg-white/15">
+                <mat-icon class="!h-6 !w-6 !text-2xl">{{ lastSale ? 'check_circle' : 'shopping_cart' }}</mat-icon>
+                <span *ngIf="itemsCount" class="absolute -right-[6px] -top-[6px] grid h-5 min-w-[20px] place-items-center rounded-full bg-white px-[5px] text-[11px] font-bold text-cafe-green-800 shadow-sm">{{ itemsCount }}</span>
+              </span>
+              <span class="flex flex-col text-left leading-tight">
+                <span class="text-xs font-medium text-white/75">{{ lastSale ? 'Venta registrada' : 'Ver pedido' }}</span>
+                <span class="font-jakarta text-base font-bold">{{ lastSale ? shortPrice(lastSale.totalAmount) : shortPrice(total) }}</span>
+              </span>
+            </span>
+            <mat-icon class="!h-5 !w-5 !text-xl text-white/80">chevron_right</mat-icon>
           </button>
-        </div>
 
+          <!-- ===== Ticket y cobro: fijo a la derecha en pantallas grandes; en el celular, un diálogo -->
+          <div [ngClass]="orderOpen ? 'fixed inset-0 z-50 flex items-end justify-center sm:items-stretch sm:justify-end' : 'hidden'"
+            class="lg:sticky lg:inset-auto lg:top-[76px] lg:z-[9] lg:block lg:self-start" [attr.role]="orderOpen ? 'dialog' : null" [attr.aria-modal]="orderOpen ? 'true' : null" aria-label="Pedido del mostrador">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] lg:hidden" (click)="closeOrder()"></div>
+            <aside id="mostrador-pedido"
+              class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white p-[20px] shadow-xl sm:max-h-none sm:max-w-[440px] sm:rounded-l-3xl sm:rounded-tr-none lg:max-h-[calc(100vh-92px)] lg:max-w-none lg:rounded-3xl lg:border lg:border-sage-200">
+              <button type="button" (click)="closeOrder()" aria-label="Cerrar el pedido"
+                class="absolute right-[12px] top-[12px] z-10 grid h-8 w-8 place-items-center rounded-full text-sage-500 hover:bg-sage-100 hover:text-sage-800 lg:hidden">
+                <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
+              </button>
 
-        <div class="grid grid-cols-1 items-start gap-[20px]" [ngClass]="showOrder ? 'lg:grid-cols-[minmax(0,1fr)_380px]' : ''">
-
-        <!-- ===== Productos ===== -->
-        <div class="min-w-0">
-          <!-- Tarjeta de producto: la usan Favoritos y Todos los productos -->
-          <ng-template #productCard let-i>
-            <div role="button" tabindex="0" (click)="add(i)" (keydown.enter)="add(i)" (keydown.space)="add(i); $event.preventDefault()"
-              [attr.aria-label]="'Agregar ' + i.name + ', ' + (i.price | money)" [attr.aria-disabled]="soldOut(i)"
-              class="group relative flex cursor-pointer select-none flex-col overflow-hidden rounded-2xl border bg-white transition-all hover:border-cafe-green-700 hover:shadow-soft active:scale-[0.97]"
-              [ngClass]="[inCart(i) ? 'border-cafe-green-700 ring-1 ring-cafe-green-700/40' : 'border-sage-200', soldOut(i) ? '!cursor-not-allowed' : '']">
-
-              <!-- Foto (o el ícono de la categoría si todavía no tiene) -->
-              <div class="relative aspect-[4/3] w-full overflow-hidden bg-sage-100" [class.opacity-45]="soldOut(i)">
-                <img *ngIf="i.imageUrl" [src]="i.imageUrl" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                <div *ngIf="!i.imageUrl" class="grid h-full w-full place-items-center text-sage-300">
-                  <mat-icon class="!h-11 !w-11 !text-[44px]">{{ iconOf(i) }}</mat-icon>
+              <!-- Venta registrada -->
+              <div *ngIf="lastSale as s" role="status" class="rounded-2xl bg-cafe-green-50 p-[18px] text-cafe-green-800">
+                <p class="m-0 flex items-center gap-[8px] text-sm font-bold"><mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>Venta registrada</p>
+                <p class="mb-0 mt-[6px] font-jakarta text-3xl font-bold">{{ s.totalAmount | money }}</p>
+                <p *ngIf="s.change > 0" class="m-0 mt-[2px] text-sm">Vuelto: <strong>{{ s.change | money }}</strong></p>
+                <div class="mt-[14px] flex gap-[8px]">
+                  <button type="button" (click)="printTicket()" class="flex flex-1 items-center justify-center gap-[6px] rounded-xl border border-cafe-green-700/30 bg-white py-[11px] text-xs font-bold text-cafe-green-700 hover:bg-sage-50">
+                    <mat-icon class="!h-4 !w-4 !text-base">print</mat-icon>Imprimir ticket
+                  </button>
+                  <button type="button" (click)="newSale()" class="flex-1 rounded-xl bg-cafe-green-700 py-[11px] text-xs font-bold text-white hover:bg-cafe-green-800">Nueva venta</button>
                 </div>
               </div>
 
-              <!-- Sobre la foto: cantidad en el pedido, favorito y promo -->
-              <span *ngIf="inCart(i)" class="absolute left-[8px] top-[8px] grid h-7 min-w-[28px] place-items-center rounded-full bg-cafe-green-700 px-[8px] text-xs font-bold text-white shadow-green">{{ inCart(i) }}</span>
-              <button *ngIf="isAdmin" type="button" (click)="toggleFavorite(i, $event)" [attr.aria-label]="i.isFavorite ? 'Quitar de favoritos' : 'Fijar como favorito'"
-                class="absolute right-[6px] top-[6px] grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow-soft backdrop-blur hover:bg-white"
-                [ngClass]="i.isFavorite ? 'text-[#d49a12]' : 'text-sage-500 hover:text-[#d49a12]'">
-                <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">{{ i.isFavorite ? 'star' : 'star_outline' }}</mat-icon>
-              </button>
-              <span *ngIf="i.isPromo && !soldOut(i)" class="absolute left-[8px] rounded-full bg-[#d49a12] px-[8px] py-[2px] text-[10px] font-bold uppercase tracking-wide text-[#ffffff]" [ngClass]="inCart(i) ? 'top-[40px]' : 'top-[8px]'">Promo</span>
-              <span *ngIf="soldOut(i)" class="absolute inset-x-0 top-[calc(50%-12px)] mx-auto w-fit -translate-y-1/2 rounded-full bg-cafe-red-700 px-[12px] py-[4px] text-xs font-bold text-[#ffffff] shadow-soft">Agotado</span>
+              <ng-container *ngIf="!lastSale">
+                <!-- Encabezado del pedido -->
+                <div class="flex items-center justify-between border-b border-sage-100 pb-[12px]">
+                  <div class="flex items-center gap-[10px]">
+                    <div class="grid h-9 w-9 place-items-center rounded-xl bg-cafe-green-700 text-white"><mat-icon class="!h-5 !w-5 !text-xl">receipt_long</mat-icon></div>
+                    <div>
+                      <div class="flex items-center gap-[6px]">
+                        <h2 class="m-0 font-jakarta text-base font-bold text-sage-900">Pedido Mostrador</h2>
+                        <span *ngIf="itemsCount" class="grid h-5 min-w-[20px] place-items-center rounded-full bg-cafe-green-700 px-[6px] text-[11px] font-bold text-white">{{ itemsCount }}</span>
+                      </div>
+                      <p class="m-0 text-[11px] text-sage-500">{{ lines.length ? 'Orden activa en curso' : 'Tocá un producto para empezar' }}</p>
+                    </div>
+                  </div>
+                  <button *ngIf="lines.length" type="button" (click)="confirmClear()" class="mr-[32px] text-xs font-semibold text-cafe-red-700 hover:underline lg:mr-0">Vaciar</button>
+                </div>
 
-              <div class="flex flex-1 flex-col p-[12px]" [class.opacity-45]="soldOut(i)">
-                <span *ngIf="categoryName(i)" class="flex items-center gap-[6px] text-[11px] text-sage-500">
-                  <i class="inline-block h-2 w-2 flex-none rounded-full" [ngClass]="dotClass(i)"></i>
-                  <span class="truncate">{{ categoryName(i) }}</span>
-                </span>
-                <span class="mt-[4px] line-clamp-2 text-[15px] font-bold leading-snug text-sage-900">{{ i.name }}</span>
-                <span class="mt-auto flex items-center justify-between pt-[10px]">
-                  <span class="text-base font-bold text-cafe-green-700">{{ i.price | money }}</span>
-                  <!-- botón de agregar: deja claro que tocar la tarjeta suma al pedido -->
-                  <span *ngIf="!soldOut(i)" class="grid h-8 w-8 place-items-center rounded-full bg-cafe-green-50 text-cafe-green-700 transition-colors group-hover:bg-cafe-green-700 group-hover:text-white" aria-hidden="true">
-                    <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">add</mat-icon>
-                  </span>
-                </span>
-              </div>
-            </div>
-          </ng-template>
+                <!-- Cómo se lleva el pedido: a la vista, porque cambia el ticket -->
+                <div class="mt-[12px] flex rounded-xl bg-sage-100 p-[3px]" role="group" aria-label="Cómo se lleva el pedido">
+                  <button type="button" (click)="takeaway = true" [attr.aria-pressed]="takeaway"
+                    class="flex flex-1 items-center justify-center gap-[6px] rounded-[10px] py-[9px] text-xs transition-colors"
+                    [ngClass]="takeaway ? 'bg-cafe-green-700 font-bold text-white shadow-green' : 'font-medium text-sage-600 hover:text-sage-900'">
+                    <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">shopping_bag</mat-icon>Para llevar</button>
+                  <button type="button" (click)="takeaway = false" [attr.aria-pressed]="!takeaway"
+                    class="flex flex-1 items-center justify-center gap-[6px] rounded-[10px] py-[9px] text-xs transition-colors"
+                    [ngClass]="!takeaway ? 'bg-cafe-green-700 font-bold text-white shadow-green' : 'font-medium text-sage-600 hover:text-sage-900'">
+                    <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">storefront</mat-icon>Lo como acá</button>
+                </div>
 
-          <!-- Favoritos -->
-          <ng-container *ngIf="favorites.length || (isAdmin && !term)">
-            <div class="mb-[10px] flex items-center gap-[6px] text-xs font-bold tracking-wider text-sage-500">
-              <mat-icon class="!h-4 !w-4 !text-base text-[#d49a12]">star</mat-icon>FAVORITOS
-            </div>
-            <div *ngIf="favorites.length" class="mb-[24px] grid grid-cols-2 gap-[12px] sm:grid-cols-3 xl:grid-cols-4">
-              <ng-container *ngFor="let i of favorites; trackBy: trackItem"><ng-container *ngTemplateOutlet="productCard; context: { $implicit: i }"></ng-container></ng-container>
-            </div>
-            <div *ngIf="!favorites.length" class="mb-[24px] flex items-center gap-[10px] rounded-2xl border border-dashed border-sage-300 bg-white/50 px-[14px] py-[14px] text-sm text-sage-500">
-              <mat-icon class="!h-5 !w-5 !text-xl text-sage-400">star_outline</mat-icon>
-              Tocá la estrella de un producto para fijarlo acá y vender más rápido.
-            </div>
-          </ng-container>
+                <div *ngIf="!lines.length" class="flex flex-col items-center px-[8px] py-[36px] text-center text-sage-400">
+                  <mat-icon class="!h-10 !w-10 !text-[40px]">shopping_basket</mat-icon>
+                  <p class="m-0 mt-[8px] text-sm text-sage-500">Todavía no hay nada en el pedido.</p>
+                </div>
 
-          <!-- Todos los productos -->
-          <div class="mb-[10px] text-xs font-bold tracking-wider text-sage-500">{{ cat === 'all' ? 'TODOS LOS PRODUCTOS' : 'PRODUCTOS' }}</div>
-          <p *ngIf="visible.length === 0" class="m-0 rounded-card bg-white p-[20px] text-center text-sm text-sage-600 shadow-soft">No encontramos productos con ese filtro.</p>
-          <div class="grid grid-cols-2 gap-[12px] sm:grid-cols-3 xl:grid-cols-4">
-            <ng-container *ngFor="let i of visible; trackBy: trackItem"><ng-container *ngTemplateOutlet="productCard; context: { $implicit: i }"></ng-container></ng-container>
+                <ul *ngIf="lines.length" class="m-0 mt-[12px] flex max-h-[30vh] list-none flex-col gap-[8px] overflow-y-auto p-0">
+                  <li *ngFor="let l of lines; trackBy: trackLine" class="flex items-center gap-[10px] rounded-2xl border border-sage-100 bg-sage-50 p-[10px] text-sm transition-colors hover:border-sage-300">
+                    <span class="min-w-0 flex-1">
+                      <span class="block truncate font-semibold text-sage-900">{{ l.item.name }}</span>
+                      <span class="text-xs text-sage-500">{{ shortPrice(l.item.price) }} c/u</span>
+                    </span>
+                    <span class="flex items-center gap-[2px] rounded-xl border border-sage-200 bg-white p-[2px] shadow-sm">
+                      <button type="button" (click)="step(l.item._id, -1)" [attr.aria-label]="'Quitar uno de ' + l.item.name"
+                        class="grid h-10 w-10 place-items-center rounded-lg text-lg font-bold leading-none text-sage-700 hover:bg-sage-100 active:bg-sage-200">−</button>
+                      <span class="w-6 text-center text-base font-bold text-sage-900">{{ l.quantity }}</span>
+                      <button type="button" (click)="step(l.item._id, 1)" [attr.aria-label]="'Agregar uno de ' + l.item.name"
+                        class="grid h-10 w-10 place-items-center rounded-lg text-lg font-bold leading-none text-sage-700 hover:bg-sage-100 active:bg-sage-200">+</button>
+                    </span>
+                    <span class="w-[76px] text-right font-bold text-sage-900">{{ shortPrice(l.amount) }}</span>
+                  </li>
+                </ul>
+
+                <!-- Total a cobrar -->
+                <div *ngIf="lines.length" class="mt-[12px] rounded-2xl border border-sage-100 bg-sage-100/60 p-[14px]">
+                  <div class="flex items-center justify-between text-xs text-sage-600">
+                    <span>Subtotal ítems ({{ itemsCount }})</span>
+                    <span class="font-medium">{{ shortPrice(total) }}</span>
+                  </div>
+                  <div class="mt-[8px] flex items-baseline justify-between border-t border-sage-200 pt-[10px]">
+                    <span class="font-jakarta text-sm font-bold uppercase tracking-wide text-sage-900">Total a cobrar</span>
+                    <strong class="font-jakarta text-[30px] font-extrabold leading-none tracking-tight text-cafe-green-700">{{ shortPrice(total) }}</strong>
+                  </div>
+                </div>
+
+                <div *ngIf="lines.length" class="mt-[14px]">
+                  <!-- Propina, método de pago (efectivo ya elegido), vuelto y, en "más opciones", varios métodos y división -->
+                  <app-payment-panel
+                    variant="pos"
+                    [total]="total"
+                    [tipEnabled]="!!(settings.settings$ | async)?.tipEnabled"
+                    [tipSuggestedPct]="(settings.settings$ | async)?.tipSuggestedPct ?? 10"
+                    (valueChange)="payment = $event">
+                  </app-payment-panel>
+                </div>
+
+                <p *ngIf="error" role="alert" class="mb-0 mt-[10px] rounded-lg bg-cafe-red-50 p-[10px] text-xs font-bold text-cafe-red-700">{{ error }}</p>
+
+                <button type="button" (click)="charge()" [disabled]="!canCharge" title="Ctrl + Enter"
+                  class="mt-[14px] flex min-h-[56px] w-full items-center justify-center gap-[10px] rounded-2xl bg-cafe-green-700 text-[17px] font-bold tracking-wide text-white shadow-green transition-all hover:bg-cafe-green-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+                  <mat-icon class="!h-6 !w-6 !text-2xl">{{ busy ? 'hourglass_top' : 'point_of_sale' }}</mat-icon>
+                  {{ busy ? 'Cobrando…' : (lines.length ? 'Cobrar ' + (payment ? shortPrice(payment.due) : shortPrice(total)) : 'Cobrar') }}
+                </button>
+              </ng-container>
+            </aside>
           </div>
-        </div>
-
-        <!-- Celular: acceso directo al pedido mientras se agregan productos -->
-        <button *ngIf="itemsCount && !lastSale" type="button" (click)="scrollToOrder()"
-          class="fixed inset-x-[12px] bottom-[12px] z-30 flex items-center justify-between rounded-2xl bg-cafe-green-700 px-[16px] py-[14px] text-white shadow-green lg:hidden">
-          <span class="flex items-center gap-[8px] text-sm font-bold">
-            <span class="grid h-6 min-w-[24px] place-items-center rounded-full bg-white px-[7px] text-xs font-bold text-cafe-green-800">{{ itemsCount }}</span>
-            Ver pedido
-          </span>
-          <span class="text-base font-bold">{{ total | money }}</span>
-        </button>
-
-        <!-- ===== Pedido y cobro ===== -->
-        <aside *ngIf="showOrder" id="mostrador-pedido" class="scroll-mt-[16px] rounded-card border border-sage-200 bg-white p-[16px] shadow-soft lg:sticky lg:top-[16px]">
-
-          <!-- Venta registrada -->
-          <div *ngIf="lastSale as s" role="status" class="rounded-xl bg-cafe-green-50 p-[16px] text-cafe-green-800">
-            <p class="m-0 flex items-center gap-[8px] text-sm font-bold"><mat-icon class="!h-5 !w-5 !text-xl">check_circle</mat-icon>Venta registrada</p>
-            <p class="mb-0 mt-[6px] text-3xl font-bold">{{ s.totalAmount | money }}</p>
-            <p *ngIf="s.change > 0" class="m-0 mt-[2px] text-sm">Vuelto: <strong>{{ s.change | money }}</strong></p>
-            <div class="mt-[14px] flex gap-[8px]">
-              <button type="button" (click)="printTicket()" class="flex flex-1 items-center justify-center gap-[6px] rounded-lg border border-cafe-green-700/30 bg-white py-[10px] text-xs font-bold text-cafe-green-700 hover:bg-sage-50">
-                <mat-icon class="!h-4 !w-4 !text-base">print</mat-icon>Imprimir ticket
-              </button>
-              <button type="button" (click)="newSale()" class="flex-1 rounded-lg bg-cafe-green-700 py-[10px] text-xs font-bold text-white hover:bg-cafe-green-800">Nueva venta</button>
-            </div>
-          </div>
-
-          <ng-container *ngIf="!lastSale">
-            <div class="flex items-center justify-between">
-              <h2 class="m-0 flex items-center gap-[8px] text-base font-bold text-sage-900">
-                Pedido
-                <span *ngIf="itemsCount" class="grid h-6 min-w-[24px] place-items-center rounded-full bg-cafe-green-700 px-[7px] text-xs font-bold text-white">{{ itemsCount }}</span>
-              </h2>
-              <button *ngIf="lines.length" type="button" (click)="clear()" class="text-xs font-medium text-cafe-red-700 hover:underline">Vaciar</button>
-            </div>
-            <p class="m-0 mt-[2px] text-xs text-sage-500">{{ takeaway ? 'Para llevar' : 'Lo consume en el local' }}</p>
-
-            <div *ngIf="!lines.length" class="flex flex-col items-center px-[8px] py-[36px] text-center text-sage-400">
-              <mat-icon class="!h-10 !w-10 !text-[40px]">shopping_basket</mat-icon>
-              <p class="m-0 mt-[8px] text-sm text-sage-500">Tocá un producto para empezar.</p>
-            </div>
-
-            <ul *ngIf="lines.length" class="m-0 mt-[8px] list-none p-0">
-              <li *ngFor="let l of lines; trackBy: trackLine" class="flex items-center gap-[10px] border-b border-sage-100 py-[10px] text-sm last:border-0">
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate font-medium text-sage-800">{{ l.item.name }}</span>
-                  <span class="text-xs text-sage-500">{{ l.item.price | money }} c/u</span>
-                </span>
-                <span class="flex items-center gap-[4px] rounded-xl border border-sage-200 p-[2px]">
-                  <button type="button" (click)="step(l.item._id, -1)" [attr.aria-label]="'Quitar uno de ' + l.item.name"
-                    class="grid h-7 w-7 place-items-center rounded-lg text-base leading-none text-sage-700 hover:bg-sage-100">−</button>
-                  <span class="w-5 text-center text-sm font-bold">{{ l.quantity }}</span>
-                  <button type="button" (click)="step(l.item._id, 1)" [attr.aria-label]="'Agregar uno de ' + l.item.name"
-                    class="grid h-7 w-7 place-items-center rounded-lg text-base leading-none text-sage-700 hover:bg-sage-100">+</button>
-                </span>
-                <span class="w-[80px] text-right font-bold text-sage-900">{{ l.amount | money }}</span>
-              </li>
-            </ul>
-
-            <div class="mt-[8px] flex items-baseline justify-between border-t border-sage-200 pt-[14px]">
-              <span class="text-sm text-sage-600">Total</span>
-              <strong class="text-[28px] font-bold leading-none text-cafe-green-700">{{ total | money }}</strong>
-            </div>
-
-            <div *ngIf="lines.length" class="mt-[12px]">
-              <!-- Propina, método de pago (obligatorio), vuelto y división en partes iguales -->
-              <app-payment-panel
-                [total]="total"
-                [tipEnabled]="!!(settings.settings$ | async)?.tipEnabled"
-                [tipSuggestedPct]="(settings.settings$ | async)?.tipSuggestedPct ?? 10"
-                (valueChange)="payment = $event">
-              </app-payment-panel>
-            </div>
-
-            <p *ngIf="error" role="alert" class="mb-0 mt-[10px] rounded-lg bg-cafe-red-50 p-[10px] text-xs font-bold text-cafe-red-700">{{ error }}</p>
-
-            <button type="button" (click)="charge()" [disabled]="!canCharge"
-              class="mt-[14px] flex h-14 w-full items-center justify-center gap-[10px] rounded-2xl bg-cafe-green-700 text-base font-bold text-white shadow-green transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
-              <mat-icon class="!h-6 !w-6 !text-2xl">{{ busy ? 'hourglass_top' : 'point_of_sale' }}</mat-icon>
-              {{ busy ? 'Cobrando…' : (lines.length ? 'Cobrar ' + (payment ? (payment.due | money) : (total | money)) : 'Cobrar') }}
-            </button>
-          </ng-container>
-        </aside>
         </div>
       </ng-container>
     </div>

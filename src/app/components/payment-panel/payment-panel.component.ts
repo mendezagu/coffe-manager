@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 
 export const PAYMENT_METHODS = [
-  { value: 'efectivo', label: '💵 Efectivo' },
-  { value: 'transferencia', label: '🏦 Transferencia' },
-  { value: 'qr', label: '📱 Código QR' },
-  { value: 'tarjeta', label: '💳 Tarjeta' },
+  { value: 'efectivo', label: '💵 Efectivo', short: 'Efectivo', icon: 'payments' },
+  { value: 'transferencia', label: '🏦 Transferencia', short: 'Transf.', icon: 'account_balance' },
+  { value: 'qr', label: '📱 Código QR', short: 'QR', icon: 'qr_code_scanner' },
+  { value: 'tarjeta', label: '💳 Tarjeta', short: 'Tarjeta', icon: 'credit_card' },
 ];
 
 // Una fila = una persona o un método (según cómo se arme el pago)
@@ -38,6 +38,8 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   @Input() total = 0; // la cuenta, ya con descuentos y sin propina
   @Input() tipEnabled = false;
   @Input() tipSuggestedPct = 10;
+  // 'pos': el cobro del Mostrador (métodos en botones y billetes rápidos para el vuelto); 'default': el de siempre
+  @Input() variant: 'default' | 'pos' = 'default';
   @Output() valueChange = new EventEmitter<PaymentValue>();
 
   methods = PAYMENT_METHODS;
@@ -52,7 +54,12 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   // Partes iguales: cantidad de personas (1 = no se divide)
   splitN = 1;
 
+  // 'pos': varios métodos y división en partes iguales quedan detrás de "Más opciones"
+  moreOptions = false;
+
   ngOnInit() {
+    // En el Mostrador casi todo se cobra en efectivo: viene elegido, y se cambia con un toque
+    if (this.variant === 'pos' && !this.rows[0].method) this.rows[0].method = 'efectivo';
     this.sync();
   }
 
@@ -169,6 +176,12 @@ export class PaymentPanelComponent implements OnInit, OnChanges {
   changeOf(row: PayRow): number {
     if (row.method !== 'efectivo' || row.tendered === null || row.tendered === undefined) return 0;
     return round2(Math.max(0, Number(row.tendered) - Number(row.amount)));
+  }
+
+  // Billetes para marcar rápido lo que entrega el cliente: los próximos tres por encima del importe
+  quickAmounts(row: PayRow): number[] {
+    const amount = Number(row.amount) || 0;
+    return [1000, 2000, 5000, 10000, 20000, 50000].filter((v) => v > amount).slice(0, 3);
   }
 
   cashShort(row: PayRow): boolean {

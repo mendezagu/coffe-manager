@@ -83,6 +83,31 @@ const SPLASH_SECONDS = 7;
       .added-pop {
         animation: addedPop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
       }
+      /* Carta oscura (se elige en Ajustes): las superficies y la tinta salen de variables; el color de marca se aclara en brandStyle */
+      .qr-dark {
+        color-scheme: dark;
+        --q-surface: 30 31 34;
+        --q-surface-low: 38 40 44;
+        --q-surface-mid: 49 51 56;
+        --q-surface-high: 22 23 26;
+        --q-surface-highest: 64 67 73;
+        --q-surface-lowest: 43 45 49;
+        --q-ink: 232 230 226;
+        --q-ink-variant: 178 181 176;
+        --q-line: 134 139 135;
+        --q-line-soft: 78 82 80;
+        --q-leaf: 59 150 112;
+        --q-leaf-container: 18 58 42;
+        --q-leaf-dim: 148 212 179;
+        --q-leaf-ink: 175 241 206;
+        --q-leaf-ink2: 175 241 206;
+      }
+      .qr-dark .text-forest {
+        color: rgb(var(--q-ink));
+      }
+      .qr-dark .bg-white {
+        background-color: rgb(var(--q-surface-mid));
+      }
       .check-path {
         stroke-dasharray: 24;
         stroke-dashoffset: 24;
@@ -103,7 +128,12 @@ const SPLASH_SECONDS = 7;
 export class QrOrderComponent implements OnInit, OnDestroy {
   // Variables CSS con el color de marca del restaurante (el token `forest` las lee)
   get brandStyle(): string {
-    return brandStyle(this.info?.business?.brandColor);
+    return brandStyle(this.info?.business?.brandColor, this.dark);
+  }
+
+  // Carta oscura, si el local la eligió en Ajustes
+  get dark(): boolean {
+    return this.info?.business?.menuTheme === 'dark';
   }
 
   // Portada: foto en la banda de arriba, oscurecida para que se lea el nombre del local
@@ -125,7 +155,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     // Una imagen vertical (con el dibujo en los bordes) recortada a pantalla completa pierde los costados: se ajusta al ancho y se repite hacia abajo.
     const portrait = this.backgroundIsPortrait(url);
     return {
-      'background-image': `${backgroundVeil(this.info?.business?.backgroundIntensity)}, url("${url.replace(/"/g, '%22')}")`,
+      'background-image': `${backgroundVeil(this.info?.business?.backgroundIntensity, this.dark)}, url("${url.replace(/"/g, '%22')}")`,
       'background-size': portrait ? '100% auto' : 'cover',
       'background-position': portrait ? 'center top' : 'center',
       'background-repeat': portrait ? 'repeat-y' : 'no-repeat',

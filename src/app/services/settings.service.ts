@@ -52,6 +52,7 @@ export interface TenantSettings {
   backgroundImageUrl?: string | null; // fondo de la carta
   coverIntensity?: number | null; // cuánto se ve la portada (0 a 100); null = automática
   backgroundIntensity?: number | null; // cuánto se ve el fondo (0 a 100); null = automático
+  menuTheme?: string; // estilo de la carta del cliente: 'light' | 'dark'
   imagesAvailable?: boolean; // el servidor tiene configurado el almacenamiento de fotos
   menuPublicEnabled?: boolean; // carta online (para ver el menú, sin pedir)
   salesMode?: 'both' | 'counter' | 'tables'; // cómo vende el negocio: define qué partes de la app se muestran

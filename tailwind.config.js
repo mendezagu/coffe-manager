@@ -54,10 +54,24 @@ module.exports = {
           soft: 'rgb(var(--brand-soft-rgb, 234 240 236) / <alpha-value>)',
         },
         // Pantalla del cliente, diseño "Nuovo": superficies cálidas, tinta y verde de apoyo (el color de marca es `forest`)
-        'surface': { DEFAULT: '#fef8f4', low: '#f8f3ef', mid: '#f2ede9', high: '#ece7e3', highest: '#e6e2de', lowest: '#ffffff' },
-        'ink': { DEFAULT: '#1d1b19', variant: '#424844' },
-        'line': { DEFAULT: '#727974', soft: '#c1c8c3' },
-        'leaf': { DEFAULT: '#2b694f', container: '#aff1ce', dim: '#94d4b3', ink: '#002114', ink2: '#0b5138' },
+        // (leen variables --q-* que la carta oscura redefine en qr-order.component.ts)
+        'surface': {
+          DEFAULT: 'rgb(var(--q-surface, 254 248 244) / <alpha-value>)',
+          low: 'rgb(var(--q-surface-low, 248 243 239) / <alpha-value>)',
+          mid: 'rgb(var(--q-surface-mid, 242 237 233) / <alpha-value>)',
+          high: 'rgb(var(--q-surface-high, 236 231 227) / <alpha-value>)',
+          highest: 'rgb(var(--q-surface-highest, 230 226 222) / <alpha-value>)',
+          lowest: 'rgb(var(--q-surface-lowest, 255 255 255) / <alpha-value>)',
+        },
+        'ink': { DEFAULT: 'rgb(var(--q-ink, 29 27 25) / <alpha-value>)', variant: 'rgb(var(--q-ink-variant, 66 72 68) / <alpha-value>)' },
+        'line': { DEFAULT: 'rgb(var(--q-line, 114 121 116) / <alpha-value>)', soft: 'rgb(var(--q-line-soft, 193 200 195) / <alpha-value>)' },
+        'leaf': {
+          DEFAULT: 'rgb(var(--q-leaf, 43 105 79) / <alpha-value>)',
+          container: 'rgb(var(--q-leaf-container, 175 241 206) / <alpha-value>)',
+          dim: 'rgb(var(--q-leaf-dim, 148 212 179) / <alpha-value>)',
+          ink: 'rgb(var(--q-leaf-ink, 0 33 20) / <alpha-value>)',
+          ink2: 'rgb(var(--q-leaf-ink2, 11 81 56) / <alpha-value>)',
+        },
         'tertiary': { container: '#4d2d07', fixed: '#ffdcbd', ink: '#2c1600' },
         'charcoal': '#1A2521',
         'muted': '#63736C',

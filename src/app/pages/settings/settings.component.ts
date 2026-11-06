@@ -255,7 +255,7 @@ export class SettingsComponent implements OnInit {
 
   // Vista previa: el mismo velo que usa la carta
   veil(kind: BrandKind): string {
-    return kind === 'cover' ? coverVeil(this.intensityOf(kind)) : backgroundVeil(this.intensityOf(kind));
+    return kind === 'cover' ? coverVeil(this.intensityOf(kind)) : backgroundVeil(this.intensityOf(kind), this.form?.menuTheme === 'dark');
   }
 
   setIntensity(kind: BrandKind, value: number | null) {
@@ -269,6 +269,15 @@ export class SettingsComponent implements OnInit {
         error: () => this.notify('No se pudo guardar la intensidad'),
       });
     }, 400);
+  }
+
+  // Estilo de la carta del cliente (clara u oscura)
+  setMenuTheme(menuTheme: string) {
+    if (!this.form || this.form.menuTheme === menuTheme) return;
+    this.form.menuTheme = menuTheme;
+    this.settings.update({ menuTheme }).subscribe({
+      error: () => this.notify('No se pudo guardar el estilo de la carta'),
+    });
   }
 
   toggleAuto(kind: BrandKind) {

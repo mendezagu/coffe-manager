@@ -23,9 +23,10 @@ export function coverVeil(value: number | null | undefined): string {
   return `linear-gradient(rgba(0,0,0,${top.toFixed(2)}), rgba(0,0,0,${bottom.toFixed(2)}))`;
 }
 
-// Fondo: un velo claro para que las tarjetas y los textos se lean (más intensidad = menos velo; al 100% no hay velo)
-export function backgroundVeil(value: number | null | undefined): string {
+// Fondo: un velo para que las tarjetas y los textos se lean (claro, u oscuro en la carta oscura); más intensidad = menos velo; al 100% no hay velo
+export function backgroundVeil(value: number | null | undefined, dark = false): string {
   const v = backgroundIntensityOf(value);
   const alpha = v <= 90 ? 0.97 - 0.007 * v : (0.34 * (100 - v)) / 10;
-  return `linear-gradient(rgba(250,248,245,${alpha.toFixed(2)}), rgba(250,248,245,${alpha.toFixed(2)}))`;
+  const c = dark ? '30,31,34' : '250,248,245';
+  return `linear-gradient(rgba(${c},${alpha.toFixed(2)}), rgba(${c},${alpha.toFixed(2)}))`;
 }

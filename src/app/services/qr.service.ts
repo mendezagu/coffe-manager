@@ -247,7 +247,7 @@ export interface PublicItem {
 }
 
 export interface PublicInfo {
-  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string; coverUrl?: string | null; backgroundUrl?: string | null; coverIntensity?: number | null; backgroundIntensity?: number | null; address?: string; phone?: string };
+  business: { name: string; logoUrl: string | null; brandColor?: string; currencyCode: string; locale: string; coverUrl?: string | null; backgroundUrl?: string | null; coverIntensity?: number | null; backgroundIntensity?: number | null; menuTheme?: string; address?: string; phone?: string };
   table: { name: string };
   requiresPin: boolean;
   autoConfirm: boolean;

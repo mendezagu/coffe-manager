@@ -96,3 +96,85 @@ mat-drawer-content {
     animation: none;
   }
 }
+
+// Menú lateral en verde oscuro (igual en claro y en oscuro): #07241a de fondo, #1e3a2f para el ítem activo y menta (#aff1ce) de acento
+mat-drawer.example-sidenav {
+  background-color: #07241a !important;
+  border-right-color: #07241a !important;
+  color: #dbe8df;
+
+  // textos
+  .text-sage-800,
+  .text-sage-900 {
+    color: #ffffff !important;
+  }
+  .text-sage-700,
+  .\!text-sage-600 {
+    color: #dbe8df !important;
+  }
+  .text-sage-600,
+  .text-sage-500 {
+    color: #86a496 !important;
+  }
+  .text-sage-400 {
+    color: #7fa391 !important;
+  }
+  .hover\:text-sage-800:hover {
+    color: #ffffff !important;
+  }
+
+  // ítem activo y ítems nuevos
+  .\!bg-cafe-green-50 {
+    background-color: #1e3a2f !important;
+  }
+  .\!text-cafe-green-700,
+  .\!text-cafe-green-800 {
+    color: #ffffff !important;
+  }
+  .bg-cafe-green-50 {
+    background-color: #153126 !important;
+  }
+  .text-cafe-green-700 {
+    color: #aff1ce !important;
+  }
+  .border-cafe-green-700\/40 {
+    border-color: rgba(175, 241, 206, 0.35) !important;
+  }
+
+  // ayuda, selector de apariencia y cerrar sesión
+  .bg-sage-100 {
+    background-color: #153126 !important;
+  }
+  .hover\:bg-sage-200:hover {
+    background-color: #1e3a2f !important;
+  }
+  .bg-white {
+    background-color: #1e3a2f !important;
+  }
+  .\!bg-cafe-red-50 {
+    background-color: #3a1c18 !important;
+  }
+  .\!text-cafe-red-700 {
+    color: #ffb4a8 !important;
+  }
+
+  // logo del negocio
+  img.rounded-full {
+    box-shadow: 0 0 0 2px #07241a, 0 0 0 5px #1e3a2f !important;
+  }
+
+  // marca Tavolapp: el plato en menta sobre el verde oscuro
+  svg circle {
+    stroke: #aff1ce;
+  }
+  svg circle[fill='#f6f8f4'] {
+    fill: #07241a;
+  }
+  svg g {
+    stroke: #aff1ce;
+  }
+  svg path[fill='#8a2a1c'],
+  svg rect[fill='#8a2a1c'] {
+    fill: #ff8f78;
+  }
+}

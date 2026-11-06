@@ -115,8 +115,8 @@
 
 <!-- Logo de Tavolapp al pie de la pantalla -->
 <ng-template #poweredBy>
-  <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] no-underline opacity-70 hover:opacity-100 text-forest">
-    <span class="text-[10px] font-medium uppercase tracking-[0.08em] text-ink-variant">Powered by</span>
+  <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] no-underline rounded-full bg-[#f6f3ee] px-[12px] py-[6px] shadow-sm ring-1 ring-black/10 hover:ring-black/20">
+    <span class="text-[10px] font-medium uppercase tracking-[0.08em] text-[#5b625e]">Powered by</span>
     <span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 16px; line-height: 1; letter-spacing: -0.035em; color: #1b2822">
       <span>Tav</span>
       <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
@@ -177,7 +177,7 @@
   </div>
 </ng-template>
 
-<div class="min-h-screen bg-surface-high text-ink font-inter flex justify-center selection:bg-forest selection:text-white" [attr.style]="brandStyle">
+<div class="min-h-screen bg-surface-high text-ink font-inter flex justify-center selection:bg-forest selection:text-white" [class.qr-dark]="dark" [attr.style]="brandStyle">
   <div class="w-full max-w-md bg-surface min-h-screen flex flex-col shadow-2xl relative border-x-[1px] border-surface-highest/60"
     [ngClass]="viewOnly ? 'pb-[32px]' : 'pb-[170px]'" [ngStyle]="pageStyle">
 

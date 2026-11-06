@@ -66,7 +66,7 @@
         <div class="relative">
           <ng-container *ngTemplateOutlet="navItem; context: { key: 'delivery', link: '/delivery-orders', icon: 'shopping_bag', label: 'Pedidos online', feature: 'online_store' }"></ng-container>
           <span *ngIf="(delivery.inbox$ | async) as d" [hidden]="delivery.pendingCount === 0"
-            class="pointer-events-none absolute right-12 top-[10px] min-w-[20px] rounded-full bg-cafe-red-700 px-1.5 text-center text-[11px] font-bold leading-5 text-white"
+            class="pointer-events-none absolute right-3 top-[10px] min-w-[20px] rounded-full bg-cafe-red-700 px-1.5 text-center text-[11px] font-bold leading-5 text-white"
             [attr.aria-label]="delivery.pendingCount + ' pedidos online nuevos'">{{ delivery.pendingCount }}</span>
         </div>
       </ng-container>
