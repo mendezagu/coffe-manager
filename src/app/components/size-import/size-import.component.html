@@ -1,10 +1,9 @@
-<div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
+<div class="mb-8 rounded-2xl bg-white p-6 shadow-soft">
   <div class="flex items-start justify-between gap-3">
     <div>
-      <h3 class="text-xl font-bold text-sage-900 m-0 flex items-center gap-2">
-        <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">table_chart</mat-icon>
+      <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0 flex items-center gap-2">
         Cargar platos con precio por tamaño
-      </h3>
+      </div>
       <p class="text-sm text-sage-600 mt-2 mb-0">
         Para menús donde cada plato tiene un precio distinto por tamaño. En la planilla, la <strong>primera fila son los tamaños</strong> y cada fila siguiente un plato. Si un plato no se ofrece en un tamaño, dejá esa celda vacía.
       </p>
@@ -15,7 +14,7 @@
   </div>
 
   <div class="mt-4 overflow-x-auto">
-    <table class="text-xs border border-sage-200 rounded-lg bg-white">
+    <table class="text-xs rounded-xl border border-sage-300 bg-white">
       <thead>
         <tr class="bg-sage-100 text-sage-700">
           <th class="px-3 py-1.5 text-left font-bold">Plato</th>
@@ -35,7 +34,7 @@
 
   <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
     <label class="block">
-      <span class="block text-xs font-bold text-sage-500 mb-1.5">Pegá la planilla acá (copiá las celdas desde Google Sheets o Excel)</span>
+      <span class="block text-sm font-medium text-sage-700 mb-1.5">Pegá la planilla acá (copiá las celdas desde Google Sheets o Excel)</span>
       <textarea [ngModel]="text" (ngModelChange)="onText($event)" rows="6" spellcheck="false" placeholder="Plato&#9;Chico&#9;Jarro&#9;Doble&#9;XXL"
         class="w-full px-4 py-3 border border-sage-200 rounded-xl bg-white text-sm font-mono text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700"></textarea>
     </label>
@@ -58,7 +57,7 @@
         <span class="font-normal text-sage-600">· {{ sheet.rows.length - updates }} nuevos, {{ updates }} ya existen y se actualizan</span>
       </p>
       <div class="overflow-x-auto">
-        <table class="w-full text-xs border border-sage-200 rounded-lg bg-white">
+        <table class="w-full text-xs rounded-xl border border-sage-300 bg-white">
           <thead>
             <tr class="bg-sage-100 text-sage-700">
               <th class="px-3 py-1.5 text-left font-bold">Plato</th>
@@ -69,7 +68,7 @@
             <tr *ngFor="let r of sheet.rows | slice: 0 : previewRows" class="border-t border-sage-200">
               <td class="px-3 py-1.5 font-semibold">
                 {{ r.name }}
-                <span *ngIf="isUpdate(r.name)" class="ml-1 px-1.5 py-0.5 rounded-full bg-sage-100 text-sage-600 text-[10px] font-bold">actualiza</span>
+                <span *ngIf="isUpdate(r.name)" class="ml-1 px-1.5 py-0.5 rounded-full bg-sage-100 text-sage-600 text-xs font-bold">actualiza</span>
               </td>
               <td *ngFor="let p of r.prices" class="px-3 py-1.5 text-right" [class.text-sage-400]="p === null">{{ p === null ? '—' : (p | number) }}</td>
             </tr>
@@ -80,11 +79,11 @@
 
       <div class="mt-4 flex flex-wrap items-end gap-3">
         <label class="block">
-          <span class="block text-xs font-bold text-sage-500 mb-1.5">Los tamaños se guardan como</span>
-          <input [(ngModel)]="groupName" maxlength="60" class="w-48 px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          <span class="block text-sm font-medium text-sage-700 mb-1.5">Los tamaños se guardan como</span>
+          <input [(ngModel)]="groupName" maxlength="60" class="w-48 px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
         </label>
         <button type="button" (click)="import()" [disabled]="!canImport"
-          class="px-6 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
+          class="px-6 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           {{ busy ? 'Cargando…' : 'Cargar ' + sheet.rows.length + (sheet.rows.length === 1 ? ' plato' : ' platos') }}
         </button>
       </div>

@@ -2,12 +2,9 @@
   <!-- Header -->
   <div class="relative bg-white px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
     <div class="flex items-center gap-2.5">
-      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cafe-green-50">
-        <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">link</mat-icon>
-      </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Vincular Mesas</h2>
-        <p class="text-sage-500 text-xs mt-0.5">Selecciona las mesas para vincular con {{ data.table.name }}</p>
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:text-xl m-0">Vincular Mesas</div>
+        <p class="text-sage-500 text-sm mt-0.5">Seleccioná las mesas para vincular con {{ data.table.name }}</p>
       </div>
     </div>
   </div>
@@ -34,7 +31,7 @@
     </button>
 
     <button
-      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200"
+      class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
       (click)="onConfirm()"
     >
       <mat-icon class="!w-4 !h-4 !text-base">link</mat-icon>

@@ -1,7 +1,7 @@
 <div class="flex flex-col max-h-[85vh] bg-white rounded-dialog overflow-hidden shadow-dialog">
 
   <div class="flex-shrink-0 px-5 pt-5 pb-3">
-    <h2 class="text-lg font-bold text-sage-900 m-0">{{ data.item.name }}</h2>
+    <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0">{{ data.item.name }}</div>
     <p class="text-sage-500 text-xs mt-0.5 mb-0">{{ units > 1 ? 'Elegí las opciones de cada unidad' : 'Elegí las opciones' }}</p>
   </div>
 
@@ -40,8 +40,8 @@
 
     <section *ngFor="let group of data.groups">
       <div class="flex items-center gap-2 mb-2">
-        <h3 class="text-sm font-bold text-sage-800 m-0">{{ group.name }}</h3>
-        <span *ngIf="group.required" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Obligatorio</span>
+        <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0">{{ group.name }}</div>
+        <span *ngIf="group.required" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">Obligatorio</span>
         <span *ngIf="!group.required" class="text-xs text-sage-500">Opcional</span>
         <span *ngIf="group.selection === 'MULTIPLE'" class="text-xs text-sage-500">· podés elegir varias</span>
       </div>
@@ -54,7 +54,7 @@
             : 'bg-white border-sage-200 text-sage-800 hover:bg-sage-50'"
           [attr.aria-pressed]="isSelected(group, option)">
           <span class="truncate" [class.line-through]="option.outOfStock">{{ option.name }}</span>
-          <span *ngIf="option.outOfStock" class="shrink-0 text-[10px] font-bold text-cafe-red-700">Agotado</span>
+          <span *ngIf="option.outOfStock" class="shrink-0 text-xs font-bold text-cafe-red-700">Agotado</span>
           <span *ngIf="option.priceDelta !== 0 && !option.outOfStock" class="shrink-0 text-xs font-bold"
             [ngClass]="isSelected(group, option) ? 'text-white/90' : 'text-cafe-green-700'">
             {{ option.priceDelta > 0 ? '+' : '' }}{{ option.priceDelta | money }}
@@ -66,13 +66,13 @@
 
   <div class="flex-shrink-0 flex items-center justify-between gap-3 px-5 py-3 border-t border-sage-100 bg-white">
     <div>
-      <p class="text-[11px] font-bold text-sage-400 m-0">{{ units > 1 ? 'Total de ' + units + ' unidades' : 'Precio por unidad' }}</p>
+      <p class="text-xs font-bold text-sage-400 m-0">{{ units > 1 ? 'Total de ' + units + ' unidades' : 'Precio por unidad' }}</p>
       <p class="text-lg font-bold text-cafe-green-700 m-0">{{ (units > 1 ? totalPrice : unitPrice) | money }}</p>
     </div>
     <div class="flex gap-2">
       <button type="button" (click)="cancel()" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Cancelar</button>
       <button type="button" (click)="primary()" [disabled]="units === 1 && !canConfirm"
-        class="px-4 py-2.5 rounded-lg text-sm font-bold bg-cafe-green-700 hover:bg-cafe-green-800 text-white disabled:opacity-50 disabled:cursor-not-allowed">
+        class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-cafe-green-700 hover:bg-cafe-green-800 text-white disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
         {{ primaryLabel }}
       </button>
     </div>

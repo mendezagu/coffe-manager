@@ -98,7 +98,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   private readChartMode(): 'bar' | 'pie' {
     try {
-      return localStorage.getItem('reports_chart_mode') === 'pie' ? 'pie' : 'bar';
+      localStorage.removeItem('reports_chart_mode');
+      return 'bar';
     } catch {
       return 'bar';
     }

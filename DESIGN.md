@@ -206,6 +206,9 @@ Una sola línea de cifras en negrita con su nombre al lado ("3/8 ocupadas · 5 l
 ### Diálogos de órdenes y cobro (Mesas)
 Título en Jakarta con una línea de apoyo, sin ícono ni recuadro. Los productos van como filas separadas por una línea fina (cantidad, nombre y precio), no como tarjetas. Los totales son filas simples con la cifra grande a la derecha. El descuento general son porcentajes a la vista como chips (sin desplegable ni íconos distintos por cada valor). El pago es el mismo selector de cuatro métodos que el Mostrador, con billetes rápidos y vuelto en efectivo. Al pie: Cerrar e Imprimir como botones con borde y el cobro como único botón verde. Los diálogos de asignar mozo y de elegir productos siguen lo mismo: los mozos son botones de texto a la vista (sin desplegable); los productos elegidos son filas con línea fina y los del menú son filas separadas por la sombra, con un botón "+" suave, el precio con formato de moneda y avisos (Opciones, Agotado, Quedan N) como etiquetas chicas de texto.
 
+### Caja
+Sin tarjeta de encabezado repetida: el título de la página y su estado (ABIERTA / CERRADA) ya están arriba. Una línea con quién abrió la caja y el fondo, y el botón de cierre en rosado suave. Las cifras del turno van en una línea ("$ 10.000 de efectivo esperado en caja"), sin tarjetas con ícono. Los movimientos y el cobrado por método son filas con línea fina; el reparto por método usa barras finas y no un anillo. El resultado de un cierre usa el fondo teñido y no una franja de color al costado. En la tabla del historial la diferencia es texto coloreado ("Faltan $ X", "Sobran $ X", "✓ Justa").
+
 ### Inputs / Fields
 - **Style:** blancos, borde fino salvia, 12px de radio.
 - **Focus:** anillo suave en verde con 25% de opacidad.
@@ -238,3 +241,15 @@ Se abre desde un carrito flotante en un diálogo de 16px de radio (hoja desde ab
 - **Don't** usar rojo sólido para acciones destructivas: van en rosado suave.
 - **Don't** depender solo del color para comunicar un estado.
 - **Don't** sumar una segunda tipografía de texto de lectura: Jakarta es solo para títulos y números.
+
+### Reportes
+
+Cifras en una sola línea (total grande en verde, resto `font-jakarta tabular-nums` + etiqueta al lado), sin tarjetas de KPI. Rango y origen como chips; sin selector Barras/Torta (rankings siempre en barras). Paneles `rounded-2xl bg-white shadow-soft`, títulos `div role="heading"`, "Mostrador y mesas" como dos filas de texto, tablas con números tabulares.
+
+### Mi negocio (Ajustes)
+
+Pestañas como chips de texto (sin íconos). Paneles `rounded-2xl bg-white shadow-soft`, títulos `div role="heading"`, campos `rounded-xl border-sage-300` con etiqueta `text-sm font-medium`. Sin cajas dentro de las tarjetas (portada/fondo, "Dónde activo mi carta" en texto plano). Barra de guardar sin vidrio.
+
+### Resto de la app
+
+Mismo criterio aplicado en bloque a Balance, Inventario (todas las pestañas), Cocina, Modificadores, Categorías, Usuarios, Reservas, Delivery, QR, Plan, Administración, Portal del hotel y los diálogos internos: títulos `div role="heading"`, `rounded-2xl` con una sola elevación, etiquetas `text-sm font-medium`, botones primarios `rounded-xl` con foco visible, cifras en línea en vez de tarjetas, sin íconos decorativos ni bordes de color (estado con fondo tenue). Quedan sin pasar por Impeccable las pantallas públicas (ingreso, onboarding, reservas públicas, carta QR, landing de hotel).

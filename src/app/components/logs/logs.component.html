@@ -25,7 +25,7 @@
     <div class="mx-auto max-w-7xl">
 
       <!-- Sin registros -->
-      <div *ngIf="total === 0" class="flex flex-col items-center justify-center py-16 bg-white rounded-card shadow-soft">
+      <div *ngIf="total === 0" class="flex flex-col items-center justify-center py-16 bg-white rounded-2xl shadow-soft">
         <div class="w-16 h-16 rounded-full bg-sage-50 flex items-center justify-center mb-3">
           <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300">inbox</mat-icon>
         </div>
@@ -41,20 +41,20 @@
             <mat-icon class="!w-5 !h-5 !text-xl absolute left-3 top-1/2 -translate-y-1/2 text-sage-400 pointer-events-none">search</mat-icon>
             <label for="log-search" class="sr-only">Buscar en el historial</label>
             <input id="log-search" type="text" [(ngModel)]="query" (ngModelChange)="onQueryChange()" placeholder="Buscar por mesa, mozo o plato…"
-              class="w-full h-11 pl-10 pr-3 bg-white border border-sage-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 placeholder-sage-400" />
+              class="w-full h-11 pl-10 pr-3 bg-white rounded-xl border border-sage-300 text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 placeholder-sage-400" />
           </div>
           <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por tipo">
             <button *ngFor="let f of visibleFilters" type="button" (click)="setFilter(f)" [attr.aria-pressed]="filter === f"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors"
               [ngClass]="filter === f ? 'bg-cafe-green-700 border-cafe-green-700 text-white' : 'bg-white border-sage-200 text-sage-700 hover:bg-sage-100'">
               {{ labelOf(f) }}
-              <span class="rounded-full px-1.5 text-[11px] leading-4" [ngClass]="filter === f ? 'bg-white/20' : 'bg-sage-100 text-sage-500'">{{ countOf(f) }}</span>
+              <span class="rounded-full px-1.5 text-xs leading-4" [ngClass]="filter === f ? 'bg-white/20' : 'bg-sage-100 text-sage-500'">{{ countOf(f) }}</span>
             </button>
           </div>
         </div>
 
         <!-- Nada coincide con el filtro -->
-        <div *ngIf="filtered.length === 0" class="flex flex-col items-center justify-center py-14 bg-white rounded-card shadow-soft text-center">
+        <div *ngIf="filtered.length === 0" class="flex flex-col items-center justify-center py-14 bg-white rounded-2xl shadow-soft text-center">
           <mat-icon class="!w-10 !h-10 !text-4xl text-sage-300">search_off</mat-icon>
           <p class="m-0 mt-2 text-sage-600 text-base font-semibold">No hay resultados</p>
           <p class="m-0 mt-1 text-sage-400 text-sm">Probá con otra búsqueda o con otro tipo de acción.</p>
@@ -62,17 +62,17 @@
 
         <!-- Lista agrupada por día -->
         <div *ngFor="let g of groups" class="mb-5">
-          <h2 class="sticky top-0 z-[1] m-0 mb-2 py-1 text-xs font-bold uppercase tracking-wider text-sage-500 bg-sage-100">{{ g.label }}</h2>
-          <ul class="m-0 p-0 list-none bg-white rounded-card shadow-soft overflow-hidden divide-y divide-sage-100">
+          <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-2">{{ g.label }}</div>
+          <ul class="m-0 p-0 list-none bg-white rounded-2xl shadow-soft overflow-hidden divide-y divide-sage-100">
             <li *ngFor="let r of g.rows; trackBy: trackRow" class="flex items-start gap-3 px-4 py-3 hover:bg-sage-50 transition-colors">
               <span class="grid h-9 w-9 flex-none place-items-center rounded-xl" [ngClass]="styles[r.kind].chip" [attr.title]="styles[r.kind].label">
                 <mat-icon class="!w-5 !h-5 !text-xl">{{ styles[r.kind].icon }}</mat-icon>
               </span>
               <div class="min-w-0 flex-1">
                 <p class="m-0 text-sm leading-snug text-sage-700 break-words [&_strong]:font-bold [&_strong]:text-sage-900" [innerHTML]="r.action"></p>
-                <p class="m-0 mt-0.5 text-[11px] font-bold uppercase tracking-wide text-sage-400">{{ styles[r.kind].label }}</p>
+                <p class="m-0 mt-0.5 text-xs font-bold uppercase tracking-wide text-sage-400">{{ styles[r.kind].label }}</p>
               </div>
-              <time class="flex-none pt-0.5 text-xs font-bold text-sage-500 tabular-nums" [attr.datetime]="r.timestamp">{{ r.time }}</time>
+              <time class="flex-none pt-0.5 text-sm font-medium text-sage-700 tabular-nums" [attr.datetime]="r.timestamp">{{ r.time }}</time>
             </li>
           </ul>
         </div>
@@ -84,7 +84,7 @@
             <label class="flex items-center gap-1.5 text-xs text-sage-500">
               Por página
               <select [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"
-                class="h-9 rounded-lg border border-sage-200 bg-white px-2 text-sm font-bold text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
+                class="h-9 rounded-xl border border-sage-300 bg-white px-2 text-sm font-bold text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
                 <option *ngFor="let s of pageSizes" [value]="s">{{ s }}</option>
               </select>
             </label>
@@ -92,7 +92,7 @@
 
           <div class="flex items-center justify-center gap-1">
             <button type="button" (click)="goTo(currentPage - 1)" [disabled]="currentPage === 1" aria-label="Página anterior"
-              class="grid h-10 w-10 place-items-center rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              class="grid h-10 w-10 place-items-center rounded-xl border border-sage-300 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
               <mat-icon>chevron_left</mat-icon>
             </button>
             <ng-container *ngFor="let p of pageButtons">
@@ -102,7 +102,7 @@
                 [ngClass]="p === currentPage ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:bg-sage-50'">{{ p }}</button>
             </ng-container>
             <button type="button" (click)="goTo(currentPage + 1)" [disabled]="currentPage === pageCount" aria-label="Página siguiente"
-              class="grid h-10 w-10 place-items-center rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              class="grid h-10 w-10 place-items-center rounded-xl border border-sage-300 bg-white text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
               <mat-icon>chevron_right</mat-icon>
             </button>
           </div>

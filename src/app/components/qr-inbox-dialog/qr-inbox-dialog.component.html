@@ -1,10 +1,9 @@
-<div class="p-[20px] sm:p-[24px] max-w-[560px]">
+<div class="p-5 sm:p-[24px] max-w-[560px]">
   <div class="flex items-center justify-between mb-[16px]">
-    <h2 class="text-xl font-bold text-sage-800 m-0 flex items-center gap-[10px]">
-      <span class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center"><mat-icon>qr_code_2</mat-icon></span>
+    <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 flex items-center gap-[10px]">
       Pedidos por QR
-    </h2>
-    <button type="button" (click)="close()" aria-label="Cerrar" class="w-9 h-9 rounded-full bg-sage-100 flex items-center justify-center">
+    </div>
+    <button type="button" (click)="close()" aria-label="Cerrar" class="grid h-10 w-10 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
       <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
     </button>
   </div>
@@ -28,7 +27,7 @@
     <div class="flex items-start justify-between gap-[8px] mb-[8px]">
       <div class="min-w-0">
         <p class="font-bold text-sage-900 m-0">{{ r.tableName }}
-          <span *ngIf="r.tableFree" class="ml-[6px] px-[8px] py-[1px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-[11px] font-bold">Mesa libre: se abre al confirmar</span>
+          <span *ngIf="r.tableFree" class="ml-[6px] px-[8px] py-[1px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">Mesa libre: se abre al confirmar</span>
         </p>
         <p class="text-xs text-sage-500 m-0">{{ r.createdAt | date: 'HH:mm' }}<ng-container *ngIf="r.customerName"> · {{ r.customerName }}</ng-container></p>
       </div>
@@ -61,7 +60,7 @@
     <ng-container *ngIf="rejecting !== r.id; else rejectForm">
       <div class="flex gap-[8px]">
         <button type="button" (click)="confirm(r)" [disabled]="busy.has(r.id) || needsWaiter(r)"
-          class="flex-1 h-11 rounded-xl bg-cafe-green-700 text-white font-bold disabled:cursor-not-allowed disabled:opacity-50">Confirmar</button>
+          class="flex-1 h-11 rounded-xl bg-cafe-green-700 text-white font-semibold disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Confirmar</button>
         <button type="button" (click)="startReject(r)" [disabled]="busy.has(r.id)"
           class="h-11 px-[16px] rounded-xl bg-cafe-red-50 text-cafe-red-700 font-bold disabled:opacity-50">Rechazar</button>
       </div>

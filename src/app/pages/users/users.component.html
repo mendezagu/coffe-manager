@@ -1,10 +1,10 @@
 <div>
     <!-- Código del local: con él y su usuario, el personal ingresa -->
-    <section *ngIf="loginCode" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-cafe-green-200 bg-cafe-green-50 p-4" aria-label="Código del local">
+    <section *ngIf="loginCode" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cafe-green-200 bg-cafe-green-50 p-4" aria-label="Código del local">
       <div class="flex min-w-0 items-center gap-3">
-        <span class="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-green-700 text-white"><mat-icon>storefront</mat-icon></span>
+        <span class="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-green-700 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"><mat-icon>storefront</mat-icon></span>
         <div class="min-w-0">
-          <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-cafe-green-800">El código de tu local</p>
+          <p class="m-0 text-xs font-bold uppercase tracking-wider text-cafe-green-800">El código de tu local</p>
           <ng-container *ngIf="!editingCode; else editCode">
             <p class="m-0 truncate font-mono text-2xl font-bold text-cafe-green-900">{{ loginCode }}</p>
           </ng-container>
@@ -21,52 +21,52 @@
           <button type="button" (click)="startEditCode()" class="inline-flex h-10 items-center rounded-lg border border-cafe-green-200 bg-white px-3 text-sm font-bold text-cafe-green-800">Cambiar</button>
         </ng-container>
         <ng-template #editButtons>
-          <button type="button" (click)="saveCode()" [disabled]="savingCode" class="inline-flex h-10 items-center rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white disabled:opacity-50">{{ savingCode ? 'Guardando…' : 'Guardar' }}</button>
+          <button type="button" (click)="saveCode()" [disabled]="savingCode" class="inline-flex h-10 items-center rounded-xl bg-cafe-green-700 px-4 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">{{ savingCode ? 'Guardando…' : 'Guardar' }}</button>
           <button type="button" (click)="editingCode = false" class="inline-flex h-10 items-center rounded-lg border border-cafe-green-200 bg-white px-3 text-sm font-bold text-cafe-green-800">Cancelar</button>
         </ng-template>
       </div>
     </section>
 
     <!-- Alta -->
-    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-card p-5 mb-6 grid gap-3 sm:grid-cols-2">
-      <h2 class="sm:col-span-2 font-bold text-sage-800">Nuevo usuario</h2>
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-2xl p-5 mb-6 grid gap-3 sm:grid-cols-2">
+      <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:col-span-2">Nuevo usuario</div>
 
       <label class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Nombre</span>
         <input name="name" [(ngModel)]="form.name" required
-          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
 
       <label class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Usuario</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Usuario</span>
         <input name="email" type="text" [(ngModel)]="form.email" required pattern="[A-Za-z0-9._@+\-]{3,60}" placeholder="por ejemplo: mozo1" autocomplete="off" autocapitalize="none" spellcheck="false"
-          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
 
       <label class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña (mín. 8)</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Contraseña (mín. 8)</span>
         <input name="password" type="password" appPasswordToggle [(ngModel)]="form.password" required minlength="8" autocomplete="new-password"
-          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
 
       <label class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Rol</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Rol</span>
         <select name="role" [(ngModel)]="form.role"
-          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
+          class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
           <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
         </select>
       </label>
 
       <div class="sm:col-span-2">
         <button type="submit" [disabled]="f.invalid || saving"
-          class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           {{ saving ? 'Creando…' : 'Crear usuario' }}
         </button>
       </div>
     </form>
 
     <!-- Listado -->
-    <div class="bg-white border border-sage-200 rounded-card overflow-hidden">
+    <div class="bg-white border border-sage-200 rounded-2xl overflow-hidden">
       <p *ngIf="loading" class="p-5 text-sage-600 text-sm">Cargando…</p>
       <p *ngIf="!loading && users.length === 0" class="p-5 text-sage-600 text-sm">No hay usuarios.</p>
 
@@ -82,15 +82,15 @@
           </div>
 
           <select [ngModel]="u.role" (ngModelChange)="changeRole(u, $event)" [attr.aria-label]="'Rol de ' + u.name"
-            class="px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white">
+            class="px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white">
             <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
           </select>
 
           <div class="flex gap-2">
             <button type="button" (click)="resetPassword(u)"
-              class="px-3 py-2 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50">Contraseña</button>
+              class="px-3 py-2 text-sm font-medium rounded-xl border border-sage-300 text-sage-700 hover:bg-sage-50">Contraseña</button>
             <button type="button" (click)="toggleActive(u)" [disabled]="u.id === currentUserId"
-              class="px-3 py-2 text-sm font-medium rounded-lg border border-sage-200 text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              class="px-3 py-2 text-sm font-medium rounded-xl border border-sage-300 text-sage-700 hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
               {{ u.active ? 'Desactivar' : 'Activar' }}
             </button>
             <button type="button" (click)="remove(u)" [disabled]="u.id === currentUserId"

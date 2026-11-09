@@ -27,34 +27,34 @@
   <div class="mx-auto max-w-7xl">
 
     <!-- La cocina es opcional: sin habilitarla en "Mi negocio" no hay pantalla -->
-    <div *ngIf="settingsReady && !kitchenEnabled" class="max-w-md mx-auto bg-white rounded-card shadow-soft p-6 text-center">
+    <div *ngIf="settingsReady && !kitchenEnabled" class="max-w-md mx-auto bg-white rounded-2xl shadow-soft p-6 text-center">
       <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-sage-100 text-sage-600 flex items-center justify-center"><mat-icon class="!w-8 !h-8 !text-[32px]">soup_kitchen</mat-icon></div>
-      <h2 class="text-lg font-bold text-sage-900 m-0 mb-1">La cocina no está activada</h2>
+      <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-1">La cocina no está activada</div>
       <p class="text-sm text-sage-600 m-0">
         <ng-container *ngIf="isAdmin">Activala en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a> para usar la pantalla de cocina.</ng-container>
         <ng-container *ngIf="!isAdmin">Pedile al administrador que la active en "Mi negocio".</ng-container>
       </p>
     </div>
 
-    <p *ngIf="barDisabled && kitchenEnabled" class="px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <p *ngIf="barDisabled && kitchenEnabled" class="px-4 py-3 rounded-2xl bg-white border border-sage-200 text-sm text-sage-700">
       La barra no está activada en este negocio, así que todos los pedidos van a la cocina.
     </p>
 
     <p *ngIf="kitchenEnabled && !loaded && !offline && !barDisabled" class="text-sage-600 text-sm">Cargando pedidos…</p>
 
     <div class="grid gap-4 lg:grid-cols-3" *ngIf="(loaded || offline) && !barDisabled">
-      <section *ngFor="let col of columns" class="bg-sage-200/50 rounded-card p-3">
-        <h2 class="flex items-center justify-between px-1 mb-3 font-bold text-sage-800">
+      <section *ngFor="let col of columns" class="bg-sage-200/50 rounded-2xl p-3">
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 flex items-center justify-between mb-3">
           {{ col.title }}
           <span class="min-w-[26px] px-2 py-0.5 rounded-full bg-white text-sage-700 text-sm text-center">{{ ticketsBy(col.status).length }}</span>
-        </h2>
+        </div>
 
         <p *ngIf="ticketsBy(col.status).length === 0" class="px-1 py-6 text-center text-sm text-sage-500">{{ col.empty }}</p>
 
         <ul class="space-y-3">
           <li *ngFor="let t of ticketsBy(col.status); trackBy: trackByKey"
-              class="bg-white rounded-xl shadow-soft p-3 border-l-4"
-              [ngClass]="isLate(t) ? 'border-cafe-red-700' : t.status === 'READY' ? 'border-cafe-green-700' : 'border-sage-300'">
+              class="rounded-xl p-3 shadow-soft"
+              [ngClass]="isLate(t) ? 'bg-cafe-red-50' : t.status === 'READY' ? 'bg-cafe-green-50' : 'bg-white'">
 
             <!-- Encabezado de la comanda -->
             <div class="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-sage-200">
@@ -81,7 +81,7 @@
                 <div class="min-w-0 flex-1" [class.opacity-50]="l.status === 'READY' && t.status !== 'READY'">
                   <p class="font-bold text-sage-900 leading-snug" [class.line-through]="l.status === 'READY' && t.status !== 'READY'">
                     <span class="text-cafe-green-700">{{ l.quantity }}×</span> {{ l.itemName }}
-                    <span *ngIf="splitActive && isAdmin && tab === 'ALL' && l.destination === 'BAR'" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">Barra</span>
+                    <span *ngIf="splitActive && isAdmin && tab === 'ALL' && l.destination === 'BAR'" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold align-middle">Barra</span>
                   </p>
                   <p *ngIf="l.modifiers?.length" class="mt-0.5 text-sm font-semibold text-cafe-green-700">{{ l.modifiers.join(' · ') }}</p>
                   <p *ngIf="l.note" class="mt-1 px-2.5 py-1 rounded-lg bg-sage-100 text-sage-800 text-sm font-medium">↳ {{ l.note }}</p>

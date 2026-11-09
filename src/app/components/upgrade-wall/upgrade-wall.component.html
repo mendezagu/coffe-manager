@@ -6,11 +6,11 @@
 
     <!-- Qué es y por qué está bloqueado -->
     <div class="text-center md:text-left">
-      <div class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-cafe-green-700 text-white shadow-green md:mx-0">
+      <div class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-cafe-green-700 text-white shadow-soft md:mx-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
         <mat-icon class="!h-9 !w-9 !text-4xl">lock</mat-icon>
       </div>
       <p class="m-0 mb-3"><app-plan-badge [feature]="feature"></app-plan-badge></p>
-      <h2 class="m-0 text-2xl font-bold leading-tight text-sage-900">{{ title }}</h2>
+      <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0">{{ title }}</div>
       <p class="m-0 mt-3 text-sm leading-relaxed text-sage-600">
         <ng-container *ngIf="benefit">{{ benefit }} </ng-container>
       </p>

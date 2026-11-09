@@ -1,32 +1,32 @@
 <div>
     <!-- Cocina y barra: depende del plan -->
-    <div *ngIf="kitchenEnabled && planAllowsSplit && !splitActive" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <div *ngIf="kitchenEnabled && planAllowsSplit && !splitActive" class="mb-4 px-4 py-3 rounded-2xl bg-white border border-sage-200 text-sm text-sage-700">
       Podés mandar categorías a la <strong>barra</strong>, pero todavía no está activada.
       Activala en <a routerLink="/settings" class="text-cafe-green-700 font-medium underline">Mi negocio</a> para que cada plato vaya a su pantalla.
     </div>
-    <div *ngIf="kitchenEnabled && !planAllowsSplit" class="mb-4 px-4 py-3 rounded-card bg-white border border-sage-200 text-sm text-sage-700">
+    <div *ngIf="kitchenEnabled && !planAllowsSplit" class="mb-4 px-4 py-3 rounded-2xl bg-white border border-sage-200 text-sm text-sage-700">
       Con tu plan todos los pedidos van a la <strong>cocina</strong>.
       Enviar bebidas y otros platos a una barra con su propia pantalla es parte del plan Pro.
       <app-upgrade-button class="ml-1 inline-block align-middle" feature="kitchen_bar_split" [compact]="true"></app-upgrade-button>
     </div>
 
     <!-- Alta -->
-    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-card p-4 mb-5 flex flex-wrap items-end gap-3">
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-2xl p-4 mb-5 flex flex-wrap items-end gap-3">
       <label class="block flex-1 min-w-[180px]">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Nueva categoría</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Nueva categoría</span>
         <input name="name" [(ngModel)]="newName" required maxlength="60" placeholder="Ej: Cafés"
-          class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
       </label>
       <label *ngIf="canSplit" class="block">
-        <span class="block text-xs font-bold text-sage-500 mb-1.5">Va a</span>
+        <span class="block text-sm font-medium text-sage-700 mb-1.5">Va a</span>
         <select name="destination" [(ngModel)]="newDestination"
-          class="px-4 py-2.5 border border-sage-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
+          class="px-4 py-2.5 rounded-xl border border-sage-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
           <option value="KITCHEN">Cocina</option>
           <option value="BAR">Barra</option>
         </select>
       </label>
       <button type="submit" [disabled]="f.invalid || saving"
-        class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
         {{ saving ? 'Agregando…' : 'Agregar' }}
       </button>
     </form>
@@ -69,27 +69,27 @@
           <!-- Cómo se ve la sección en la carta -->
           <div class="w-full basis-full grid gap-2.5 rounded-xl bg-sage-50 p-3 sm:grid-cols-2">
             <label class="block">
-              <span class="block text-xs font-bold text-sage-500 mb-1">Subtítulo (opcional)</span>
+              <span class="block text-sm font-medium text-sage-700 mb-1">Subtítulo (opcional)</span>
               <input [(ngModel)]="c.editSubtitle" maxlength="60" placeholder="Ej: Granos tostados en casa" class="w-full px-3 py-1.5 border border-sage-300 rounded-lg text-sm bg-white" />
             </label>
             <label class="block">
-              <span class="block text-xs font-bold text-sage-500 mb-1">Texto a la derecha (opcional)</span>
+              <span class="block text-sm font-medium text-sage-700 mb-1">Texto a la derecha (opcional)</span>
               <input [(ngModel)]="c.editTagline" maxlength="30" placeholder="Ej: Favoritos del día" class="w-full px-3 py-1.5 border border-sage-300 rounded-lg text-sm bg-white" />
             </label>
             <div class="sm:col-span-2">
-              <span class="block text-xs font-bold text-sage-500 mb-1">Cómo se muestran sus platos</span>
+              <span class="block text-sm font-medium text-sage-700 mb-1">Cómo se muestran sus platos</span>
               <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Formato de la sección">
                 <button *ngFor="let l of layouts" type="button" (click)="c.editLayout = l.key" role="radio" [attr.aria-checked]="c.editLayout === l.key"
                   class="flex-1 min-w-[120px] rounded-lg border px-3 py-2 text-left text-sm transition-colors"
                   [ngClass]="c.editLayout === l.key ? 'border-cafe-green-700 bg-cafe-green-50 text-cafe-green-800' : 'border-sage-200 bg-white text-sage-700 hover:bg-sage-50'">
                   <span class="block font-bold">{{ l.label }}</span>
-                  <span class="block text-[11px] text-sage-500">{{ l.hint }}</span>
+                  <span class="block text-xs text-sage-500">{{ l.hint }}</span>
                 </button>
               </div>
-              <p class="m-0 mt-1 text-[11px] text-sage-500">Los platos sin foto siempre se muestran en lista.</p>
+              <p class="m-0 mt-1 text-xs text-sage-500">Los platos sin foto siempre se muestran en lista.</p>
             </div>
           </div>
-          <button type="button" (click)="saveEdit(c)" class="px-3 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold rounded-lg">Guardar</button>
+          <button type="button" (click)="saveEdit(c)" class="px-3 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-semibold rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Guardar</button>
           <button type="button" (click)="cancelEdit(c)" class="px-3 py-1.5 border border-sage-200 text-sage-700 text-sm font-medium rounded-lg hover:bg-sage-50">Cancelar</button>
         </ng-container>
       </div>

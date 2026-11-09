@@ -5,8 +5,7 @@
   <!-- Login -->
   <div *ngIf="!loggedIn" class="min-h-screen flex items-center justify-center px-[16px]">
     <form (ngSubmit)="login()" class="w-full max-w-sm bg-white rounded-2xl shadow-soft p-[24px]">
-      <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center mb-[12px]"><mat-icon>hotel</mat-icon></div>
-      <h1 class="m-0 text-xl font-bold">Portal del hotel</h1>
+      <h1 class="m-0 font-jakarta text-xl font-bold text-sage-900">Portal del hotel</h1>
       <p class="m-0 mt-[4px] mb-[18px] text-sm text-sage-600">Ingresá con el acceso que te dio Tavolapp.</p>
 
       <label for="hp-email" class="block text-xs font-bold text-sage-600 mb-[4px]">Email</label>
@@ -18,7 +17,7 @@
 
       <p *ngIf="loginError" role="alert" class="m-0 mb-[12px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ loginError }}</p>
       <button type="submit" [disabled]="busy || !email.trim() || !password"
-        class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+        class="w-full px-[16px] py-[11px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
         {{ busy ? 'Ingresando…' : 'Ingresar' }}
       </button>
     </form>
@@ -29,9 +28,8 @@
     <header class="bg-white border-b-[1px] border-sage-200">
       <div class="max-w-4xl mx-auto px-[16px] py-[14px] flex items-center justify-between gap-[12px]">
         <div class="flex items-center gap-[12px] min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center flex-shrink-0"><mat-icon>hotel</mat-icon></div>
           <div class="min-w-0">
-            <h1 class="m-0 text-lg font-bold truncate">{{ summary?.hotel?.name || 'Portal del hotel' }}</h1>
+            <h1 class="m-0 truncate font-jakarta text-lg font-bold text-sage-900">{{ summary?.hotel?.name || 'Portal del hotel' }}</h1>
             <p class="m-0 text-xs text-sage-500">Beneficio para huéspedes · Tavolapp</p>
           </div>
         </div>
@@ -48,17 +46,17 @@
         <p *ngIf="!s.hotel.active" role="alert" class="mb-[16px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">El hotel está dado de baja: los huéspedes no pueden pedir vouchers.</p>
 
         <!-- Resumen -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-[12px] mb-[16px]">
-          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Emitidos</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.issued }}</p></div>
-          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Usados</p><p class="m-0 mt-[4px] text-2xl font-bold text-cafe-green-700" data-testid="redeemed">{{ s.totals.redeemed }}</p></div>
-          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Vencidos</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.expired }}</p></div>
-          <div class="bg-white rounded-2xl shadow-soft p-[16px]"><p class="m-0 text-xs font-bold text-sage-500">Anulados</p><p class="m-0 mt-[4px] text-2xl font-bold">{{ s.totals.cancelled }}</p></div>
+        <div class="mb-[16px] flex flex-wrap items-baseline gap-x-8 gap-y-2 rounded-2xl bg-white px-5 py-4 shadow-soft">
+          <div><strong class="font-jakarta text-xl font-bold tabular-nums">{{ s.totals.issued }}</strong><span class="ml-[6px] text-sm text-sage-600">emitidos</span></div>
+          <div><strong class="font-jakarta text-xl font-bold tabular-nums text-cafe-green-700" data-testid="redeemed">{{ s.totals.redeemed }}</strong><span class="ml-[6px] text-sm text-sage-600">usados</span></div>
+          <div><strong class="font-jakarta text-xl font-bold tabular-nums">{{ s.totals.expired }}</strong><span class="ml-[6px] text-sm text-sage-600">vencidos</span></div>
+          <div><strong class="font-jakarta text-xl font-bold tabular-nums">{{ s.totals.cancelled }}</strong><span class="ml-[6px] text-sm text-sage-600">anulados</span></div>
         </div>
 
         <div class="grid gap-[16px] md:grid-cols-2 mb-[16px]">
           <!-- Código -->
           <section class="bg-white rounded-2xl shadow-soft p-[16px]">
-            <h2 class="m-0 mb-[4px] font-bold">Código para huéspedes</h2>
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-[4px]">Código para huéspedes</div>
             <p class="m-0 mb-[10px] text-xs text-sage-500">Es lo que prueba que alguien está alojado. Cambialo cuando quieras (por ejemplo cada semana).</p>
             <p class="m-0 mb-[12px] text-3xl font-bold tracking-[0.2em] text-cafe-green-800" data-testid="access-code">{{ s.hotel.accessCode }}</p>
             <div class="flex flex-wrap gap-[8px]">
@@ -66,13 +64,13 @@
                 class="flex-1 min-w-[140px] px-[12px] py-[8px] rounded-xl border-[1px] border-sage-300 text-sm uppercase" />
               <button type="button" (click)="generateCode()" class="px-[12px] py-[8px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold">Generar</button>
               <button type="button" (click)="saveCode()" [disabled]="!newCode.trim()"
-                class="px-[14px] py-[8px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold disabled:opacity-50">Guardar</button>
+                class="px-[14px] py-[8px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-semibold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Guardar</button>
             </div>
           </section>
 
           <!-- QR -->
           <section class="bg-white rounded-2xl shadow-soft p-[16px]">
-            <h2 class="m-0 mb-[4px] font-bold">QR del hotel</h2>
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-[4px]">QR del hotel</div>
             <p class="m-0 mb-[10px] text-xs text-sage-500">Los huéspedes lo escanean para ver los restaurantes y pedir su voucher.</p>
             <div class="flex items-center gap-[14px]">
               <img *ngIf="qr" [src]="qr" alt="QR del hotel" class="w-28 h-28 rounded-lg border-[1px] border-sage-200 flex-shrink-0" />
@@ -80,7 +78,7 @@
                 <p class="m-0 text-xs text-sage-600 break-all">{{ url }}</p>
                 <div class="flex flex-wrap gap-[8px] mt-[10px]">
                   <button type="button" (click)="copy(url)" class="px-[12px] py-[6px] rounded-lg bg-white border-[1px] border-sage-300 text-xs font-bold">Copiar enlace</button>
-                  <button type="button" (click)="printCard()" class="px-[12px] py-[6px] rounded-lg bg-cafe-green-700 text-white text-xs font-bold">Imprimir tarjeta</button>
+                  <button type="button" (click)="printCard()" class="px-[12px] py-[6px] rounded-xl bg-cafe-green-700 text-white text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Imprimir tarjeta</button>
                 </div>
               </div>
             </div>
@@ -89,7 +87,7 @@
 
         <!-- Por restaurante -->
         <section *ngIf="s.byRestaurant.length" class="bg-white rounded-2xl shadow-soft p-[16px] mb-[16px]">
-          <h2 class="m-0 mb-[10px] font-bold">Por restaurante</h2>
+          <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-[10px]">Por restaurante</div>
           <table class="w-full text-sm">
             <thead><tr class="text-left text-xs text-sage-500"><th class="py-[6px]">Restaurante</th><th class="py-[6px] text-right">Emitidos</th><th class="py-[6px] text-right">Usados</th></tr></thead>
             <tbody class="divide-y divide-sage-100">
@@ -100,7 +98,7 @@
 
         <!-- Últimos vouchers -->
         <section class="bg-white rounded-2xl shadow-soft p-[16px]">
-          <h2 class="m-0 mb-[4px] font-bold">Últimos vouchers</h2>
+          <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 mb-[4px]">Últimos vouchers</div>
           <p class="m-0 mb-[10px] text-xs text-sage-500">Si alguien lo pidió sin estar alojado, podés anular su voucher mientras no se haya usado.</p>
           <p *ngIf="s.recent.length === 0" class="m-0 text-sm text-sage-500">Todavía no se emitió ninguno.</p>
           <div class="overflow-x-auto">

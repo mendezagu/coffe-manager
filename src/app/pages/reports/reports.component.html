@@ -8,41 +8,33 @@
           <p class="page-sub">Qué se vendió, cuándo y quién. Solo cuenta lo cobrado.</p>
         </div>
       </div>
-      <div *ngIf="!locked" class="flex flex-wrap items-center gap-3">
-        <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Tipo de gráfico">
-          <button type="button" (click)="setChartMode('bar')" class="px-2.5 py-1 rounded-md font-medium"
-            [ngClass]="chartMode === 'bar' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="chartMode === 'bar'">Barras</button>
-          <button type="button" (click)="setChartMode('pie')" class="px-2.5 py-1 rounded-md font-medium"
-            [ngClass]="chartMode === 'pie' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="chartMode === 'pie'">Torta</button>
-        </div>
-        <label class="inline-flex items-center gap-2 text-sm text-sage-700 cursor-pointer select-none">
-          <input type="checkbox" [(ngModel)]="showTables" class="accent-[#1b2822] w-4 h-4" />
-          Ver como tablas
-        </label>
-      </div>
+      <label *ngIf="!locked" class="inline-flex cursor-pointer select-none items-center gap-2 text-sm text-sage-700">
+        <input type="checkbox" [(ngModel)]="showTables" class="h-4 w-4 accent-[#1b2822] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700" />
+        Ver como tablas
+      </label>
       <div *ngIf="!locked" class="flex w-full flex-wrap items-center gap-2">
-      <div class="inline-flex flex-wrap p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Rango de fechas">
+      <div class="flex flex-wrap gap-1.5" role="group" aria-label="Rango de fechas">
         <button *ngFor="let p of presets" type="button" (click)="selectPreset(p.key)"
-          class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
-          [ngClass]="preset === p.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
+          class="rounded-full border px-[14px] py-[7px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          [ngClass]="preset === p.key ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'"
           [attr.aria-pressed]="preset === p.key">{{ p.label }}</button>
       </div>
 
-      <div *ngIf="plans.showTables && counterOn" class="inline-flex p-[3px] bg-sage-100 rounded-xl" role="group" aria-label="Origen de las ventas">
+      <div *ngIf="plans.showTables && counterOn" class="flex flex-wrap gap-1.5" role="group" aria-label="Origen de las ventas">
         <button *ngFor="let s of sources" type="button" (click)="selectSource(s.key)"
-          class="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
-          [ngClass]="source === s.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'"
+          class="rounded-full border px-[14px] py-[7px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          [ngClass]="source === s.key ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'"
           [attr.aria-pressed]="source === s.key">{{ s.label }}</button>
       </div>
 
       <div *ngIf="preset === 'custom'" class="flex flex-wrap items-center gap-2">
         <input type="date" [(ngModel)]="from" [max]="to" aria-label="Desde"
-          class="px-3 py-1.5 border border-sage-200 rounded-lg text-sm bg-white" />
+          class="rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-sm focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
         <span class="text-sage-500 text-sm">a</span>
         <input type="date" [(ngModel)]="to" [min]="from" aria-label="Hasta"
-          class="px-3 py-1.5 border border-sage-200 rounded-lg text-sm bg-white" />
+          class="rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-sm focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
         <button type="button" (click)="applyCustom()" [disabled]="!from || !to || rangeInvalid"
-          class="px-4 py-1.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Ver</button>
+          class="rounded-xl bg-cafe-green-700 px-4 py-[7px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">Ver</button>
       </div>
       </div>
     </div>
@@ -60,49 +52,43 @@
 
     <ng-container *ngIf="report">
 
-      <!-- Resumen -->
-      <div class="grid grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-4 gap-3 mb-4">
-        <div class="min-w-0 bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Total vendido</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-cafe-green-700 mt-1 sm:text-2xl">{{ report.summary.totalAmount | money }}</p>
+      <!-- Resumen: cifras en una línea, sin tarjetas -->
+      <div class="mb-4 flex flex-wrap items-baseline gap-x-8 gap-y-3 rounded-2xl bg-white px-5 py-4 shadow-soft">
+        <div class="min-w-0">
+          <strong class="font-jakarta text-3xl font-bold tabular-nums text-cafe-green-700">{{ report.summary.totalAmount | money }}</strong>
+          <span class="ml-[8px] text-sm text-sage-600">vendido</span>
         </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Ventas</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.salesCount }}</p>
-          <p class="text-xs text-sage-500 mt-0.5">{{ report.summary.itemsSold }} platos</p>
+        <div>
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ report.summary.salesCount }}</strong>
+          <span class="ml-[6px] text-sm text-sage-600">{{ report.summary.salesCount === 1 ? 'venta' : 'ventas' }} · {{ report.summary.itemsSold }} platos</span>
         </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Ticket promedio</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.averageTicket | money }}</p>
+        <div>
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ report.summary.averageTicket | money }}</strong>
+          <span class="ml-[6px] text-sm text-sage-600">ticket promedio</span>
         </div>
-        <div class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Descuentos</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.discountTotal | money }}</p>
-          <p class="text-xs text-sage-500 mt-0.5" *ngIf="report.summary.grossTotal > 0">
-            {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto
-          </p>
+        <div>
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ report.summary.discountTotal | money }}</strong>
+          <span class="ml-[6px] text-sm text-sage-600">en descuentos<ng-container *ngIf="report.summary.grossTotal > 0"> · {{ (report.summary.discountTotal / report.summary.grossTotal) | percent:'1.0-1' }} del bruto</ng-container></span>
         </div>
-        <div *ngIf="showCommission && plans.showTables" class="min-w-0 bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Comisión de mozos</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-sage-900 mt-1 sm:text-2xl">{{ report.summary.commissionTotal | money }}</p>
-          <p *ngIf="report.commission.enabled" class="text-xs text-sage-500 mt-0.5">{{ report.commission.pct }}% de lo vendido</p>
+        <div *ngIf="showCommission && plans.showTables">
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ report.summary.commissionTotal | money }}</strong>
+          <span class="ml-[6px] text-sm text-sage-600">de comisión a mozos<ng-container *ngIf="report.commission.enabled"> · {{ report.commission.pct }}%</ng-container></span>
         </div>
-        <div *ngIf="hasCosts" class="bg-white rounded-card shadow-soft p-4">
-          <p class="text-xs font-bold text-sage-500">Ganancia estimada</p>
-          <p class="whitespace-nowrap text-[clamp(1.05rem,4.8vw,1.5rem)] font-bold text-cafe-green-700 mt-1 sm:text-2xl">{{ report.summary.profit | money }}</p>
-          <p *ngIf="report.summary.profitMarginPct !== null" class="text-xs text-sage-500 mt-0.5">{{ report.summary.profitMarginPct / 100 | percent:'1.0-0' }} de margen</p>
+        <div *ngIf="hasCosts">
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-cafe-green-700">{{ report.summary.profit | money }}</strong>
+          <span class="ml-[6px] text-sm text-sage-600">de ganancia estimada<ng-container *ngIf="report.summary.profitMarginPct !== null"> · {{ report.summary.profitMarginPct / 100 | percent:'1.0-0' }} de margen</ng-container></span>
         </div>
       </div>
 
-      <p *ngIf="hasCosts && report.summary.revenueWithoutCost > 0" class="mb-2 text-xs text-sage-600">
+      <p *ngIf="hasCosts && report.summary.revenueWithoutCost > 0" class="mb-2 text-sm text-sage-600">
         La ganancia se calcula sobre lo vendido con receta. Quedan fuera {{ report.summary.revenueWithoutCost | money }} de platos sin receta, de los que no se conoce el costo.
       </p>
 
-      <p *ngIf="report.summary.tipsTotal > 0" class="mb-2 text-xs text-sage-600">
+      <p *ngIf="report.summary.tipsTotal > 0" class="mb-2 text-sm text-sage-600">
         Propinas del período: <strong class="text-sage-800">{{ report.summary.tipsTotal | money }}</strong>. No están incluidas en las ventas; el método de pago sí las cuenta, porque es lo que entró con cada uno.
       </p>
 
-      <p *ngIf="report.summary.salesWithoutDetail > 0" class="mb-4 text-xs text-sage-600">
+      <p *ngIf="report.summary.salesWithoutDetail > 0" class="mb-4 text-sm text-sage-600">
         {{ report.summary.salesWithoutDetail }}
         {{ report.summary.salesWithoutDetail === 1 ? 'venta es del sistema anterior y no tiene' : 'ventas son del sistema anterior y no tienen' }}
         detalle de platos: cuentan en los totales, pero no en el ranking de platos.
@@ -116,12 +102,12 @@
       <div *ngIf="hasSales" class="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[repeat(2,minmax(0,1fr))]">
 
         <!-- Ventas por día -->
-        <section class="min-w-0 bg-white rounded-card shadow-soft p-4 lg:col-span-2">
-          <h2 class="font-bold text-sage-800 mb-3">Ventas por día</h2>
+        <section class="min-w-0 rounded-2xl bg-white p-5 shadow-soft lg:col-span-2">
+          <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-3">Ventas por día</div>
           <div [hidden]="showTables" class="relative h-64 min-w-0"><canvas #dayChart aria-label="Gráfico de ventas por día"></canvas></div>
           <div *ngIf="showTables" class="max-h-72 overflow-y-auto">
-            <table class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Día</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+            <table class="w-full text-sm tabular-nums">
+              <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Día</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let d of report.byDay"><td class="py-1.5">{{ dayLabel(d.date) }}</td><td class="py-1.5 text-right">{{ d.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ d.totalAmount | money }}</td></tr>
               </tbody>
@@ -132,23 +118,23 @@
         <!-- Rankings en dos columnas: cada tarjeta ocupa su propio alto y las columnas se reparten solas -->
         <div class="lg:col-span-2 lg:columns-2 lg:gap-x-4">
         <!-- Platos más vendidos -->
-        <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
+        <section class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 class="font-bold text-sage-800">Platos más vendidos</h2>
-            <div class="inline-flex p-[2px] bg-sage-50 border border-sage-200 rounded-lg text-xs" role="group" aria-label="Ordenar platos por">
-              <button type="button" (click)="setItemsBy('amount')" class="px-2.5 py-1 rounded-md font-medium"
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900">Platos más vendidos</div>
+            <div class="inline-flex rounded-lg bg-sage-100 p-[2px] text-xs" role="group" aria-label="Ordenar platos por">
+              <button type="button" (click)="setItemsBy('amount')" class="rounded-md px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
                 [ngClass]="itemsBy === 'amount' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'amount'">Por importe</button>
-              <button type="button" (click)="setItemsBy('quantity')" class="px-2.5 py-1 rounded-md font-medium"
+              <button type="button" (click)="setItemsBy('quantity')" class="rounded-md px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
                 [ngClass]="itemsBy === 'quantity' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'quantity'">Por cantidad</button>
-              <button *ngIf="hasCosts" type="button" (click)="setItemsBy('profit')" class="px-2.5 py-1 rounded-md font-medium"
+              <button *ngIf="hasCosts" type="button" (click)="setItemsBy('profit')" class="rounded-md px-2.5 py-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
                 [ngClass]="itemsBy === 'profit' ? 'bg-white shadow-soft text-cafe-green-700' : 'text-sage-600'" [attr.aria-pressed]="itemsBy === 'profit'">Por ganancia</button>
             </div>
           </div>
           <p *ngIf="report.items.length === 0" class="text-sm text-sage-500 py-8 text-center">Todavía no hay ventas con detalle de platos en este rango.</p>
           <div class="relative min-w-0" [hidden]="showTables || report.items.length === 0" [style.height.px]="chartHeight(topItems.length)"><canvas #itemsChart aria-label="Gráfico de platos más vendidos"></canvas></div>
           <div *ngIf="showTables && report.items.length" class="max-h-80 overflow-y-auto">
-            <table class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th><th *ngIf="hasCosts" class="py-1.5 text-right">Ganancia</th></tr></thead>
+            <table class="w-full text-sm tabular-nums">
+              <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Plato</th><th class="py-1.5 text-right">Unidades</th><th class="py-1.5 text-right">Importe</th><th *ngIf="hasCosts" class="py-1.5 text-right">Ganancia</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let i of topItems"><td class="py-1.5">{{ i.name }}</td><td class="py-1.5 text-right">{{ i.quantity }}</td><td class="py-1.5 text-right font-medium">{{ i.amount | money }}</td><td *ngIf="hasCosts" class="py-1.5 text-right">{{ i.profit === null ? '–' : (i.profit | money) }}</td></tr>
               </tbody>
@@ -158,11 +144,11 @@
 
 
           <!-- Ventas por mozo: solo si el negocio tiene salón -->
-          <section *ngIf="plans.showTables" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-3">Ventas por mozo</h2>
+          <section *ngIf="plans.showTables" class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-3">Ventas por mozo</div>
             <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byWaiter.length)"><canvas #waiterChart aria-label="Gráfico de ventas por mozo"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Propinas</th><th *ngIf="showCommission" class="py-1.5 text-right">Comisión</th></tr></thead>
+              <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Mozo</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Propinas</th><th *ngIf="showCommission" class="py-1.5 text-right">Comisión</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let w of report.byWaiter"><td class="py-1.5">{{ w.name }}</td><td class="py-1.5 text-right">{{ w.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ w.totalAmount | money }}</td><td class="py-1.5 text-right">{{ w.tips | money }}</td><td *ngIf="showCommission" class="py-1.5 text-right font-medium">{{ w.commission | money }}</td></tr>
               </tbody>
@@ -170,9 +156,9 @@
           </section>
 
           <!-- Comisión de cada mozo -->
-          <section *ngIf="showCommission && plans.showTables" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4" data-testid="commission">
-            <h2 class="font-bold text-sage-800 mb-1">Comisión por mozo</h2>
-            <p class="text-xs text-sage-500 mb-3">Lo vendido en las mesas que atendió cada uno por el porcentaje de comisión de cada venta.</p>
+          <section *ngIf="showCommission && plans.showTables" class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft" data-testid="commission">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Comisión por mozo</div>
+            <p class="text-sm text-sage-500 mb-3">Lo vendido en las mesas que atendió cada uno por el porcentaje de comisión de cada venta.</p>
             <ul class="m-0 list-none divide-y divide-sage-100 p-0">
               <li *ngFor="let w of report.byWaiter" class="flex items-center justify-between gap-3 py-2 text-sm">
                 <span class="min-w-0 truncate font-medium text-sage-900">{{ w.name }}</span>
@@ -186,11 +172,11 @@
           </section>
 
           <!-- Método de pago -->
-          <section class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-3">Método de pago</h2>
+          <section class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-3">Método de pago</div>
             <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byPayment.length)"><canvas #paymentChart aria-label="Gráfico de ventas por método de pago"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Método</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Método</th><th class="py-1.5 text-right">Ventas</th><th class="py-1.5 text-right">Importe</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let p of report.byPayment"><td class="py-1.5">{{ paymentLabel(p.method) }}</td><td class="py-1.5 text-right">{{ p.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ p.totalAmount | money }}</td></tr>
               </tbody>
@@ -198,43 +184,41 @@
           </section>
 
           <!-- Mostrador y mesas: solo si hay ventas de mostrador en el período -->
-          <section *ngIf="plans.showTables && counterOn && report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-1">Mostrador y mesas</h2>
-            <p class="text-xs text-sage-500 mb-3">Cuánto vendiste en cada lugar y qué parte del total es cada uno.</p>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-xl bg-cafe-green-50 p-3">
-                <p class="m-0 flex items-center gap-1.5 text-xs font-bold text-cafe-green-700"><mat-icon class="!h-4 !w-4 !text-base">delivery_dining</mat-icon>Mostrador</p>
-                <p class="m-0 mt-1 text-xl font-bold text-sage-900">{{ report.bySource.mostrador.totalAmount | money }}</p>
-                <p class="m-0 mt-0.5 text-xs text-sage-600">{{ report.bySource.mostrador.salesCount }} {{ report.bySource.mostrador.salesCount === 1 ? 'venta' : 'ventas' }} · <strong>{{ counterShare }}%</strong> del total</p>
-              </div>
-              <div class="rounded-xl bg-sage-50 p-3">
-                <p class="m-0 flex items-center gap-1.5 text-xs font-bold text-sage-600"><mat-icon class="!h-4 !w-4 !text-base">table_restaurant</mat-icon>Mesas</p>
-                <p class="m-0 mt-1 text-xl font-bold text-sage-900">{{ report.bySource.mesa.totalAmount | money }}</p>
-                <p class="m-0 mt-0.5 text-xs text-sage-600">{{ report.bySource.mesa.salesCount }} {{ report.bySource.mesa.salesCount === 1 ? 'venta' : 'ventas' }} · <strong>{{ 100 - counterShare }}%</strong> del total</p>
-              </div>
-            </div>
+          <section *ngIf="plans.showTables && counterOn && report.bySource.mostrador.salesCount > 0 && !source" class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Mostrador y mesas</div>
+            <p class="text-sm text-sage-500 mb-3">Cuánto vendiste en cada lugar y qué parte del total es cada uno.</p>
+            <ul class="m-0 list-none divide-y divide-sage-100 p-0">
+              <li class="flex flex-wrap items-baseline justify-between gap-x-3 py-[10px] text-sm">
+                <span class="font-semibold text-sage-900">Mostrador</span>
+                <span class="text-sage-600"><strong class="font-jakarta text-lg font-bold tabular-nums text-sage-900">{{ report.bySource.mostrador.totalAmount | money }}</strong><span class="ml-[8px] tabular-nums">{{ report.bySource.mostrador.salesCount }} {{ report.bySource.mostrador.salesCount === 1 ? 'venta' : 'ventas' }} · {{ counterShare }}%</span></span>
+              </li>
+              <li class="flex flex-wrap items-baseline justify-between gap-x-3 py-[10px] text-sm">
+                <span class="font-semibold text-sage-900">Mesas</span>
+                <span class="text-sage-600"><strong class="font-jakarta text-lg font-bold tabular-nums text-sage-900">{{ report.bySource.mesa.totalAmount | money }}</strong><span class="ml-[8px] tabular-nums">{{ report.bySource.mesa.salesCount }} {{ report.bySource.mesa.salesCount === 1 ? 'venta' : 'ventas' }} · {{ 100 - counterShare }}%</span></span>
+              </li>
+            </ul>
           </section>
 
           <!-- Ventas por hora -->
-          <section *ngIf="hourBars.length > 1" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-1">Ventas por hora</h2>
-            <p class="text-xs text-sage-500 mb-3">Cuándo se vende más en el período. La hora pico va en verde oscuro.</p>
+          <section *ngIf="hourBars.length > 1" class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Ventas por hora</div>
+            <p class="text-sm text-sage-500 mb-3">Cuándo se vende más en el período. La hora pico va en verde oscuro.</p>
             <div class="flex h-32 items-end gap-1.5">
-              <div *ngFor="let h of hourBars" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1 text-[10px] text-sage-500"
+              <div *ngFor="let h of hourBars" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1 text-xs tabular-nums text-sage-600"
                 [attr.title]="h.hour + ' h: ' + h.count + ' ventas'">
-                <div class="w-full rounded-t-md" [ngClass]="h.peak ? 'bg-cafe-green-700' : 'bg-cafe-green-200'" [style.height.%]="h.pct"></div>
+                <div class="w-full rounded-t-sm" [ngClass]="h.peak ? 'bg-cafe-green-700' : 'bg-cafe-green-200'" [style.height.%]="h.pct"></div>
                 {{ h.hour }}
               </div>
             </div>
           </section>
 
           <!-- Mesas más ocupadas -->
-          <section *ngIf="plans.showTables && report.byTable?.length" class="mb-4 break-inside-avoid min-w-0 bg-white rounded-card shadow-soft p-4">
-            <h2 class="font-bold text-sage-800 mb-1">Mesas más ocupadas</h2>
-            <p class="text-xs text-sage-500 mb-3">Cuántas veces se cobró cada mesa en el período (las 10 primeras).</p>
+          <section *ngIf="plans.showTables && report.byTable?.length" class="mb-4 break-inside-avoid min-w-0 rounded-2xl bg-white p-5 shadow-soft">
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Mesas más ocupadas</div>
+            <p class="text-sm text-sage-500 mb-3">Cuántas veces se cobró cada mesa en el período (las 10 primeras).</p>
             <div class="relative min-w-0" [hidden]="showTables" [style.height.px]="chartHeight(report.byTable.length)"><canvas #tablesChart aria-label="Gráfico de las mesas más ocupadas"></canvas></div>
             <table *ngIf="showTables" class="w-full text-sm">
-              <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Mesa</th><th class="py-1.5 text-right">Veces cobrada</th><th class="py-1.5 text-right">Importe</th></tr></thead>
+              <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Mesa</th><th class="py-1.5 text-right">Veces cobrada</th><th class="py-1.5 text-right">Importe</th></tr></thead>
               <tbody class="divide-y divide-sage-100">
                 <tr *ngFor="let t of report.byTable"><td class="py-1.5">{{ t.name }}</td><td class="py-1.5 text-right">{{ t.salesCount }}</td><td class="py-1.5 text-right font-medium">{{ t.totalAmount | money }}</td></tr>
               </tbody>
@@ -245,23 +229,23 @@
       </div>
 
       <!-- Hoteles: ventas de huéspedes que llegaron con un voucher -->
-      <section *ngIf="report.byHotel?.length" class="bg-white rounded-card shadow-soft p-4 mt-4" data-testid="hotel-sales">
-        <h2 class="font-bold text-sage-800 mb-1">Ventas por hotel</h2>
-        <p class="text-xs text-sage-500 mb-3">Mesas cobradas con voucher de hotel. El descuento ya está restado del importe.</p>
+      <section *ngIf="report.byHotel?.length" class="rounded-2xl bg-white p-5 shadow-soft mt-4" data-testid="hotel-sales">
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Ventas por hotel</div>
+        <p class="text-sm text-sage-500 mb-3">Mesas cobradas con voucher de hotel. El descuento ya está restado del importe.</p>
         <ul class="m-0 list-none divide-y divide-sage-100 p-0 sm:hidden">
           <li *ngFor="let h of hotelRows" class="py-3">
             <p class="m-0 break-words font-bold text-sage-900">{{ h.name }}</p>
             <dl class="m-0 mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-              <div><dt class="text-xs text-sage-500">Mesas</dt><dd class="m-0 font-medium">{{ h.salesCount }}</dd></div>
-              <div><dt class="text-xs text-sage-500">Importe</dt><dd class="m-0 font-medium">{{ h.totalAmount | money }}</dd></div>
-              <div><dt class="text-xs text-sage-500">Ticket promedio</dt><dd class="m-0">{{ h.averageTicket | money }}</dd></div>
-              <div><dt class="text-xs text-sage-500">Descuentos</dt><dd class="m-0 text-cafe-red-700">{{ h.discountTotal | money }}</dd></div>
+              <div><dt class="text-sm text-sage-500">Mesas</dt><dd class="m-0 font-medium">{{ h.salesCount }}</dd></div>
+              <div><dt class="text-sm text-sage-500">Importe</dt><dd class="m-0 font-medium">{{ h.totalAmount | money }}</dd></div>
+              <div><dt class="text-sm text-sage-500">Ticket promedio</dt><dd class="m-0">{{ h.averageTicket | money }}</dd></div>
+              <div><dt class="text-sm text-sage-500">Descuentos</dt><dd class="m-0 text-cafe-red-700">{{ h.discountTotal | money }}</dd></div>
             </dl>
           </li>
         </ul>
         <div class="hidden overflow-x-auto sm:block">
-          <table class="w-full text-sm">
-            <thead><tr class="text-left text-xs text-sage-500"><th class="py-1.5">Hotel</th><th class="py-1.5 text-right">Mesas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Ticket promedio</th><th class="py-1.5 text-right">Descontado</th></tr></thead>
+          <table class="w-full text-sm tabular-nums">
+            <thead><tr class="text-left text-sm font-medium text-sage-600"><th class="py-1.5">Hotel</th><th class="py-1.5 text-right">Mesas</th><th class="py-1.5 text-right">Importe</th><th class="py-1.5 text-right">Ticket promedio</th><th class="py-1.5 text-right">Descontado</th></tr></thead>
             <tbody class="divide-y divide-sage-100">
               <tr *ngFor="let h of hotelRows">
                 <td class="py-1.5 font-medium">{{ h.name }}</td>
@@ -275,7 +259,7 @@
         </div>
         <!-- Con muchos hoteles se muestran los que más vendieron (ya vienen ordenados por importe) y el resto se despliega -->
         <button *ngIf="report.byHotel.length > hotelsPreview" type="button" (click)="hotelsExpanded = !hotelsExpanded" [attr.aria-expanded]="hotelsExpanded"
-          class="mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-sage-200 bg-white text-sm font-bold text-sage-700 transition-colors hover:bg-sage-50">
+          class="mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-sage-300 bg-white text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
           {{ hotelsExpanded ? 'Ver menos' : 'Ver los ' + report.byHotel.length + ' hoteles' }}
           <mat-icon class="!h-5 !w-5 !text-xl">{{ hotelsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
         </button>

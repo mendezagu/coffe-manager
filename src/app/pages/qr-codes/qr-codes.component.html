@@ -6,8 +6,7 @@
   <app-upgrade-wall *ngIf="!view.planIncluded" feature="qr_ordering" benefit="Tus clientes escanean el QR de la mesa y piden desde el celular, sin esperar al mozo."></app-upgrade-wall>
 
   <!-- Pedido por QR apagado: no se muestran ni se generan códigos -->
-  <div *ngIf="view.planIncluded && !view.active" class="p-[20px] sm:p-[24px] rounded-2xl bg-sage-50 border-[1px] border-sage-200 flex flex-col sm:flex-row sm:items-center gap-[16px]">
-    <div class="w-12 h-12 rounded-xl bg-white text-sage-500 flex items-center justify-center flex-shrink-0"><mat-icon class="!w-7 !h-7 !text-[28px]">qr_code_2</mat-icon></div>
+  <div *ngIf="view.planIncluded && !view.active" class="p-5 sm:p-[24px] rounded-2xl bg-white shadow-soft flex flex-col sm:flex-row sm:items-center gap-[16px]">
     <div class="flex-1 min-w-0">
       <p class="font-bold text-sage-900 m-0 mb-[4px]">El pedido por QR está apagado</p>
       <p class="text-sm text-sage-600 m-0">
@@ -15,7 +14,7 @@
         y volvé acá para generar los QR de tus mesas.
       </p>
     </div>
-    <a routerLink="/settings" class="inline-flex items-center justify-center gap-[8px] px-[18px] py-[10px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold no-underline flex-shrink-0">
+    <a routerLink="/settings" class="inline-flex items-center justify-center gap-[8px] px-[18px] py-[10px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-semibold no-underline flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
       <mat-icon class="!w-5 !h-5 !text-xl">business</mat-icon>Ir a Mi negocio
     </a>
   </div>
@@ -50,7 +49,7 @@
         Después podés imprimirlos y pegarlos en cada mesa.
       </p>
       <button type="button" (click)="generate()" [disabled]="busy"
-        class="inline-flex items-center gap-[8px] px-[22px] py-[12px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-bold disabled:opacity-50">
+        class="inline-flex items-center gap-[8px] px-[22px] py-[12px] rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white text-sm font-semibold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
         <mat-icon class="!w-5 !h-5 !text-xl">qr_code_2</mat-icon>{{ busy ? 'Generando…' : 'Generar QR' }}
       </button>
     </div>
@@ -68,7 +67,7 @@
             <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>{{ busy ? 'Generando…' : 'Generar QR de ' + missingCount + (missingCount === 1 ? ' mesa nueva' : ' mesas nuevas') }}
           </button>
           <button type="button" (click)="print(visibleCards)"
-            class="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-xl bg-cafe-green-700 text-white text-sm font-bold">
+            class="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-xl bg-cafe-green-700 text-white text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
             <mat-icon class="!w-5 !h-5 !text-xl">print</mat-icon> {{ activeSectorTab === 'all' ? 'Imprimir todos' : 'Imprimir estos ' + visibleCards.length }}
           </button>
         </div>
@@ -78,7 +77,7 @@
 
       <div class="grid gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
         <article *ngFor="let c of visibleCards" class="p-[16px] rounded-2xl border-[1px] border-sage-200 bg-white flex flex-col items-center text-center">
-          <h3 class="text-lg font-bold text-sage-900 m-0">{{ c.name }}</h3>
+          <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0">{{ c.name }}</div>
           <p class="text-xs text-sage-500 m-0 mb-[8px]">{{ c.sector || 'Sin sector' }}</p>
           <img [src]="c.image" [alt]="'QR de ' + c.name" class="w-[168px] h-[168px]" />
           <p *ngIf="view.requirePin" class="text-xs text-sage-600 m-0 mt-[8px]">

@@ -23,7 +23,7 @@
     <!-- Inicio: una tarjeta por cada cosa que se puede administrar -->
     <div *ngIf="!section" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <a *ngFor="let c of cards; trackBy: trackCard" [routerLink]="['/admin', c.key]"
-        class="group flex flex-col gap-4 p-6 bg-white rounded-card shadow-soft border border-transparent hover:border-cafe-green-200 hover:shadow-soft-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
+        class="group flex flex-col gap-4 p-6 bg-white rounded-2xl shadow-soft border border-transparent hover:border-cafe-green-200 hover:shadow-soft-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
         <div class="flex items-start justify-between">
           <div class="w-12 h-12 rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center">
             <mat-icon class="!w-7 !h-7 !text-3xl">{{ c.icon }}</mat-icon>
@@ -31,7 +31,7 @@
           <mat-icon class="text-sage-300 group-hover:text-cafe-green-700 transition-colors">arrow_forward</mat-icon>
         </div>
         <div>
-          <h3 class="m-0 flex flex-wrap items-center gap-2 text-xl font-bold text-sage-900">{{ c.title }}<app-plan-badge *ngIf="c.feature" [feature]="c.feature"></app-plan-badge></h3>
+          <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0 flex flex-wrap items-center gap-2">{{ c.title }}<app-plan-badge *ngIf="c.feature" [feature]="c.feature"></app-plan-badge></div>
           <p class="text-sm text-sage-500 mt-1 mb-0">{{ c.description }}</p>
         </div>
         <div class="mt-auto flex flex-wrap items-center gap-2">
@@ -42,14 +42,14 @@
     </div>
 
     <!-- ADMINISTRAR MESAS -->
-    <div *ngIf="section === 'tables'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'tables'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
           <!-- Agregar Mesa -->
-          <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
-            <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <div class="mb-8 p-6 bg-sage-50 rounded-2xl border border-sage-200">
+            <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-4 flex items-center gap-2">
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">add_circle</mat-icon>
               Agregar Nueva Mesa
-            </h3>
+            </div>
             <div class="flex flex-col sm:flex-row gap-3">
               <input
                 class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold"
@@ -62,7 +62,7 @@
                 <option value="">Sin sector</option>
                 <option *ngFor="let sector of sectors" [value]="sector._id">{{ sector.name }}</option>
               </select>
-              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2" (click)="addTable()">
+              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2" (click)="addTable()">
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
                 Agregar
               </button>
@@ -70,12 +70,12 @@
           </div>
 
           <!-- Lista de Mesas -->
-          <h3 class="text-xl font-bold text-sage-900 mb-3 flex items-center gap-2">
+          <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-3 flex items-center gap-2">
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista de Mesas
-          </h3>
+          </div>
           <app-filter-tabs *ngIf="sectors.length > 0" class="mb-3 block" label="Mesas por sector" [tabs]="tableTabs" [selected]="activeTableTab" (selectedChange)="tableTab = $event"></app-filter-tabs>
-          <div class="overflow-x-auto rounded-card shadow-soft bg-white">
+          <div class="overflow-x-auto rounded-2xl shadow-soft bg-white">
             <table class="w-full">
               <thead class="bg-sage-50">
                 <tr>
@@ -142,14 +142,14 @@
     </div>
 
     <!-- ADMINISTRAR SECTORES -->
-    <div *ngIf="section === 'sectors'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'sectors'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
           <!-- Sectores -->
-          <div class="p-6 bg-sage-50 rounded-card border border-sage-200">
-            <h3 class="text-xl font-bold text-sage-900 mb-1 flex items-center gap-2">
+          <div class="p-6 bg-sage-50 rounded-2xl border border-sage-200">
+            <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-1 flex items-center gap-2">
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">category</mat-icon>
               Sectores
-            </h3>
+            </div>
             <p class="text-sm text-sage-500 mt-0 mb-[16px]">Agrupa tus mesas por zona (ej: Salón, Terraza). Después asignás cada mesa a un sector.</p>
             <div class="flex flex-col sm:flex-row gap-3">
               <div class="flex-1">
@@ -162,7 +162,7 @@
                 />
                 <p *ngIf="newSectorNameTaken" class="mt-1.5 mb-0 text-xs font-medium text-cafe-red-700">Ya existe un sector con ese nombre</p>
               </div>
-              <button class="self-start px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              <button class="self-start px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
                       [disabled]="!newSectorName.trim() || newSectorNameTaken" (click)="addSector()">
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
                 Agregar sector
@@ -195,21 +195,21 @@
     </div>
 
     <!-- ADMINISTRAR MENU -->
-    <div *ngIf="section === 'menu'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'menu'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
           <!-- Cargar una planilla con precio por tamaño -->
           <app-size-import *ngIf="showSizeImport" [existing]="menuItems" (imported)="onSizesImported()" (closed)="showSizeImport = false"></app-size-import>
 
           <!-- Agregar ítem -->
-          <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
-            <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <div class="mb-8 p-6 bg-sage-50 rounded-2xl border border-sage-200">
+            <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-4 flex items-center gap-2">
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">add_circle</mat-icon>
               Agregar Ítem al Menú
-              <button *ngIf="!showSizeImport" type="button" (click)="showSizeImport = true" class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-100">
+              <button *ngIf="!showSizeImport" type="button" (click)="showSizeImport = true" class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-sage-300 bg-white text-sage-700 hover:bg-sage-100">
                 <mat-icon class="!w-4 !h-4 !text-base">table_chart</mat-icon>
                 Cargar planilla con tamaños
               </button>
-            </h3>
+            </div>
             <div class="flex flex-col sm:flex-row gap-3">
               <input class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" [(ngModel)]="newItemName" placeholder="Nombre del ítem (ej: Café Americano)" />
               <input class="w-full sm:w-40 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" type="number" [(ngModel)]="newItemPrice" placeholder="Precio" (change)="formatPrice()" />
@@ -221,7 +221,7 @@
                 <input type="checkbox" class="w-5 h-5 accent-cafe-green-700" [(ngModel)]="newItemIsPromo" />
                 Es promo
               </label>
-              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2" (click)="addMenuItem()">
+              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2" (click)="addMenuItem()">
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
                 Agregar
               </button>
@@ -229,7 +229,7 @@
           </div>
 
           <!-- Filtro de búsqueda -->
-          <div class="mb-6 p-4 bg-sage-50 rounded-card border border-sage-200">
+          <div class="mb-6 p-4 bg-sage-50 rounded-2xl border border-sage-200">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <mat-icon class="!w-5 !h-5 !text-xl text-sage-400">search</mat-icon>
@@ -239,10 +239,10 @@
           </div>
 
           <!-- Lista del menú -->
-          <h3 class="text-xl font-bold text-sage-900 mb-3 flex items-center gap-2">
+          <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-3 flex items-center gap-2">
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista del Menú
-          </h3>
+          </div>
           <!-- Filtro desplegable: qué se ve y qué está oculto en la carta -->
           <div class="relative mb-3 flex justify-end" #visMenu (document:click)="closeVisFilter($event, visMenu)" (keydown.escape)="closeVisFilter()">
             <button type="button" (click)="visFilterOpen = !visFilterOpen" [attr.aria-expanded]="visFilterOpen" aria-haspopup="menu" aria-label="Filtrar por visibilidad en la carta"
@@ -254,7 +254,7 @@
             </button>
             <div *ngIf="visFilterOpen" role="menu" aria-label="Visibilidad en la carta"
               class="absolute right-0 top-full z-20 mt-1.5 w-64 overflow-hidden rounded-xl border border-sage-200 bg-white py-1 shadow-soft-lg">
-              <p class="m-0 px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wide text-sage-400">Mostrar en la lista</p>
+              <p class="m-0 px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wide text-sage-400">Mostrar en la lista</p>
               <button *ngFor="let o of visOptions" type="button" role="menuitemradio" [attr.aria-checked]="menuVisibility === o.key" (click)="setVisibility(o.key)"
                 class="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-sage-50"
                 [ngClass]="menuVisibility === o.key ? 'font-bold text-cafe-green-700' : 'text-sage-800'">
@@ -266,7 +266,7 @@
             </div>
           </div>
           <app-filter-tabs *ngIf="categories.length > 0" class="mb-3 block" label="Platos por categoría" [tabs]="menuTabsList" [selected]="activeMenuTab" (selectedChange)="menuTab = $event"></app-filter-tabs>
-          <div class="overflow-x-auto rounded-card shadow-soft bg-white">
+          <div class="overflow-x-auto rounded-2xl shadow-soft bg-white">
             <table class="w-full">
               <thead class="bg-sage-50">
                 <tr>
@@ -309,25 +309,25 @@
                           [attr.title]="item.imageUrl ? 'Cambiar la foto' : 'Agregar una foto'">
                           <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="'Foto de ' + item.name" class="h-full w-full object-cover" loading="lazy" />
                           <mat-icon *ngIf="!item.imageUrl && imageBusy !== item._id" class="!h-6 !w-6 !text-2xl">add_a_photo</mat-icon>
-                          <span *ngIf="imageBusy === item._id" class="absolute inset-0 grid place-items-center bg-white/80 text-[10px] font-bold text-cafe-green-700">Subiendo…</span>
+                          <span *ngIf="imageBusy === item._id" class="absolute inset-0 grid place-items-center bg-white text-xs font-bold text-cafe-green-700">Subiendo…</span>
                           <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="imageBusy === item._id" (change)="onImagePicked(item, $event)" [attr.aria-label]="'Foto de ' + item.name" />
                         </label>
                       </ng-container>
                       <ng-template #noPhoto></ng-template>
                       <div class="min-w-0">
                     {{ item.name }}
-                    <span *ngIf="item.isPromo" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold align-middle">Promo</span>
-                    <span *ngIf="categoryName(item.categoryId)" class="ml-2 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-[10px] font-bold align-middle">{{ categoryName(item.categoryId) }}</span>
-                    <span *ngIf="item.modifierGroupIds?.length" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-[10px] font-bold align-middle">{{ item.modifierGroupIds!.length }} {{ item.modifierGroupIds!.length === 1 ? 'modificador' : 'modificadores' }}</span>
+                    <span *ngIf="item.isPromo" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-red-700 text-white text-xs font-bold align-middle">Promo</span>
+                    <span *ngIf="categoryName(item.categoryId)" class="ml-2 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-xs font-bold align-middle">{{ categoryName(item.categoryId) }}</span>
+                    <span *ngIf="item.modifierGroupIds?.length" class="ml-2 px-2 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold align-middle">{{ item.modifierGroupIds!.length }} {{ item.modifierGroupIds!.length === 1 ? 'modificador' : 'modificadores' }}</span>
                         <button *ngIf="imagesAvailable && item.imageUrl" type="button" (click)="removeImage(item)" [disabled]="imageBusy === item._id"
-                          class="ml-2 align-middle text-[11px] font-medium text-cafe-red-700 underline">Quitar foto</button>
+                          class="ml-2 align-middle text-xs font-medium text-cafe-red-700 underline">Quitar foto</button>
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
                       <mat-icon class="!w-4 !h-4 !text-base text-cafe-green-600">payments</mat-icon>
-                      <span *ngIf="hasOwnPrices(item)" class="text-[11px] text-sage-500">desde</span><span class="text-cafe-green-700 font-bold">${{ item.price }}</span>
+                      <span *ngIf="hasOwnPrices(item)" class="text-xs text-sage-500">desde</span><span class="text-cafe-green-700 font-bold">${{ item.price }}</span>
                     </div>
                   </td>
                   <td class="px-6 py-4">
@@ -339,7 +339,7 @@
                       [ngClass]="isVisible(item) ? 'bg-cafe-green-700' : 'bg-sage-300'">
                       <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all" [ngClass]="isVisible(item) ? 'left-[22px]' : 'left-0.5'"></span>
                     </button>
-                    <span class="w-[52px] text-[11px] font-bold leading-none" [ngClass]="isVisible(item) ? 'text-sage-500' : 'text-cafe-red-700'">{{ isVisible(item) ? 'Visible' : 'Oculto' }}</span>
+                    <span class="w-[52px] text-xs font-bold leading-none" [ngClass]="isVisible(item) ? 'text-sage-500' : 'text-cafe-red-700'">{{ isVisible(item) ? 'Visible' : 'Oculto' }}</span>
                     </div>
                   </td>
                   <td class="px-6 py-4">
@@ -362,14 +362,14 @@
     </div>
 
     <!-- ADMINISTRAR CATEGORÍAS -->
-    <div *ngIf="section === 'categories'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'categories'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
           <app-categories (changed)="loadCategories()"></app-categories>
         </div>
     </div>
 
     <!-- ADMINISTRAR MODIFICADORES -->
-    <div *ngIf="section === 'modifiers'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'modifiers'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
       <div class="p-6 sm:p-8">
         <app-upgrade-wall *ngIf="plans.locked('modifiers')" feature="modifiers" benefit="Ofrecé tamaños, leches y extras con precio al pedir cada plato."></app-upgrade-wall>
         <app-modifiers *ngIf="!plans.locked('modifiers')" (changed)="loadModifierGroups(); loadMenuItems()"></app-modifiers>
@@ -377,31 +377,31 @@
     </div>
 
     <!-- CÓDIGOS QR -->
-    <div *ngIf="section === 'qr'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'qr'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
       <div class="p-6 sm:p-8">
         <app-qr-codes></app-qr-codes>
       </div>
     </div>
 
     <!-- ADMINISTRAR USUARIOS -->
-    <div *ngIf="section === 'users'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'users'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
       <div class="p-6 sm:p-8">
         <app-users (changed)="loadUsers()"></app-users>
       </div>
     </div>
 
     <!-- ADMINISTRAR MOZOS -->
-    <div *ngIf="section === 'waiters'" class="bg-white rounded-card shadow-soft overflow-hidden">
+    <div *ngIf="section === 'waiters'" class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="p-6 sm:p-8">
           <!-- Agregar Mesero -->
-          <div class="mb-8 p-6 bg-sage-50 rounded-card border border-sage-200">
-            <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <div class="mb-8 p-6 bg-sage-50 rounded-2xl border border-sage-200">
+            <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-4 flex items-center gap-2">
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">add_circle</mat-icon>
               Agregar Nuevo Mesero
-            </h3>
+            </div>
             <div class="flex flex-col sm:flex-row gap-3">
               <input class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" [(ngModel)]="newWaiterName" placeholder="Nombre del mesero (ej: Juan Pérez)" />
-              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2" (click)="addWaiter()">
+              <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2" (click)="addWaiter()">
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon>
                 Agregar
               </button>
@@ -409,11 +409,11 @@
           </div>
 
           <!-- Lista de Meseros -->
-          <h3 class="text-xl font-bold text-sage-900 mb-4 flex items-center gap-2">
+          <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 mb-4 flex items-center gap-2">
             <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">list</mat-icon>
             Lista de Meseros
-          </h3>
-          <div class="overflow-x-auto rounded-card shadow-soft bg-white">
+          </div>
+          <div class="overflow-x-auto rounded-2xl shadow-soft bg-white">
             <table class="w-full">
               <thead class="bg-sage-50">
                 <tr>
@@ -476,7 +476,7 @@
         <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">table_restaurant</mat-icon>
       </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Editar Mesa</h2>
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:text-xl m-0">Editar Mesa</div>
         <p class="text-sage-500 text-xs mt-0.5 mb-0">Cambia el nombre o la disponibilidad</p>
       </div>
     </div>
@@ -485,20 +485,20 @@
       <div class="space-y-[12px]">
         <!-- Foto del plato -->
         <div *ngIf="editItem as it">
-          <span class="block text-xs font-bold text-sage-500 mb-1.5">Foto</span>
+          <span class="block text-sm font-medium text-sage-700 mb-1.5">Foto</span>
           <div *ngIf="imagesAvailable; else photosOff" class="flex items-center gap-[14px]">
             <div class="relative grid h-24 w-24 flex-none place-items-center overflow-hidden rounded-2xl border border-sage-200 bg-sage-50 text-sage-400">
               <img *ngIf="it.imageUrl" [src]="it.imageUrl" [alt]="'Foto de ' + it.name" class="h-full w-full object-cover" />
               <mat-icon *ngIf="!it.imageUrl" class="!h-8 !w-8 !text-[32px]">image</mat-icon>
-              <span *ngIf="imageBusy === it._id" class="absolute inset-0 grid place-items-center bg-white/80 text-[11px] font-bold text-cafe-green-700">Subiendo…</span>
+              <span *ngIf="imageBusy === it._id" class="absolute inset-0 grid place-items-center bg-white text-xs font-bold text-cafe-green-700">Subiendo…</span>
             </div>
             <div class="flex min-w-0 flex-col items-start gap-[8px]">
-              <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-[14px] py-[9px] text-sm font-bold text-sage-700 hover:bg-sage-50">
+              <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-sage-300 bg-white px-[14px] py-[9px] text-sm font-bold text-sage-700 hover:bg-sage-50">
                 <mat-icon class="!h-4 !w-4 !text-base">add_a_photo</mat-icon>{{ it.imageUrl ? 'Cambiar foto' : 'Elegir foto' }}
                 <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="imageBusy === it._id" (change)="onImagePicked(it, $event)" aria-label="Foto del plato" />
               </label>
               <button *ngIf="it.imageUrl" type="button" (click)="removeImage(it)" [disabled]="imageBusy === it._id" class="text-xs font-medium text-cafe-red-700 underline">Quitar foto</button>
-              <p class="m-0 text-[11px] text-sage-500">Se achica sola. Se guarda al elegirla, no hace falta apretar Guardar.</p>
+              <p class="m-0 text-xs text-sage-500">Se achica sola. Se guarda al elegirla, no hace falta apretar Guardar.</p>
             </div>
           </div>
           <ng-template #photosOff>
@@ -506,12 +506,12 @@
           </ng-template>
         </div>
         <div>
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</label>
+          <label class="block text-sm font-medium text-sage-700 mb-1.5">Nombre</label>
           <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
                  [(ngModel)]="editTableName" (keydown.enter)="saveTableEdit()" placeholder="Nombre de la mesa" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Sector</label>
+          <label class="block text-sm font-medium text-sage-700 mb-1.5">Sector</label>
           <select class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold cursor-pointer"
                   [(ngModel)]="editTableSectorId">
             <option value="">Sin sector</option>
@@ -530,7 +530,7 @@
         <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
         <span>Cancelar</span>
       </button>
-      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
               [disabled]="!editTableName.trim()" (click)="saveTableEdit()">
         <mat-icon class="!w-4 !h-4 !text-base">save</mat-icon>
         <span>Guardar</span>
@@ -547,13 +547,13 @@
         <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">category</mat-icon>
       </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Editar Sector</h2>
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:text-xl m-0">Editar Sector</div>
         <p class="text-sage-500 text-xs mt-0.5 mb-0">Cambia el nombre del sector</p>
       </div>
     </div>
 
     <mat-dialog-content class="!px-[20px] !py-[8px]">
-      <label class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</label>
+      <label class="block text-sm font-medium text-sage-700 mb-1.5">Nombre</label>
       <input class="w-full px-[16px] py-[10px] border rounded-xl bg-white focus:outline-none focus:ring-2 text-sage-800 font-semibold"
              [ngClass]="editSectorNameTaken ? 'border-cafe-red-500 focus:ring-cafe-red-500/25' : 'border-sage-300 focus:ring-cafe-green-700/25 focus:border-cafe-green-700'"
              [(ngModel)]="editSectorName" (keydown.enter)="saveSectorEdit()" placeholder="Nombre del sector" />
@@ -565,7 +565,7 @@
         <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
         <span>Cancelar</span>
       </button>
-      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
               [disabled]="!editSectorName.trim() || editSectorNameTaken" (click)="saveSectorEdit()">
         <mat-icon class="!w-4 !h-4 !text-base">save</mat-icon>
         <span>Guardar</span>
@@ -582,7 +582,7 @@
         <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">restaurant_menu</mat-icon>
       </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Editar Ítem del Menú</h2>
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:text-xl m-0">Editar Ítem del Menú</div>
         <p class="text-sage-500 text-xs mt-0.5 mb-0">Cambia el nombre, el precio o si es promo</p>
       </div>
     </div>
@@ -590,17 +590,17 @@
     <mat-dialog-content class="!px-[20px] !py-[8px]">
       <div class="space-y-[12px]">
         <div>
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</label>
+          <label class="block text-sm font-medium text-sage-700 mb-1.5">Nombre</label>
           <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
                  [(ngModel)]="editItemName" (keydown.enter)="saveMenuItemEdit()" placeholder="Nombre del ítem" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Precio</label>
+          <label class="block text-sm font-medium text-sage-700 mb-1.5">Precio</label>
           <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
                  type="number" [(ngModel)]="editItemPrice" (keydown.enter)="saveMenuItemEdit()" placeholder="Precio" />
         </div>
         <div *ngIf="categories.length">
-          <label class="block text-xs font-bold text-sage-500 mb-1.5">Categoría</label>
+          <label class="block text-sm font-medium text-sage-700 mb-1.5">Categoría</label>
           <select class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white text-sage-800 font-semibold focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" [(ngModel)]="editItemCategoryId">
             <option value="">Sin categoría</option>
             <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
@@ -610,19 +610,19 @@
         <div class="rounded-xl border border-sage-200 bg-sage-50 p-[12px] space-y-[10px]">
           <p class="m-0 text-xs font-bold text-sage-600">En la carta (opcional)</p>
           <div>
-            <label class="block text-xs font-bold text-sage-500 mb-1">Descripción corta</label>
+            <label class="block text-sm font-medium text-sage-700 mb-1">Descripción corta</label>
             <textarea [(ngModel)]="editItemDescription" maxlength="160" rows="2" placeholder="Ej: Espresso doble con leche texturizada"
               class="w-full px-[12px] py-[8px] border border-sage-300 rounded-xl bg-white text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700"></textarea>
-            <p class="m-0 mt-0.5 text-right text-[10px] text-sage-400">{{ editItemDescription.length }}/160</p>
+            <p class="m-0 mt-0.5 text-right text-xs text-sage-400">{{ editItemDescription.length }}/160</p>
           </div>
           <div>
-            <label class="block text-xs font-bold text-sage-500 mb-1">Etiqueta sobre la foto</label>
+            <label class="block text-sm font-medium text-sage-700 mb-1">Etiqueta sobre la foto</label>
             <input [(ngModel)]="editItemBadge" maxlength="20" placeholder="Ej: Firma Casa, Nuevo, Favorito"
               class="w-full px-[12px] py-[8px] border border-sage-300 rounded-xl bg-white text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
             <div *ngIf="editItemBadge.trim()" class="mt-[8px] flex flex-wrap items-center gap-[8px]">
               <button *ngFor="let c of badgeColors" type="button" (click)="editItemBadgeColor = c.key" [attr.aria-label]="'Color ' + c.label" [attr.aria-pressed]="editItemBadgeColor === c.key"
                 class="h-7 w-7 rounded-full ring-offset-2 transition" [ngClass]="[c.swatch, editItemBadgeColor === c.key ? 'ring-2 ring-sage-700' : '']"></button>
-              <span class="ml-1 rounded-lg px-[10px] py-[3px] text-[11px] font-bold text-white" [ngClass]="badgeSwatch(editItemBadgeColor)">{{ editItemBadge }}</span>
+              <span class="ml-1 rounded-lg px-[10px] py-[3px] text-xs font-bold text-white" [ngClass]="badgeSwatch(editItemBadgeColor)">{{ editItemBadge }}</span>
             </div>
           </div>
           <label class="flex items-start gap-[10px] cursor-pointer select-none">
@@ -641,7 +641,7 @@
           </label>
         </div>
         <div *ngIf="modifierGroups.length">
-          <span class="block text-xs font-bold text-sage-500 mb-1.5">Opciones que se ofrecen al pedirlo</span>
+          <span class="block text-sm font-medium text-sage-700 mb-1.5">Opciones que se ofrecen al pedirlo</span>
           <div class="space-y-1.5">
             <div *ngFor="let g of modifierGroups" class="bg-sage-50 rounded-xl border border-sage-200">
               <label class="flex items-center gap-[10px] px-[12px] py-[8px] cursor-pointer select-none">
@@ -663,9 +663,9 @@
                 </label>
                 <div *ngIf="editOwnGroups.has(g._id)" class="mt-[10px] grid grid-cols-2 gap-[8px]">
                   <label *ngFor="let o of g.options" class="block" [class.hidden]="!o.active">
-                    <span class="block text-xs font-bold text-sage-500 mb-1">{{ o.name }}</span>
+                    <span class="block text-sm font-medium text-sage-700 mb-1">{{ o.name }}</span>
                     <input type="number" min="0" step="any" [(ngModel)]="editOptionPrices[o._id]" [name]="'ownprice' + o._id" placeholder="No se ofrece"
-                      class="w-full px-3 py-2 border border-sage-200 rounded-lg text-sm bg-white text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+                      class="w-full px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
                   </label>
                 </div>
                 <p *ngIf="editOwnGroups.has(g._id) && ownPricesMin !== null" class="m-0 mt-[8px] text-xs text-sage-500">En la carta se ve <strong class="text-sage-800">Desde {{ ownPricesMin | number }}</strong>. El precio de arriba pasa a ser el más bajo al guardar.</p>
@@ -688,7 +688,7 @@
         <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
         <span>Cancelar</span>
       </button>
-      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
               [disabled]="!editItemName.trim()" (click)="saveMenuItemEdit()">
         <mat-icon class="!w-4 !h-4 !text-base">save</mat-icon>
         <span>Guardar</span>
@@ -705,13 +705,13 @@
         <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">person</mat-icon>
       </div>
       <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900 m-0">Editar Mesero</h2>
+        <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:text-xl m-0">Editar Mesero</div>
         <p class="text-sage-500 text-xs mt-0.5 mb-0">Cambia el nombre del mozo</p>
       </div>
     </div>
 
     <mat-dialog-content class="!px-[20px] !py-[8px]">
-      <label class="block text-xs font-bold text-sage-500 mb-1.5">Nombre</label>
+      <label class="block text-sm font-medium text-sage-700 mb-1.5">Nombre</label>
       <input class="w-full px-[16px] py-[10px] border border-sage-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 text-sage-800 font-semibold"
              [(ngModel)]="editWaiterName" (keydown.enter)="saveWaiterEdit()" placeholder="Nombre del mesero" />
     </mat-dialog-content>
@@ -721,7 +721,7 @@
         <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
         <span>Cancelar</span>
       </button>
-      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-bold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      <button class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm bg-cafe-green-700 hover:bg-cafe-green-800 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
               [disabled]="!editWaiterName.trim()" (click)="saveWaiterEdit()">
         <mat-icon class="!w-4 !h-4 !text-base">save</mat-icon>
         <span>Guardar</span>

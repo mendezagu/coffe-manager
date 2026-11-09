@@ -5,7 +5,7 @@
       <mat-icon>{{ data.icon || (danger ? 'warning' : 'help_outline') }}</mat-icon>
     </span>
     <div class="min-w-0">
-      <h2 id="confirm-title" class="m-0 text-lg font-bold leading-snug text-sage-900">{{ data.title }}</h2>
+      <div id="confirm-title" role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 leading-snug">{{ data.title }}</div>
       <p id="confirm-text" class="m-0 mt-2 text-sm leading-relaxed text-sage-600">{{ data.message }}</p>
     </div>
   </div>
