@@ -25,6 +25,8 @@ export class TotalDialogComponent implements OnInit {
   promoTotal: number = 0;
   globalDiscountAmount: number = 0;
   discountPercentage: number = 0;
+  // Porcentajes de descuento general que se ofrecen a la vista
+  readonly discountOptions = [0, 5, 10, 15, 20, 25, 30, 35, 50];
   orders: any[] = [];
   table: any = {};
   tableName: string = ''; // Nueva propiedad para almacenar el nombre de la mesa

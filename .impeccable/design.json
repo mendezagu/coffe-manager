@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T04:08:07.930Z",
+  "title": "Design System: Tavolapp",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Verde botella casi negro",
+        "canonical": "#1b2822"
+      },
+      "table-free": {
+        "role": "secondary",
+        "displayName": "Menta de mesa libre",
+        "canonical": "#5fae86"
+      },
+      "table-busy": {
+        "role": "tertiary",
+        "displayName": "Ladrillo",
+        "canonical": "#8a2a1c"
+      },
+      "page-bg": {
+        "role": "neutral",
+        "displayName": "Salvia de fondo",
+        "canonical": "#edf1ea"
+      }
+    },
+    "shadows": [
+      {
+        "name": "soft",
+        "value": "0 1px 2px rgba(30,43,36,.05), 0 14px 30px -18px rgba(30,43,36,.28)",
+        "purpose": "Tarjetas."
+      },
+      {
+        "name": "soft-lg",
+        "value": "0 1px 2px rgba(30,43,36,.06), 0 30px 60px -30px rgba(30,43,36,.35)",
+        "purpose": "Tarjetas elevadas."
+      },
+      {
+        "name": "dialog",
+        "value": "0 30px 60px -20px rgba(30,43,36,.45)",
+        "purpose": "Diálogos."
+      },
+      {
+        "name": "green",
+        "value": "0 18px 30px -20px rgba(29,91,62,.8)",
+        "purpose": "Botones principales y chips seleccionados."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "max-content",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [],
+  "narrative": {
+    "northStar": "La mise en place",
+    "overview": "Todo en su lugar y listo para usar con apuro: superficies calmas, una sola acción principal en verde botella casi negro y color solo para estados.",
+    "keyCharacteristics": [
+      "Superficies blancas sobre salvia con sombras difusas",
+      "Un único color de acción",
+      "Estados siempre con texto o ícono además del color",
+      "Radios generosos"
+    ],
+    "rules": [
+      {
+        "name": "La regla de la voz única",
+        "body": "El verde botella es la única acción primaria de una pantalla; el color de estado aparece solo para estados.",
+        "section": "colors"
+      },
+      {
+        "name": "La regla del estado doble",
+        "body": "Todo estado lleva texto o ícono además del color.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Usar los tokens sage, cafe-green, cafe-mint, cafe-red y cafe-amber",
+      "Marcar siempre el estado con texto o ícono",
+      "Áreas de toque de al menos 40px"
+    ],
+    "donts": [
+      "Degradados decorativos",
+      "Rojos, azules o morados sueltos de Tailwind",
+      "Rojo sólido para acciones destructivas"
+    ]
+  }
+}

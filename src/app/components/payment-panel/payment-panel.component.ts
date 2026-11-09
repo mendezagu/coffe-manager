@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 
 export const PAYMENT_METHODS = [
-  { value: 'efectivo', label: '💵 Efectivo', short: 'Efectivo', icon: 'payments' },
-  { value: 'transferencia', label: '🏦 Transferencia', short: 'Transf.', icon: 'account_balance' },
-  { value: 'qr', label: '📱 Código QR', short: 'QR', icon: 'qr_code_scanner' },
-  { value: 'tarjeta', label: '💳 Tarjeta', short: 'Tarjeta', icon: 'credit_card' },
+  { value: 'efectivo', label: 'Efectivo', short: 'Efectivo', icon: 'payments' },
+  { value: 'transferencia', label: 'Transferencia', short: 'Transf.', icon: 'account_balance' },
+  { value: 'qr', label: 'Código QR', short: 'QR', icon: 'qr_code_scanner' },
+  { value: 'tarjeta', label: 'Tarjeta', short: 'Tarjeta', icon: 'credit_card' },
 ];
 
 // Una fila = una persona o un método (según cómo se arme el pago)

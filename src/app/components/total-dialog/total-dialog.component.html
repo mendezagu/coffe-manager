@@ -1,255 +1,181 @@
-<div class="relative flex h-full w-full flex-col bg-white sm:h-auto sm:rounded-dialog sm:shadow-dialog overflow-hidden">
+<div class="relative flex h-full w-full flex-col overflow-hidden bg-white sm:h-auto sm:rounded-dialog sm:shadow-dialog">
 
-  <!-- Header -->
-  <div class="relative flex-shrink-0 bg-white px-5 pt-5 pb-3 pr-14 sm:px-6 sm:pt-6">
+  <!-- Título -->
+  <div class="relative flex-shrink-0 bg-white px-5 pb-2 pr-14 pt-5 sm:px-6 sm:pt-6">
     <!-- X de cierre en la esquina -->
     <button type="button" mat-dialog-close aria-label="Cerrar" title="Cerrar"
-      class="absolute right-1.5 top-1.5 z-10 grid h-10 w-10 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 sm:right-3 sm:top-3">
+      class="absolute right-1.5 top-1.5 z-10 grid h-10 w-10 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 sm:right-3 sm:top-3">
       <mat-icon>close</mat-icon>
     </button>
-    <div class="flex items-center gap-2.5">
-      <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-cafe-green-50">
-        <mat-icon class="!w-6 !h-6 !text-2xl text-cafe-green-700">receipt_long</mat-icon>
-      </div>
-      <div>
-        <h2 class="text-lg sm:text-xl font-bold text-sage-900">Detalle de la Orden</h2>
-        <p class="text-sage-500 text-xs mt-0.5">Resumen de consumo y pago</p>
-      </div>
-    </div>
+    <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900">Detalle de la orden</div>
+    <p class="m-0 mt-[2px] text-sm text-sage-500">Consumo, descuentos y pago.</p>
   </div>
 
   <div class="flex-shrink-0 px-3 sm:px-4">
     <app-guide-hint [step]="5" title="Cobrá" text="Elegí cómo paga el cliente y confirmá el cobro: con eso hacés tu primera venta. Si te avisa que falta abrir la caja, abrila desde el menú Caja."></app-guide-hint>
   </div>
 
-  <mat-dialog-content class="relative min-h-0 flex-1 !max-h-none overflow-y-auto p-3 sm:flex-none sm:!max-h-[55vh] sm:p-4">
-    <!-- Lista de items -->
-    <div class="mb-3">
-      <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-base text-sage-600">shopping_cart</mat-icon>
-        Productos Ordenados
-      </h3>
+  <mat-dialog-content class="thin-scroll relative min-h-0 flex-1 !max-h-none overflow-y-auto px-5 py-3 sm:flex-none sm:!max-h-[58vh] sm:px-6">
+    <!-- Productos -->
+    <div class="mb-[20px]">
+      <div role="heading" aria-level="3" class="mb-[8px] text-sm font-semibold text-sage-700">Productos ordenados</div>
 
       <!-- Cobrar solo una parte: elegir qué platos paga esta persona -->
-      <label class="flex items-center gap-2 mb-2 text-sm font-medium text-sage-800 cursor-pointer select-none">
-        <input type="checkbox" [ngModel]="partial" (ngModelChange)="setPartial($event)" class="w-4 h-4 accent-cafe-green-700" />
+      <label class="mb-[8px] flex cursor-pointer select-none items-center gap-[8px] text-sm font-medium text-sage-800">
+        <input type="checkbox" [ngModel]="partial" (ngModelChange)="setPartial($event)" class="h-4 w-4 accent-cafe-green-700" />
         Cobrar solo una parte de la cuenta
       </label>
 
-      <div *ngIf="partial" class="mb-3 p-3 bg-cafe-green-50 border border-cafe-green-200 rounded-lg text-xs text-cafe-green-900">
+      <div *ngIf="partial" class="mb-[12px] text-sm text-sage-700">
         Elegí los platos que paga <strong>esta persona</strong>. Lo demás <strong>queda en la mesa</strong> para cobrarlo después.
-        <div class="mt-2 flex gap-2">
-          <button type="button" (click)="selectAll()" class="px-2.5 py-1 rounded-lg border border-cafe-green-200 bg-white font-medium text-cafe-green-800 hover:bg-cafe-green-50">Agregar todo</button>
-          <button type="button" (click)="selectNone()" [disabled]="chargeLines.length === 0" class="px-2.5 py-1 rounded-lg border border-sage-200 bg-white font-medium text-sage-700 hover:bg-sage-100 disabled:opacity-40">Quitar todo</button>
+        <div class="mt-[8px] flex gap-[8px]">
+          <button type="button" (click)="selectAll()" class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Agregar todo</button>
+          <button type="button" (click)="selectNone()" [disabled]="chargeLines.length === 0" class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar todo</button>
         </div>
       </div>
 
       <!-- Lo que todavía no está en esta parte -->
-      <div *ngIf="partial && remainingLines.length" class="mb-3 p-2.5 bg-white border border-sage-200 rounded-lg">
-        <div class="flex items-center justify-between mb-1.5">
-          <h4 class="text-xs font-bold text-sage-700 m-0">Queda en la mesa</h4>
-          <span class="text-xs text-sage-500">{{ remainingTotal | money }}</span>
+      <div *ngIf="partial && remainingLines.length" class="mb-[12px]">
+        <div class="flex items-baseline justify-between">
+          <div role="heading" aria-level="4" class="text-sm font-semibold text-sage-700">Queda en la mesa</div>
+          <span class="text-sm tabular-nums text-sage-500">{{ remainingTotal | money }}</span>
         </div>
-        <ul class="m-0 p-0 list-none divide-y divide-sage-100">
-          <li *ngFor="let o of remainingLines" class="py-1.5 flex items-center gap-2 text-sm">
-            <span class="flex-1 min-w-0 text-sage-800">
-              <strong>{{ o.maxQuantity - o.quantity }}×</strong> {{ o.name }}
+        <ul class="m-0 list-none divide-y divide-sage-100 p-0">
+          <li *ngFor="let o of remainingLines" class="flex items-center gap-[8px] py-[8px] text-sm">
+            <span class="min-w-0 flex-1 text-sage-800">
+              <strong class="tabular-nums">{{ o.maxQuantity - o.quantity }}×</strong> {{ o.name }}
               <span *ngIf="o.modifiers?.length" class="text-xs text-cafe-green-700"> · {{ modifiersText(o.modifiers) }}</span>
             </span>
-            <button type="button" (click)="addToPart(o)" class="px-2.5 py-1.5 text-xs font-bold rounded-lg bg-cafe-green-700 hover:bg-cafe-green-800 text-white">+ Agregar</button>
+            <button type="button" (click)="addToPart(o)" class="rounded-lg bg-cafe-green-700 px-[12px] py-[8px] text-sm font-semibold text-white hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">+ Agregar</button>
             <button *ngIf="o.maxQuantity - o.quantity > 1" type="button" (click)="addToPart(o, o.maxQuantity - o.quantity)"
-              class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-sage-200 bg-white text-sage-700 hover:bg-sage-100">Todos</button>
+              class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Todos</button>
           </li>
         </ul>
       </div>
-      <p *ngIf="partial && remainingLines.length === 0 && chargeLines.length > 0" class="mb-3 text-xs font-medium text-cafe-green-700">
+      <p *ngIf="partial && remainingLines.length === 0 && chargeLines.length > 0" class="mb-[12px] text-sm font-medium text-cafe-green-700">
         ✓ Esta parte incluye todo lo que queda: al cobrar se libera la mesa.
       </p>
 
-      <h4 *ngIf="partial" class="text-xs font-bold text-sage-700 mb-1.5">Esta parte</h4>
-      <p *ngIf="partial && chargeLines.length === 0" class="mb-2 p-3 bg-sage-50 border border-dashed border-sage-300 rounded-lg text-xs text-sage-600">
+      <div *ngIf="partial" role="heading" aria-level="4" class="mb-[4px] text-sm font-semibold text-sage-700">Esta parte</div>
+      <p *ngIf="partial && chargeLines.length === 0" class="mb-[8px] mt-0 text-sm text-sage-600">
         Todavía no elegiste ningún plato. Tocá <strong>+ Agregar</strong> en la lista de arriba.
       </p>
 
-      <!-- Items -->
-      <div class="space-y-2">
+      <!-- Productos: filas separadas por una línea fina, sin cajas -->
+      <ul class="m-0 list-none divide-y divide-sage-100 p-0">
         <ng-container *ngFor="let order of orders">
-        <div *ngIf="!partial || order.quantity > 0"
-             class="p-2.5 bg-white rounded-lg hover:shadow-md transition-all duration-200 border border-sage-100 hover:border-sage-200">
-          <div class="flex items-center justify-between gap-2 mb-1.5">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <div class="flex items-center justify-center w-6 h-6 rounded bg-sage-100 flex-shrink-0">
-                <span class="text-sage-700 font-bold text-xs">{{ order.quantity || 1 }}x</span>
-              </div>
-              <span class="text-sage-800 font-semibold text-xs truncate">{{ order.name }}</span>
-              <span *ngIf="order.isPromo" class="px-1.5 py-0.5 rounded-full bg-cafe-red-700 text-white text-[10px] font-bold flex-shrink-0">Promo</span>
+        <li *ngIf="!partial || order.quantity > 0" class="py-[12px]">
+          <div class="flex items-baseline justify-between gap-[12px]">
+            <div class="flex min-w-0 items-baseline gap-[8px]">
+              <span class="flex-none text-sm font-bold tabular-nums text-sage-500">{{ order.quantity || 1 }}×</span>
+              <span class="truncate font-semibold text-sage-900">{{ order.name }}</span>
+              <span *ngIf="order.isPromo" class="flex-none rounded-md bg-cafe-red-700 px-[6px] py-[1px] text-xs font-semibold text-white">Promo</span>
             </div>
-            <span class="text-cafe-green-700 font-bold text-sm flex-shrink-0">
+            <span class="flex-none font-bold tabular-nums text-sage-900">
               {{ (order.modifiers?.length ? (order.basePrice ?? order.price) * (order.quantity || 1) : order.price * (order.quantity || 1) * (1 - (order.discount || 0)/100)) | money }}
             </span>
           </div>
           <!-- Cantidad que entra en esta parte -->
-          <div *ngIf="partial" class="flex flex-wrap items-center gap-2 pl-1 mb-1.5 text-xs text-sage-600">
+          <div *ngIf="partial" class="mt-[6px] flex flex-wrap items-center gap-[8px] text-sm text-sage-600">
             <button type="button" (click)="stepQuantity(order, -1)" aria-label="Una menos"
-              class="w-9 h-9 rounded-lg border border-sage-200 bg-white text-lg font-bold text-sage-700 hover:bg-sage-100">−</button>
-            <strong class="text-sage-900 min-w-[1.5rem] text-center text-sm">{{ order.quantity }}</strong>
+              class="h-10 w-10 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">−</button>
+            <strong class="min-w-[1.5rem] text-center text-base tabular-nums text-sage-900">{{ order.quantity }}</strong>
             <button type="button" (click)="stepQuantity(order, 1)" [disabled]="order.quantity >= order.maxQuantity" aria-label="Una más"
-              class="w-9 h-9 rounded-lg border border-sage-200 bg-white text-lg font-bold text-sage-700 hover:bg-sage-100 disabled:opacity-40">+</button>
+              class="h-10 w-10 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">+</button>
             <span *ngIf="order.maxQuantity > 1">de {{ order.maxQuantity }} en la mesa</span>
-            <button type="button" (click)="stepQuantity(order, -order.quantity)" class="ml-auto px-2 py-1 rounded-lg text-cafe-red-700 font-medium hover:bg-cafe-red-50">Quitar</button>
+            <button type="button" (click)="stepQuantity(order, -order.quantity)" class="ml-auto rounded-lg px-[8px] py-[6px] font-medium text-cafe-red-700 hover:bg-cafe-red-50">Quitar</button>
           </div>
-          <div *ngIf="order.modifiers?.length" class="pl-1 mb-1">
-            <p *ngFor="let m of order.modifiers" class="flex items-center justify-between gap-2 text-xs text-cafe-green-700 font-medium m-0">
-              <span class="truncate">+ {{ m.name }}<span *ngIf="(order.quantity || 1) > 1 && m.priceDelta" class="text-sage-500 font-normal"> ×{{ order.quantity }}</span></span>
-              <span *ngIf="m.priceDelta" class="flex-shrink-0">{{ m.priceDelta > 0 ? '+' : '-' }}{{ (m.priceDelta < 0 ? -m.priceDelta : m.priceDelta) * (order.quantity || 1) | money }}</span>
+          <div *ngIf="order.modifiers?.length" class="mt-[4px]">
+            <p *ngFor="let m of order.modifiers" class="m-0 flex items-center justify-between gap-[8px] text-sm font-medium text-cafe-green-700">
+              <span class="truncate">+ {{ m.name }}<span *ngIf="(order.quantity || 1) > 1 && m.priceDelta" class="font-normal text-sage-500"> ×{{ order.quantity }}</span></span>
+              <span *ngIf="m.priceDelta" class="flex-shrink-0 tabular-nums">{{ m.priceDelta > 0 ? '+' : '-' }}{{ (m.priceDelta < 0 ? -m.priceDelta : m.priceDelta) * (order.quantity || 1) | money }}</span>
             </p>
-            <p *ngIf="!order.isPromo && order.discount > 0" class="flex items-center justify-between gap-2 text-xs text-cafe-red-700 font-medium m-0">
+            <p *ngIf="!order.isPromo && order.discount > 0" class="m-0 flex items-center justify-between gap-[8px] text-sm font-medium text-cafe-red-700">
               <span>Descuento {{ order.discount }}%</span>
-              <span class="flex-shrink-0">-{{ order.price * (order.quantity || 1) * order.discount / 100 | money }}</span>
+              <span class="flex-shrink-0 tabular-nums">-{{ order.price * (order.quantity || 1) * order.discount / 100 | money }}</span>
             </p>
           </div>
-          <p *ngIf="order.note" class="text-xs text-sage-600 italic pl-1 mb-1">↳ {{ order.note }}</p>
-          <div class="flex items-center justify-between gap-2 pl-1">
-            <span class="text-sage-500 text-xs">Precio unit.: <strong class="text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</strong></span>
-            <div *ngIf="!order.isPromo && manualDiscountAllowed" class="flex items-center gap-1.5">
-              <span class="text-sage-500 text-xs">% desc.</span>
-              <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-14 text-xs p-1 border border-sage-200 rounded text-center focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
-            </div>
-            <span *ngIf="order.isPromo" class="text-cafe-red-700 text-xs font-medium">Promo: sin descuento</span>
+          <p *ngIf="order.note" class="m-0 mt-[4px] text-sm italic text-sage-600">↳ {{ order.note }}</p>
+          <div class="mt-[4px] flex items-center justify-between gap-[8px]">
+            <span class="text-sm text-sage-500">Precio unitario <span class="font-medium tabular-nums text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</span></span>
+            <label *ngIf="!order.isPromo && manualDiscountAllowed" class="flex items-center gap-[6px] text-sm text-sage-500">
+              % desc.
+              <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-16 rounded-lg border border-sage-300 px-[6px] py-[6px] text-center text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+            </label>
+            <span *ngIf="order.isPromo" class="text-sm font-medium text-cafe-red-700">Promo: sin descuento</span>
           </div>
-        </div>
+        </li>
         </ng-container>
-      </div>
+      </ul>
     </div>
 
-    <!-- Total original -->
-    <div class="mb-3 p-3 bg-sage-50 rounded-lg border border-sage-200">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-1.5">
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-sage-700">
-            <mat-icon class="!w-5 !h-5 !text-xl text-white">calculate</mat-icon>
-          </div>
-          <span class="text-sage-900 font-bold text-sm">{{ partial ? 'Total de esta parte:' : 'Total:' }}</span>
-        </div>
-        <span class="text-xl font-bold text-sage-900">{{ total | money }}</span>
-      </div>
+    <!-- Total -->
+    <div class="mb-[20px] flex items-baseline justify-between border-t border-sage-200 pt-[14px]">
+      <span class="text-sm font-semibold text-sage-700">{{ partial ? 'Total de esta parte' : 'Total' }}</span>
+      <span class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ total | money }}</span>
     </div>
 
     <!-- Voucher de hotel: lo puede usar cualquier cajero; fija el descuento y no se suma a otros -->
-    <div *ngIf="(settings.settings$ | async)?.features?.includes('hotels')" class="mb-3" data-testid="voucher-panel">
-      <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-base text-sage-600">hotel</mat-icon>
-        Voucher de hotel
-      </h3>
+    <div *ngIf="(settings.settings$ | async)?.features?.includes('hotels')" class="mb-[20px]" data-testid="voucher-panel">
+      <div role="heading" aria-level="3" class="mb-[8px] text-sm font-semibold text-sage-700">Voucher de hotel</div>
 
-      <div *ngIf="!voucher" class="flex items-stretch gap-2">
+      <div *ngIf="!voucher" class="flex items-stretch gap-[8px]">
         <input type="text" [(ngModel)]="voucherInput" (keydown.enter)="applyVoucher()" maxlength="20" autocomplete="off" autocapitalize="characters"
           placeholder="Código del voucher" aria-label="Código del voucher de hotel"
-          class="flex-1 min-w-0 px-3 py-2 text-sm uppercase tracking-widest border border-sage-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+          class="min-w-0 flex-1 rounded-xl border border-sage-300 px-[12px] py-[10px] text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
         <button type="button" (click)="applyVoucher()" [disabled]="!voucherInput.trim() || voucherChecking"
-          class="px-4 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold text-xs rounded-lg border border-sage-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="rounded-xl border border-sage-300 bg-white px-[16px] py-[10px] text-sm font-semibold text-sage-800 hover:bg-sage-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
           {{ voucherChecking ? 'Revisando…' : 'Aplicar' }}
         </button>
       </div>
-      <p *ngIf="voucherError" role="alert" class="mt-2 mb-0 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-xs font-medium">{{ voucherError }}</p>
+      <p *ngIf="voucherError" role="alert" class="m-0 mt-[8px] text-sm font-medium text-cafe-red-700">{{ voucherError }}</p>
 
-      <div *ngIf="voucher" class="flex items-center justify-between gap-2 p-3 rounded-lg border border-cafe-green-200 bg-cafe-green-50">
+      <div *ngIf="voucher" class="flex items-center justify-between gap-[8px] rounded-xl bg-cafe-green-50 p-[12px]">
         <div class="min-w-0">
-          <p class="m-0 text-sm font-bold text-cafe-green-900 truncate">{{ voucher.hotelName }} · {{ voucher.discountPct }}% de descuento</p>
-          <p class="m-0 text-xs text-cafe-green-800 truncate">Huésped: {{ voucher.guestName }}<ng-container *ngIf="voucher.documentHint"> (documento terminado en {{ voucher.documentHint }})</ng-container> · código {{ voucher.code }}</p>
-          <p class="m-0 text-xs text-cafe-green-800">Un voucher por mesa. No se suma a otros descuentos ni toca los ítems en promo.</p>
+          <p class="m-0 truncate text-sm font-semibold text-cafe-green-900">{{ voucher.hotelName }} · {{ voucher.discountPct }}% de descuento</p>
+          <p class="m-0 truncate text-sm text-cafe-green-800">Huésped: {{ voucher.guestName }}<ng-container *ngIf="voucher.documentHint"> (documento terminado en {{ voucher.documentHint }})</ng-container> · código {{ voucher.code }}</p>
+          <p class="m-0 text-sm text-cafe-green-800">Un voucher por mesa. No se suma a otros descuentos ni toca los ítems en promo.</p>
         </div>
-        <button type="button" (click)="removeVoucher()" class="flex-shrink-0 px-3 py-1.5 bg-white text-sage-700 font-bold text-xs rounded-lg border border-sage-200">Quitar</button>
+        <button type="button" (click)="removeVoucher()" class="flex-shrink-0 rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar</button>
       </div>
     </div>
 
-    <!-- Panel de descuento (administrador, o cajero si el negocio lo habilitó) -->
-    <div class="mb-3" *ngIf="manualDiscountAllowed">
-      <h3 class="text-sm font-bold text-sage-900 mb-2 flex items-center gap-1.5">
-        <mat-icon class="!w-4 !h-4 !text-base text-sage-600">local_offer</mat-icon>
-        Aplicar Descuento
-      </h3>
-      <p class="text-xs text-sage-500 mb-2">El descuento general no se aplica a los ítems en promo.</p>
-      <mat-accordion>
-        <mat-expansion-panel class="!rounded-lg overflow-hidden">
-          <mat-expansion-panel-header class="!bg-sage-50 !border !border-sage-100">
-            <mat-panel-title class="!font-bold !text-sage-700 flex items-center gap-1.5 !text-xs">
-              <mat-icon class="!w-3 !h-3 !text-xs">sell</mat-icon>
-              Escoge un descuento
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 p-2 bg-sage-50">
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(0)">
-              <mat-icon class="!w-4 !h-4 !text-base">block</mat-icon>
-              <span class="text-xs mt-0.5 block">0%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(5)">
-              <mat-icon class="!w-4 !h-4 !text-base">redeem</mat-icon>
-              <span class="text-xs mt-0.5 block">5%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(10)">
-              <mat-icon class="!w-4 !h-4 !text-base">loyalty</mat-icon>
-              <span class="text-xs mt-0.5 block">10%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(15)">
-              <mat-icon class="!w-4 !h-4 !text-base">card_giftcard</mat-icon>
-              <span class="text-xs mt-0.5 block">15%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(20)">
-              <mat-icon class="!w-4 !h-4 !text-base">stars</mat-icon>
-              <span class="text-xs mt-0.5 block">20%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(25)">
-              <mat-icon class="!w-4 !h-4 !text-base">celebration</mat-icon>
-              <span class="text-xs mt-0.5 block">25%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(30)">
-              <mat-icon class="!w-4 !h-4 !text-base">workspace_premium</mat-icon>
-              <span class="text-xs mt-0.5 block">30%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(35)">
-              <mat-icon class="!w-4 !h-4 !text-base">emoji_events</mat-icon>
-              <span class="text-xs mt-0.5 block">35%</span>
-            </button>
-            <button class="px-2 py-2 bg-white hover:bg-sage-100 text-sage-700 font-bold rounded-lg transition-all duration-200 border border-sage-200 hover:border-sage-300" (click)="applyDiscount(50)">
-              <mat-icon class="!w-4 !h-4 !text-base">military_tech</mat-icon>
-              <span class="text-xs mt-0.5 block">50%</span>
-            </button>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
+    <!-- Descuento general (administrador, o cajero si el negocio lo habilitó): porcentajes a la vista, sin desplegable -->
+    <div class="mb-[20px]" *ngIf="manualDiscountAllowed">
+      <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700">Descuento general</div>
+      <p class="m-0 mb-[8px] mt-[2px] text-sm text-sage-500">No se aplica a los ítems en promo.</p>
+      <div class="flex flex-wrap gap-[8px]" role="group" aria-label="Porcentaje de descuento">
+        <button *ngFor="let p of discountOptions" type="button" (click)="applyDiscount(p)" [attr.aria-pressed]="discountPercentage === p && !voucher"
+          class="min-w-[56px] rounded-full border px-[14px] py-[8px] text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          [ngClass]="discountPercentage === p && !voucher ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">{{ p }}%</button>
+      </div>
     </div>
 
     <!-- Total con descuento -->
-    <div class="mb-3 p-3 bg-cafe-green-50 rounded-lg border border-cafe-green-200">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-1.5">
-          <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-cafe-green-700">
-            <mat-icon class="!w-5 !h-5 !text-xl text-white">payments</mat-icon>
-          </div>
-          <span class="text-cafe-green-900 font-bold text-sm">Total con Descuento:</span>
-        </div>
-        <span class="text-xl font-bold text-cafe-green-700">{{ discountedTotal | money }}</span>
+    <div class="mb-[20px] border-t border-sage-200 pt-[14px]">
+      <div class="flex items-baseline justify-between">
+        <span class="text-sm font-semibold text-sage-700">Total con descuento</span>
+        <span class="font-jakarta text-[30px] font-extrabold leading-none tabular-nums text-sage-900">{{ discountedTotal | money }}</span>
       </div>
       <!-- Detalle del descuento general: aclara sobre qué parte se aplicó -->
-      <div *ngIf="discountPercentage > 0" class="mt-2 pt-2 border-t border-cafe-green-200 text-xs text-cafe-green-900 space-y-0.5">
-        <div class="flex justify-between gap-2">
+      <div *ngIf="discountPercentage > 0" class="mt-[10px] space-y-[2px] text-sm text-sage-600">
+        <div class="flex justify-between gap-[8px]">
           <span>{{ hasPromoItems ? 'Productos sin promo' : 'Subtotal' }}</span>
-          <span>{{ discountableTotal | money }}</span>
+          <span class="tabular-nums">{{ discountableTotal | money }}</span>
         </div>
-        <div class="flex justify-between gap-2 font-bold">
+        <div class="flex justify-between gap-[8px] font-semibold text-sage-800">
           <span>{{ voucher ? 'Voucher ' + voucher.hotelName : 'Descuento' }} {{ discountPercentage }}%{{ hasPromoItems ? ' (solo sin promo)' : '' }}</span>
-          <span>-{{ globalDiscountAmount | money }}</span>
+          <span class="tabular-nums">-{{ globalDiscountAmount | money }}</span>
         </div>
-        <div *ngIf="hasPromoItems" class="flex justify-between gap-2">
+        <div *ngIf="hasPromoItems" class="flex justify-between gap-[8px]">
           <span>Productos en promo (sin descuento)</span>
-          <span>{{ promoTotal | money }}</span>
+          <span class="tabular-nums">{{ promoTotal | money }}</span>
         </div>
       </div>
     </div>
 
     <!-- Caja cerrada: no se puede cobrar -->
-    <div *ngIf="cashBlocked" role="alert" class="mb-3 p-3 rounded-lg border border-cafe-red-200 bg-cafe-red-50 text-sm text-cafe-red-700">
+    <div *ngIf="cashBlocked" role="alert" class="mb-[16px] rounded-xl bg-cafe-red-50 p-[12px] text-sm text-cafe-red-700">
       <strong>No hay caja abierta.</strong> Abrí la caja para poder cobrar.
       <a routerLink="/cash" mat-dialog-close class="ml-1 font-bold underline">Ir a Caja</a>
     </div>
@@ -263,17 +189,15 @@
     </app-payment-panel>
   </mat-dialog-content>
 
-  <mat-dialog-actions class="relative flex flex-shrink-0 flex-wrap gap-2 p-3 sm:p-4 bg-white border-t border-sage-200">
-    <button class="!hidden sm:!flex flex-1 min-w-[85px] !px-4 !py-2.5 !bg-white !text-sage-700 !border !border-sage-200 !font-bold !text-xs !rounded-lg !transition-all !duration-200 flex items-center justify-center gap-1.5" mat-dialog-close>
-      <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
+  <mat-dialog-actions class="relative flex flex-shrink-0 flex-wrap gap-[8px] border-t border-sage-100 bg-white px-5 py-4 sm:px-6">
+    <button type="button" mat-dialog-close class="hidden min-w-[85px] flex-1 items-center justify-center rounded-xl border border-sage-300 bg-white px-[16px] py-[12px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 sm:flex">
       Cerrar
     </button>
-    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5" (click)="printTicket()" [disabled]="!payment?.printable" [attr.title]="payment?.printable ? null : 'Revisá el pago: no cubre el total'">
-      <mat-icon class="!w-4 !h-4 !text-base">print</mat-icon>
+    <button type="button" class="flex min-w-[85px] flex-1 items-center justify-center gap-[6px] rounded-xl border border-sage-300 bg-white px-[16px] py-[12px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700" (click)="printTicket()" [disabled]="!payment?.printable" [attr.title]="payment?.printable ? null : 'Revisá el pago: no cubre el total'">
+      <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">print</mat-icon>
       Imprimir
     </button>
-    <button class="flex-1 min-w-[85px] px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5" [disabled]="!isTicketPrinted || isProcessing || !canCharge" (click)="liberarMesa()">
-      <mat-icon class="!w-4 !h-4 !text-base">check_circle</mat-icon>
+    <button type="button" class="flex min-w-[85px] flex-1 items-center justify-center gap-[6px] rounded-xl bg-cafe-green-700 px-[16px] py-[12px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2" [disabled]="!isTicketPrinted || isProcessing || !canCharge" (click)="liberarMesa()">
       <span *ngIf="!isProcessing">{{ chargeLabel }}</span>
       <span *ngIf="isProcessing">
         <mat-spinner diameter="18" color="accent" style="display:inline-block;vertical-align:middle;margin-right:6px;"></mat-spinner>

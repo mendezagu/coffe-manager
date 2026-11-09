@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Category, GestionService } from 'src/app/services/gestionService';
@@ -37,7 +37,7 @@ const iconFor = (name: string) => ICONS.find(([re]) => re.test(name))?.[1] ?? 'r
   selector: 'app-counter',
   templateUrl: './counter.component.html',
 })
-export class CounterComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CounterComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
   categories: Category[] = [];
   loading = true;
@@ -53,16 +53,6 @@ export class CounterComponent implements OnInit, AfterViewInit, OnDestroy {
   editFavs = false;
 
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
-
-  // Barra fija de búsqueda y categorías: el ticket arranca debajo de ella y, al desplazarse, queda pegado justo abajo
-  @ViewChild('searchBar') set searchBarRef(ref: ElementRef<HTMLElement> | undefined) {
-    this.bar = ref?.nativeElement;
-    this.watchBar();
-  }
-  private bar?: HTMLElement;
-  private barObserver?: ResizeObserver;
-  ticketTop: number | null = null;
-  ticketMaxHeight: string | null = null;
 
   // lo que lleva el cliente: id del producto -> cantidad
   cart = new Map<string, number>();
@@ -83,7 +73,6 @@ export class CounterComponent implements OnInit, AfterViewInit, OnDestroy {
     private tickets: TicketService,
     private users: UserService,
     private snack: MatSnackBar,
-    private zone: NgZone,
   ) {}
 
   ngOnInit() {
@@ -92,32 +81,8 @@ export class CounterComponent implements OnInit, AfterViewInit, OnDestroy {
     this.load();
   }
 
-  ngAfterViewInit() {
-    Promise.resolve().then(() => this.updateTicketTop());
-  }
-
   ngOnDestroy() {
     this.subs.unsubscribe();
-    this.barObserver?.disconnect();
-  }
-
-  private watchBar() {
-    this.barObserver?.disconnect();
-    if (!this.bar || typeof ResizeObserver === 'undefined') return;
-    this.barObserver = new ResizeObserver(() => this.zone.run(() => this.updateTicketTop()));
-    this.barObserver.observe(this.bar);
-  }
-
-  // Solo en pantallas grandes (el ticket está al costado): debajo del encabezado de la app (64 px) y de la barra, con un poco de aire
-  @HostListener('window:resize')
-  updateTicketTop() {
-    if (window.innerWidth < 1024 || !this.bar) {
-      this.ticketTop = null;
-      this.ticketMaxHeight = null;
-      return;
-    }
-    this.ticketTop = Math.round(64 + this.bar.offsetHeight + 12);
-    this.ticketMaxHeight = `calc(100vh - ${this.ticketTop + 16}px)`;
   }
 
   private load() {
@@ -354,6 +319,16 @@ export class CounterComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!s) return null;
     if (s.open) return { text: 'Caja abierta', tone: 'ok' };
     return s.requireOpenRegister ? { text: 'Caja cerrada', tone: 'bad' } : { text: 'Caja sin abrir', tone: 'idle' };
+  }
+
+  // Texto del botón de cobrar: incluye cómo se cobra, para que quien cobra lo confirme de un vistazo
+  get chargeLabel(): string {
+    if (this.busy) return 'Cobrando…';
+    if (!this.lines.length) return 'Cobrar';
+    const labels: Record<string, string> = { efectivo: 'Efectivo', transferencia: 'Transferencia', qr: 'QR', tarjeta: 'Tarjeta' };
+    const paid = this.payment?.payments ?? [];
+    const method = paid.length === 1 ? (labels[paid[0].method] ?? paid[0].method) : paid.length > 1 ? paid.length + ' métodos' : '';
+    return 'Cobrar ' + this.shortPrice(this.payment ? this.payment.due : this.total) + (method ? ' · ' + method : '');
   }
 
   get canCharge(): boolean {

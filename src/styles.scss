@@ -496,3 +496,14 @@ html.dark * {
   font-weight: 700;
   color: inherit;
 }
+
+/* Piezas del navegador con los colores de la marca: texto seleccionado y barras de desplazamiento finas */
+::selection {
+  background: #aff1ce;
+  color: #07241a;
+}
+
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cfd8cb transparent;
+}
