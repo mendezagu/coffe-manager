@@ -114,24 +114,29 @@
 </ng-template>
 
 <!-- Logo de Tavolapp al pie de la pantalla -->
+<!-- Pie de la carta: invitación discreta a otros comercios (colores fijos: se ve igual en claro, en oscuro y sobre cualquier fondo) -->
 <ng-template #poweredBy>
-  <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] no-underline rounded-full bg-[#f6f3ee] px-[12px] py-[6px] shadow-sm ring-1 ring-black/10 hover:ring-black/20">
-    <span class="text-[10px] font-medium uppercase tracking-[0.08em] text-[#5b625e]">Powered by</span>
-    <span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 16px; line-height: 1; letter-spacing: -0.035em; color: #1b2822">
+  <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Quiero una tienda así para mi negocio (abre la página de Tavolapp)"
+    class="group inline-flex max-w-full items-center gap-[10px] rounded-full bg-[#07241a]/95 py-[7px] pl-[14px] pr-[10px] no-underline ring-1 ring-white/10 transition-colors hover:bg-[#07241a] active:scale-[0.98]">
+    <span class="inline-flex flex-none items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 14px; line-height: 1; letter-spacing: -0.035em; color: #ffffff">
       <span>Tav</span>
       <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
-        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
-        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#5fae86" />
-        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#22322a" stroke="#5fae86" stroke-opacity=".35" />
-        <g fill="none" stroke="#5fae86" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#07241a" stroke="#aff1ce" />
+        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#aff1ce" />
+        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#07241a" stroke="#aff1ce" stroke-opacity=".35" />
+        <g fill="none" stroke="#aff1ce" stroke-linecap="round" stroke-linejoin="round">
           <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
           <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
           <path d="M39 50 V69" stroke-width="3.6" />
         </g>
-        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
-        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
+        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#ff8f78" />
+        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#ff8f78" />
       </svg>
       <span>lapp</span>
+    </span>
+    <span class="min-w-0 text-[12px] font-medium leading-tight text-[#b9cfc2]">Quiero una tienda así para mi negocio</span>
+    <span class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full bg-[#aff1ce] text-[#07241a] transition-transform group-hover:translate-x-[2px]">
+      <mat-icon class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">arrow_forward</mat-icon>
     </span>
   </a>
 </ng-template>
@@ -179,7 +184,7 @@
 
 <div class="min-h-screen bg-surface-high text-ink font-inter flex justify-center selection:bg-forest selection:text-white" [class.qr-dark]="dark" [attr.style]="brandStyle">
   <div class="w-full max-w-md bg-surface min-h-screen flex flex-col shadow-2xl relative border-x-[1px] border-surface-highest/60"
-    [ngClass]="viewOnly ? 'pb-[32px]' : 'pb-[170px]'" [ngStyle]="pageStyle">
+    [ngClass]="viewOnly ? 'pb-[32px]' : (cartUnits > 0 && !cartOpen ? 'pb-[170px]' : 'pb-[96px]')" [ngStyle]="pageStyle">
 
     <!-- Cargando -->
     <app-loader *ngIf="phase === 'loading'" [splash]="true" label="Cargando la carta…"></app-loader>
@@ -441,7 +446,7 @@
             </ul>
           </section>
 
-          <div class="flex justify-center pt-[8px]"><ng-container *ngTemplateOutlet="poweredBy"></ng-container></div>
+          <div class="flex justify-center pt-[16px]"><ng-container *ngTemplateOutlet="poweredBy"></ng-container></div>
         </main>
       </ng-container>
 

@@ -234,9 +234,18 @@ export class AppComponent {
     // Una novedad importante sin leer se muestra en una ventana, una sola vez por sesión
     this.news.unread$.subscribe((u) => {
       // no en los primeros pasos de un local nuevo: ahí todavía no tiene nada que "ver de nuevo"
-      if (!u.popup || this.popupShown.has(u.popup.id) || this.publicPage || !this.isAdminRole || this.router.url.startsWith('/bienvenida')) return;
-      this.popupShown.add(u.popup.id);
-      this.dialog.open(AnnouncementsDialogComponent, { data: { mode: 'popup', item: u.popup }, width: '560px', maxWidth: '96vw', autoFocus: false });
+      const popup = u.popup;
+      if (!popup || this.popupShown.has(popup.id) || this.publicPage || !this.isAdminRole || this.router.url.startsWith('/bienvenida')) return;
+      // Solo cuando el negocio ya terminó (o salteó) el asistente de primeros pasos: se consulta el estado real en vez
+      // de fiarse de la dirección, que al entrar todavía puede no ser la del asistente
+      this.onboarding.status().subscribe({
+        next: (s) => {
+          if (!s.done || this.popupShown.has(popup.id) || this.router.url.startsWith('/bienvenida')) return;
+          this.popupShown.add(popup.id);
+          this.dialog.open(AnnouncementsDialogComponent, { data: { mode: 'popup', item: popup }, width: '560px', maxWidth: '96vw', autoFocus: false });
+        },
+        error: () => {},
+      });
     });
     // La caja la manejan administrador y cajero: se mantiene al día el indicador del encabezado
     this.userService.getRoleState().subscribe((role) => {

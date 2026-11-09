@@ -88,9 +88,10 @@ export class PlanService {
     return this.settings.value.salesMode ?? 'both';
   }
 
-  // ¿Se muestra el salón (Inicio con mesas, mozos, sectores, reservas)? Sí si el plan o un extra lo incluye y el negocio no vende solo en mostrador
+  // ¿Se muestra el salón (Inicio con mesas, mozos, sectores, reservas)? Lo decide cómo vende el negocio: solo mesas o mesas y mostrador sí;
+  // solo mostrador (takeaway) no. No depende de qué trae el plan: si el local vende por mesas, el Inicio tiene que estar.
   get showTables(): boolean {
-    return this.salesMode !== 'counter' && !this.locked('tables');
+    return this.salesMode !== 'counter';
   }
 
   // ¿Se muestra todo lo del Mostrador (menú, pestañas, reportes)? Solo si el negocio lo tiene (por su plan o un extra) y no vende solo en mesas

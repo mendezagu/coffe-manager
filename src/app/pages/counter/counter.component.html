@@ -42,51 +42,51 @@
       </div>
 
       <ng-container *ngIf="!loading && items.length > 0">
+          <div #searchBar class="sticky top-[56px] z-[9] -mt-[4px] mb-[8px] bg-sage-100 pb-[10px] pt-[8px] sm:top-[64px]">
+            <div class="mb-[10px] flex flex-wrap items-center gap-[10px]">
+              <div class="relative min-w-[200px] flex-1 sm:max-w-[380px]">
+                <mat-icon class="pointer-events-none absolute left-[10px] top-1/2 -translate-y-1/2 !h-5 !w-5 !text-xl text-sage-400">search</mat-icon>
+                <input #searchInput type="search" [(ngModel)]="term" (keydown.enter)="searchEnter()" aria-label="Buscar producto" placeholder="Buscar producto"
+                  class="h-12 w-full rounded-xl border border-sage-200 bg-white pl-[36px] pr-[64px] text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                <kbd class="pointer-events-none absolute right-[10px] top-1/2 hidden -translate-y-1/2 rounded bg-sage-100 px-[6px] py-[2px] text-[10px] font-semibold text-sage-500 sm:block">Ctrl K</kbd>
+              </div>
+
+              <!-- Fotos grandes o lista compacta -->
+              <div class="flex rounded-xl bg-sage-200/70 p-[3px]" role="group" aria-label="Cómo se ven los productos">
+                <button type="button" (click)="setCompact(false)" [attr.aria-pressed]="!compact" aria-label="Tarjetas con foto" title="Tarjetas con foto"
+                  class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="!compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
+                  <mat-icon class="!h-5 !w-5 !text-xl">grid_view</mat-icon></button>
+                <button type="button" (click)="setCompact(true)" [attr.aria-pressed]="compact" aria-label="Lista compacta" title="Lista compacta: caben más productos"
+                  class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
+                  <mat-icon class="!h-5 !w-5 !text-xl">view_list</mat-icon></button>
+              </div>
+
+              <!-- Solo el administrador: la estrella de favoritos queda escondida para no tocarla en plena venta -->
+              <button *ngIf="isAdmin" type="button" (click)="editFavs = !editFavs" [attr.aria-pressed]="editFavs"
+                class="flex h-12 items-center gap-[6px] rounded-xl border px-[12px] text-xs font-semibold transition-colors"
+                [ngClass]="editFavs ? 'border-[#d49a12] bg-[#fbf1d6] text-[#8a5a0b]' : 'border-sage-200 bg-white text-sage-600 hover:text-sage-900'">
+                <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">{{ editFavs ? 'check' : 'star_outline' }}</mat-icon>{{ editFavs ? 'Listo' : 'Editar favoritos' }}
+              </button>
+            </div>
+
+            <!-- Categorías: todas a la vista, sin barra de desplazamiento -->
+            <div class="flex flex-wrap gap-[8px]" role="tablist" aria-label="Categorías">
+              <button *ngFor="let c of chips; trackBy: trackChip" type="button" role="tab" (click)="cat = c.id" [attr.aria-selected]="cat === c.id"
+                class="flex items-center gap-[8px] rounded-full border py-[8px] pl-[12px] pr-[16px] text-sm font-medium transition-colors"
+                [ngClass]="cat === c.id ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300 hover:bg-sage-50'">
+                <mat-icon class="!h-[18px] !w-[18px] !text-[18px]" [ngClass]="cat === c.id ? 'text-white' : 'text-cafe-green-700'">{{ c.icon }}</mat-icon>
+                {{ c.name }}
+                <span class="text-xs font-normal" [ngClass]="cat === c.id ? 'text-white/70' : 'text-sage-400'">{{ c.count }}</span>
+              </button>
+            </div>
+          </div>
+
+
         <!-- Vista dividida: productos a la izquierda y el ticket siempre a la vista a la derecha (en el celular, el ticket se abre desde el botón flotante) -->
         <div class="grid grid-cols-1 items-start gap-[20px] pb-[96px] lg:grid-cols-[minmax(0,1fr)_400px] lg:pb-0">
 
           <!-- ===== Productos ===== -->
           <div class="min-w-0">
-            <!-- Buscador y categorías: quedan fijos arriba al desplazarse -->
-            <div class="sticky top-[56px] z-[9] -mt-[4px] bg-sage-100 pb-[10px] pt-[8px] sm:top-[64px]">
-              <div class="mb-[10px] flex flex-wrap items-center gap-[10px]">
-                <div class="relative min-w-[200px] flex-1 sm:max-w-[380px]">
-                  <mat-icon class="pointer-events-none absolute left-[10px] top-1/2 -translate-y-1/2 !h-5 !w-5 !text-xl text-sage-400">search</mat-icon>
-                  <input #searchInput type="search" [(ngModel)]="term" (keydown.enter)="searchEnter()" aria-label="Buscar producto" placeholder="Buscar producto"
-                    class="h-12 w-full rounded-xl border border-sage-200 bg-white pl-[36px] pr-[64px] text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
-                  <kbd class="pointer-events-none absolute right-[10px] top-1/2 hidden -translate-y-1/2 rounded bg-sage-100 px-[6px] py-[2px] text-[10px] font-semibold text-sage-500 sm:block">Ctrl K</kbd>
-                </div>
-
-                <!-- Fotos grandes o lista compacta -->
-                <div class="flex rounded-xl bg-sage-200/70 p-[3px]" role="group" aria-label="Cómo se ven los productos">
-                  <button type="button" (click)="setCompact(false)" [attr.aria-pressed]="!compact" aria-label="Tarjetas con foto" title="Tarjetas con foto"
-                    class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="!compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
-                    <mat-icon class="!h-5 !w-5 !text-xl">grid_view</mat-icon></button>
-                  <button type="button" (click)="setCompact(true)" [attr.aria-pressed]="compact" aria-label="Lista compacta" title="Lista compacta: caben más productos"
-                    class="grid h-9 w-9 place-items-center rounded-[10px] transition-colors" [ngClass]="compact ? 'bg-cafe-green-700 text-white shadow-green' : 'text-sage-600 hover:text-sage-900'">
-                    <mat-icon class="!h-5 !w-5 !text-xl">view_list</mat-icon></button>
-                </div>
-
-                <!-- Solo el administrador: la estrella de favoritos queda escondida para no tocarla en plena venta -->
-                <button *ngIf="isAdmin" type="button" (click)="editFavs = !editFavs" [attr.aria-pressed]="editFavs"
-                  class="flex h-12 items-center gap-[6px] rounded-xl border px-[12px] text-xs font-semibold transition-colors"
-                  [ngClass]="editFavs ? 'border-[#d49a12] bg-[#fbf1d6] text-[#8a5a0b]' : 'border-sage-200 bg-white text-sage-600 hover:text-sage-900'">
-                  <mat-icon class="!h-[18px] !w-[18px] !text-[18px]">{{ editFavs ? 'check' : 'star_outline' }}</mat-icon>{{ editFavs ? 'Listo' : 'Editar favoritos' }}
-                </button>
-              </div>
-
-              <!-- Categorías: todas a la vista, sin barra de desplazamiento -->
-              <div class="flex flex-wrap gap-[8px]" role="tablist" aria-label="Categorías">
-                <button *ngFor="let c of chips; trackBy: trackChip" type="button" role="tab" (click)="cat = c.id" [attr.aria-selected]="cat === c.id"
-                  class="flex items-center gap-[8px] rounded-full border py-[8px] pl-[12px] pr-[16px] text-sm font-medium transition-colors"
-                  [ngClass]="cat === c.id ? 'border-cafe-green-700 bg-cafe-green-700 text-white shadow-green' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300 hover:bg-sage-50'">
-                  <mat-icon class="!h-[18px] !w-[18px] !text-[18px]" [ngClass]="cat === c.id ? 'text-white' : 'text-cafe-green-700'">{{ c.icon }}</mat-icon>
-                  {{ c.name }}
-                  <span class="text-xs font-normal" [ngClass]="cat === c.id ? 'text-white/70' : 'text-sage-400'">{{ c.count }}</span>
-                </button>
-              </div>
-            </div>
-
             <!-- Tarjeta de producto con foto -->
             <ng-template #productCard let-i>
               <div role="button" tabindex="0" (click)="add(i)" (keydown.enter)="add(i)" (keydown.space)="add(i); $event.preventDefault()"
@@ -208,10 +208,10 @@
 
           <!-- ===== Ticket y cobro: fijo a la derecha en pantallas grandes; en el celular, un diálogo -->
           <div [ngClass]="orderOpen ? 'fixed inset-0 z-50 flex items-end justify-center sm:items-stretch sm:justify-end' : 'hidden'"
-            class="lg:sticky lg:inset-auto lg:top-[76px] lg:z-[9] lg:block lg:self-start" [attr.role]="orderOpen ? 'dialog' : null" [attr.aria-modal]="orderOpen ? 'true' : null" aria-label="Pedido del mostrador">
+            class="lg:sticky lg:inset-auto lg:z-[9] lg:block lg:self-start" [style.top.px]="ticketTop" [attr.role]="orderOpen ? 'dialog' : null" [attr.aria-modal]="orderOpen ? 'true' : null" aria-label="Pedido del mostrador">
             <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] lg:hidden" (click)="closeOrder()"></div>
-            <aside id="mostrador-pedido"
-              class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white p-[20px] shadow-xl sm:max-h-none sm:max-w-[440px] sm:rounded-l-3xl sm:rounded-tr-none lg:max-h-[calc(100vh-92px)] lg:max-w-none lg:rounded-3xl lg:border lg:border-sage-200">
+            <aside id="mostrador-pedido" [style.max-height]="ticketMaxHeight"
+              class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white p-[20px] shadow-xl sm:max-h-none sm:max-w-[440px] sm:rounded-l-3xl sm:rounded-tr-none lg:max-w-none lg:rounded-3xl lg:border lg:border-sage-200">
               <button type="button" (click)="closeOrder()" aria-label="Cerrar el pedido"
                 class="absolute right-[12px] top-[12px] z-10 grid h-8 w-8 place-items-center rounded-full text-sage-500 hover:bg-sage-100 hover:text-sage-800 lg:hidden">
                 <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
