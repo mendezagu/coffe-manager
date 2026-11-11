@@ -592,3 +592,10 @@ html [class~="bg-cafe-green-700"]:disabled,
 html [class~="bg-cafe-green-700"][disabled] {
   background-color: #2ed0ab;
 }
+
+/* Menú lateral: el texto del botón (.mdc-button__label) es "position: relative" y achica el área de los globitos con posición absoluta
+   (por ejemplo el contador de pedidos QR de "Inicio"); sin eso quedan pegados al texto en vez de al borde derecho del botón. */
+.example-sidenav .mat-mdc-button .mdc-button__label { position: static; }
+
+/* Fondo detrás del menú lateral abierto (celular): oscurecido y difuminado */
+.mat-drawer-backdrop.mat-drawer-shown { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }

@@ -178,3 +178,11 @@ mat-drawer.example-sidenav {
     fill: #ff8f78;
   }
 }
+
+// Celular: el menú ocupa todo el ancho (se cierra con la X) y, por si se ve el fondo, se difumina
+@media (max-width: 767px) {
+  .example-sidenav {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}

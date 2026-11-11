@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatePipe } from '@angular/common';
 import { AppUser, ROLE_LABELS, UserService } from './services/user.service';
@@ -36,6 +36,20 @@ export const isPublicPath = (url: string) => PUBLIC_PREFIXES.some((p) => url.spl
 export class AppComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   showFiller = false;
+  // Celular: el menú se abre por encima de la pantalla, a todo el ancho, y se cierra con la X (o tocando afuera)
+  isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  drawerOpen = !this.isMobile;
+  // Al tocar una sección del menú en el celular, se cierra (aunque ya estés en esa pantalla)
+  onDrawerClick(ev: Event) {
+    if (this.isMobile && (ev.target as HTMLElement).closest?.('[routerLink]')) this.drawerOpen = false;
+  }
+  @HostListener('window:resize') onResize() {
+    const mobile = window.innerWidth < 768;
+    if (mobile !== this.isMobile) {
+      this.isMobile = mobile;
+      this.drawerOpen = !mobile;
+    }
+  }
   isLoggedIn: boolean = false;
   // Páginas públicas (cliente por QR, huésped y portal del hotel): nunca llevan el menú ni la barra del restaurante,
   // aunque en ese navegador haya una sesión del personal abierta
@@ -286,6 +300,7 @@ export class AppComponent {
     this.syncTheme();
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       this.publicPage = isPublicPath(e.urlAfterRedirects);
+      if (this.isMobile) this.drawerOpen = false;
       // Con una versión nueva lista, el próximo cambio de pantalla recarga la app: es un momento seguro (no corta un pedido)
       if (this.updateReady) {
         this.applyUpdate();
