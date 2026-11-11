@@ -533,7 +533,7 @@ export class HotelLandingComponent implements OnInit {
       g.textAlign = 'center';
       g.fillText(t, W / 2, y);
     };
-    g.fillStyle = '#1d5b3e';
+    g.fillStyle = '#0b7d66';
     g.fillRect(0, 0, W, H);
     center(`Beneficio para huéspedes de`, 70, font(400, 24), '#cfe6d9');
     center(this.info?.name ?? 'Hotel', 112, font(700, 40), '#ffffff');
@@ -543,12 +543,12 @@ export class HotelLandingComponent implements OnInit {
     if (g.roundRect) g.roundRect(40, 150, W - 80, H - 230, 28);
     else g.rect(40, 150, W - 80, H - 230); // celulares viejos: esquinas rectas
     g.fill();
-    center(v.restaurantName, 215, font(700, 36), '#1b2822');
-    center(`${v.discountPct}% de descuento`, 262, font(700, 30), '#1d5b3e');
+    center(v.restaurantName, 215, font(700, 36), '#0b7d66');
+    center(`${v.discountPct}% de descuento`, 262, font(700, 30), '#0b7d66');
     center(`Válido solo en ${v.restaurantName}`, 300, font(500, 22), '#5b6b63');
-    center(v.code.split('').join(' '), 400, font(700, 64), '#1b2822');
+    center(v.code.split('').join(' '), 400, font(700, 64), '#0b7d66');
     g.drawImage(img, (W - 340) / 2, 430, 340, 340);
-    center(`A nombre de ${v.guestName}`, 820, font(500, 24), '#1b2822');
+    center(`A nombre de ${v.guestName}`, 820, font(500, 24), '#0b7d66');
     const days = this.daysLeft(v);
     center(`1 voucher por mesa · ${days > 1 ? 'vence en ' + days + ' días' : 'vence hoy'}`, 856, font(400, 22), '#5b6b63');
     center('Mostralo al cajero al pagar · Tavolapp', H - 36, font(400, 20), '#cfe6d9');

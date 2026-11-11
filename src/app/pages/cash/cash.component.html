@@ -10,9 +10,9 @@
           <p class="page-sub">El efectivo y los cobros del turno.</p>
         </div>
       </div>
-      <span *ngIf="state" class="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[6px] text-xs font-bold tracking-wide"
+      <span *ngIf="state" class="inline-flex items-center gap-[8px] rounded-full px-[12px] py-[6px] text-sm font-semibold"
         [ngClass]="state.open ? 'bg-cafe-green-50 text-cafe-green-800' : 'bg-cafe-red-50 text-cafe-red-700'">
-        <span class="h-2 w-2 rounded-full" [ngClass]="state.open ? 'bg-cafe-green-600' : 'bg-cafe-red-700'"></span>{{ state.open ? 'ABIERTA' : 'CERRADA' }}
+        <span class="h-2 w-2 rounded-full" [ngClass]="state.open ? 'bg-cafe-green-600' : 'bg-cafe-red-700'"></span>{{ state.open ? 'Abierta' : 'Cerrada' }}
       </span>
     </div>
   </header>
@@ -28,14 +28,14 @@
       <div class="flex flex-wrap items-start justify-between gap-[12px]">
         <div>
           <div role="heading" aria-level="2" class="font-jakarta text-lg font-bold text-sage-900">Caja cerrada</div>
-          <p class="m-0 mt-[4px] text-sm text-sage-700">Cerrada por {{ c.closedByName }}. Debería haber {{ c.cash.expected | money }} y contaste {{ c.countedAmount | money }}.</p>
+          <p class="m-0 mt-[4px] text-sm text-sage-700">Cerrada por {{ c.closedByName }}. Debería haber {{ c.cash.expected | money:true }} y contaste {{ c.countedAmount | money:true }}.</p>
         </div>
-        <button type="button" (click)="dismissClosed()" class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Entendido</button>
+        <button type="button" (click)="dismissClosed()" class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-[16px] text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Entendido</button>
       </div>
       <p class="m-0 mt-[12px] font-jakarta text-2xl font-extrabold tabular-nums" [ngClass]="(c.difference || 0) === 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">
         <ng-container *ngIf="(c.difference || 0) === 0">✓ La caja cierra justa</ng-container>
-        <ng-container *ngIf="(c.difference || 0) < 0">Faltan {{ -(c.difference || 0) | money }}</ng-container>
-        <ng-container *ngIf="(c.difference || 0) > 0">Sobran {{ c.difference | money }}</ng-container>
+        <ng-container *ngIf="(c.difference || 0) < 0">Faltan {{ -(c.difference || 0) | money:true }}</ng-container>
+        <ng-container *ngIf="(c.difference || 0) > 0">Sobran {{ c.difference | money:true }}</ng-container>
       </p>
     </section>
 
@@ -52,11 +52,11 @@
           <span class="relative block">
             <span class="absolute left-[14px] top-1/2 -translate-y-1/2 text-sm text-sage-500">$</span>
             <input name="opening" type="number" min="0" step="any" required [(ngModel)]="openingAmount" placeholder="Ej: 20000"
-              class="w-full rounded-xl border border-sage-300 bg-white py-[10px] pl-[30px] pr-[14px] text-sm tabular-nums focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+              class="min-h-[48px] w-full rounded-xl border border-sage-300 bg-white py-[10px] pl-[30px] pr-[14px] text-base tabular-nums focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
           </span>
         </label>
         <button type="submit" [disabled]="of.invalid || busy"
-          class="rounded-xl bg-cafe-green-700 px-[20px] py-[11px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+          class="min-h-[48px] rounded-xl bg-cafe-green-700 px-[24px] text-base font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           {{ busy ? 'Abriendo…' : 'Abrir caja' }}
         </button>
       </form>
@@ -65,50 +65,52 @@
     <!-- ===== CAJA ABIERTA ===== -->
     <ng-container *ngIf="state && state.open && register as r">
 
-      <!-- Quién abrió la caja y cuándo; el cierre queda a un toque -->
-      <section class="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between">
-        <p class="m-0 text-sm text-sage-600">
-          Abierta el <strong class="tabular-nums text-sage-900">{{ r.openedAt | date:'dd/MM HH:mm' }}</strong> por <strong class="text-sage-900">{{ r.openedByName }}</strong>
-          · fondo <strong class="tabular-nums text-sage-900">{{ r.cash.opening | money }}</strong>
-        </p>
-        <button type="button" (click)="startClose()"
-          class="flex-shrink-0 rounded-xl bg-cafe-red-50 px-[18px] py-[11px] text-sm font-semibold text-cafe-red-700 transition-colors hover:bg-cafe-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">
-          Cerrar y arqueo de caja
-        </button>
-      </section>
+      <!-- Estado de la caja: lo primero es cuánto efectivo debería haber; el cierre queda a un toque -->
+      <section aria-label="Indicadores del turno" class="rounded-2xl bg-white shadow-soft">
+        <div class="flex flex-col gap-[16px] p-[16px] sm:flex-row sm:items-center sm:justify-between sm:p-[24px]">
+          <div class="min-w-0">
+            <ng-container *ngIf="!blind">
+              <p class="m-0 text-sm font-medium text-sage-600">Efectivo esperado en caja</p>
+              <p class="m-0 mt-[2px] font-jakarta text-[40px] font-extrabold leading-tight tabular-nums text-sage-900">{{ r.cash.expected | money:true }}</p>
+            </ng-container>
+            <ng-container *ngIf="blind">
+              <p class="m-0 text-sm font-medium text-sage-600">Fondo inicial</p>
+              <p class="m-0 mt-[2px] font-jakarta text-[40px] font-extrabold leading-tight tabular-nums text-sage-900">{{ r.cash.opening | money:true }}</p>
+            </ng-container>
+            <p class="m-0 mt-[6px] text-sm text-sage-600">
+              Abierta el <strong class="font-semibold tabular-nums text-sage-900">{{ r.openedAt | date:'dd/MM HH:mm' }}</strong> por <strong class="font-semibold text-sage-900">{{ r.openedByName }}</strong>
+              <ng-container *ngIf="!blind"> · fondo <strong class="font-semibold tabular-nums text-sage-900">{{ r.cash.opening | money:true }}</strong></ng-container>
+            </p>
+          </div>
+          <button type="button" (click)="startClose()"
+            class="min-h-[48px] flex-shrink-0 rounded-xl bg-cafe-red-50 px-[20px] text-base font-semibold text-cafe-red-700 transition-colors hover:bg-cafe-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">
+            Cerrar y arqueo de caja
+          </button>
+        </div>
 
-      <!-- Cifras del turno: una línea, el número primero y su nombre al lado -->
-      <section aria-label="Indicadores del turno" class="flex flex-wrap items-baseline gap-x-[32px] gap-y-[10px] text-sm text-sage-600">
-        <ng-container *ngIf="!blind">
-          <p class="m-0">
-            <strong class="font-jakarta text-2xl font-bold tabular-nums text-sage-900">{{ r.cash.expected | money }}</strong>
-            <span class="ml-[6px]">de efectivo esperado en caja</span>
-          </p>
-          <p class="m-0">
-            <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ r.sales.totalAmount | money }}</strong>
-            <span class="ml-[6px]">vendidos en {{ r.sales.count }} {{ r.sales.count === 1 ? 'cobro' : 'cobros' }}</span>
-          </p>
-          <p class="m-0">
-            <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ nonCashTotal | money }}</strong>
-            <span class="ml-[6px]">en cobros digitales ({{ nonCashPct | number:'1.0-0' }}%)</span>
-          </p>
-          <p class="m-0">
-            <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ r.sales.tipsTotal | money }}</strong>
-            <span class="ml-[6px]">de propinas ({{ tipsPct | number:'1.0-1' }}% de lo vendido)<ng-container *ngIf="r.sales.discountTotal"> · {{ r.sales.discountTotal | money }} en descuentos</ng-container></span>
-          </p>
-        </ng-container>
+        <div *ngIf="!blind" class="grid grid-cols-1 gap-px overflow-hidden rounded-b-2xl border-t border-sage-200 bg-sage-200 sm:grid-cols-3">
+        <div class="min-w-0 bg-white p-[16px] sm:p-[20px]">
+          <p class="m-0 text-sm font-medium text-sage-600">Vendido</p>
+          <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[26px] font-bold leading-tight tabular-nums text-sage-900 xl:text-[28px]">{{ r.sales.totalAmount | money:true }}</p>
+          <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">en {{ r.sales.count }} {{ r.sales.count === 1 ? 'cobro' : 'cobros' }}</p>
+        </div>
+        <div class="min-w-0 bg-white p-[16px] sm:p-[20px]">
+          <p class="m-0 text-sm font-medium text-sage-600">Cobros digitales</p>
+          <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[26px] font-bold leading-tight tabular-nums text-sage-900 xl:text-[28px]">{{ nonCashTotal | money:true }}</p>
+          <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">{{ nonCashPct | number:'1.0-0' }}% del total</p>
+        </div>
+        <div class="min-w-0 bg-white p-[16px] sm:p-[20px]">
+          <p class="m-0 text-sm font-medium text-sage-600">Propinas</p>
+          <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[26px] font-bold leading-tight tabular-nums text-sage-900 xl:text-[28px]">{{ r.sales.tipsTotal | money:true }}</p>
+          <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">{{ tipsPct | number:'1.0-1' }}%<ng-container *ngIf="r.sales.discountTotal"> · {{ r.sales.discountTotal | money:true }} en descuentos</ng-container></p>
+        </div>
+        </div>
 
-        <!-- Conteo a ciegas: solo lo que cargó la propia persona y cuántos cobros hubo, sin importes de lo vendido -->
-        <ng-container *ngIf="blind">
-          <p class="m-0">
-            <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ r.cash.opening | money }}</strong>
-            <span class="ml-[6px]">de fondo inicial</span>
-          </p>
-          <p class="m-0">
-            <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ r.sales.count }}</strong>
-            <span class="ml-[6px]">{{ r.sales.count === 1 ? 'cobro en el turno' : 'cobros en el turno' }}</span>
-          </p>
-        </ng-container>
+        <!-- Conteo a ciegas: solo cuántos cobros hubo, sin importes de lo vendido -->
+        <div *ngIf="blind" class="border-t border-sage-100 px-[16px] py-[14px] text-sm text-sage-600 sm:px-[24px]">
+          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ r.sales.count }}</strong>
+          <span class="ml-[6px]">{{ r.sales.count === 1 ? 'cobro en el turno' : 'cobros en el turno' }}</span>
+        </div>
       </section>
 
       <!-- Panel central -->
@@ -121,28 +123,29 @@
             <p class="m-0 mb-[16px] mt-[4px] text-sm text-sage-600">Para lo que no es una venta: cambio que te traen, un pago a un proveedor, plata que se lleva al banco.</p>
 
             <form (ngSubmit)="addMovement()" #mf="ngForm">
-              <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-12">
-                <label class="block sm:col-span-4">
-                  <span class="mb-[4px] block text-sm font-medium text-sage-700">Tipo</span>
-                  <select name="type" [(ngModel)]="movement.type" class="w-full rounded-xl border border-sage-300 bg-white px-[12px] py-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25">
-                    <option value="OUT">Retiro o gasto</option>
-                    <option value="IN">Ingreso</option>
-                  </select>
-                </label>
-                <label class="block sm:col-span-3">
+              <div class="flex rounded-xl bg-sage-100 p-[3px]" role="group" aria-label="Tipo de movimiento">
+                <button type="button" (click)="movement.type = 'OUT'" [attr.aria-pressed]="movement.type === 'OUT'"
+                  class="min-h-[44px] flex-1 rounded-[10px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+                  [ngClass]="movement.type === 'OUT' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Retiro o gasto</button>
+                <button type="button" (click)="movement.type = 'IN'" [attr.aria-pressed]="movement.type === 'IN'"
+                  class="min-h-[44px] flex-1 rounded-[10px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+                  [ngClass]="movement.type === 'IN' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Ingreso</button>
+              </div>
+              <div class="mt-[12px] grid grid-cols-1 gap-[12px] sm:grid-cols-[180px_minmax(0,1fr)]">
+                <label class="block">
                   <span class="mb-[4px] block text-sm font-medium text-sage-700">Importe</span>
                   <input name="amount" type="number" min="0" step="any" required [(ngModel)]="movement.amount" placeholder="Ej: 4500"
-                    class="w-full rounded-xl border border-sage-300 px-[12px] py-[10px] text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                    class="min-h-[48px] w-full rounded-xl border border-sage-300 px-[12px] py-[10px] text-base tabular-nums focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
                 </label>
-                <label class="block sm:col-span-5">
+                <label class="block">
                   <span class="mb-[4px] block text-sm font-medium text-sage-700">Motivo</span>
                   <input name="reason" required maxlength="120" [(ngModel)]="movement.reason" placeholder="Ej: hielo, cambio, retiro al banco"
-                    class="w-full rounded-xl border border-sage-300 px-[12px] py-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+                    class="min-h-[48px] w-full rounded-xl border border-sage-300 px-[12px] py-[10px] text-base focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
                 </label>
               </div>
               <div class="mt-[12px] flex justify-end">
                 <button type="submit" [disabled]="mf.invalid || busy"
-                  class="rounded-xl bg-cafe-green-700 px-[18px] py-[10px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+                  class="min-h-[48px] w-full rounded-xl bg-cafe-green-700 px-[20px] text-base font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2 sm:w-auto">
                   Registrar en caja
                 </button>
               </div>
@@ -155,14 +158,14 @@
                   <p class="m-0 truncate text-sm font-semibold text-sage-900">{{ m.reason }}</p>
                   <p class="m-0 text-sm text-sage-500">{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }} · {{ m.createdBy }} · {{ m.createdAt | date:'HH:mm' }}</p>
                 </div>
-                <span class="flex-shrink-0 text-sm font-bold tabular-nums" [ngClass]="m.type === 'IN' ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span>
+                <span class="flex-shrink-0 text-sm font-bold tabular-nums" [ngClass]="m.type === 'IN' ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money:true }}</span>
               </li>
               <li class="flex items-center justify-between gap-[12px] py-[12px]">
                 <div class="min-w-0">
                   <p class="m-0 truncate text-sm font-semibold text-sage-900">Fondo de apertura del turno</p>
                   <p class="m-0 text-sm text-sage-500">{{ r.openedAt | date:'dd/MM HH:mm' }} · {{ r.openedByName }}</p>
                 </div>
-                <span class="flex-shrink-0 text-sm font-bold tabular-nums text-cafe-green-700">+ {{ r.cash.opening | money }}</span>
+                <span class="flex-shrink-0 text-sm font-bold tabular-nums text-cafe-green-700">+ {{ r.cash.opening | money:true }}</span>
               </li>
             </ul>
           </section>
@@ -174,7 +177,7 @@
             <ng-container *ngIf="!blind">
               <div class="flex items-baseline justify-between gap-[8px]">
                 <div role="heading" aria-level="2" class="font-jakarta text-lg font-bold text-sage-900">Cobrado por método</div>
-                <span class="text-sm tabular-nums text-sage-600">Total {{ r.sales.totalAmount | money }}</span>
+                <span class="text-sm tabular-nums text-sage-600">Total {{ r.sales.totalAmount | money:true }}</span>
               </div>
               <p *ngIf="methodRows.length === 0" class="m-0 py-[16px] text-sm text-sage-500">Todavía no hubo cobros en esta caja.</p>
 
@@ -182,9 +185,9 @@
                 <li *ngFor="let m of methodRows" class="py-[12px]">
                   <div class="flex items-baseline justify-between gap-[8px]">
                     <span class="truncate font-semibold text-sage-900">{{ m.label }}</span>
-                    <span class="flex-shrink-0 font-bold tabular-nums text-sage-900">{{ m.amount | money }}</span>
+                    <span class="flex-shrink-0 font-bold tabular-nums text-sage-900">{{ m.amount | money:true }}</span>
                   </div>
-                  <div class="mt-[6px] h-1.5 w-full overflow-hidden rounded-full bg-sage-200"><div class="h-1.5 rounded-full" [ngClass]="m.dot" [style.width.%]="m.pct"></div></div>
+                  <div class="mt-[6px] h-1.5 w-full overflow-hidden rounded-full bg-sage-200"><div class="h-1.5 rounded-full bg-cafe-green-700" [style.width.%]="m.pct"></div></div>
                   <div class="mt-[4px] flex justify-between text-sm text-sage-600">
                     <span>{{ m.count }} {{ m.count === 1 ? 'cobro' : 'cobros' }}</span>
                     <span class="tabular-nums">{{ m.pct | number:'1.0-1' }}% del total</span>
@@ -206,7 +209,7 @@
               <ul class="m-0 list-none divide-y divide-sage-100 p-0">
                 <li *ngFor="let t of r.tipsByWaiter" class="flex justify-between py-[8px] text-sm">
                   <span class="text-sage-700">{{ t.waiterName }}</span>
-                  <span class="font-bold tabular-nums text-sage-900">{{ t.amount | money }}</span>
+                  <span class="font-bold tabular-nums text-sage-900">{{ t.amount | money:true }}</span>
                 </li>
               </ul>
             </ng-container>
@@ -214,11 +217,12 @@
 
           <section class="rounded-2xl bg-white p-[16px] shadow-soft sm:p-[24px]">
             <div role="heading" aria-level="2" class="mb-[4px] font-jakarta text-lg font-bold text-sage-900">Efectivo de la caja</div>
-            <ul class="m-0 list-none divide-y divide-sage-100 p-0 text-sm">
-              <li class="flex justify-between py-[10px]"><span class="text-sage-700">Fondo inicial</span><span class="font-bold tabular-nums">{{ r.cash.opening | money }}</span></li>
-              <li *ngIf="r.cash.sales !== null" class="flex justify-between py-[10px]"><span class="text-sage-700">Cobros en efectivo</span><span class="font-bold tabular-nums">+ {{ r.cash.sales | money }}</span></li>
-              <li class="flex justify-between py-[10px]"><span class="text-sage-700">Ingresos</span><span class="font-bold tabular-nums text-cafe-green-700">+ {{ r.cash.in | money }}</span></li>
-              <li class="flex justify-between py-[10px]"><span class="text-sage-700">Retiros y gastos</span><span class="font-bold tabular-nums text-cafe-red-700">− {{ r.cash.out | money }}</span></li>
+            <ul class="m-0 list-none divide-y divide-sage-100 p-0 text-base">
+              <li class="flex justify-between py-[12px]"><span class="text-sage-700">Fondo inicial</span><span class="font-semibold tabular-nums">{{ r.cash.opening | money:true }}</span></li>
+              <li *ngIf="r.cash.sales !== null" class="flex justify-between py-[12px]"><span class="text-sage-700">Cobros en efectivo</span><span class="font-semibold tabular-nums">+ {{ r.cash.sales | money:true }}</span></li>
+              <li class="flex justify-between py-[12px]"><span class="text-sage-700">Ingresos</span><span class="font-semibold tabular-nums" [ngClass]="r.cash.in > 0 ? 'text-cafe-green-700' : 'text-sage-500'">+ {{ r.cash.in | money:true }}</span></li>
+              <li class="flex justify-between py-[12px]"><span class="text-sage-700">Retiros y gastos</span><span class="font-semibold tabular-nums" [ngClass]="r.cash.out > 0 ? 'text-cafe-red-700' : 'text-sage-500'">− {{ r.cash.out | money:true }}</span></li>
+              <li *ngIf="!blind" class="flex justify-between py-[14px] text-lg font-bold"><span class="text-sage-900">Esperado en caja</span><span class="font-jakarta tabular-nums text-sage-900">{{ r.cash.expected | money:true }}</span></li>
             </ul>
             <p *ngIf="blind" class="m-0 mt-[12px] text-sm text-sage-500">El total esperado se muestra al cerrar la caja, después de que cuentes el efectivo.</p>
           </section>
@@ -234,68 +238,95 @@
       </div>
       <p *ngIf="history.length === 0" class="m-0 text-sm text-sage-500">Todavía no hay cajas.</p>
 
-      <div *ngIf="history.length > 0" class="thin-scroll -mx-[4px] overflow-x-auto px-[4px]">
+      <!-- Detalle de un cierre (se usa en la tabla y en las tarjetas del celular) -->
+      <ng-template #detailTpl let-h>
+        <p *ngIf="expanded[h.id] === 'loading'" class="m-0 pt-[12px] text-sm text-sage-500">Cargando…</p>
+        <div *ngIf="detailOf(h) as d" class="grid gap-[16px] pt-[12px] text-sm sm:grid-cols-2">
+          <div>
+            <p class="m-0 mb-[4px] font-semibold text-sage-800">Ventas: <span class="tabular-nums">{{ d.sales.totalAmount | money:true }}</span> ({{ d.sales.count }})</p>
+            <ul class="m-0 list-none p-0 text-sage-700">
+              <li *ngFor="let m of d.byMethod" class="flex justify-between py-[2px]"><span>{{ methodLabel(m.method) }}</span><span class="tabular-nums">{{ m.amount | money:true }}</span></li>
+            </ul>
+            <p *ngIf="d.sales.tipsTotal" class="m-0 mt-[4px] text-sage-600">Propinas: {{ d.sales.tipsTotal | money:true }}</p>
+          </div>
+          <div>
+            <p class="m-0 mb-[4px] font-semibold text-sage-800">Efectivo</p>
+            <ul class="m-0 list-none p-0 text-sage-700">
+              <li class="flex justify-between py-[2px]"><span>Fondo</span><span class="tabular-nums">{{ d.cash.opening | money:true }}</span></li>
+              <li class="flex justify-between py-[2px]"><span>Cobros en efectivo</span><span class="tabular-nums">+ {{ d.cash.sales | money:true }}</span></li>
+              <li class="flex justify-between py-[2px]"><span>Ingresos</span><span class="tabular-nums">+ {{ d.cash.in | money:true }}</span></li>
+              <li class="flex justify-between py-[2px]"><span>Retiros y gastos</span><span class="tabular-nums">− {{ d.cash.out | money:true }}</span></li>
+              <li class="flex justify-between py-[2px] font-semibold text-sage-900"><span>Esperado</span><span class="tabular-nums">{{ d.cash.expected | money:true }}</span></li>
+            </ul>
+          </div>
+          <ul *ngIf="d.movements.length" class="m-0 list-none p-0 text-sage-700 sm:col-span-2">
+            <li *ngFor="let m of d.movements" class="flex justify-between gap-[12px] py-[2px]"><span>{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }}: {{ m.reason }} ({{ m.createdBy }})</span><span class="flex-none tabular-nums">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money:true }}</span></li>
+          </ul>
+          <p *ngIf="d.note" class="m-0 italic text-sage-600 sm:col-span-2">Nota: {{ d.note }}</p>
+        </div>
+      </ng-template>
+
+      <!-- Etiqueta de la diferencia -->
+      <ng-template #diffTpl let-h>
+        <span *ngIf="!h.closedAt" class="inline-flex rounded-full bg-sage-100 px-[10px] py-[4px] text-sm font-semibold text-sage-700">Abierta</span>
+        <span *ngIf="h.closedAt" class="inline-flex whitespace-nowrap rounded-full px-[10px] py-[4px] text-sm font-semibold tabular-nums"
+          [ngClass]="(h.difference || 0) === 0 ? 'bg-cafe-green-50 text-cafe-green-800' : ((h.difference || 0) < 0 ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-amber-50 text-cafe-amber-900')">
+          {{ (h.difference || 0) === 0 ? '✓ Justa' : ((h.difference || 0) < 0 ? 'Faltan ' : 'Sobran ') + (((h.difference || 0) < 0 ? -(h.difference || 0) : h.difference) | money:true) }}
+        </span>
+      </ng-template>
+
+      <!-- Celular: una tarjeta por cierre -->
+      <ul *ngIf="history.length > 0" class="m-0 list-none divide-y divide-sage-100 p-0 sm:hidden">
+        <li *ngFor="let h of history" class="py-[14px]">
+          <div class="flex items-start justify-between gap-[12px]">
+            <div class="min-w-0">
+              <p class="m-0 font-semibold tabular-nums text-sage-900">{{ h.openedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+              <p class="m-0 text-sm text-sage-600">{{ h.openedByName }}<span *ngIf="h.closedByName && h.closedByName !== h.openedByName"> → {{ h.closedByName }}</span></p>
+            </div>
+            <ng-container *ngTemplateOutlet="diffTpl; context: { $implicit: h }"></ng-container>
+          </div>
+          <dl *ngIf="h.closedAt" class="m-0 mt-[8px] grid grid-cols-2 gap-[8px] text-sm">
+            <div><dt class="text-sage-500">Esperado</dt><dd class="m-0 font-semibold tabular-nums">{{ h.expectedAmount | money:true }}</dd></div>
+            <div><dt class="text-sage-500">Contado</dt><dd class="m-0 font-semibold tabular-nums">{{ h.countedAmount | money:true }}</dd></div>
+          </dl>
+          <button type="button" (click)="toggleRow(h)" [attr.aria-expanded]="!!expanded[h.id]"
+            class="mt-[6px] min-h-[44px] rounded-lg text-sm font-semibold text-cafe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">{{ expanded[h.id] ? 'Ocultar detalle' : 'Ver detalle' }}</button>
+          <ng-container *ngIf="expanded[h.id]"><ng-container *ngTemplateOutlet="detailTpl; context: { $implicit: h }"></ng-container></ng-container>
+        </li>
+      </ul>
+
+      <!-- Escritorio: tabla -->
+      <div *ngIf="history.length > 0" class="thin-scroll -mx-[4px] hidden overflow-x-auto px-[4px] sm:block">
         <table class="w-full min-w-[720px] border-collapse text-left">
           <thead>
             <tr class="border-b border-sage-200 text-sm text-sage-600">
-              <th class="px-[14px] py-[10px] font-semibold">Apertura</th>
-              <th class="px-[14px] py-[10px] font-semibold">Cajero</th>
-              <th class="px-[14px] py-[10px] font-semibold">Esperado</th>
-              <th class="px-[14px] py-[10px] font-semibold">Contado</th>
-              <th class="px-[14px] py-[10px] font-semibold">Diferencia</th>
-              <th class="px-[14px] py-[10px] text-right font-semibold">Detalle</th>
+              <th class="px-[14px] py-[12px] font-semibold">Apertura</th>
+              <th class="px-[14px] py-[12px] font-semibold">Cajero</th>
+              <th class="px-[14px] py-[12px] text-right font-semibold">Esperado</th>
+              <th class="px-[14px] py-[12px] text-right font-semibold">Contado</th>
+              <th class="px-[14px] py-[12px] font-semibold">Diferencia</th>
+              <th class="px-[14px] py-[12px] text-right font-semibold">Detalle</th>
             </tr>
           </thead>
-          <tbody class="text-sm text-sage-900">
+          <tbody class="text-base text-sage-900">
             <ng-container *ngFor="let h of history">
               <tr class="border-b border-sage-100 transition-colors hover:bg-sage-50">
-                <td class="whitespace-nowrap px-[14px] py-[12px] font-semibold tabular-nums">{{ h.openedAt | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="px-[14px] py-[12px]">
+                <td class="whitespace-nowrap px-[14px] py-[14px] font-semibold tabular-nums">{{ h.openedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="px-[14px] py-[14px]">
                   {{ h.openedByName }}<span *ngIf="h.closedByName && h.closedByName !== h.openedByName" class="text-sage-500"> → {{ h.closedByName }}</span>
                 </td>
-                <td class="whitespace-nowrap px-[14px] py-[12px] font-semibold tabular-nums">{{ h.closedAt ? (h.expectedAmount | money) : '—' }}</td>
-                <td class="whitespace-nowrap px-[14px] py-[12px] font-semibold tabular-nums">{{ h.closedAt ? (h.countedAmount | money) : '—' }}</td>
-                <td class="whitespace-nowrap px-[14px] py-[12px] tabular-nums">
-                  <span *ngIf="!h.closedAt" class="font-semibold text-cafe-green-700">Abierta</span>
-                  <span *ngIf="h.closedAt" class="font-semibold" [ngClass]="(h.difference || 0) === 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">
-                    {{ (h.difference || 0) === 0 ? '✓ Justa' : ((h.difference || 0) < 0 ? 'Faltan ' : 'Sobran ') + (((h.difference || 0) < 0 ? -(h.difference || 0) : h.difference) | money) }}
-                  </span>
-                </td>
-                <td class="px-[14px] py-[12px] text-right">
+                <td class="whitespace-nowrap px-[14px] py-[14px] text-right tabular-nums">{{ h.closedAt ? (h.expectedAmount | money:true) : '—' }}</td>
+                <td class="whitespace-nowrap px-[14px] py-[14px] text-right tabular-nums">{{ h.closedAt ? (h.countedAmount | money:true) : '—' }}</td>
+                <td class="px-[14px] py-[14px]"><ng-container *ngTemplateOutlet="diffTpl; context: { $implicit: h }"></ng-container></td>
+                <td class="px-[14px] py-[8px] text-right">
                   <button type="button" (click)="toggleRow(h)" [attr.aria-expanded]="!!expanded[h.id]"
-                    class="rounded-lg px-[10px] py-[6px] text-sm font-semibold text-cafe-green-700 hover:bg-cafe-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+                    class="min-h-[44px] rounded-lg px-[12px] text-sm font-semibold text-cafe-green-700 hover:bg-cafe-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
                     {{ expanded[h.id] ? 'Ocultar' : 'Ver detalle' }}
                   </button>
                 </td>
               </tr>
-
               <tr *ngIf="expanded[h.id]">
-                <td colspan="6" class="bg-sage-50 px-[14px] pb-[16px]">
-                  <p *ngIf="expanded[h.id] === 'loading'" class="m-0 pt-[12px] text-sm text-sage-500">Cargando…</p>
-                  <div *ngIf="detailOf(h) as d" class="grid gap-[16px] pt-[12px] text-sm sm:grid-cols-2">
-                    <div>
-                      <p class="m-0 mb-[4px] font-semibold text-sage-800">Ventas: <span class="tabular-nums">{{ d.sales.totalAmount | money }}</span> ({{ d.sales.count }})</p>
-                      <ul class="m-0 list-none p-0 text-sage-700">
-                        <li *ngFor="let m of d.byMethod" class="flex justify-between"><span>{{ methodLabel(m.method) }}</span><span class="tabular-nums">{{ m.amount | money }}</span></li>
-                      </ul>
-                      <p *ngIf="d.sales.tipsTotal" class="m-0 mt-[4px] text-sage-600">Propinas: {{ d.sales.tipsTotal | money }}</p>
-                    </div>
-                    <div>
-                      <p class="m-0 mb-[4px] font-semibold text-sage-800">Efectivo</p>
-                      <ul class="m-0 list-none p-0 text-sage-700">
-                        <li class="flex justify-between"><span>Fondo</span><span class="tabular-nums">{{ d.cash.opening | money }}</span></li>
-                        <li class="flex justify-between"><span>Cobros en efectivo</span><span class="tabular-nums">+ {{ d.cash.sales | money }}</span></li>
-                        <li class="flex justify-between"><span>Ingresos</span><span class="tabular-nums">+ {{ d.cash.in | money }}</span></li>
-                        <li class="flex justify-between"><span>Retiros y gastos</span><span class="tabular-nums">− {{ d.cash.out | money }}</span></li>
-                        <li class="flex justify-between font-semibold text-sage-900"><span>Esperado</span><span class="tabular-nums">{{ d.cash.expected | money }}</span></li>
-                      </ul>
-                    </div>
-                    <ul *ngIf="d.movements.length" class="m-0 list-none p-0 text-sage-700 sm:col-span-2">
-                      <li *ngFor="let m of d.movements" class="flex justify-between"><span>{{ m.type === 'IN' ? 'Ingreso' : 'Retiro' }}: {{ m.reason }} ({{ m.createdBy }})</span><span class="tabular-nums">{{ m.type === 'IN' ? '+' : '−' }} {{ m.amount | money }}</span></li>
-                    </ul>
-                    <p *ngIf="d.note" class="m-0 italic text-sage-600 sm:col-span-2">Nota: {{ d.note }}</p>
-                  </div>
-                </td>
+                <td colspan="6" class="bg-sage-50 px-[14px] pb-[16px]"><ng-container *ngTemplateOutlet="detailTpl; context: { $implicit: h }"></ng-container></td>
               </tr>
             </ng-container>
           </tbody>
@@ -310,7 +341,7 @@
       role="dialog" aria-modal="true" aria-labelledby="close-title" (click)="$event.stopPropagation()">
       <div class="mb-[16px] flex items-start justify-between gap-[12px]">
         <h3 id="close-title" class="m-0 font-jakarta !text-xl !font-bold text-sage-900">Arqueo y cierre de caja</h3>
-        <button type="button" (click)="cancelClose()" aria-label="Cerrar" class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+        <button type="button" (click)="cancelClose()" aria-label="Cerrar" class="grid h-11 w-11 flex-shrink-0 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
           <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
         </button>
       </div>
@@ -332,9 +363,9 @@
             class="w-full resize-none rounded-xl border border-sage-300 bg-sage-50 px-[14px] py-[10px] text-sm focus:border-cafe-green-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25"></textarea>
         </label>
         <div class="flex flex-col-reverse gap-[8px] pt-[4px] sm:flex-row sm:justify-end">
-          <button type="button" (click)="cancelClose()" class="rounded-xl border border-sage-300 bg-white px-[20px] py-[11px] text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Cancelar</button>
+          <button type="button" (click)="cancelClose()" class="min-h-[48px] rounded-xl border border-sage-300 bg-white px-[20px] text-base font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Cancelar</button>
           <button type="submit" [disabled]="cf.invalid || busy"
-            class="rounded-xl bg-cafe-red-700 px-[20px] py-[11px] text-sm font-semibold text-white transition-colors hover:bg-cafe-red-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700 focus-visible:ring-offset-2">{{ busy ? 'Cerrando…' : 'Confirmar cierre' }}</button>
+            class="min-h-[48px] rounded-xl bg-cafe-red-700 px-[20px] text-base font-semibold text-white transition-colors hover:bg-cafe-red-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700 focus-visible:ring-offset-2">{{ busy ? 'Cerrando…' : 'Confirmar cierre' }}</button>
         </div>
       </form>
     </div>

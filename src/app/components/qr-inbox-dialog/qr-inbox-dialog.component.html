@@ -1,9 +1,9 @@
-<div class="p-5 sm:p-[24px] max-w-[560px]">
+<div class="p-[20px] sm:p-[24px] max-w-[560px]">
   <div class="flex items-center justify-between mb-[16px]">
     <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0 flex items-center gap-[10px]">
       Pedidos por QR
     </div>
-    <button type="button" (click)="close()" aria-label="Cerrar" class="grid h-10 w-10 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+    <button type="button" (click)="close()" aria-label="Cerrar" class="grid h-11 w-11 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
       <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
     </button>
   </div>
@@ -19,7 +19,7 @@
         <p class="text-sm text-sage-700 m-0">{{ callLabel(c) }} · {{ c.createdAt | date: 'HH:mm' }}</p>
       </div>
     </div>
-    <button type="button" (click)="done(c)" [disabled]="busy.has(c.id)" class="px-[14px] py-[8px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold text-sage-800 disabled:opacity-50">Atendido</button>
+    <button type="button" (click)="done(c)" [disabled]="busy.has(c.id)" class="min-h-[44px] px-[16px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold text-sage-800 disabled:opacity-50">Atendido</button>
   </div>
 
   <!-- Pedidos -->
@@ -29,7 +29,7 @@
         <p class="font-bold text-sage-900 m-0">{{ r.tableName }}
           <span *ngIf="r.tableFree" class="ml-[6px] px-[8px] py-[1px] rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">Mesa libre: se abre al confirmar</span>
         </p>
-        <p class="text-xs text-sage-500 m-0">{{ r.createdAt | date: 'HH:mm' }}<ng-container *ngIf="r.customerName"> · {{ r.customerName }}</ng-container></p>
+        <p class="text-sm text-sage-500 m-0">{{ r.createdAt | date: 'HH:mm' }}<ng-container *ngIf="r.customerName"> · {{ r.customerName }}</ng-container></p>
       </div>
       <span class="font-bold text-sage-800">{{ r.total | money }}</span>
     </div>
@@ -38,13 +38,13 @@
       <li *ngFor="let l of r.items" class="py-[2px]">
         <span class="font-medium">{{ l.quantity }}× {{ l.name }}</span>
         <span *ngIf="l.extras.length" class="text-sage-600"> · {{ l.extras.join(', ') }}</span>
-        <span *ngIf="l.note" class="block text-xs text-cafe-red-700">"{{ l.note }}"</span>
+        <span *ngIf="l.note" class="block text-sm text-cafe-red-700">"{{ l.note }}"</span>
       </li>
     </ul>
 
     <!-- Mozo a cargo: solo si la mesa todavía no tiene -->
     <div *ngIf="!r.hasWaiter && waiters.length" class="mb-[10px]">
-      <label class="mb-[4px] flex items-center gap-[6px] text-xs font-bold" [attr.for]="'w-' + r.id"
+      <label class="mb-[4px] flex items-center gap-[6px] text-sm font-bold" [attr.for]="'w-' + r.id"
         [ngClass]="needsWaiter(r) ? 'text-cafe-amber-800' : 'text-sage-600'">
         <mat-icon class="!h-4 !w-4 !text-base">person</mat-icon>
         Elegí el mozo que atiende esta mesa <span class="text-cafe-red-700" aria-hidden="true">*</span>
@@ -64,14 +64,14 @@
         <button type="button" (click)="startReject(r)" [disabled]="busy.has(r.id)"
           class="h-11 px-[16px] rounded-xl bg-cafe-red-50 text-cafe-red-700 font-bold disabled:opacity-50">Rechazar</button>
       </div>
-      <p *ngIf="needsWaiter(r)" class="m-0 mt-[8px] text-xs font-medium text-cafe-amber-800">Elegí un mozo para poder confirmar el pedido.</p>
+      <p *ngIf="needsWaiter(r)" class="m-0 mt-[8px] text-sm font-medium text-cafe-amber-800">Elegí un mozo para poder confirmar el pedido.</p>
     </ng-container>
     <ng-template #rejectForm>
-      <label class="block text-xs font-medium text-sage-600 mb-[4px]" [attr.for]="'r-' + r.id">Motivo (lo ve el cliente)</label>
+      <label class="block text-sm font-medium text-sage-600 mb-[4px]" [attr.for]="'r-' + r.id">Motivo (lo ve el cliente)</label>
       <input [id]="'r-' + r.id" [(ngModel)]="reason" maxlength="140" placeholder="Ej: se acabó la gaseosa"
         class="w-full px-[10px] py-[8px] rounded-xl border-[1px] border-sage-300 text-sm mb-[8px]" />
       <div class="flex flex-wrap gap-[6px] mb-[10px]">
-        <button *ngFor="let q of quickReasons" type="button" (click)="reason = q" class="px-[10px] py-[4px] rounded-full bg-sage-100 text-xs text-sage-700">{{ q }}</button>
+        <button *ngFor="let q of quickReasons" type="button" (click)="reason = q" class="min-h-[40px] px-[14px] rounded-full bg-sage-100 text-sm text-sage-700">{{ q }}</button>
       </div>
       <div class="flex gap-[8px]">
         <button type="button" (click)="reject(r)" [disabled]="busy.has(r.id)" class="flex-1 h-10 rounded-xl bg-cafe-red-700 text-white font-bold text-sm disabled:opacity-50">Rechazar pedido</button>

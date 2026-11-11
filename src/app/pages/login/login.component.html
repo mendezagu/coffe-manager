@@ -11,61 +11,61 @@
   <!-- Izquierda: la cocina. El cocinero prepara el plato; después la escena se desvanece (solo en pantallas anchas) -->
   <div *ngIf="scene === 'staff'" class="kitchen pointer-events-none absolute left-[2%] bottom-[calc(26%-34px)] hidden w-[260px] lg:block xl:left-[4%] xl:w-[340px] 2xl:w-[380px]" aria-hidden="true">
     <svg viewBox="0 0 300 260" class="block h-auto w-full" role="presentation">
-      <ellipse cx="150" cy="246" rx="140" ry="6" fill="#1e2b24" opacity=".08" />
+      <ellipse cx="150" cy="246" rx="140" ry="6" fill="#262d39" opacity=".08" />
 
       <!-- estante con frascos -->
       <rect x="30" y="64" width="112" height="6" rx="3" fill="#b98a63" />
       <rect x="40" y="42" width="20" height="22" rx="5" fill="#e9b44c" /><rect x="42" y="37" width="16" height="6" rx="2" fill="#8b6f47" />
-      <rect x="70" y="46" width="20" height="18" rx="5" fill="#a9c7b3" /><rect x="72" y="41" width="16" height="6" rx="2" fill="#8b6f47" />
+      <rect x="70" y="46" width="20" height="18" rx="5" fill="#9be7d3" /><rect x="72" y="41" width="16" height="6" rx="2" fill="#8b6f47" />
       <rect x="100" y="40" width="22" height="24" rx="5" fill="#ee7791" /><rect x="102" y="35" width="18" height="6" rx="2" fill="#8b6f47" />
 
       <!-- cocinero -->
       <g class="cook">
         <!-- brazo que no cocina, en la cintura -->
-        <path d="M244 100 Q264 122 246 148" fill="none" stroke="#dfe6dc" stroke-width="14" stroke-linecap="round" />
+        <path d="M244 100 Q264 122 246 148" fill="none" stroke="#e1e5ea" stroke-width="14" stroke-linecap="round" />
         <path d="M244 100 Q264 122 246 148" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" />
         <!-- torso con chaqueta -->
-        <path d="M196 106 Q196 90 212 90 H234 Q250 90 250 106 L246 176 H200 Z" fill="#fff" stroke="#dfe6dc" stroke-width="2" />
-        <g fill="#1d5b3e"><circle cx="223" cy="116" r="2.6" /><circle cx="223" cy="132" r="2.6" /><circle cx="223" cy="148" r="2.6" /></g>
+        <path d="M196 106 Q196 90 212 90 H234 Q250 90 250 106 L246 176 H200 Z" fill="#fff" stroke="#e1e5ea" stroke-width="2" />
+        <g fill="#0b7d66"><circle cx="223" cy="116" r="2.6" /><circle cx="223" cy="132" r="2.6" /><circle cx="223" cy="148" r="2.6" /></g>
         <path d="M211 91 L235 91 L223 106 Z" fill="#8a2a1c" />
         <!-- cabeza y gorro (sin rostro) -->
         <path d="M218 76 H228 V92 Q223 96 218 92 Z" fill="#f2c9a5" />
         <circle cx="223" cy="66" r="15" fill="#f2c9a5" />
-        <path d="M205 58 Q197 36 213 36 Q217 24 231 30 Q247 26 243 46 Q247 58 241 58 Z" fill="#fff" stroke="#dfe6dc" stroke-width="2" stroke-linejoin="round" />
-        <rect x="206" y="52" width="34" height="9" rx="3" fill="#fff" stroke="#dfe6dc" stroke-width="2" />
+        <path d="M205 58 Q197 36 213 36 Q217 24 231 30 Q247 26 243 46 Q247 58 241 58 Z" fill="#fff" stroke="#e1e5ea" stroke-width="2" stroke-linejoin="round" />
+        <rect x="206" y="52" width="34" height="9" rx="3" fill="#fff" stroke="#e1e5ea" stroke-width="2" />
         <!-- brazo que revuelve la sartén -->
         <g class="cook-arm">
-          <path d="M205 102 L195 128 L183 152" fill="none" stroke="#dfe6dc" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M205 102 L195 128 L183 152" fill="none" stroke="#e1e5ea" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M205 102 L195 128 L183 152" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
           <circle cx="182" cy="153" r="6.5" fill="#f2c9a5" />
         </g>
       </g>
 
       <!-- mesada -->
-      <rect x="24" y="176" width="252" height="68" rx="8" fill="#cfd8cb" />
+      <rect x="24" y="176" width="252" height="68" rx="8" fill="#cdd3da" />
       <path d="M110 184 V238 M190 184 V238" stroke="#b6c2b2" stroke-width="2" />
-      <g fill="#86958b"><circle cx="102" cy="206" r="3" /><circle cx="118" cy="206" r="3" /><circle cx="182" cy="206" r="3" /><circle cx="198" cy="206" r="3" /></g>
-      <rect x="16" y="162" width="268" height="15" rx="7" fill="#6a7a70" />
+      <g fill="#8a94a4"><circle cx="102" cy="206" r="3" /><circle cx="118" cy="206" r="3" /><circle cx="182" cy="206" r="3" /><circle cx="198" cy="206" r="3" /></g>
+      <rect x="16" y="162" width="268" height="15" rx="7" fill="#667184" />
 
       <!-- hornalla con llama -->
-      <ellipse cx="124" cy="162" rx="40" ry="4" fill="#3b4a41" />
+      <ellipse cx="124" cy="162" rx="40" ry="4" fill="#363f4e" />
       <g class="flame" fill="#e6834a">
         <path d="M100 162 q3 -9 6 0 z" /><path d="M112 162 q3 -12 6 0 z" /><path d="M124 162 q3 -9 6 0 z" /><path d="M136 162 q3 -12 6 0 z" />
       </g>
 
       <!-- sartén que se sacude -->
       <g class="pan">
-        <path d="M86 146 H158 Q162 146 162 150 V156 Q162 160 158 160 H90 Q86 160 86 156 Z" fill="#3b4a41" />
-        <path d="M160 150 H192 a4 4 0 0 1 0 8 H160 Z" fill="#55655b" />
+        <path d="M86 146 H158 Q162 146 162 150 V156 Q162 160 158 160 H90 Q86 160 86 156 Z" fill="#363f4e" />
+        <path d="M160 150 H192 a4 4 0 0 1 0 8 H160 Z" fill="#4f5a6b" />
       </g>
 
       <!-- ingredientes que saltan -->
       <rect class="toss toss--1" x="102" y="138" width="5" height="11" rx="2.5" fill="#ec9060" />
-      <circle class="toss toss--2" cx="124" cy="141" r="4.5" fill="#4f8668" />
+      <circle class="toss toss--2" cx="124" cy="141" r="4.5" fill="#1fa88c" />
       <circle class="toss toss--3" cx="143" cy="141" r="5" fill="#d9553f" />
 
       <!-- vapor de la sartén -->
-      <g fill="none" stroke="#86958b" stroke-width="2" stroke-linecap="round">
+      <g fill="none" stroke="#8a94a4" stroke-width="2" stroke-linecap="round">
         <path class="steam" d="M104 130 q-4 -6 0 -11 q4 -5 0 -10" />
         <path class="steam steam--2" d="M124 130 q-4 -6 0 -11 q4 -5 0 -10" />
         <path class="steam steam--3" d="M144 130 q-4 -6 0 -11 q4 -5 0 -10" />
@@ -73,9 +73,9 @@
 
       <!-- plato terminado, listo para llevar -->
       <g class="ready">
-        <ellipse cx="52" cy="160" rx="22" ry="4" fill="#fff" stroke="#cfd8cb" />
-        <path d="M34 160 a18 16 0 0 1 36 0 z" fill="#dfe6dc" stroke="#86958b" stroke-width="1.5" />
-        <circle cx="52" cy="141" r="3.2" fill="#86958b" />
+        <ellipse cx="52" cy="160" rx="22" ry="4" fill="#fff" stroke="#cdd3da" />
+        <path d="M34 160 a18 16 0 0 1 36 0 z" fill="#e1e5ea" stroke="#8a94a4" stroke-width="1.5" />
+        <circle cx="52" cy="141" r="3.2" fill="#8a94a4" />
       </g>
     </svg>
   </div>
@@ -83,14 +83,14 @@
   <!-- Derecha: dos personas conversando en una mesa (solo en pantallas anchas) -->
   <div *ngIf="scene === 'staff'" class="pointer-events-none absolute right-[2%] bottom-[calc(26%-34px)] hidden w-[280px] lg:block xl:right-[4%] xl:w-[360px] 2xl:w-[420px]" aria-hidden="true">
     <svg viewBox="0 0 360 260" class="block w-full h-auto" role="presentation">
-      <ellipse cx="180" cy="242" rx="150" ry="6" fill="#1e2b24" opacity=".08" />
+      <ellipse cx="180" cy="242" rx="150" ry="6" fill="#262d39" opacity=".08" />
 
       <!-- Persona de la izquierda: remera amarilla, pelo oscuro corto -->
       <g>
-        <path d="M62 124 Q60 124 60 128 V180 H70 V128 Q70 124 66 124 Z" fill="#3b4a41" />
-        <rect x="60" y="176" width="48" height="8" rx="4" fill="#3b4a41" />
-        <rect x="64" y="184" width="5" height="52" rx="2.5" fill="#3b4a41" />
-        <rect x="100" y="184" width="5" height="52" rx="2.5" fill="#3b4a41" />
+        <path d="M62 124 Q60 124 60 128 V180 H70 V128 Q70 124 66 124 Z" fill="#363f4e" />
+        <rect x="60" y="176" width="48" height="8" rx="4" fill="#363f4e" />
+        <rect x="64" y="184" width="5" height="52" rx="2.5" fill="#363f4e" />
+        <rect x="100" y="184" width="5" height="52" rx="2.5" fill="#363f4e" />
         <!-- pierna: muslo ancho que se afina hacia el tobillo -->
         <path d="M84 162 Q112 160 134 168 Q146 172 144 184 L128 186 Q104 186 84 186 Z" fill="#27408b" />
         <path d="M128 176 H146 Q148 206 143 231 H132 Q130 206 128 176 Z" fill="#27408b" />
@@ -103,20 +103,20 @@
         <g class="nod">
           <path d="M89 80 H99 V96 Q94 100 89 96 Z" fill="#f2c9a5" />
           <circle cx="94" cy="72" r="15" fill="#f2c9a5" />
-          <path d="M78 74 A16 16 0 0 1 110 72 Q95 62 78 74 Z" fill="#1e2b24" />
-          <path d="M92 57 q14 -8 22 4 q-12 -2 -20 5 z" fill="#1e2b24" />
+          <path d="M78 74 A16 16 0 0 1 110 72 Q95 62 78 74 Z" fill="#262d39" />
+          <path d="M92 57 q14 -8 22 4 q-12 -2 -20 5 z" fill="#262d39" />
         </g>
       </g>
 
       <!-- Persona de la derecha (espejo): remera rosa, pelo largo con cola -->
       <g transform="translate(360 0) scale(-1 1)">
-        <path d="M62 124 Q60 124 60 128 V180 H70 V128 Q70 124 66 124 Z" fill="#3b4a41" />
-        <rect x="60" y="176" width="48" height="8" rx="4" fill="#3b4a41" />
-        <rect x="64" y="184" width="5" height="52" rx="2.5" fill="#3b4a41" />
-        <rect x="100" y="184" width="5" height="52" rx="2.5" fill="#3b4a41" />
-        <path d="M84 162 Q112 160 134 168 Q146 172 144 184 L128 186 Q104 186 84 186 Z" fill="#1d5b3e" />
-        <path d="M128 176 H146 Q148 206 143 231 H132 Q130 206 128 176 Z" fill="#1d5b3e" />
-        <path d="M130 231 H146 Q160 232 160 241 Q160 246 153 246 H132 Q127 246 127 241 Q127 235 130 231 Z" fill="#1e2b24" />
+        <path d="M62 124 Q60 124 60 128 V180 H70 V128 Q70 124 66 124 Z" fill="#363f4e" />
+        <rect x="60" y="176" width="48" height="8" rx="4" fill="#363f4e" />
+        <rect x="64" y="184" width="5" height="52" rx="2.5" fill="#363f4e" />
+        <rect x="100" y="184" width="5" height="52" rx="2.5" fill="#363f4e" />
+        <path d="M84 162 Q112 160 134 168 Q146 172 144 184 L128 186 Q104 186 84 186 Z" fill="#0b7d66" />
+        <path d="M128 176 H146 Q148 206 143 231 H132 Q130 206 128 176 Z" fill="#0b7d66" />
+        <path d="M130 231 H146 Q160 232 160 241 Q160 246 153 246 H132 Q127 246 127 241 Q127 235 130 231 Z" fill="#262d39" />
         <path d="M130 242 H158" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".6" />
         <path d="M76 108 Q76 94 90 94 H98 Q110 94 110 108 L106 168 Q105 177 96 177 H88 Q79 177 79 168 Z" fill="#ee7791" />
         <path d="M98 108 L120 130 L131 146" fill="none" stroke="#ee7791" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
@@ -136,24 +136,24 @@
       <ellipse cx="180" cy="150" rx="72" ry="11" fill="#cfa176" />
 
       <!-- Tazas, plato y flor -->
-      <ellipse cx="146" cy="147" rx="13" ry="3.5" fill="#fff" stroke="#cfd8cb" />
-      <path d="M139 136 h14 v8 a7 5 0 0 1 -14 0 z" fill="#fff" stroke="#cfd8cb" />
-      <ellipse cx="214" cy="147" rx="13" ry="3.5" fill="#fff" stroke="#cfd8cb" />
-      <path d="M207 136 h14 v8 a7 5 0 0 1 -14 0 z" fill="#fff" stroke="#cfd8cb" />
-      <ellipse cx="180" cy="148" rx="14" ry="3.5" fill="#fff" stroke="#cfd8cb" />
+      <ellipse cx="146" cy="147" rx="13" ry="3.5" fill="#fff" stroke="#cdd3da" />
+      <path d="M139 136 h14 v8 a7 5 0 0 1 -14 0 z" fill="#fff" stroke="#cdd3da" />
+      <ellipse cx="214" cy="147" rx="13" ry="3.5" fill="#fff" stroke="#cdd3da" />
+      <path d="M207 136 h14 v8 a7 5 0 0 1 -14 0 z" fill="#fff" stroke="#cdd3da" />
+      <ellipse cx="180" cy="148" rx="14" ry="3.5" fill="#fff" stroke="#cdd3da" />
       <path d="M170 146 a10 7 0 0 1 20 0 z" fill="#e0b27a" />
-      <rect x="179" y="128" width="2" height="14" fill="#1d5b3e" />
+      <rect x="179" y="128" width="2" height="14" fill="#0b7d66" />
       <circle cx="180" cy="125" r="5" fill="#8a2a1c" />
       <circle cx="180" cy="125" r="1.8" fill="#d9a441" />
 
       <!-- Plato que llega con el mozo -->
       <g class="table-dish">
-        <path d="M165 148 a15 13 0 0 1 30 0 z" fill="#dfe6dc" stroke="#86958b" stroke-width="1.5" />
-        <circle cx="180" cy="132" r="3" fill="#86958b" />
+        <path d="M165 148 a15 13 0 0 1 30 0 z" fill="#e1e5ea" stroke="#8a94a4" stroke-width="1.5" />
+        <circle cx="180" cy="132" r="3" fill="#8a94a4" />
       </g>
 
       <!-- Vapor de las tazas -->
-      <g fill="none" stroke="#86958b" stroke-width="2" stroke-linecap="round">
+      <g fill="none" stroke="#8a94a4" stroke-width="2" stroke-linecap="round">
         <path class="steam" d="M143 132 q-4 -6 0 -11 q4 -5 0 -10" />
         <path class="steam steam--2" d="M150 132 q-4 -6 0 -11 q4 -5 0 -10" />
         <path class="steam steam--3" d="M211 132 q-4 -6 0 -11 q4 -5 0 -10" />
@@ -162,63 +162,63 @@
 
       <!-- Charla: habla uno y después el otro -->
       <g class="bubble">
-        <path d="M62 36 h44 a8 8 0 0 1 8 8 v12 a8 8 0 0 1 -8 8 h-26 l-10 9 v-9 h-8 a8 8 0 0 1 -8 -8 v-12 a8 8 0 0 1 8 -8z" fill="#fff" stroke="#cfd8cb" />
-        <circle class="dot" cx="76" cy="50" r="2.6" fill="#86958b" />
-        <circle class="dot" cx="86" cy="50" r="2.6" fill="#86958b" />
-        <circle class="dot" cx="96" cy="50" r="2.6" fill="#86958b" />
+        <path d="M62 36 h44 a8 8 0 0 1 8 8 v12 a8 8 0 0 1 -8 8 h-26 l-10 9 v-9 h-8 a8 8 0 0 1 -8 -8 v-12 a8 8 0 0 1 8 -8z" fill="#fff" stroke="#cdd3da" />
+        <circle class="dot" cx="76" cy="50" r="2.6" fill="#8a94a4" />
+        <circle class="dot" cx="86" cy="50" r="2.6" fill="#8a94a4" />
+        <circle class="dot" cx="96" cy="50" r="2.6" fill="#8a94a4" />
       </g>
       <g class="bubble bubble--late" transform="translate(360 0) scale(-1 1)">
-        <path d="M62 36 h44 a8 8 0 0 1 8 8 v12 a8 8 0 0 1 -8 8 h-26 l-10 9 v-9 h-8 a8 8 0 0 1 -8 -8 v-12 a8 8 0 0 1 8 -8z" fill="#fff" stroke="#cfd8cb" />
+        <path d="M62 36 h44 a8 8 0 0 1 8 8 v12 a8 8 0 0 1 -8 8 h-26 l-10 9 v-9 h-8 a8 8 0 0 1 -8 -8 v-12 a8 8 0 0 1 8 -8z" fill="#fff" stroke="#cdd3da" />
         <path d="M80 56 c-2 -4 -8 -3 -8 1 c0 4 8 8 8 8 s8 -4 8 -8 c0 -4 -6 -5 -8 -1z" fill="#8a2a1c" transform="translate(4 -9) scale(.9)" />
       </g>
 
-      <path d="M0 242 H360" stroke="#cfd8cb" stroke-width="1.5" stroke-dasharray="2 8" stroke-linecap="round" />
+      <path d="M0 242 H360" stroke="#cdd3da" stroke-width="1.5" stroke-dasharray="2 8" stroke-linecap="round" />
     </svg>
   </div>
 
   <!-- El mozo sale de la cocina y camina hacia la mesa (pasa por detrás de la tarjeta de ingreso) -->
   <div *ngIf="scene === 'staff'" class="waiter-run pointer-events-none absolute bottom-[calc(26%-34px)] hidden lg:block" aria-hidden="true">
     <svg viewBox="30 0 120 260" class="block h-auto w-[86px] xl:w-[114px] 2xl:w-[131px]" role="presentation">
-      <ellipse cx="62" cy="245" rx="30" ry="5" fill="#1e2b24" opacity=".12" />
+      <ellipse cx="62" cy="245" rx="30" ry="5" fill="#262d39" opacity=".12" />
       <g class="bob">
           <!-- pierna de atrás: ancha arriba y fina en el tobillo -->
           <g class="leg-b">
-            <path d="M50 126 Q47 180 55 231 H67 Q69 180 73 126 Z" fill="#3b4a41" />
-            <path d="M52 230 H68 Q82 231 82 240 Q82 245 75 245 H54 Q49 245 49 240 Q49 234 52 230 Z" fill="#1e2b24" />
+            <path d="M50 126 Q47 180 55 231 H67 Q69 180 73 126 Z" fill="#363f4e" />
+            <path d="M52 230 H68 Q82 231 82 240 Q82 245 75 245 H54 Q49 245 49 240 Q49 234 52 230 Z" fill="#262d39" />
           </g>
           <!-- brazo de atrás -->
           <g class="arm-b">
-            <path d="M55 76 Q43 100 47 126 Q52 129 57 126 Q57 102 64 80 Z" fill="#fff" stroke="#dfe6dc" stroke-width="2" stroke-linejoin="round" />
+            <path d="M55 76 Q43 100 47 126 Q52 129 57 126 Q57 102 64 80 Z" fill="#fff" stroke="#e1e5ea" stroke-width="2" stroke-linejoin="round" />
             <circle cx="52" cy="131" r="6.5" fill="#f2c9a5" />
           </g>
           <!-- pierna de adelante -->
           <g class="leg-a">
-            <path d="M49 126 Q47 180 56 231 H68 Q70 180 76 126 Z" fill="#1e2b24" />
-            <path d="M53 230 H69 Q83 231 83 240 Q83 245 76 245 H55 Q50 245 50 240 Q50 234 53 230 Z" fill="#1e2b24" />
-            <path d="M52 241 H80" stroke="#55655b" stroke-width="2" stroke-linecap="round" />
+            <path d="M49 126 Q47 180 56 231 H68 Q70 180 76 126 Z" fill="#262d39" />
+            <path d="M53 230 H69 Q83 231 83 240 Q83 245 76 245 H55 Q50 245 50 240 Q50 234 53 230 Z" fill="#262d39" />
+            <path d="M52 241 H80" stroke="#4f5a6b" stroke-width="2" stroke-linecap="round" />
           </g>
           <!-- torso: hombros anchos que se afinan en la cintura -->
-          <path d="M45 78 Q45 68 57 68 H68 Q80 68 80 79 L75 132 Q74 139 66 139 H55 Q47 139 47 132 Z" fill="#fff" stroke="#dfe6dc" stroke-width="2" />
-          <path d="M47 80 Q47 70 57 70 L62 96 L68 70 Q78 70 78 80 L75 120 H50 Z" fill="#1e2b24" />
-          <g fill="#55655b"><circle cx="62" cy="104" r="1.8" /><circle cx="62" cy="114" r="1.8" /></g>
-          <path d="M50 120 H75 L79 172 H46 Z" fill="#fff" stroke="#dfe6dc" stroke-width="2" stroke-linejoin="round" />
-          <rect x="50" y="118" width="25" height="4" rx="2" fill="#dfe6dc" />
-          <path d="M62 73 l-8 -5 v10 z M62 73 l8 -5 v10 z" fill="#1e2b24" />
+          <path d="M45 78 Q45 68 57 68 H68 Q80 68 80 79 L75 132 Q74 139 66 139 H55 Q47 139 47 132 Z" fill="#fff" stroke="#e1e5ea" stroke-width="2" />
+          <path d="M47 80 Q47 70 57 70 L62 96 L68 70 Q78 70 78 80 L75 120 H50 Z" fill="#262d39" />
+          <g fill="#4f5a6b"><circle cx="62" cy="104" r="1.8" /><circle cx="62" cy="114" r="1.8" /></g>
+          <path d="M50 120 H75 L79 172 H46 Z" fill="#fff" stroke="#e1e5ea" stroke-width="2" stroke-linejoin="round" />
+          <rect x="50" y="118" width="25" height="4" rx="2" fill="#e1e5ea" />
+          <path d="M62 73 l-8 -5 v10 z M62 73 l8 -5 v10 z" fill="#262d39" />
           <!-- cabeza: chica y sin rostro, con pelo que sube hacia adelante -->
           <path d="M57 54 H67 V68 Q62 72 57 68 Z" fill="#f2c9a5" />
           <circle cx="62" cy="43" r="15" fill="#f2c9a5" />
-          <path d="M46 45 A16 16 0 0 1 78 43 Q63 33 46 45 Z" fill="#1e2b24" />
-          <path d="M60 28 q14 -9 24 3 q-12 -2 -22 5 z" fill="#1e2b24" />
+          <path d="M46 45 A16 16 0 0 1 78 43 Q63 33 46 45 Z" fill="#262d39" />
+          <path d="M60 28 q14 -9 24 3 q-12 -2 -22 5 z" fill="#262d39" />
           <!-- brazo que sostiene la bandeja -->
-          <path d="M68 80 L86 103 L99 82" fill="none" stroke="#dfe6dc" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M68 80 L86 103 L99 82" fill="none" stroke="#e1e5ea" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M68 80 L86 103 L99 82" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
           <circle cx="99" cy="78" r="6.5" fill="#f2c9a5" />
           <!-- bandeja con una campana de servir -->
           <g class="tray">
-            <rect x="70" y="68" width="64" height="6" rx="3" fill="#6a7a70" />
-            <path d="M84 68 a16 14 0 0 1 32 0 z" fill="#dfe6dc" stroke="#86958b" stroke-width="1.5" />
-            <circle cx="100" cy="52" r="3.2" fill="#86958b" />
-            <path d="M122 68 v-9 h9 v9 z" fill="#fff" stroke="#cfd8cb" />
+            <rect x="70" y="68" width="64" height="6" rx="3" fill="#667184" />
+            <path d="M84 68 a16 14 0 0 1 32 0 z" fill="#e1e5ea" stroke="#8a94a4" stroke-width="1.5" />
+            <circle cx="100" cy="52" r="3.2" fill="#8a94a4" />
+            <path d="M122 68 v-9 h9 v9 z" fill="#fff" stroke="#cdd3da" />
           </g>
         </g>
     </svg>
@@ -249,7 +249,7 @@
       <span class="ripple ripple--2"></span>
       <span class="ripple ripple--3"></span>
       <svg class="plate plate--big plate--right left-0 top-0"><use href="#tv-plate" /></svg>
-      <svg class="plate plate--small plate--spin-left bottom-[6%] right-[4%] h-[110px] w-[110px] xl:h-[140px] xl:w-[140px]" style="--rim:#5fae86;--acc:#d9786a"><use href="#tv-plate" /></svg>
+      <svg class="plate plate--small plate--spin-left bottom-[6%] right-[4%] h-[110px] w-[110px] xl:h-[140px] xl:w-[140px]" style="--rim:#2ed0ab;--acc:#d9786a"><use href="#tv-plate" /></svg>
     </div>
 
     <!-- Derecha: gira hacia la izquierda, a contratiempo del otro -->
@@ -258,7 +258,7 @@
       <span class="ripple ripple--right ripple--2"></span>
       <span class="ripple ripple--right ripple--3"></span>
       <svg class="plate plate--big plate--left right-0 top-[12%]"><use href="#tv-plate" /></svg>
-      <svg class="plate plate--small plate--spin-right bottom-[8%] left-[4%] h-[100px] w-[100px] xl:h-[130px] xl:w-[130px]" style="--rim:#8a2a1c;--acc:#1d5b3e"><use href="#tv-plate" /></svg>
+      <svg class="plate plate--small plate--spin-right bottom-[8%] left-[4%] h-[100px] w-[100px] xl:h-[130px] xl:w-[130px]" style="--rim:#8a2a1c;--acc:#0b7d66"><use href="#tv-plate" /></svg>
     </div>
 
     <!-- Derecha: una tabla de cocina vista desde arriba; el cuchillo corta una zanahoria en rodajas -->
@@ -269,14 +269,14 @@
         </defs>
 
         <!-- tabla -->
-        <rect x="30" y="52" width="320" height="236" rx="24" fill="#1e2b24" opacity=".1" />
+        <rect x="30" y="52" width="320" height="236" rx="24" fill="#262d39" opacity=".1" />
         <rect x="20" y="34" width="320" height="236" rx="24" fill="#cfa176" stroke="#b98a63" stroke-width="4" />
         <g fill="none" stroke="#c0905f" stroke-width="2" stroke-linecap="round" opacity=".8">
           <path d="M44 150 q60 -8 110 0 t120 -4" />
           <path d="M50 232 q70 -8 130 0 t110 -4" />
           <path d="M240 60 q30 -6 60 0" />
         </g>
-        <ellipse cx="52" cy="62" rx="9" ry="7" fill="#f4f7f2" stroke="#b98a63" stroke-width="3" />
+        <ellipse cx="52" cy="62" rx="9" ry="7" fill="#f6f7f9" stroke="#b98a63" stroke-width="3" />
 
         <!-- verduras de adorno -->
         <g>
@@ -285,14 +285,14 @@
           <g fill="#f6d9a3"><ellipse cx="276" cy="206" rx="3" ry="5" /><ellipse cx="290" cy="204" rx="3" ry="5" /><ellipse cx="284" cy="220" rx="3" ry="5" /></g>
         </g>
         <g>
-          <circle cx="96" cy="214" r="15" fill="#a9c7b3" stroke="#4f8668" stroke-width="3" />
-          <circle cx="96" cy="214" r="9" fill="#d3e3d7" />
-          <circle cx="132" cy="234" r="15" fill="#a9c7b3" stroke="#4f8668" stroke-width="3" />
-          <circle cx="132" cy="234" r="9" fill="#d3e3d7" />
-          <circle cx="62" cy="244" r="15" fill="#a9c7b3" stroke="#4f8668" stroke-width="3" />
-          <circle cx="62" cy="244" r="9" fill="#d3e3d7" />
+          <circle cx="96" cy="214" r="15" fill="#9be7d3" stroke="#1fa88c" stroke-width="3" />
+          <circle cx="96" cy="214" r="9" fill="#c8f3e8" />
+          <circle cx="132" cy="234" r="15" fill="#9be7d3" stroke="#1fa88c" stroke-width="3" />
+          <circle cx="132" cy="234" r="9" fill="#c8f3e8" />
+          <circle cx="62" cy="244" r="15" fill="#9be7d3" stroke="#1fa88c" stroke-width="3" />
+          <circle cx="62" cy="244" r="9" fill="#c8f3e8" />
         </g>
-        <g fill="#4f8668">
+        <g fill="#1fa88c">
           <path d="M150 196 q10 -16 24 -10 q-4 16 -24 10z" />
           <path d="M150 196 q-2 -18 12 -22 q6 14 -12 22z" />
           <path d="M150 196 q-16 -8 -12 -22 q16 0 12 22z" />
@@ -316,14 +316,14 @@
         </g>
 
         <!-- cuchillo (visto desde arriba): la sombra se achica cuando baja a cortar -->
-        <path class="knife-shadow" d="M196 148 L196 72 Q197 60 208 56 L218 60 L218 148 Z M197 146 h20 v72 a10 10 0 0 1 -20 0 z" fill="#1e2b24" opacity=".2" />
+        <path class="knife-shadow" d="M196 148 L196 72 Q197 60 208 56 L218 60 L218 148 Z M197 146 h20 v72 a10 10 0 0 1 -20 0 z" fill="#262d39" opacity=".2" />
         <g class="knife">
           <rect x="197" y="144" width="20" height="76" rx="10" fill="#8a2a1c" />
-          <g fill="#f4f7f2"><circle cx="207" cy="168" r="2.4" /><circle cx="207" cy="186" r="2.4" /><circle cx="207" cy="204" r="2.4" /></g>
-          <path d="M196 148 L196 72 Q197 60 208 56 L218 60 L218 148 Z" fill="#dfe6dc" stroke="#86958b" stroke-width="2" stroke-linejoin="round" />
+          <g fill="#f6f7f9"><circle cx="207" cy="168" r="2.4" /><circle cx="207" cy="186" r="2.4" /><circle cx="207" cy="204" r="2.4" /></g>
+          <path d="M196 148 L196 72 Q197 60 208 56 L218 60 L218 148 Z" fill="#e1e5ea" stroke="#8a94a4" stroke-width="2" stroke-linejoin="round" />
           <path d="M203 80 V140" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8" />
-          <path d="M215 66 V142" stroke="#86958b" stroke-width="2" stroke-linecap="round" opacity=".6" />
-          <rect x="195" y="143" width="24" height="7" rx="2" fill="#86958b" />
+          <path d="M215 66 V142" stroke="#8a94a4" stroke-width="2" stroke-linecap="round" opacity=".6" />
+          <rect x="195" y="143" width="24" height="7" rx="2" fill="#8a94a4" />
         </g>
       </svg>
     </div>
@@ -331,35 +331,16 @@
 
   <!-- Tarjeta de ingreso -->
   <!-- Marca: la versión sobre fondo oscuro del logo de Tavolapp (la "o" es un plato) -->
-  <header class="relative z-10 flex h-[84px] w-full items-center justify-center bg-forest">
-    <span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 42px; line-height: 1; letter-spacing: -0.035em; color: #edf1ea">
-      <span>Tav</span>
-      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
-        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#22322a" stroke="#5fae86" />
-        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#5fae86" />
-        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#22322a" stroke="#5fae86" stroke-opacity=".35" />
-        <path d="M70 66 A24 24 0 0 1 36 74" fill="none" stroke-width="4" stroke-linecap="round" stroke="#5fae86" opacity=".18" />
-        <g fill="none" stroke="#5fae86" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
-          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
-          <path d="M39 50 V69" stroke-width="3.6" />
-        </g>
-        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
-        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
-      </svg>
-      <span>lapp</span>
-    </span>
+  <header class="relative z-10 flex h-[84px] w-full items-center justify-center bg-[#2f3643]">
+    <img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="180" height="44" style="height:44px;width:auto;display:block">
   </header>
 
   <div class="relative z-10 flex min-h-[calc(100vh-84px)] w-full items-center justify-center px-4 py-10">
-    <div class="w-full max-w-[400px] bg-white rounded-card shadow-soft-lg p-6 sm:p-8">
+    <div class="w-full max-w-[400px] bg-white rounded-2xl shadow-soft p-6 sm:p-8">
 
       <!-- PASO 1: ¿a qué local entrás? -->
       <form *ngIf="step === 'local'" (ngSubmit)="checkCode()" class="w-full">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cafe-green-50 text-cafe-green-700">
-          <mat-icon class="!h-7 !w-7 !text-[28px]">storefront</mat-icon>
-        </div>
-        <h2 class="text-center text-2xl font-bold text-sage-900">¿A qué local entrás?</h2>
+        <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 text-center">¿A qué local entrás?</div>
         <p class="text-center text-sage-500 text-sm mt-1 mb-6">Escribí el código de tu restaurante.</p>
 
         <p *ngIf="passwordChanged" role="status" class="mb-4 flex items-start gap-2 rounded-lg bg-cafe-green-50 px-3 py-2 text-sm font-medium text-cafe-green-800">
@@ -368,21 +349,21 @@
         </p>
 
         <div class="mb-3">
-          <label for="local-code" class="block text-xs font-bold text-sage-500 mb-1.5">Código del local</label>
+          <label for="local-code" class="block text-sm font-medium text-sage-700 mb-1.5">Código del local</label>
           <input id="local-code" type="text" [formControl]="codeControl" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
             placeholder="por ejemplo: mi-restaurante"
             class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
         </div>
 
         <label class="mb-4 flex cursor-pointer select-none items-center gap-2 text-sm text-sage-600">
-          <input type="checkbox" [(ngModel)]="rememberLocal" [ngModelOptions]="{ standalone: true }" class="h-4 w-4 accent-[#1d5b3e]" />
+          <input type="checkbox" [(ngModel)]="rememberLocal" [ngModelOptions]="{ standalone: true }" class="h-4 w-4 accent-[#2ed0ab]" />
           Recordar este local en este dispositivo
         </label>
 
         <p *ngIf="codeError" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ codeError }}</p>
 
         <button type="submit" [disabled]="codeControl.invalid || checkingCode"
-          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           {{ checkingCode ? 'Buscando…' : 'Continuar' }}
         </button>
         <button type="button" (click)="skipCode()" class="mt-3 block w-full bg-transparent text-center text-sm font-bold text-cafe-green-700 underline">No sé mi código</button>
@@ -391,11 +372,11 @@
       <!-- PASO 2: usuario y contraseña, con el local confirmado -->
       <form *ngIf="step === 'credentials'" [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="w-full">
         <div *ngIf="!local" class="mb-5 text-center">
-          <h2 class="text-2xl font-bold text-sage-900">Ingresá con tu usuario</h2>
+          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900">Ingresá con tu usuario</div>
           <p class="mt-1 text-sm text-sage-500">Sin código del local. Si tu usuario está en más de un local, te lo vamos a pedir.</p>
           <button type="button" (click)="backToCode()" class="mt-2 bg-transparent text-xs font-bold text-cafe-green-700 underline">Tengo el código</button>
         </div>
-        <div *ngIf="local" class="mb-5 flex items-center gap-3 rounded-xl border border-sage-200 bg-sage-50 p-3">
+        <div *ngIf="local" class="mb-5 flex items-center gap-3 rounded-xl border border-sage-300 bg-sage-50 p-3">
           <img *ngIf="local.logoUrl; else noLogo" [src]="local.logoUrl" [alt]="local.name" class="h-12 w-12 flex-none rounded-full object-cover ring-2 ring-sage-100" />
           <ng-template #noLogo>
             <span class="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-cafe-green-50 text-cafe-green-700"><mat-icon>storefront</mat-icon></span>
@@ -413,13 +394,13 @@
         </p>
 
         <div class="mb-4">
-          <label for="login-user" class="block text-xs font-bold text-sage-500 mb-1.5">Usuario</label>
+          <label for="login-user" class="block text-sm font-medium text-sage-700 mb-1.5">Usuario</label>
           <input id="login-user" type="text" formControlName="email" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
             class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
         </div>
 
         <div class="mb-6">
-          <label for="login-pass" class="block text-xs font-bold text-sage-500 mb-1.5">Contraseña</label>
+          <label for="login-pass" class="block text-sm font-medium text-sage-700 mb-1.5">Contraseña</label>
           <input id="login-pass" type="password" appPasswordToggle formControlName="password" required autocomplete="current-password"
             class="w-full px-4 py-2.5 border border-sage-200 rounded-lg text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
         </div>
@@ -427,7 +408,7 @@
         <p *ngIf="error" role="alert" class="mb-4 px-3 py-2 rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">{{ error }}</p>
 
         <button type="submit" [disabled]="formLogin.invalid || loading"
-          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-bold text-sm rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="w-full py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           {{ loading ? 'Ingresando…' : 'Ingresar' }}
         </button>
       </form>

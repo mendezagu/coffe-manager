@@ -1,26 +1,26 @@
 html, body {
   height: 100%;
   margin: 0;
-  background-color: #edf1ea; /* sage-100 */
+  background-color: #eef0f3; /* sage-100 */
 }
 
 :host {
   display: block;
   min-height: 100vh;
-  background-color: #edf1ea; /* sage-100 */
+  background-color: #eef0f3; /* sage-100 */
 }
 
 mat-drawer-container {
-  background-color: #edf1ea; /* sage-100 */
+  background-color: #eef0f3; /* sage-100 */
 }
 
 mat-drawer {
   background-color: #ffffff !important;
-  border-right: 1px solid #e0e7dc; /* sage-200 */
+  border-right: 1px solid #e1e5ea; /* sage-200 */
 }
 
 mat-drawer-content {
-  background-color: #edf1ea; /* sage-100 */
+  background-color: #eef0f3; /* sage-100 */
 }
 
 .example-container {
@@ -37,7 +37,7 @@ mat-drawer-content {
   width: 100%;
   margin-bottom: 0;
   margin-top: 0;
-  border-bottom: 1px solid #e0e7dc; /* sage-200 */
+  border-bottom: 1px solid #e1e5ea; /* sage-200 */
   background-color: #ffffff !important;
 }
 
@@ -84,10 +84,10 @@ mat-drawer-content {
 @keyframes nav-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(29, 91, 62, 0.35);
+    box-shadow: 0 0 0 0 rgba(11, 125, 102, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(29, 91, 62, 0);
+    box-shadow: 0 0 0 6px rgba(11, 125, 102, 0);
   }
 }
 
@@ -97,11 +97,11 @@ mat-drawer-content {
   }
 }
 
-// Menú lateral en verde oscuro (igual en claro y en oscuro): #07241a de fondo, #1e3a2f para el ítem activo y menta (#aff1ce) de acento
+// Menú lateral en verde oscuro (igual en claro y en oscuro): #2f3643 de fondo, #434d5f para el ítem activo y menta (#6fe3c6) de acento
 mat-drawer.example-sidenav {
-  background-color: #07241a !important;
-  border-right-color: #07241a !important;
-  color: #dbe8df;
+  background-color: #2f3643 !important;
+  border-right-color: #2f3643 !important;
+  color: #e3e7ed;
 
   // textos
   .text-sage-800,
@@ -110,14 +110,14 @@ mat-drawer.example-sidenav {
   }
   .text-sage-700,
   .\!text-sage-600 {
-    color: #dbe8df !important;
+    color: #e3e7ed !important;
   }
   .text-sage-600,
   .text-sage-500 {
-    color: #86a496 !important;
+    color: #a2adbd !important;
   }
   .text-sage-400 {
-    color: #7fa391 !important;
+    color: #98a4b5 !important;
   }
   .hover\:text-sage-800:hover {
     color: #ffffff !important;
@@ -125,31 +125,31 @@ mat-drawer.example-sidenav {
 
   // ítem activo y ítems nuevos
   .\!bg-cafe-green-50 {
-    background-color: #1e3a2f !important;
+    background-color: #434d5f !important;
   }
   .\!text-cafe-green-700,
   .\!text-cafe-green-800 {
     color: #ffffff !important;
   }
   .bg-cafe-green-50 {
-    background-color: #153126 !important;
+    background-color: #3a4252 !important;
   }
   .text-cafe-green-700 {
-    color: #aff1ce !important;
+    color: #6fe3c6 !important;
   }
   .border-cafe-green-700\/40 {
-    border-color: rgba(175, 241, 206, 0.35) !important;
+    border-color: rgba(111, 227, 198, 0.35) !important;
   }
 
   // ayuda, selector de apariencia y cerrar sesión
   .bg-sage-100 {
-    background-color: #153126 !important;
+    background-color: #3a4252 !important;
   }
   .hover\:bg-sage-200:hover {
-    background-color: #1e3a2f !important;
+    background-color: #434d5f !important;
   }
   .bg-white {
-    background-color: #1e3a2f !important;
+    background-color: #434d5f !important;
   }
   .\!bg-cafe-red-50 {
     background-color: #3a1c18 !important;
@@ -160,18 +160,18 @@ mat-drawer.example-sidenav {
 
   // logo del negocio
   img.rounded-full {
-    box-shadow: 0 0 0 2px #07241a, 0 0 0 5px #1e3a2f !important;
+    box-shadow: 0 0 0 2px #2f3643, 0 0 0 5px #434d5f !important;
   }
 
   // marca Tavolapp: el plato en menta sobre el verde oscuro
   svg circle {
-    stroke: #aff1ce;
+    stroke: #6fe3c6;
   }
-  svg circle[fill='#f6f8f4'] {
-    fill: #07241a;
+  svg circle[fill='#f3f5f7'] {
+    fill: #2f3643;
   }
   svg g {
-    stroke: #aff1ce;
+    stroke: #6fe3c6;
   }
   svg path[fill='#8a2a1c'],
   svg rect[fill='#8a2a1c'] {

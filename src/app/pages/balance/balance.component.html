@@ -191,16 +191,18 @@
       </div>
     </div>
 
-    <!-- Total: una línea de cifras, sin bloque de color -->
-    <div class="mb-6 flex flex-wrap items-baseline gap-x-8 gap-y-2 rounded-2xl bg-white px-5 py-4 shadow-soft">
-      <div>
-        <strong class="font-jakarta text-3xl font-bold tabular-nums text-cafe-green-700">{{ totalRevenue | money }}</strong>
-        <span class="ml-[8px] text-sm text-sage-600">recaudado</span>
-      </div>
-      <div>
-        <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ rows.length }}</strong>
-        <span class="ml-[6px] text-sm text-sage-600">{{ activeView === 'takeaway' ? (rows.length === 1 ? 'venta' : 'ventas') : (rows.length === 1 ? 'mesa' : 'mesas') }}</span>
-      </div>
+    <!-- Total: bloques iguales, el mismo formato que Reportes y Mesas -->
+    <div class="mb-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-sage-200 shadow-soft lg:grid-flow-col lg:auto-cols-fr lg:grid-cols-none">
+        <div class="min-w-0 bg-white p-[16px] sm:p-[20px] [&:last-child:nth-child(odd)]:col-span-2 lg:[&:last-child:nth-child(odd)]:col-span-1">
+          <p class="m-0 text-sm font-medium text-sage-600">Recaudado</p>
+          <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[26px] font-bold leading-tight tabular-nums text-sage-900 xl:text-[28px]">{{ totalRevenue | money:true }}</p>
+          <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">&nbsp;</p>
+        </div>
+        <div class="min-w-0 bg-white p-[16px] sm:p-[20px] [&:last-child:nth-child(odd)]:col-span-2 lg:[&:last-child:nth-child(odd)]:col-span-1">
+          <p class="m-0 text-sm font-medium text-sage-600">{{ activeView === 'takeaway' ? 'Ventas' : 'Mesas' }}</p>
+          <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[26px] font-bold leading-tight tabular-nums text-sage-900 xl:text-[28px]">{{ rows.length }}</p>
+          <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">{{ activeView === 'takeaway' ? (rows.length === 1 ? 'venta' : 'ventas') : (rows.length === 1 ? 'mesa cobrada' : 'mesas cobradas') }}</p>
+        </div>
     </div>
 
     <!-- Mesas: qué mesas y qué mozos -->

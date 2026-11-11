@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
@@ -46,6 +46,8 @@ export class CardComponent implements OnInit, OnDestroy {
   viewMode: 'grouped' | 'flat' = 'grouped';
   selectedGroupKey: string | null = null; // sector elegido en las pestañas; null o '__all__' = todos
   statusFilter: 'all' | 'free' | 'busy' | 'qr' = 'all';
+  // false hasta que llega la primera respuesta: mientras tanto se muestra un esqueleto en vez de "sin mesas"
+  tablesLoaded = false;
   waiters: Waiter[] = [];
    selectedItems: MenuItem[] = [];
    menuItems: MenuItem[] = [];
@@ -70,6 +72,7 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.nowTimer = setInterval(() => (this.now = Date.now()), 30000);
     this.restoreView();
     this.guideSub = this.onboarding.guideActive$.subscribe((on) => (this.guideOn = on));
     // Las mesas se actualizan en el momento en que el servidor avisa un cambio (otro mozo, la cocina, un pedido por QR).
@@ -115,6 +118,8 @@ export class CardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.laneObserver?.disconnect();
+    if (this.nowTimer) clearInterval(this.nowTimer);
     this.tablesSub?.unsubscribe();
     this.guideSub?.unsubscribe();
     this.shiftSub?.unsubscribe();
@@ -128,6 +133,9 @@ export class CardComponent implements OnInit, OnDestroy {
   // ---- Resumen del administrador ----
   live: LiveSummary | null = null;
   private liveTimer?: ReturnType<typeof setInterval>;
+  // Reloj para el tiempo de espera de los pedidos por QR ("hace 4 min")
+  now = Date.now();
+  private nowTimer?: ReturnType<typeof setInterval>;
 
   // Las tarjetas ocupan todo el ancho. El administrador tiene cinco: en celular van de a dos y desde
   // pantallas medianas todas en una sola fila. Los demás roles tienen tres y siempre van en una fila.
@@ -206,29 +214,30 @@ export class CardComponent implements OnInit, OnDestroy {
       dot: 'bg-cafe-mint-500',
       meta: 'text-cafe-green-700',
       strong: 'text-cafe-green-900',
-      primary: 'bg-cafe-mint-500 text-[#0c1511] hover:bg-cafe-mint-600',
+      primary: 'bg-cafe-mint-500 text-[#084440] hover:bg-cafe-mint-600',
       secondary: 'bg-cafe-mint-100 text-cafe-green-800 hover:bg-cafe-mint-200',
     },
     amber: {
-      // Pedido o aviso por QR esperando: ámbar (distinto del rojo de ocupada), con el texto "Pendiente"
-      card: 'bg-cafe-amber-50',
-      title: 'text-cafe-amber-900',
-      status: 'text-cafe-amber-900',
-      dot: 'bg-cafe-amber-600',
-      meta: 'text-cafe-amber-900',
-      strong: 'text-cafe-amber-900',
-      primary: 'bg-cafe-amber-700 text-white hover:bg-cafe-amber-800',
-      secondary: 'bg-cafe-amber-100 text-cafe-amber-900 hover:bg-cafe-amber-200',
+      // Pedido o aviso por QR esperando: ámbar lleno (distinto del rojo de ocupada), con el texto "Pendiente"
+      card: 'bg-cafe-amber-700',
+      title: 'text-[#ffffff]',
+      status: 'text-[#ffffff]',
+      dot: 'bg-[#ffffff]',
+      meta: 'text-[#ffffffe6]',
+      strong: 'text-[#ffffff]',
+      primary: 'bg-[#ffffff] text-[#4a2c00] hover:bg-[#fdf3e1]',
+      secondary: 'bg-[#ffffff26] text-[#ffffff] hover:bg-[#ffffff40]',
     },
     red: {
-      card: 'bg-cafe-red-50',
-      title: 'text-cafe-red-900',
-      status: 'text-cafe-red-800',
-      dot: 'bg-cafe-red-700',
-      meta: 'text-cafe-red-700',
-      strong: 'text-cafe-red-900',
-      primary: 'bg-cafe-red-700 text-white hover:bg-cafe-red-800',
-      secondary: 'bg-cafe-red-100 text-cafe-red-800 hover:bg-cafe-red-200',
+      // Ocupada: ladrillo lleno, para que lo que está en servicio se vea de lejos
+      card: 'bg-cafe-red-700',
+      title: 'text-[#ffffff]',
+      status: 'text-[#ffffff]',
+      dot: 'bg-[#ffffff]',
+      meta: 'text-[#ffffffe6]',
+      strong: 'text-[#ffffff]',
+      primary: 'bg-[#ffffff] text-[#6b2015] hover:bg-[#fbedea]',
+      secondary: 'bg-[#ffffff26] text-[#ffffff] hover:bg-[#ffffff40]',
     },
   } as const;
 
@@ -248,6 +257,191 @@ export class CardComponent implements OnInit, OnDestroy {
       case 'qr': return this.needsQrAttention(table);
       default: return true;
     }
+  }
+
+  // ---- Salón compacto: fichas por mesa y un panel con las acciones de la mesa elegida ----
+  panelTableId: string | null = null;
+
+  get panelTable(): Table | null {
+    return this.panelTableId ? this.tables.find((t) => t.id === this.panelTableId) ?? null : null;
+  }
+
+  openPanel(table: Table): void { this.panelTableId = table.id; }
+  closePanel(): void { this.panelTableId = null; }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filterOpen) this.filterOpen = false;
+    else if (this.panelTableId) this.closePanel();
+  }
+
+  // Filtro por estado: un botón con menú desplegable (ocupa poco y no se encima en pantallas chicas)
+  filterOpen = false;
+  get activeStatus() { return this.statusOptions.find((o) => o.key === this.statusFilter); }
+  pickStatus(key: 'all' | 'free' | 'busy' | 'qr'): void { this.statusFilter = key; this.filterOpen = false; }
+
+  // Cierra el panel y ejecuta la acción (los diálogos se abren encima de la pantalla, no del panel)
+  panelAction(kind: 'order' | 'orders' | 'total' | 'print' | 'qr', table: Table): void {
+    this.closePanel();
+    if (kind === 'order') this.orderButtonClicked(table);
+    else if (kind === 'orders') this.openTableInfoDialog(table);
+    else if (kind === 'total') this.openTotalDialog(table);
+    else if (kind === 'print') this.printTicket(table.id);
+    else this.openQrInbox(table);
+  }
+
+  // Desde cuándo espera un cliente en esta mesa (el más antiguo entre pedidos y avisos por QR)
+  private waitingSince(table: Table): number | null {
+    const times = [...this.qrInbox.requests, ...this.qrInbox.calls]
+      .filter((x) => x.tableId === table.id)
+      .map((x) => Date.parse(x.createdAt))
+      .filter((n) => !isNaN(n));
+    return times.length ? Math.min(...times) : null;
+  }
+
+  waitMinutes(table: Table): number | null {
+    const t = this.waitingSince(table);
+    return t === null ? null : Math.max(0, Math.floor((this.now - t) / 60000));
+  }
+
+  waitText(table: Table): string {
+    const m = this.waitMinutes(table);
+    if (m === null) return '';
+    if (m < 1) return 'recién llegó';
+    if (m < 60) return 'hace ' + m + ' min';
+    return 'hace ' + Math.floor(m / 60) + ' h ' + (m % 60) + ' min';
+  }
+
+  // Más de 5 minutos esperando: la ficha late para que se atienda primero
+  waitingLate(table: Table): boolean {
+    const m = this.waitMinutes(table);
+    return m !== null && m >= 5;
+  }
+
+  // La barra flotante de avisos solo aparece cuando la lista de atención quedó fuera de la pantalla
+  laneVisible = true;
+  private laneObserver?: IntersectionObserver;
+
+  @ViewChild('lane') set laneRef(el: ElementRef<HTMLElement> | undefined) {
+    this.laneObserver?.disconnect();
+    this.laneObserver = undefined;
+    if (!el) { this.laneVisible = false; return; }
+    if (typeof IntersectionObserver === 'undefined') { this.laneVisible = true; return; }
+    this.laneObserver = new IntersectionObserver(([entry]) => this.zone.run(() => (this.laneVisible = entry.isIntersecting)), { threshold: 0.2 });
+    this.laneObserver.observe(el.nativeElement);
+  }
+
+  // Cifras del turno: en celular empiezan plegadas para que lo urgente quede arriba
+  shiftOpen = false;
+
+  // Mesas con un cliente esperando (pedido o aviso por QR), las que esperan hace más primero
+  get attentionTables(): Table[] {
+    return this.tables
+      .filter((t) => this.needsQrAttention(t)) // solo clientes esperando; los platos listos se ven en la ficha de cada mesa
+      .sort((a, b) => (this.waitingSince(a) ?? Infinity) - (this.waitingSince(b) ?? Infinity));
+  }
+
+  // Con muchas mesas esperando, la lista muestra las 5 que esperan hace más y el resto se despliega
+  laneExpanded = false;
+  readonly laneLimit = 5;
+  get laneTables(): Table[] {
+    const all = this.attentionTables;
+    return this.laneExpanded ? all : all.slice(0, this.laneLimit);
+  }
+
+  // Texto corto para la píldora de espera de la lista de atención
+  waitShort(table: Table): string {
+    const m = this.waitMinutes(table);
+    if (m === null) return 'Listo';
+    if (m < 1) return 'Ahora';
+    if (m < 60) return m + ' min';
+    return Math.floor(m / 60) + ' h ' + (m % 60) + ' m';
+  }
+
+  // Qué se hace al tocar esa mesa
+  actionLabel(table: Table): string {
+    if (this.qrRequestsOf(table) > 0) return 'Atender';
+    if (this.qrCallsOf(table).bill) return 'Cobrar';
+    if (this.qrCallsOf(table).waiter) return 'Ver mesa';
+    return 'Servir';
+  }
+
+  // Un pedido por confirmar solo se resuelve en la bandeja: se abre directo (un toque en vez de tres)
+  tileClick(table: Table): void {
+    if (this.qrRequestsOf(table) > 0) this.openQrInbox(table);
+    else this.openPanel(table);
+  }
+
+  // Prioridad visual: atención (algo espera a alguien) > ocupada > libre
+  tileTone(table: Table): 'free' | 'busy' | 'alert' {
+    if (this.needsQrAttention(table)) return 'alert'; // los platos listos no pintan la ficha de naranja: una mesa ocupada se ve roja
+    return this.isFree(table) ? 'free' : 'busy';
+  }
+
+  // Tamaño del nombre según su largo, para que entre entero en la ficha
+  nameSizeClass(name: string): string {
+    const n = (name ?? '').length;
+    return n <= 8 ? 'text-xl' : n <= 12 ? 'text-lg' : 'text-base';
+  }
+
+  // Qué espera en una mesa que pide atención
+  tileReason(table: Table): string {
+    const calls = this.qrCallsOf(table);
+    const requests = this.qrRequestsOf(table);
+    if (requests > 0) return requests === 1 ? 'Pedido por QR' : requests + ' pedidos por QR';
+    if (calls.bill) return 'Pide la cuenta';
+    if (calls.waiter) return 'Llama al mozo';
+    const ready = this.readyCount(table);
+    if (ready > 0) return ready === 1 ? '1 plato listo' : ready + ' platos listos';
+    return '';
+  }
+
+  // El sector ya está en el título de la sección: se lo saca del nombre ("Salon M1" dentro de "Salon" -> "M1")
+  shortName(table: Table, sectorName?: string | null): string {
+    const name = String(table.name ?? '').trim();
+    const sector = (sectorName ?? '').trim();
+    const fold = (v: string) => v.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); // sin tildes ni mayúsculas
+    if (sector && fold(name).startsWith(fold(sector)) && name.length > sector.length) {
+      const rest = name.slice(sector.length).replace(/^[\s\-–·:]+/, '').trim();
+      if (rest) return rest;
+    }
+    return name;
+  }
+
+  readonly tileStyles = {
+    free: {
+      tile: 'bg-[var(--floor-free-bg)] text-[var(--floor-free-ink)] shadow-soft',
+      sub: 'text-[var(--floor-muted)]',
+      dot: 'rounded-full border-2 border-[var(--floor-free-dot)]',
+      count: 'bg-[var(--floor-line)] text-[var(--floor-free-ink)]',
+    },
+    busy: {
+      tile: 'bg-[var(--floor-busy-bg)] text-[var(--floor-busy-ink)]',
+      sub: 'text-[var(--floor-busy-ink)]',
+      dot: 'rounded-full bg-[var(--floor-busy-accent)]',
+      count: 'bg-[var(--floor-busy-accent)] text-[#ffffff]',
+    },
+    alert: {
+      tile: 'bg-[var(--floor-alert-bg)] text-[#ffffff] shadow-soft',
+      sub: 'text-[#ffffffeb]',
+      dot: 'rotate-45 rounded-[2px] bg-[#ffffff]',
+      count: 'bg-[#ffffff] text-[#7c2d12]',
+    },
+  } as const;
+
+  // Sin esto, cada ciclo de cambios vuelve a crear los botones y un clic que cruza uno se pierde
+  trackTable = (_: number, t: { id: any }) => t.id;
+  trackOption = (_: number, o: { key: string }) => o.key;
+
+  // Filtro por estado: un toque, con la cantidad de cada uno a la vista
+  get statusOptions(): { key: 'all' | 'free' | 'busy' | 'qr'; label: string; count: number }[] {
+    const opts: { key: 'all' | 'free' | 'busy' | 'qr'; label: string; count: number }[] = [
+      { key: 'all', label: 'Todas', count: this.tables.length },
+      { key: 'free', label: 'Libres', count: this.freeCount },
+      { key: 'busy', label: 'Ocupadas', count: this.busyCount },
+    ];
+    if (this.settings.value.qrActive) opts.push({ key: 'qr', label: 'Por QR', count: this.qrTablesCount });
+    return opts;
   }
 
   // ---- Resumen de arriba ----
@@ -435,7 +629,7 @@ export class CardComponent implements OnInit, OnDestroy {
 
   loadTables(): void {
     this.gestionService.getTables().subscribe((tables) => {
-      console.log(tables,'LAS MESAS desde CARD');
+      this.tablesLoaded = true;
       
       this.tables = tables.map((table) => {
         const waiter = this.waiters.find((w) => w._id === table.waiterId);

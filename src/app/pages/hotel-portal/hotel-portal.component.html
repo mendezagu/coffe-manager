@@ -46,7 +46,7 @@
         <p *ngIf="!s.hotel.active" role="alert" class="mb-[16px] px-[12px] py-[8px] rounded-lg bg-cafe-red-50 text-cafe-red-700 text-sm font-medium">El hotel está dado de baja: los huéspedes no pueden pedir vouchers.</p>
 
         <!-- Resumen -->
-        <div class="mb-[16px] flex flex-wrap items-baseline gap-x-8 gap-y-2 rounded-2xl bg-white px-5 py-4 shadow-soft">
+        <div class="mb-[16px] flex flex-wrap items-baseline gap-x-8 gap-y-2 rounded-2xl bg-white px-[20px] py-[16px] shadow-soft">
           <div><strong class="font-jakarta text-xl font-bold tabular-nums">{{ s.totals.issued }}</strong><span class="ml-[6px] text-sm text-sage-600">emitidos</span></div>
           <div><strong class="font-jakarta text-xl font-bold tabular-nums text-cafe-green-700" data-testid="redeemed">{{ s.totals.redeemed }}</strong><span class="ml-[6px] text-sm text-sage-600">usados</span></div>
           <div><strong class="font-jakarta text-xl font-bold tabular-nums">{{ s.totals.expired }}</strong><span class="ml-[6px] text-sm text-sage-600">vencidos</span></div>

@@ -1,10 +1,7 @@
-<section *ngIf="visible" class="mx-2 mt-3 sm:mx-8 sm:mt-6 rounded-2xl bg-white border border-sage-200 shadow-soft" aria-labelledby="gs-title">
+<section *ngIf="visible" class="rounded-2xl bg-white shadow-soft" aria-labelledby="gs-title">
 
   <!-- Encabezado: en celular se puede plegar para que no tape las mesas -->
   <div class="flex items-center gap-3 p-4 sm:p-5">
-    <span class="grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
-      <mat-icon>checklist</mat-icon>
-    </span>
     <div class="min-w-0 flex-1">
       <div id="gs-title" role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0">Primeros pasos</div>
       <div class="mt-1.5 flex items-center gap-3">
@@ -15,7 +12,7 @@
       </div>
     </div>
     <button type="button" (click)="open = !open" [attr.aria-expanded]="open" [attr.aria-label]="open ? 'Plegar la lista' : 'Mostrar la lista'"
-      class="grid h-10 w-10 flex-none place-items-center rounded-lg text-sage-500 hover:bg-sage-100 transition-colors">
+      class="grid h-11 w-11 flex-none place-items-center rounded-lg text-sage-500 hover:bg-sage-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
       <mat-icon>{{ open ? 'expand_less' : 'expand_more' }}</mat-icon>
     </button>
   </div>
@@ -28,13 +25,13 @@
         class="self-start flex-none px-3 py-1.5 rounded-lg text-sm font-bold text-cafe-amber-900 bg-white ring-1 ring-cafe-amber-300 hover:bg-cafe-amber-100 transition-colors disabled:opacity-50 sm:self-auto">Borrar el ejemplo</button>
     </div>
 
-    <ul class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-2 p-0 sm:grid-cols-2">
+    <ul class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-x-[16px] gap-y-[4px] p-0 sm:grid-cols-2">
       <li *ngFor="let t of tasks; let i = index; trackBy: trackTitle" class="min-w-0">
         <!-- El próximo paso pendiente se destaca: borde y fondo verdes, un brillo que late y un botón de acción -->
         <a [routerLink]="t.done ? null : t.link"
-          class="flex min-w-0 items-center gap-3 rounded-xl border p-3 no-underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40"
+          class="flex min-h-[56px] min-w-0 items-center gap-3 rounded-xl p-3 no-underline transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40"
           [class.gs-next]="i === nextIndex"
-          [ngClass]="t.done ? 'border-sage-100 bg-sage-50' : i === nextIndex ? 'border-cafe-green-700 bg-cafe-green-50 hover:bg-cafe-green-100/60 flex-wrap sm:flex-nowrap' : 'border-sage-200 bg-white hover:border-cafe-green-300 hover:bg-cafe-green-50/50'">
+          [ngClass]="t.done ? '' : i === nextIndex ? 'bg-cafe-green-50 hover:bg-cafe-green-100/60 flex-wrap sm:flex-nowrap sm:col-span-2' : 'hover:bg-sage-50'">
           <span class="grid h-8 w-8 flex-none place-items-center rounded-full"
             [ngClass]="t.done ? 'bg-cafe-green-700 text-white' : i === nextIndex ? 'bg-cafe-green-700 text-white' : 'border-2 border-sage-300 text-transparent'" aria-hidden="true">
             <mat-icon *ngIf="i !== nextIndex || t.done" class="!w-5 !h-5 !text-xl">check</mat-icon>
@@ -42,21 +39,20 @@
           </span>
           <span class="min-w-0 flex-1" [ngClass]="i === nextIndex && !t.done ? 'basis-[calc(100%-3rem)] sm:basis-0' : ''">
             <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <span class="font-bold" [ngClass]="t.done ? 'truncate text-sm text-sage-400 line-through' : i === nextIndex ? 'text-base font-extrabold leading-5 text-sage-900' : 'truncate text-sm text-sage-900'">{{ t.title }}</span>
-              <span *ngIf="i === nextIndex && !t.done" class="flex-none rounded-full bg-cafe-green-700 px-2 py-px text-xs font-bold uppercase tracking-wide text-white">Siguiente paso</span>
+              <span class="font-bold" [ngClass]="t.done ? 'truncate text-sm text-sage-600 line-through' : i === nextIndex ? 'text-base font-extrabold leading-5 text-sage-900' : 'truncate text-sm text-sage-900'">{{ t.title }}</span>
             </span>
-            <span class="block text-xs" [ngClass]="i === nextIndex && !t.done ? 'text-cafe-green-700 sm:truncate' : 'truncate text-sage-500'">{{ t.hint }}</span>
+            <span class="block text-sm" [ngClass]="i === nextIndex && !t.done ? 'text-cafe-green-700 sm:truncate' : 'truncate text-sage-600'">{{ t.hint }}</span>
           </span>
-          <span *ngIf="i === nextIndex && !t.done" class="inline-flex w-full flex-none items-center justify-center gap-1 rounded-xl bg-cafe-green-700 px-3 py-2 text-xs font-semibold text-white shadow-soft sm:w-auto sm:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+          <span *ngIf="i === nextIndex && !t.done" class="inline-flex min-h-[44px] w-full flex-none items-center justify-center gap-1 rounded-xl bg-cafe-green-700 px-4 text-sm font-semibold text-white sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
             {{ t.cta }}
             <mat-icon class="!w-4 !h-4 !text-base">{{ t.link ? 'arrow_forward' : 'arrow_downward' }}</mat-icon>
           </span>
-          <mat-icon *ngIf="!t.done && i !== nextIndex" class="flex-none !text-xl text-sage-400">chevron_right</mat-icon>
+          <mat-icon *ngIf="!t.done && i !== nextIndex" class="flex-none !text-xl text-sage-500">chevron_right</mat-icon>
           <span class="sr-only">{{ t.done ? '(hecho)' : '(pendiente)' }}</span>
         </a>
       </li>
     </ul>
 
-    <p class="m-0 mt-3 text-xs text-sage-500">Cuando completes estos {{ tasks.length }} pasos se habilita el resto del menú.</p>
+    <p class="m-0 mt-3 text-sm text-sage-600">Cuando completes estos {{ tasks.length }} pasos se habilita el resto del menú.</p>
   </div>
 </section>

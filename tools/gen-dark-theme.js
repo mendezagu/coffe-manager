@@ -1,4 +1,4 @@
-// Genera src/_dark-theme.generated.scss: el modo oscuro del panel interno (estilo Discord, grises neutros).
+// Genera src/_dark-theme.generated.scss: el modo oscuro del panel interno (pizarra de la paleta nueva).
 //
 // En vez de tocar cada pantalla, se recorren los templates y los .ts buscando las clases de color de Tailwind que se
 // usan (bg-white, bg-sage-100, text-cafe-green-700, hover:bg-cafe-red-50…) y por cada una se escribe, bajo `html.dark`,
@@ -14,16 +14,16 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', 'src');
 const OUT = path.join(ROOT, '_dark-theme.generated.scss');
 
-// ---- paleta oscura (Discord) ----
-const SURFACE = '#2b2d31'; // lo que en claro es "bg-white" (tarjetas, paneles)
-const SAGE_BG = { 50: '#34363c', 100: '#313338', 200: '#3f4147', 300: '#4a4d54' };
-const SAGE_BORDER = { 50: '#3f4147', 100: '#3f4147', 200: '#3f4147', 300: '#4a4d54', 400: '#5c5f66' };
-const SAGE_TEXT = { 400: '#80848e', 500: '#949ba4', 600: '#b5bac1', 700: '#c4c9ce', 800: '#dbdee1', 900: '#f2f3f5' };
+// ---- paleta oscura (pizarra) ----
+const SURFACE = '#252b36'; // lo que en claro es "bg-white" (tarjetas, paneles)
+const SAGE_BG = { 50: '#2f3744', 100: '#2b323e', 200: '#3a4252', 300: '#454e5f' };
+const SAGE_BORDER = { 50: '#3a4252', 100: '#3a4252', 200: '#3a4252', 300: '#454e5f', 400: '#5a6478' };
+const SAGE_TEXT = { 400: '#8a94a4', 500: '#9ba5b4', 600: '#b4bcc8', 700: '#c6ccd6', 800: '#dde1e8', 900: '#f2f4f7' };
 
 // Color base de cada tono, para armar sus tintes oscuros y sus textos claros
 const HUES = {
-  'cafe-green': '#4f8668',
-  'cafe-mint': '#5fae86',
+  'cafe-green': '#2bb598',
+  'cafe-mint': '#2ed0ab',
   'cafe-red': '#c0462f',
   'cafe-amber': '#e6834a',
   yellow: '#eab308',
@@ -47,9 +47,9 @@ const tintBorder = (hue, step) => mix(SURFACE, HUES[hue], TINT_MIX[step] + 0.1);
 const TEXT_MIX = { 600: 0.3, 700: 0.5, 800: 0.62, 900: 0.74 };
 const lightText = (hue, step) => mix(HUES[hue], '#ffffff', TEXT_MIX[step]);
 
-// Botones principales: el verde botella (#1b2822) casi no se distingue de una tarjeta oscura, así que se aclara
-const BUTTON_GREEN = '#2e7a57';
-const BUTTON_GREEN_HOVER = '#3a8c67';
+// Botones principales: el verde agua de marca (#0b7d66) se usa igual que en claro y se distingue bien de una tarjeta oscura
+const BUTTON_GREEN = '#2ed0ab';
+const BUTTON_GREEN_HOVER = '#22b592';
 
 function darkValue(prop, color, step, hover) {
   if (color === 'white') return prop === 'bg' ? SURFACE : null;

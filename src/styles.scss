@@ -7,13 +7,13 @@
 
 html, body { 
   height: 100%; 
-  background: #edf1ea;
+  background: #eef0f3;
 }
 
 body { 
   margin: 0; 
   font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', sans-serif;
-  color: #1e2b24;
+  color: #262d39;
 }
 
 .snackbar-center {
@@ -95,23 +95,23 @@ mat-icon {
    El botón de acción (Cerrar) va en verde de marca. */
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-color: #ffffff;
-  --mdc-snackbar-supporting-text-color: #1e2b24;
-  --mat-snack-bar-button-color: #1d5b3e;
+  --mdc-snackbar-supporting-text-color: #262d39;
+  --mat-snack-bar-button-color: #0b7d66;
   --mdc-snackbar-container-shape: 16px;
   margin: 16px !important;
 }
 
 .mat-mdc-snack-bar-container .mdc-snackbar__surface {
   background: #ffffff !important;
-  border: 1px solid #e0e7dc;
-  border-left: 4px solid #1d5b3e;
+  border: 1px solid #e1e5ea;
+  border-left: 4px solid #0b7d66;
   border-radius: 16px !important;
   box-shadow: 0 30px 60px -20px rgba(30, 43, 36, 0.45), 0 1px 2px rgba(30, 43, 36, 0.06) !important;
   padding-right: 4px;
 }
 
 .mat-mdc-snack-bar-container .mdc-snackbar__label {
-  color: #1e2b24 !important;
+  color: #262d39 !important;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -119,7 +119,7 @@ mat-icon {
 }
 
 .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
-  color: #1d5b3e !important;
+  color: #0b7d66 !important;
   font-weight: 700;
   letter-spacing: 0;
   border-radius: 10px;
@@ -130,14 +130,14 @@ mat-icon {
 }
 
 html.dark .mat-mdc-snack-bar-container .mdc-snackbar__surface {
-  background: #2b2d31 !important;
+  background: #252b36 !important;
   border-color: #3a3d43;
   border-left-color: #3f9d70;
   box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6) !important;
 }
 
 html.dark .mat-mdc-snack-bar-container .mdc-snackbar__label {
-  color: #dbdee1 !important;
+  color: #dde1e8 !important;
 }
 
 html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
@@ -179,7 +179,7 @@ html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
     @apply mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-8 sm:py-4;
   }
   .page-header__icon {
-    @apply grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-green-700 text-white shadow-green;
+    @apply grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-mint-500 text-cafe-green-900;
   }
   /* Material le pisa el peso y el tamaño a los h1: por eso van con !important */
   .page-title {
@@ -298,15 +298,15 @@ mat-drawer-content,
 
 html.dark {
   color-scheme: dark;
-  background: #313338;
-  --mdc-dialog-container-color: #2b2d31;
-  --mdc-dialog-subhead-color: #f2f3f5;
-  --mdc-dialog-supporting-text-color: #dbdee1;
+  background: #2b323e;
+  --mdc-dialog-container-color: #252b36;
+  --mdc-dialog-subhead-color: #f2f4f7;
+  --mdc-dialog-supporting-text-color: #dde1e8;
 }
 
 html.dark body {
-  background: #313338;
-  color: #dbdee1;
+  background: #2b323e;
+  color: #dde1e8;
 }
 
 html.dark app-root,
@@ -314,52 +314,53 @@ html.dark .mat-drawer-container,
 html.dark .mat-drawer-content,
 html.dark mat-drawer-container,
 html.dark mat-drawer-content {
-  background-color: #313338 !important;
-  color: #dbdee1;
+  background-color: #2b323e !important;
+  color: #dde1e8;
 }
 
 html.dark mat-drawer,
 html.dark .mat-drawer {
-  background-color: #2b2d31 !important;
-  color: #dbdee1;
-  border-right-color: #1e1f22 !important;
+  background-color: #252b36 !important;
+  color: #dde1e8;
+  border-right-color: #1b2029 !important;
 }
 
 html.dark .page-header {
-  background-color: #2b2d31;
-  border-bottom-color: #1e1f22;
+  background-color: #252b36;
+  border-bottom-color: #1b2029;
 }
 
 html.dark .page-header__icon {
-  background-color: #2e7a57;
+  background-color: #2ed0ab;
+  color: #084440;
 }
 
 html.dark .page-title {
-  color: #f2f3f5;
+  color: #f2f4f7;
 }
 
 html.dark .page-sub {
-  color: #949ba4;
+  color: #9ba5b4;
 }
 
 html.dark .custom-toolbar,
 html.dark .mat-toolbar {
-  background-color: #2b2d31 !important;
-  color: #dbdee1;
-  border-bottom-color: #1e1f22 !important;
+  background-color: #252b36 !important;
+  color: #dde1e8;
+  border-bottom-color: #1b2029 !important;
 }
 
 html.dark .mat-mdc-dialog-surface,
 html.dark .mat-mdc-select-panel,
 html.dark .mat-mdc-menu-panel,
 html.dark .mat-mdc-autocomplete-panel {
-  background-color: #2b2d31 !important;
-  color: #dbdee1;
+  background-color: #252b36 !important;
+  color: #dde1e8;
 }
 
 html.dark .mat-mdc-option,
 html.dark .mat-mdc-menu-item {
-  color: #dbdee1;
+  color: #dde1e8;
 }
 
 html.dark .mat-mdc-option:hover:not(.mdc-list-item--disabled),
@@ -370,19 +371,19 @@ html.dark .mat-mdc-menu-item:hover:not([disabled]) {
 html.dark input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
 html.dark select,
 html.dark textarea {
-  background-color: #1e1f22;
-  color: #dbdee1;
-  border-color: #3f4147;
+  background-color: #1b2029;
+  color: #dde1e8;
+  border-color: #3a4252;
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #80848e;
+  color: #8a94a4;
 }
 
 html.dark select option {
-  background-color: #2b2d31;
-  color: #dbdee1;
+  background-color: #252b36;
+  color: #dde1e8;
 }
 
 /* Las tarjetas con la clase "border" de Bootstrap y borde transparente (por ejemplo, Administrar) muestran su gris claro:
@@ -392,7 +393,7 @@ html.dark .border.border-transparent {
 }
 
 html.dark hr {
-  border-color: #3f4147;
+  border-color: #3a4252;
 }
 
 /* ---- Etiquetas de plan (Pro / Beneficios): colores fijos con brillo para que se noten, en claro y en oscuro ---- */
@@ -403,7 +404,7 @@ html.dark hr {
   letter-spacing: 0.04em;
 }
 .plan-pill--pro {
-  background: #12a150;
+  background: #2ed0ab;
   color: #ffffff;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 8px rgba(18, 161, 80, 0.65);
   animation: plan-glow-pro 2.4s ease-in-out infinite;
@@ -448,7 +449,7 @@ html.dark hr {
 /* Barras de desplazamiento finas y discretas: sin flechas, el cursor es una píldora suave que aparece sobre el fondo */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(27, 40, 34, 0.28) transparent;
+  scrollbar-color: rgba(54, 63, 78, 0.28) transparent;
 }
 html.dark * {
   scrollbar-color: rgba(219, 222, 225, 0.3) transparent;
@@ -463,11 +464,11 @@ html.dark * {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(27, 40, 34, 0.28);
+    background: rgba(54, 63, 78, 0.28);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(27, 40, 34, 0.45);
+    background: rgba(54, 63, 78, 0.45);
   }
   ::-webkit-scrollbar-button {
     display: none;
@@ -499,11 +500,95 @@ html.dark * {
 
 /* Piezas del navegador con los colores de la marca: texto seleccionado y barras de desplazamiento finas */
 ::selection {
-  background: #aff1ce;
-  color: #07241a;
+  background: #6fe3c6;
+  color: #2f3643;
 }
 
 .thin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #cfd8cb transparent;
+  scrollbar-color: #cdd3da transparent;
+}
+
+/* ===== Salón (Mesas): paleta propia, elegida con UI UX Pro Max para un panel de operación en tiempo real =====
+   Libre = blanco con aro verde (calma) · Ocupada = rojo ladrillo tenue · Atención = naranja quemado (lo único urgente).
+   El rojo queda para errores. Cada estado se distingue también por forma y texto, no solo por color. */
+/* Ficha con un cliente esperando hace más de 5 minutos: un halo que late (se apaga con "reducir movimiento") */
+@keyframes floor-late {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7); }
+  50% { box-shadow: 0 0 0 6px rgba(251, 146, 60, 0); }
+}
+.floor-late { animation: floor-late 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .floor-late { animation: none; box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.7); }
+}
+
+.floor {
+  --floor-bg: #eef0f3;
+  --floor-panel: #ffffff;
+  --floor-ink: #181d26;
+  --floor-muted: #4f5a6b;
+  --floor-line: #dde2e8;
+  --floor-free-bg: #ffffff;
+  --floor-free-ink: #181d26;
+  --floor-free-dot: #1fa88c;
+  --floor-busy-bg: #fbe9e5;
+  --floor-busy-ink: #6b2015;
+  --floor-busy-accent: #8a2a1c;
+  --floor-action: #2ed0ab;
+  --floor-action-text: #0b7d66;
+  --floor-ready: #0b7d66;
+  --floor-alert-bg: #c2410c;
+  --floor-chip-on: #363f4e;
+  --floor-chip-on-ink: #ffffff;
+  --floor-ink-block: #363f4e;
+}
+html.dark .floor {
+  /* Oscuro: pizarra de la paleta nueva; los únicos colores son el rojo tenue, el naranja de atención y el verde agua de marca */
+  --floor-bg: #2b323e;
+  --floor-panel: #252b36;
+  --floor-ink: #dde1e8;
+  --floor-muted: #9ba5b4;
+  --floor-line: #3a4252;
+  --floor-free-bg: #252b36;
+  --floor-free-ink: #dde1e8;
+  --floor-free-dot: #2ed0ab;
+  --floor-busy-bg: #3b2824;
+  --floor-busy-ink: #f2d3cc;
+  --floor-busy-accent: #c0513f;
+  --floor-alert-bg: #c2410c;
+  --floor-chip-on: #dde1e8;
+  --floor-chip-on-ink: #1b2029;
+  --floor-ink-block: #2f3643;
+  --floor-action: #2ed0ab;
+  --floor-action-text: #6fe3c6;
+  --floor-ready: #6fe3c6;
+}
+
+/* ===== Acción principal en menta (#2ED0AB) con texto verde azulado oscuro (#084440) =====
+   El blanco sobre menta no se lee (1,9:1); el texto oscuro sí (5,6:1). Rige en claro y en oscuro; el color va con !important porque Bootstrap (`.text-white`) también lo usa.
+   Los textos verdes sobre blanco (enlaces, importes) siguen en verde oscuro: son `text-cafe-green-*`, no `bg-`. */
+html [class~="bg-cafe-green-700"],
+html [class~="bg-cafe-green-600"],
+html [class~="bg-cafe-green-800"] {
+  background-color: #2ed0ab;
+  color: #084440 !important;
+}
+html [class~="bg-cafe-green-700"] [class*="text-white"],
+html [class~="bg-cafe-green-600"] [class*="text-white"],
+html [class~="bg-cafe-green-800"] [class*="text-white"],
+html [class~="bg-cafe-green-700"] [class*="text-[#ffffff"] {
+  color: rgba(8, 68, 64, 0.82) !important;
+}
+html [class~="hover:bg-cafe-green-800"]:hover,
+html [class~="hover:bg-cafe-green-700"]:hover,
+html .group:hover [class~="group-hover:bg-cafe-green-700"] {
+  background-color: #22b592;
+  color: #084440 !important;
+}
+html .group:hover [class~="group-hover:text-white"] {
+  color: #084440 !important;
+}
+html [class~="bg-cafe-green-700"]:disabled,
+html [class~="bg-cafe-green-700"][disabled] {
+  background-color: #2ed0ab;
 }

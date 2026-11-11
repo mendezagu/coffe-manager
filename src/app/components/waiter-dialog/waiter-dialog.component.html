@@ -21,15 +21,15 @@
     <p *ngIf="waiters && waiters.length === 0" class="m-0 py-[16px] text-center text-sm text-sage-500">Todavía no hay mozos cargados.</p>
   </mat-dialog-content>
 
-  <mat-dialog-actions class="flex flex-wrap gap-[8px] border-t border-sage-100 bg-white px-5 py-4 sm:px-6">
+  <mat-dialog-actions class="flex flex-wrap gap-[8px] border-t border-sage-100 bg-white px-[20px] py-[16px] sm:px-6">
     <button type="button"
-      class="min-w-[100px] flex-1 rounded-xl border border-sage-300 bg-white px-[16px] py-[11px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+      class="min-w-[100px] flex-1 rounded-xl border border-sage-300 bg-white min-h-[48px] px-[16px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
       (click)="onCancel()">
       Cancelar
     </button>
 
     <button type="button"
-      class="min-w-[100px] flex-1 rounded-xl bg-cafe-green-700 px-[16px] py-[11px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
+      class="min-w-[100px] flex-1 rounded-xl bg-cafe-green-700 min-h-[48px] px-[16px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"
       (click)="onConfirm()"
       [disabled]="!selectedWaiterId">
       Asignar

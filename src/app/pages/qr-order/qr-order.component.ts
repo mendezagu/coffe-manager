@@ -86,21 +86,21 @@ const SPLASH_SECONDS = 7;
       /* Carta oscura (se elige en Ajustes): las superficies y la tinta salen de variables; el color de marca se aclara en brandStyle */
       .qr-dark {
         color-scheme: dark;
-        --q-surface: 30 31 34;
-        --q-surface-low: 38 40 44;
-        --q-surface-mid: 49 51 56;
-        --q-surface-high: 22 23 26;
-        --q-surface-highest: 64 67 73;
-        --q-surface-lowest: 43 45 49;
-        --q-ink: 232 230 226;
-        --q-ink-variant: 178 181 176;
-        --q-line: 134 139 135;
-        --q-line-soft: 78 82 80;
-        --q-leaf: 59 150 112;
-        --q-leaf-container: 18 58 42;
-        --q-leaf-dim: 148 212 179;
-        --q-leaf-ink: 175 241 206;
-        --q-leaf-ink2: 175 241 206;
+        --q-surface: 43 50 62;
+        --q-surface-low: 47 55 68;
+        --q-surface-mid: 47 55 68;
+        --q-surface-high: 27 32 41;
+        --q-surface-highest: 58 66 82;
+        --q-surface-lowest: 37 43 54;
+        --q-ink: 221 225 232;
+        --q-ink-variant: 180 188 200;
+        --q-line: 138 148 164;
+        --q-line-soft: 69 78 95;
+        --q-leaf: 43 181 152;
+        --q-leaf-container: 22 66 62;
+        --q-leaf-dim: 111 227 198;
+        --q-leaf-ink: 200 243 232;
+        --q-leaf-ink2: 200 243 232;
       }
       .qr-dark .text-forest {
         color: rgb(var(--q-ink));
@@ -452,7 +452,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     red: 'bg-[#d62f2f] text-white',
     blue: 'bg-[#2f6fd6] text-white',
     amber: 'bg-[#d98a14] text-white',
-    dark: 'bg-[#22322a] text-white',
+    dark: 'bg-[#363f4e] text-white',
   };
 
   badgeClass(color?: string): string {

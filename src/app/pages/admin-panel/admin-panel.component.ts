@@ -139,7 +139,7 @@ export class AdminPanelComponent {
     { key: 'red', label: 'Rojo', swatch: 'bg-[#d62f2f]' },
     { key: 'blue', label: 'Azul', swatch: 'bg-[#2f6fd6]' },
     { key: 'amber', label: 'Ámbar', swatch: 'bg-[#d98a14]' },
-    { key: 'dark', label: 'Oscuro', swatch: 'bg-[#22322a]' },
+    { key: 'dark', label: 'Oscuro', swatch: 'bg-[#363f4e]' },
   ];
   editItemName: string = '';
   editItemPrice: number = 0;

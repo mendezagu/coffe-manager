@@ -1,6 +1,6 @@
 <!-- Inicio: resumen, filtros y mesas. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con
      !important y pisa a Tailwind; por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
-<div class="w-full min-h-screen bg-sage-100">
+<div class="floor w-full min-h-screen bg-[var(--floor-bg)] font-inter">
   <header class="page-header">
     <div class="page-header__inner">
       <div class="flex min-w-0 items-center gap-4">
@@ -16,200 +16,285 @@
   <div class="px-4 pb-[96px] pt-6 sm:px-8 sm:pt-8">
   <div class="max-w-7xl mx-auto flex flex-col gap-[16px]">
 
-    <!-- Resumen: una línea con las cifras del salón, el número primero y su nombre al lado -->
-    <section aria-label="Resumen del salón" class="flex flex-wrap items-baseline gap-x-[32px] gap-y-[8px] text-sm text-sage-600">
-      <!-- Solo administrador: ventas de hoy y permanencia -->
-      <ng-container *ngIf="roleValue === 'admin'">
-        <p class="m-0">
-          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ live ? (live.sales.total | money) : '—' }}</strong>
-          <span class="ml-[6px]">{{ shiftStart ? 'ventas del turno' : 'ventas de hoy' }}</span>
-          <ng-container *ngIf="!shiftStart && live && live.changePct !== null">
-            <span class="ml-[6px] font-medium tabular-nums" [ngClass]="live.changePct >= 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ live.changePct >= 0 ? '+' : '' }}{{ live.changePct | number: '1.0-1' }}% vs. ayer</span>
-          </ng-container>
-          <span *ngIf="shiftStart && live" class="ml-[6px]">· {{ live.sales.count }} {{ live.sales.count === 1 ? 'venta' : 'ventas' }} desde {{ shiftStart | date: 'HH:mm' }}</span>
-        </p>
-        <p class="m-0">
-          <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ stayText(live?.averageStayMinutes) }}</strong>
-          <span class="ml-[6px]">de permanencia promedio<ng-container *ngIf="live && live.staysCount > 0"> · {{ live.staysCount }} {{ live.staysCount === 1 ? 'mesa cerrada' : 'mesas cerradas' }}</ng-container></span>
-        </p>
-      </ng-container>
+    <!-- Esperando atención: lo urgente primero, el que espera hace más arriba -->
+    <section *ngIf="attentionTables.length" #lane aria-label="Esperando atención" class="overflow-hidden rounded-2xl bg-[var(--floor-panel)] shadow-soft">
+      <div class="flex items-center gap-[10px] px-[16px] pb-[4px] pt-[16px] sm:px-[24px]">
+        <div role="heading" aria-level="2" class="font-inter text-lg font-bold text-[var(--floor-ink)]">Esperando atención</div>
+        <span role="status" class="flex h-[24px] min-w-[24px] items-center justify-center rounded-full bg-[var(--floor-alert-bg)] px-[8px] text-sm font-bold tabular-nums text-[#ffffff]">{{ attentionTables.length }}</span>
+      </div>
+      <ul class="m-0 list-none p-0">
+        <li *ngFor="let t of laneTables; trackBy: trackTable" class="border-t border-[var(--floor-line)] first:border-t-0">
+          <button type="button" (click)="tileClick(t)" [attr.aria-label]="t.name + ': ' + tileReason(t) + (waitText(t) ? ', ' + waitText(t) : '')"
+            class="flex min-h-[64px] w-full items-center gap-[14px] px-[16px] py-[10px] text-left transition-colors hover:bg-[var(--floor-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--floor-action)] sm:px-[24px]">
+            <span class="flex h-[44px] min-w-[72px] flex-none items-center justify-center rounded-xl px-[10px] text-base font-bold tabular-nums text-[#ffffff]" [ngClass]="waitMinutes(t) === null ? 'bg-[var(--floor-action)] !text-[#084440]' : 'bg-[var(--floor-alert-bg)]'" [class.floor-late]="waitingLate(t)">{{ waitShort(t) }}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-base font-semibold text-[var(--floor-ink)]">{{ t.name }}</span>
+              <span class="block truncate text-sm text-[var(--floor-muted)]">{{ tileReason(t) }}</span>
+            </span>
+            <span class="flex-none text-sm font-semibold text-[var(--floor-action-text)]">{{ actionLabel(t) }}</span>
+          </button>
+        </li>
+      </ul>
+      <button *ngIf="attentionTables.length > laneLimit" type="button" (click)="laneExpanded = !laneExpanded" [attr.aria-expanded]="laneExpanded"
+        class="flex min-h-[48px] w-full items-center justify-center gap-[4px] border-t border-[var(--floor-line)] text-sm font-semibold text-[var(--floor-action-text)] transition-colors hover:bg-[var(--floor-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--floor-action)]">
+        {{ laneExpanded ? 'Ver menos' : 'Ver las ' + (attentionTables.length - laneLimit) + ' restantes' }}
+        <mat-icon class="!h-5 !w-5 !text-xl">{{ laneExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </section>
 
-      <p class="m-0">
-        <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ busyCount }}<span class="text-base font-medium text-sage-500">/{{ tables.length }}</span></strong>
-        <span class="ml-[6px]">ocupadas · {{ freeCount }} {{ freeCount === 1 ? 'libre' : 'libres' }}</span>
-      </p>
+    <!-- Primeros pasos: va después de lo urgente, para no empujarlo fuera de pantalla -->
+    <app-getting-started class="block empty:hidden"></app-getting-started>
 
-      <p *ngIf="settings.value.kitchenEnabled" class="m-0">
-        <strong class="font-jakarta text-xl font-bold tabular-nums" [ngClass]="readyTotal > 0 ? 'text-cafe-green-700' : 'text-sage-900'">{{ readyTotal }}</strong>
-        <span class="ml-[6px]">{{ readyTotal === 1 ? 'plato listo para servir' : 'platos listos para servir' }}</span>
-      </p>
+    <!-- Estado del salón: una sola tarjeta con bloques iguales (etiqueta, cifra y contexto), separados por líneas finas -->
+    <section aria-label="Resumen del salón" aria-live="polite" class="overflow-hidden rounded-2xl bg-white shadow-soft">
+      <div class="grid grid-cols-2" [ngClass]="roleValue === 'admin' ? 'lg:grid-cols-[1.5fr_1fr_1fr_1fr]' : 'lg:grid-cols-1'">
 
-      <p *ngIf="settings.value.kitchenEnabled" class="m-0">
-        <strong class="font-jakarta text-xl font-bold tabular-nums text-sage-900">{{ cookingTotal }}</strong>
-        <span class="ml-[6px]">{{ cookingTotal === 1 ? 'plato en preparación' : 'platos en preparación' }}</span>
+        <!-- Ocupación -->
+        <div class="col-span-2 min-w-0 p-[16px] sm:p-[20px] lg:col-span-1">
+          <p class="m-0 text-sm font-medium text-sage-600">Ocupación</p>
+          <p class="m-0 mt-[2px] flex flex-wrap items-baseline gap-x-[8px]">
+            <strong class="font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ busyCount }}</strong>
+            <span class="text-base font-medium tabular-nums text-sage-600">de {{ tables.length }} mesas<ng-container *ngIf="tables.length"> · {{ occupancyPct }}%</ng-container></span>
+          </p>
+          <div class="mt-[10px] flex h-[8px] w-full gap-[3px]" role="img" [attr.aria-label]="busyCount + ' mesas ocupadas y ' + freeCount + ' libres de ' + tables.length">
+            <div class="rounded-full bg-[var(--floor-busy-accent)] transition-[flex-grow] duration-500" [style.flex-grow]="busyCount" [style.min-width.px]="busyCount ? 8 : 0"></div>
+            <div class="rounded-full bg-[var(--floor-free-dot)] transition-[flex-grow] duration-500" [style.flex-grow]="freeCount" [style.min-width.px]="freeCount ? 8 : 0"></div>
+            <div *ngIf="!tables.length" class="flex-1 rounded-full bg-sage-200"></div>
+          </div>
+          <p class="m-0 mt-[8px] flex flex-wrap items-center gap-x-[14px] gap-y-[2px] text-sm text-sage-600">
+            <span class="inline-flex items-center gap-[6px]"><span class="h-[8px] w-[8px] rounded-full bg-[var(--floor-busy-accent)]"></span><span class="tabular-nums">{{ busyCount }} {{ busyCount === 1 ? 'ocupada' : 'ocupadas' }}</span></span>
+            <span class="inline-flex items-center gap-[6px]"><span class="h-[8px] w-[8px] rounded-full bg-[var(--floor-free-dot)]"></span><span class="tabular-nums">{{ freeCount }} {{ freeCount === 1 ? 'libre' : 'libres' }}</span></span>
+          </p>
+          <button *ngIf="roleValue === 'admin'" type="button" (click)="shiftOpen = !shiftOpen" [attr.aria-expanded]="shiftOpen"
+            class="mt-[6px] flex min-h-[44px] items-center gap-[4px] rounded-lg text-sm font-semibold text-[var(--floor-action-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] lg:hidden">
+            {{ shiftOpen ? 'Ocultar cifras del turno' : 'Ver cifras del turno' }}
+            <mat-icon class="!h-5 !w-5 !text-xl">{{ shiftOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Cifras del turno (solo administrador): en celular empiezan plegadas -->
+        <ng-container *ngIf="roleValue === 'admin'">
+          <div [ngClass]="shiftOpen ? '' : 'max-lg:hidden'" class="min-w-0 border-t border-[var(--floor-line)] p-[16px] sm:p-[20px] lg:border-l lg:border-t-0">
+            <p class="m-0 text-sm font-medium text-sage-600">{{ shiftStart ? 'Ventas del turno' : 'Ventas de hoy' }}</p>
+            <p class="m-0 mt-[2px] font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ live ? (live.sales.total | money:true) : '—' }}</p>
+            <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600">
+              <ng-container *ngIf="live && shiftStart">{{ live.sales.count }} {{ live.sales.count === 1 ? 'venta' : 'ventas' }}</ng-container>
+              <ng-container *ngIf="live && !shiftStart && live.changePct !== null"><span class="font-semibold" [ngClass]="live.changePct >= 0 ? 'text-cafe-green-700' : 'text-cafe-red-700'">{{ live.changePct >= 0 ? '+' : '' }}{{ live.changePct | number: '1.0-1' }}% vs. ayer</span></ng-container>
+            </p>
+          </div>
+          <div [ngClass]="shiftOpen ? '' : 'max-lg:hidden'" class="min-w-0 border-l border-t border-[var(--floor-line)] p-[16px] sm:p-[20px] lg:border-t-0">
+            <p class="m-0 text-sm font-medium text-sage-600">Ticket promedio</p>
+            <p class="m-0 mt-[2px] font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ live && live.sales.count > 0 ? (live.sales.total / live.sales.count | money:true) : '—' }}</p>
+            <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600"><ng-container *ngIf="shiftStart">desde las {{ shiftStart | date: 'HH:mm' }}</ng-container></p>
+          </div>
+          <div [ngClass]="shiftOpen ? '' : 'max-lg:hidden'" class="col-span-2 min-w-0 border-t border-[var(--floor-line)] p-[16px] sm:p-[20px] lg:col-span-1 lg:border-l lg:border-t-0">
+            <p class="m-0 text-sm font-medium text-sage-600">Permanencia promedio</p>
+            <p class="m-0 mt-[2px] font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ stayText(live?.averageStayMinutes) }}</p>
+            <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600"><ng-container *ngIf="live && live.staysCount > 0">{{ live.staysCount }} {{ live.staysCount === 1 ? 'mesa cerrada' : 'mesas cerradas' }}</ng-container></p>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Cocina: platos listos y en preparación -->
+      <p *ngIf="settings.value.kitchenEnabled" class="m-0 flex flex-wrap gap-x-[20px] gap-y-[4px] border-t border-[var(--floor-line)] px-[16px] py-[12px] text-sm text-sage-600 sm:px-[20px]">
+        <span><strong class="font-inter text-base font-bold tabular-nums" [ngClass]="readyTotal > 0 ? 'text-[var(--floor-ready)]' : 'text-sage-900'">{{ readyTotal }}</strong> {{ readyTotal === 1 ? 'plato listo para servir' : 'platos listos para servir' }}</span>
+        <span><strong class="font-inter text-base font-bold tabular-nums text-sage-900">{{ cookingTotal }}</strong> en preparación</span>
       </p>
     </section>
 
-    <!-- Tipo de vista y sectores en una misma fila -->
-    <div *ngIf="hasSectors" class="flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[10px]">
-      <!-- Sectores (solo en la vista por sector): se desplazan a los costados arrastrando (mouse o dedo), sin barra visible -->
-      <div *ngIf="viewMode === 'grouped'" #sectorTabs class="flex min-w-0 flex-1 cursor-grab select-none items-center gap-[8px] overflow-x-auto active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
+    <!-- Barra de trabajo: búsqueda, tipo de vista y sectores (cada cosa en su fila, sin encimarse) -->
+    <div class="flex flex-col gap-[12px]">
+      <div class="flex flex-wrap items-center gap-[12px]">
+        <div class="relative min-w-0 basis-full sm:flex-1 sm:basis-0 sm:max-w-[420px]">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-[14px]">
+            <mat-icon class="!h-5 !w-5 !text-xl text-sage-500">search</mat-icon>
+          </div>
+          <input type="text" [(ngModel)]="searchText" placeholder="Buscar mesa, sector o mozo" aria-label="Buscar mesas"
+            class="min-h-[44px] w-full rounded-xl border-[1px] border-sage-300 bg-white py-[12px] pl-[44px] pr-[40px] text-sm text-sage-800 shadow-soft transition-all placeholder:text-sage-500 focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+          <button *ngIf="searchText" type="button" aria-label="Limpiar búsqueda" (click)="searchText = ''"
+            class="absolute inset-y-0 right-0 grid w-[44px] place-items-center text-sage-500 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Filtrar por estado: un botón que despliega Todas / Libres / Ocupadas / Por QR -->
+        <div class="relative flex-none">
+          <button type="button" (click)="filterOpen = !filterOpen" [attr.aria-expanded]="filterOpen" aria-haspopup="menu"
+            class="inline-flex min-h-[44px] items-center gap-[8px] rounded-xl border px-[14px] text-sm font-medium shadow-soft transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]"
+            [ngClass]="statusFilter === 'all' ? 'border-sage-300 bg-white text-sage-800 hover:bg-sage-50' : 'border-[var(--floor-chip-on)] bg-[var(--floor-chip-on)] text-[var(--floor-chip-on-ink)]'">
+            <mat-icon class="!h-5 !w-5 !text-xl">filter_list</mat-icon>
+            <span>{{ statusFilter === 'all' ? 'Filtrar' : activeStatus?.label }}</span>
+            <span *ngIf="statusFilter !== 'all'" class="text-xs tabular-nums opacity-80">{{ activeStatus?.count }}</span>
+          </button>
+          <ng-container *ngIf="filterOpen">
+            <div class="fixed inset-0 z-40" (click)="filterOpen = false" aria-hidden="true"></div>
+            <div role="menu" aria-label="Filtrar por estado" class="absolute left-0 top-[calc(100%+6px)] z-50 w-[240px] rounded-2xl bg-[var(--floor-panel)] p-[6px] text-[var(--floor-ink)] shadow-dialog">
+              <button *ngFor="let o of statusOptions; trackBy: trackOption" type="button" role="menuitemradio" [attr.aria-checked]="statusFilter === o.key" (click)="pickStatus(o.key)"
+                class="flex min-h-[44px] w-full items-center gap-[10px] rounded-xl px-[12px] text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]"
+                [ngClass]="statusFilter === o.key ? 'bg-[var(--floor-line)] font-semibold' : 'font-medium hover:bg-[var(--floor-bg)]'">
+                <span *ngIf="o.key === 'all'" class="h-[10px] w-[10px] flex-none rounded-[3px] bg-[var(--floor-muted)]"></span>
+                <span *ngIf="o.key === 'free'" class="h-[10px] w-[10px] flex-none rounded-full border-2 border-[var(--floor-free-dot)]"></span>
+                <span *ngIf="o.key === 'busy'" class="h-[10px] w-[10px] flex-none rounded-full bg-[var(--floor-busy-accent)]"></span>
+                <span *ngIf="o.key === 'qr'" class="h-[9px] w-[9px] flex-none rotate-45 rounded-[2px] bg-[var(--floor-alert-bg)]"></span>
+                <span class="flex-1">{{ o.label }}</span>
+                <span class="text-xs font-normal tabular-nums text-[var(--floor-muted)]">{{ o.count }}</span>
+                <mat-icon *ngIf="statusFilter === o.key" class="!h-5 !w-5 !text-xl">check</mat-icon>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+
+        <div *ngIf="hasSectors" class="flex min-w-0 flex-1 whitespace-nowrap rounded-xl bg-sage-200/70 p-[3px] sm:ml-auto sm:inline-flex sm:w-auto sm:flex-none" role="group" aria-label="Tipo de vista">
+          <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
+            class="min-h-[40px] flex-1 rounded-[10px] px-[14px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+            [ngClass]="viewMode === 'grouped' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Sectores</button>
+          <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
+            class="min-h-[40px] flex-1 rounded-[10px] px-[14px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+            [ngClass]="viewMode === 'flat' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Conjunta</button>
+        </div>
+      </div>
+
+      <!-- Sectores: se desplazan arrastrando (mouse o dedo), sin barra visible -->
+      <div *ngIf="hasSectors && viewMode === 'grouped'" #sectorTabs class="-mx-4 flex cursor-grab select-none items-center gap-[8px] overflow-x-auto px-4 active:cursor-grabbing sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
         (mousedown)="dragStart($event, sectorTabs)">
         <button type="button" role="tab" [attr.aria-selected]="activeGroupKey === '__all__'" (click)="selectGroup('__all__')"
-          class="flex-none whitespace-nowrap rounded-full border px-[14px] py-[8px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-          [ngClass]="activeGroupKey === '__all__' ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">
-          Todos<span class="ml-[6px] text-xs font-normal tabular-nums" [ngClass]="activeGroupKey === '__all__' ? 'text-white/70' : 'text-sage-400'">{{ filteredTables.length }}</span>
+          class="inline-flex min-h-[44px] flex-none items-center whitespace-nowrap rounded-full border px-[16px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          [ngClass]="activeGroupKey === '__all__' ? 'border-[#2ed0ab] bg-[#2ed0ab] text-[#084440]' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">
+          Todos los sectores<span class="ml-[6px] text-xs font-normal tabular-nums" [ngClass]="activeGroupKey === '__all__' ? 'text-[#084440]/80' : 'text-sage-600'">{{ filteredTables.length }}</span>
         </button>
         <button *ngFor="let group of tableGroups; trackBy: trackGroup" type="button" role="tab" [attr.aria-selected]="activeGroupKey === group.key" (click)="selectGroup(group.key)"
-          class="flex-none whitespace-nowrap rounded-full border px-[14px] py-[8px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-          [ngClass]="activeGroupKey === group.key ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">
-          {{ group.name }}<span class="ml-[6px] text-xs font-normal tabular-nums" [ngClass]="activeGroupKey === group.key ? 'text-white/70' : 'text-sage-400'">{{ group.tables.length }}</span>
+          class="inline-flex min-h-[44px] flex-none items-center whitespace-nowrap rounded-full border px-[16px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          [ngClass]="activeGroupKey === group.key ? 'border-[#2ed0ab] bg-[#2ed0ab] text-[#084440]' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">
+          {{ group.name }}<span class="ml-[6px] text-xs font-normal tabular-nums" [ngClass]="activeGroupKey === group.key ? 'text-[#084440]/80' : 'text-sage-600'">{{ group.tables.length }}</span>
         </button>
-      </div>
-      <div *ngIf="viewMode !== 'grouped'" class="flex-1"></div>
-
-      <div class="inline-flex flex-none whitespace-nowrap rounded-xl bg-sage-200/70 p-[3px]" role="group" aria-label="Tipo de vista">
-        <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
-          class="rounded-[10px] px-[12px] py-[7px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-          [ngClass]="viewMode === 'grouped' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Por sector</button>
-        <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
-          class="rounded-[10px] px-[12px] py-[7px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-          [ngClass]="viewMode === 'flat' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Vista conjunta</button>
       </div>
     </div>
 
-    <!-- Búsqueda y filtro por estado -->
-    <section class="flex flex-col sm:flex-row gap-[8px] sm:gap-[12px]">
-      <div class="relative flex-1 min-w-0 sm:max-w-[420px]">
-        <div class="absolute inset-y-0 left-0 pl-[14px] flex items-center pointer-events-none">
-          <mat-icon class="!w-5 !h-5 !text-xl text-sage-500">search</mat-icon>
-        </div>
-        <input type="text" [(ngModel)]="searchText" placeholder="Buscar por mesa, sector o mozo..." aria-label="Buscar mesas"
-          class="w-full pl-[44px] pr-[40px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 placeholder-sage-400 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
-        <button *ngIf="searchText" type="button" aria-label="Limpiar búsqueda" (click)="searchText = ''"
-          class="absolute inset-y-0 right-0 pr-[12px] flex items-center text-sage-500 hover:text-sage-800">
-          <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
-        </button>
-      </div>
+    <!-- Cargando: esqueleto con la forma de las tarjetas (no salta el contenido al llegar) -->
+    <div *ngIf="!tablesLoaded" class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 sm:gap-[16px] lg:grid-cols-3 2xl:grid-cols-4" aria-busy="true" aria-label="Cargando mesas">
+      <div *ngFor="let n of [1, 2, 3, 4]" class="h-[176px] animate-pulse rounded-2xl bg-white shadow-soft"></div>
+    </div>
 
-      <div class="relative sm:w-[240px] flex-shrink-0">
-        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500 absolute left-[12px] top-1/2 -translate-y-1/2 pointer-events-none">filter_list</mat-icon>
-        <select [(ngModel)]="statusFilter" aria-label="Filtrar por estado"
-          class="w-full appearance-none pl-[40px] pr-[36px] py-[10px] bg-white border-[1px] border-sage-300 rounded-xl text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 cursor-pointer">
-          <option value="all">Todos los estados ({{ tables.length }})</option>
-          <option value="free">Libres ({{ freeCount }})</option>
-          <option value="busy">Ocupadas ({{ busyCount }})</option>
-          <option *ngIf="settings.value.qrActive" value="qr">Pidiendo por QR ({{ qrTablesCount }})</option>
-        </select>
-        <mat-icon class="!w-5 !h-5 !text-xl text-sage-500 absolute right-[10px] top-1/2 -translate-y-1/2 pointer-events-none">expand_more</mat-icon>
-      </div>
-    </section>
+    <!-- Todavía no hay mesas -->
+    <div *ngIf="tablesLoaded && tables.length === 0" class="rounded-2xl bg-white px-[24px] py-[40px] text-center shadow-soft">
+      <div role="heading" aria-level="2" class="font-inter text-lg font-bold text-sage-900">Todavía no hay mesas</div>
+      <p class="m-0 mt-[4px] text-sm text-sage-600">Cuando cargues las mesas de tu salón, vas a ver acá cuáles están libres y cuáles ocupadas.</p>
+    </div>
 
     <!-- Sin resultados -->
     <div *ngIf="tables.length > 0 && filteredTables.length === 0" class="flex flex-col items-center justify-center py-[48px] text-sage-600 text-center">
       <p class="text-base font-medium m-0">No hay mesas que coincidan con lo que buscás</p>
-      <button type="button" (click)="searchText = ''; statusFilter = 'all'" class="mt-[12px] px-[16px] py-[8px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-bold text-sage-800">Quitar filtros</button>
+      <button type="button" (click)="searchText = ''; statusFilter = 'all'" class="mt-[12px] min-h-[44px] px-[16px] rounded-xl bg-white border-[1px] border-sage-300 text-sm font-semibold text-sage-800">Quitar filtros</button>
     </div>
 
     <!-- Mesas: una sección por sector (con título) o una sola grilla en la vista conjunta -->
     <section *ngFor="let group of visibleGroups; trackBy: trackGroup" class="flex flex-col gap-[12px]">
-      <div *ngIf="group.name" class="flex items-baseline gap-[12px] border-b border-sage-200 pb-[8px]">
-        <div role="heading" aria-level="2" class="font-jakarta text-[17px] font-bold text-sage-900">{{ group.name }}</div>
-        <span class="text-sm tabular-nums text-sage-500">{{ group.tables.length }} {{ group.tables.length === 1 ? 'mesa' : 'mesas' }} · {{ occupiedIn(group) }} {{ occupiedIn(group) === 1 ? 'ocupada' : 'ocupadas' }}</span>
+      <div *ngIf="group.name" class="flex items-center gap-[12px] pt-[8px]">
+        <div role="heading" aria-level="2" class="font-inter text-xl font-bold text-sage-900">{{ group.name }}</div>
+        <span class="text-sm tabular-nums text-sage-600">{{ occupiedIn(group) }} de {{ group.tables.length }} {{ group.tables.length === 1 ? 'ocupada' : 'ocupadas' }}</span>
+        <div class="ml-auto hidden h-[6px] w-[160px] overflow-hidden rounded-full bg-[var(--floor-line)] sm:block" aria-hidden="true">
+          <div class="h-full rounded-full bg-[var(--floor-busy-accent)] transition-[width] duration-500" [style.width.%]="group.tables.length ? (occupiedIn(group) / group.tables.length) * 100 : 0"></div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-[12px] sm:gap-[16px]">
-        <article *ngFor="let table of group.tables" class="flex min-w-0 flex-col justify-between rounded-2xl p-[16px] shadow-soft transition-shadow hover:shadow-soft-lg"
-          [ngClass]="styleOf(table).card">
-          <div>
-            <!-- Nombre y estado (texto + punto; nunca solo color) -->
-            <h3 class="m-0 truncate !text-lg !font-bold !leading-tight tracking-tight" [ngClass]="styleOf(table).title">{{ table.name }}</h3>
-            <span class="mt-[4px] inline-flex items-center gap-[6px] text-sm font-semibold" [ngClass]="styleOf(table).status">
-              <span class="h-2 w-2 rounded-full" [ngClass]="styleOf(table).dot"></span>
-              {{ isFree(table) ? 'Libre' : 'Ocupada' }}<ng-container *ngIf="toneOf(table) === 'amber'"> · Pendiente</ng-container>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-[10px] sm:gap-[12px]">
+        <button *ngFor="let table of group.tables; trackBy: trackTable" type="button" (click)="tileClick(table)"
+          [attr.aria-label]="shortName(table, group.name) + ': ' + (tileTone(table) === 'alert' ? 'necesita atención, ' + tileReason(table) + (waitText(table) ? ', ' + waitText(table) : '') : isFree(table) ? 'libre' : 'ocupada') + (table.waiterId && table.waiterName?.trim() ? ', mozo ' + table.waiterName : '')"
+          [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)" [class.floor-late]="waitingLate(table)"
+          class="relative flex min-h-[112px] min-w-0 flex-col justify-between rounded-2xl p-[14px] text-left transition duration-150 hover:-translate-y-[1px] hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transform-none"
+          [ngClass]="tileStyles[tileTone(table)].tile">
+          <span class="block min-w-0 break-words font-inter font-bold leading-tight" [ngClass]="nameSizeClass(shortName(table, group.name))">{{ shortName(table, group.name) }}</span>
+          <span class="mt-[10px] block min-w-0">
+            <span class="flex items-center gap-[8px] text-sm font-semibold">
+              <span class="h-[10px] w-[10px] flex-none" [ngClass]="tileStyles[tileTone(table)].dot"></span>
+              <span class="min-w-0 flex-1 truncate">{{ tileTone(table) === 'alert' ? tileReason(table) : isFree(table) ? 'Libre' : 'Ocupada' }}</span>
+              <span *ngIf="table.orders && table.orders.length" class="flex h-[22px] min-w-[22px] flex-none items-center justify-center rounded-full px-[6px] text-xs font-bold tabular-nums" [ngClass]="tileStyles[tileTone(table)].count" [attr.title]="table.orders.length + ' órdenes'">{{ table.orders.length }}</span>
             </span>
-
-            <!-- Mozo -->
-            <p class="m-0 mt-[12px] truncate text-sm" [ngClass]="styleOf(table).meta">
-              <ng-container *ngIf="table.waiterName?.trim() && table.waiterId">Mozo: <strong class="font-semibold" [ngClass]="styleOf(table).strong">{{ table.waiterName }}</strong></ng-container>
-              <span *ngIf="!(table.waiterName?.trim() && table.waiterId)" class="opacity-70">Sin mozo asignado</span>
-            </p>
-
-            <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
-            <button *ngIf="needsQrAttention(table)" type="button" (click)="openQrInbox(table)" [attr.aria-label]="'Atender pedidos QR de ' + table.name"
-              class="mt-[12px] flex w-full items-center gap-[8px] rounded-xl bg-white px-[12px] py-[10px] text-left text-sm font-semibold text-cafe-amber-900 transition-colors hover:bg-cafe-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
-              <span class="min-w-0 flex-1">
-                <ng-container *ngIf="qrRequestsOf(table) > 0">{{ qrRequestsOf(table) }} {{ qrRequestsOf(table) === 1 ? 'pedido por confirmar' : 'pedidos por confirmar' }}</ng-container>
-                <ng-container *ngIf="qrRequestsOf(table) > 0 && (qrCallsOf(table).waiter || qrCallsOf(table).bill)"> · </ng-container>
-                <ng-container *ngIf="qrCallsOf(table).bill">Pide la cuenta</ng-container>
-                <ng-container *ngIf="qrCallsOf(table).bill && qrCallsOf(table).waiter"> · </ng-container>
-                <ng-container *ngIf="qrCallsOf(table).waiter">Llama al mozo</ng-container>
-              </span>
-              <span class="h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-cafe-amber-700"></span>
-            </button>
-
-            <!-- Mesa controlada y mesas vinculadas: una línea de texto cada una -->
-            <p *ngIf="table.controlledBy" class="m-0 mt-[12px] text-sm" [ngClass]="styleOf(table).meta">Administrada por <strong class="font-semibold" [ngClass]="styleOf(table).strong">{{ getTableNameById(table.controlledBy) }}</strong></p>
-            <p *ngIf="table.linkedTables && table.linkedTables.length > 0" class="m-0 mt-[12px] text-sm" [ngClass]="styleOf(table).meta">
-              Vinculada con
-              <ng-container *ngFor="let linkedTableId of table.linkedTables; let last = last"><strong class="font-semibold" [ngClass]="styleOf(table).strong">{{ getTableNameById(linkedTableId) }}</strong><ng-container *ngIf="!last">, </ng-container></ng-container>
-            </p>
-          </div>
-
-          <!-- Acciones -->
-          <div class="pt-[16px] flex flex-col gap-[8px]">
-            <!-- Guía de la primera venta: paso 1 (el botón late para que se vea cuál tocar) -->
-            <app-guide-hint *ngIf="isGuide(table) && !(table.orders && table.orders.length)" [step]="1" title="Ordená" text="Tocá Ordenar para abrir el pedido de esta mesa. Después te va a pedir el mozo y los platos."></app-guide-hint>
-            <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="orderButtonClicked(table)" [disabled]="orderBlocked(table)" [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length) && !orderBlocked(table)"
-              [attr.title]="qrRequestsOf(table) > 0 ? 'Primero aceptá o rechazá el pedido por QR' : null"
-              class="w-full flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              [ngClass]="styleOf(table).primary">
-              <mat-icon class="!w-5 !h-5 !text-xl">restaurant_menu</mat-icon>
-              <span>Ordenar</span>
-            </button>
-            <p *ngIf="qrRequestsOf(table) > 0 && !table.controlledBy" class="m-0 text-center text-xs font-medium opacity-90">Aceptá o rechazá el pedido por QR para poder ordenar.</p>
-
-            <!-- Guía de la primera venta: paso 4 (pedir la cuenta) -->
-            <app-guide-hint *ngIf="isGuide(table) && table.orders && table.orders.length" [step]="4" title="La cuenta" text="Cuando el cliente la pida, tocá Total. Órdenes muestra el detalle del pedido y la impresora vuelve a sacar la comanda."></app-guide-hint>
-            <div *ngIf="table.orders && table.orders.length > 0" class="flex gap-[6px]">
-              <button type="button" (click)="openTableInfoDialog(table)" [disabled]="table.controlledBy"
-                class="flex-[2] min-w-0 flex items-center justify-center gap-[4px] py-[7px] px-[6px] rounded-lg transition-colors text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-                [ngClass]="styleOf(table).secondary">
-                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base flex-shrink-0">receipt_long</mat-icon>
-                <span class="whitespace-nowrap">Órdenes</span>
-                <span class="min-w-[18px] px-[4px] rounded-full bg-white text-sage-800 text-[11px] leading-[18px] text-center">{{ table.orders.length }}</span>
-                <span *ngIf="settings.value.kitchenEnabled && readyCount(table) > 0" title="Listos para servir" class="inline-flex items-center min-w-[18px] px-[4px] rounded-full bg-cafe-green-700 text-white text-[11px] leading-[18px]">
-                  <mat-icon class="!w-3 !h-3 !text-[12px] !leading-3">check</mat-icon>{{ readyCount(table) }}
-                </span>
-              </button>
-
-              <button *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" type="button" (click)="openTotalDialog(table)" [disabled]="table.controlledBy" [class.guide-pulse]="isGuide(table)"
-                class="flex-1 min-w-0 flex items-center justify-center gap-[4px] py-[7px] px-[6px] rounded-lg transition-colors text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-                [ngClass]="styleOf(table).secondary">
-                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base flex-shrink-0">payments</mat-icon>
-                <span class="truncate">Total</span>
-              </button>
-
-              <button type="button" title="Imprimir comanda" aria-label="Imprimir comanda" (click)="printTicket(table.id)"
-                class="flex-shrink-0 flex items-center justify-center gap-[4px] py-[7px] px-[12px] rounded-lg transition-colors text-xs font-bold"
-                [ngClass]="styleOf(table).secondary">
-                <mat-icon fontSet="material-icons-outlined" class="!w-4 !h-4 !text-base">print</mat-icon>
-              </button>
-            </div>
-          </div>
-        </article>
+            <span class="mt-[2px] block truncate text-sm" [ngClass]="tileStyles[tileTone(table)].sub">
+              <ng-container *ngIf="tileTone(table) === 'alert'"><span [class.font-bold]="waitingLate(table)" class="tabular-nums">{{ waitText(table) || (table.waiterId && table.waiterName?.trim() ? table.waiterName : 'Sin mozo') }}</span></ng-container>
+              <ng-container *ngIf="tileTone(table) !== 'alert' && readyCount(table) > 0"><span class="font-semibold text-[var(--floor-ready)]">✓ {{ readyCount(table) === 1 ? '1 plato listo' : readyCount(table) + ' platos listos' }}</span></ng-container>
+              <ng-container *ngIf="tileTone(table) !== 'alert' && !(readyCount(table) > 0)"><ng-container *ngIf="table.waiterId && table.waiterName?.trim(); else noWaiter">{{ table.waiterName }}</ng-container><ng-template #noWaiter>Sin mozo</ng-template></ng-container>
+            </span>
+          </span>
+        </button>
       </div>
     </section>
   </div>
 
+  <!-- Panel de la mesa elegida: todas sus acciones en un solo lugar -->
+  <ng-container *ngIf="panelTable as t">
+    <div class="fixed inset-0 z-[60]" role="presentation">
+      <div class="absolute inset-0 bg-[#0f172a99]" (click)="closePanel()"></div>
+      <aside role="dialog" aria-modal="true" [attr.aria-label]="'Mesa ' + t.name"
+        class="floor absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col overflow-y-auto rounded-t-3xl bg-[var(--floor-panel)] p-[20px] font-inter text-[var(--floor-ink)] shadow-dialog sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[420px] sm:rounded-l-3xl sm:rounded-tr-none sm:p-[28px]">
+
+        <div class="flex items-start justify-between gap-[12px]">
+          <div class="min-w-0">
+            <div role="heading" aria-level="2" class="break-words font-inter text-2xl font-bold leading-tight">{{ t.name }}</div>
+            <p class="m-0 mt-[6px] flex items-center gap-[8px] text-sm font-semibold">
+              <span class="h-[10px] w-[10px] flex-none" [ngClass]="tileStyles[tileTone(t)].dot"></span>
+              {{ tileTone(t) === 'alert' ? 'Necesita atención' : isFree(t) ? 'Libre' : 'Ocupada' }}
+            </p>
+            <p class="m-0 mt-[2px] text-sm text-[var(--floor-muted)]">
+              <ng-container *ngIf="t.waiterId && t.waiterName?.trim(); else sinMozo">Mozo: <strong class="font-semibold text-[var(--floor-ink)]">{{ t.waiterName }}</strong></ng-container>
+              <ng-template #sinMozo>Sin mozo asignado</ng-template>
+            </p>
+            <p *ngIf="t.controlledBy" class="m-0 mt-[2px] text-sm text-[var(--floor-muted)]">Administrada por <strong class="font-semibold text-[var(--floor-ink)]">{{ getTableNameById(t.controlledBy) }}</strong></p>
+          </div>
+          <button type="button" (click)="closePanel()" aria-label="Cerrar"
+            class="grid h-11 w-11 flex-none place-items-center rounded-full text-[var(--floor-muted)] transition-colors hover:bg-[var(--floor-line)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Pedidos y avisos que llegaron por QR a esta mesa -->
+        <button *ngIf="needsQrAttention(t)" type="button" (click)="panelAction('qr', t)"
+          class="mt-[16px] flex min-h-[48px] w-full items-center justify-between gap-[8px] rounded-xl bg-[var(--floor-alert-bg)] px-[16px] text-left text-sm font-semibold text-[#ffffff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-alert-bg)] focus-visible:ring-offset-2">
+          <span>{{ tileReason(t) }}</span>
+          <span class="text-[#ffffffeb]">Atender</span>
+        </button>
+
+        <div class="mt-[20px] flex flex-col gap-[8px]">
+          <app-guide-hint *ngIf="isGuide(t) && !(t.orders && t.orders.length)" [step]="1" title="Ordená" text="Tocá Ordenar para abrir el pedido de esta mesa. Después te va a pedir el mozo y los platos."></app-guide-hint>
+          <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="panelAction('order', t)" [disabled]="orderBlocked(t)"
+            [attr.title]="qrRequestsOf(t) > 0 ? 'Primero aceptá o rechazá el pedido por QR' : null"
+            class="flex min-h-[56px] w-full items-center justify-center gap-[8px] rounded-xl bg-[var(--floor-action)] px-[16px] text-base font-semibold text-[#084440] transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            <mat-icon>restaurant_menu</mat-icon>{{ t.orders && t.orders.length ? 'Agregar al pedido' : 'Ordenar' }}
+          </button>
+          <p *ngIf="qrRequestsOf(t) > 0 && !t.controlledBy" class="m-0 text-sm text-[var(--floor-muted)]">Aceptá o rechazá el pedido por QR para poder ordenar.</p>
+
+          <app-guide-hint *ngIf="isGuide(t) && t.orders && t.orders.length" [step]="4" title="La cuenta" text="Cuando el cliente la pida, tocá Total. Órdenes muestra el detalle del pedido y la impresora vuelve a sacar la comanda."></app-guide-hint>
+
+          <ng-container *ngIf="t.orders && t.orders.length > 0">
+            <button type="button" (click)="panelAction('orders', t)" [disabled]="t.controlledBy"
+              class="flex min-h-[52px] w-full items-center justify-between gap-[8px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] disabled:cursor-not-allowed disabled:opacity-40">
+              <span class="flex items-center gap-[10px]"><mat-icon fontSet="material-icons-outlined">receipt_long</mat-icon>Órdenes</span>
+              <span class="text-sm tabular-nums text-[var(--floor-muted)]">{{ t.orders.length }}<ng-container *ngIf="settings.value.kitchenEnabled && readyCount(t) > 0"> · {{ readyCount(t) }} {{ readyCount(t) === 1 ? 'listo' : 'listos' }}</ng-container></span>
+            </button>
+
+            <button *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" type="button" (click)="panelAction('total', t)" [disabled]="t.controlledBy" [class.guide-pulse]="isGuide(t)"
+              class="flex min-h-[52px] w-full items-center gap-[10px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] disabled:cursor-not-allowed disabled:opacity-40">
+              <mat-icon fontSet="material-icons-outlined">payments</mat-icon>Cobrar la cuenta
+            </button>
+
+            <button type="button" (click)="panelAction('print', t)"
+              class="flex min-h-[52px] w-full items-center gap-[10px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]">
+              <mat-icon fontSet="material-icons-outlined">print</mat-icon>Imprimir comanda
+            </button>
+          </ng-container>
+        </div>
+      </aside>
+    </div>
+  </ng-container>
+
   <!-- Barra flotante: pedidos y avisos de clientes esperando -->
-  <div *ngIf="qrPendingTotal > 0" class="fixed bottom-[12px] left-[12px] right-[12px] sm:left-auto sm:right-6 sm:bottom-6 z-30">
+  <div *ngIf="qrPendingTotal > 0 && !laneVisible" class="fixed bottom-[12px] left-[12px] right-[12px] sm:left-auto sm:right-6 sm:bottom-6 z-30">
     <div class="flex items-center justify-between gap-[12px] rounded-2xl bg-white px-[14px] py-[10px] shadow-dialog">
       <span class="flex items-center gap-[8px] text-sm font-bold text-sage-900">
         <span class="w-2.5 h-2.5 rounded-full bg-cafe-amber-700 animate-pulse"></span>
         {{ qrPendingTotal }} {{ qrPendingTotal === 1 ? 'cliente espera' : 'clientes esperan' }} atención
       </span>
-      <button type="button" (click)="openAllQr()" class="flex items-center gap-[6px] px-[14px] py-[8px] rounded-xl bg-cafe-amber-700 text-white text-sm font-bold hover:bg-cafe-amber-800 transition-colors">
+      <button type="button" (click)="openAllQr()" class="flex min-h-[44px] items-center gap-[6px] px-[14px] rounded-xl bg-cafe-amber-700 text-white text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-amber-700 focus-visible:ring-offset-2 hover:bg-cafe-amber-800 transition-colors">
         <mat-icon class="!w-5 !h-5 !text-xl">notifications</mat-icon>
         <span>Atender</span>
       </button>

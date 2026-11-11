@@ -2,7 +2,7 @@
 
   <div class="flex-shrink-0 px-5 pt-5 pb-3">
     <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0">{{ data.item.name }}</div>
-    <p class="text-sage-500 text-xs mt-0.5 mb-0">{{ units > 1 ? 'Elegí las opciones de cada unidad' : 'Elegí las opciones' }}</p>
+    <p class="text-sage-500 text-sm mt-0.5 mb-0">{{ units > 1 ? 'Elegí las opciones de cada unidad' : 'Elegí las opciones' }}</p>
   </div>
 
   <!-- Varias unidades: cada una lleva sus propias opciones (ej: un café jarrito y otro doble) -->
@@ -19,11 +19,11 @@
               <ng-container *ngIf="missingIn(i).length">{{ i + 1 }}</ng-container>
             </span>
             <span class="min-w-0">
-              <span class="block text-xs font-bold text-sage-800">{{ data.item.name }} {{ i + 1 }}</span>
-              <span class="block text-xs truncate" [ngClass]="missingIn(i).length ? 'text-cafe-red-700' : 'text-sage-600'">{{ missingIn(i).length ? 'Falta elegir ' + missingIn(i)[0].name : summary(i) }}</span>
+              <span class="block text-sm font-bold text-sage-800">{{ data.item.name }} {{ i + 1 }}</span>
+              <span class="block text-sm truncate" [ngClass]="missingIn(i).length ? 'text-cafe-red-700' : 'text-sage-600'">{{ missingIn(i).length ? 'Falta elegir ' + missingIn(i)[0].name : summary(i) }}</span>
             </span>
           </span>
-          <span class="text-xs font-bold text-cafe-green-700 flex-shrink-0">{{ unitPriceOf(i) | money }}</span>
+          <span class="text-sm font-bold text-cafe-green-700 flex-shrink-0">{{ unitPriceOf(i) | money }}</span>
         </button>
       </li>
     </ul>
@@ -33,8 +33,8 @@
     <div *ngIf="units > 1" class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-sage-100">
       <p class="text-sm font-bold text-sage-800 m-0 pt-2">Unidad {{ current + 1 }} de {{ units }}</p>
       <div class="flex gap-2 pt-2">
-        <button *ngIf="current > 0" type="button" (click)="copyFromPrevious()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual a la anterior</button>
-        <button type="button" (click)="copyToAll()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual en todas</button>
+        <button *ngIf="current > 0" type="button" (click)="copyFromPrevious()" class="min-h-[44px] px-4 rounded-xl text-sm font-semibold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual a la anterior</button>
+        <button type="button" (click)="copyToAll()" class="min-h-[44px] px-4 rounded-xl text-sm font-semibold bg-sage-50 hover:bg-sage-100 text-sage-700">Igual en todas</button>
       </div>
     </div>
 
@@ -42,8 +42,8 @@
       <div class="flex items-center gap-2 mb-2">
         <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0">{{ group.name }}</div>
         <span *ngIf="group.required" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">Obligatorio</span>
-        <span *ngIf="!group.required" class="text-xs text-sage-500">Opcional</span>
-        <span *ngIf="group.selection === 'MULTIPLE'" class="text-xs text-sage-500">· podés elegir varias</span>
+        <span *ngIf="!group.required" class="text-sm text-sage-500">Opcional</span>
+        <span *ngIf="group.selection === 'MULTIPLE'" class="text-sm text-sage-500">· podés elegir varias</span>
       </div>
 
       <div class="grid grid-cols-2 gap-2" role="group" [attr.aria-label]="group.name">
@@ -54,8 +54,8 @@
             : 'bg-white border-sage-200 text-sage-800 hover:bg-sage-50'"
           [attr.aria-pressed]="isSelected(group, option)">
           <span class="truncate" [class.line-through]="option.outOfStock">{{ option.name }}</span>
-          <span *ngIf="option.outOfStock" class="shrink-0 text-xs font-bold text-cafe-red-700">Agotado</span>
-          <span *ngIf="option.priceDelta !== 0 && !option.outOfStock" class="shrink-0 text-xs font-bold"
+          <span *ngIf="option.outOfStock" class="shrink-0 text-sm font-bold text-cafe-red-700">Agotado</span>
+          <span *ngIf="option.priceDelta !== 0 && !option.outOfStock" class="shrink-0 text-sm font-bold"
             [ngClass]="isSelected(group, option) ? 'text-white/90' : 'text-cafe-green-700'">
             {{ option.priceDelta > 0 ? '+' : '' }}{{ option.priceDelta | money }}
           </span>
@@ -66,7 +66,7 @@
 
   <div class="flex-shrink-0 flex items-center justify-between gap-3 px-5 py-3 border-t border-sage-100 bg-white">
     <div>
-      <p class="text-xs font-bold text-sage-400 m-0">{{ units > 1 ? 'Total de ' + units + ' unidades' : 'Precio por unidad' }}</p>
+      <p class="text-sm font-bold text-sage-600 m-0">{{ units > 1 ? 'Total de ' + units + ' unidades' : 'Precio por unidad' }}</p>
       <p class="text-lg font-bold text-cafe-green-700 m-0">{{ (units > 1 ? totalPrice : unitPrice) | money }}</p>
     </div>
     <div class="flex gap-2">
@@ -77,10 +77,10 @@
       </button>
     </div>
   </div>
-  <p *ngIf="units === 1 && missing.length" role="alert" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
+  <p *ngIf="units === 1 && missing.length" role="alert" class="px-5 pb-3 -mt-1 text-sm font-medium text-cafe-red-700">
     Falta elegir: {{ missing[0].name }}
   </p>
-  <p *ngIf="units > 1 && !canConfirm" role="status" class="px-5 pb-3 -mt-1 text-xs font-medium text-cafe-red-700">
+  <p *ngIf="units > 1 && !canConfirm" role="status" class="px-5 pb-3 -mt-1 text-sm font-medium text-cafe-red-700">
     Falta elegir opciones en: {{ incomplete.join(', ') }}
   </p>
 </div>

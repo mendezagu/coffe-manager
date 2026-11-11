@@ -26,16 +26,16 @@ interface Task {
       @keyframes gs-glow {
         0%,
         100% {
-          box-shadow: 0 0 0 0 rgba(29, 91, 62, 0.35);
+          box-shadow: 0 0 0 0 rgba(11, 125, 102, 0.35);
         }
         50% {
-          box-shadow: 0 0 0 7px rgba(29, 91, 62, 0);
+          box-shadow: 0 0 0 7px rgba(11, 125, 102, 0);
         }
       }
       @media (prefers-reduced-motion: reduce) {
         .gs-next {
           animation: none;
-          box-shadow: 0 0 0 3px rgba(29, 91, 62, 0.2);
+          box-shadow: 0 0 0 3px rgba(11, 125, 102, 0.2);
         }
       }
     `,

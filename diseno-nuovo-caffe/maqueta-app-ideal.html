@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta · App de gestión de restaurantes</title>
+<style>
+  :root{
+    --bg:#edf1ea; --panel:#fff; --ink:#14201a; --muted:#5b6b62; --line:#dbe2d8;
+    --brand:#1b2822; --brand-2:#2e7a57; --free:#16a34a;
+    --busy-bg:#fbe9e5; --busy-ink:#6b2015; --busy:#8a2a1c;
+    --alert:#c2410c; --ready:#166534;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  button:focus-visible{outline:3px solid var(--brand-2);outline-offset:2px}
+  .page{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 22px;font-size:15px;max-width:720px;line-height:1.5}
+  .roles{display:inline-flex;background:#dfe6dc;border-radius:14px;padding:4px;gap:2px;margin-bottom:22px}
+  .roles button{min-height:44px;padding:0 20px;border-radius:11px;font-weight:600;color:var(--muted)}
+  .roles button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .stage{display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:start}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
+  .notes{max-width:420px}
+  .notes h2{font-size:18px;margin:0 0 10px}
+  .notes ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.6;font-size:15px}
+  .notes li{margin-bottom:8px}
+  .notes b{color:var(--ink)}
+  .tag{display:inline-block;font-size:12px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px;margin:0 6px 10px 0;color:var(--muted)}
+
+  /* ---- teléfono ---- */
+  .phone{width:375px;height:min(780px,calc(100vh - 150px));min-height:620px;background:#fff;border-radius:38px;border:10px solid #111;position:relative;overflow:hidden;box-shadow:0 24px 50px rgba(0,0,0,.25)}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+  .top{background:#fff;padding:18px 18px 12px;border-bottom:1px solid var(--line)}
+  .top .hi{font-size:13px;color:var(--muted)}
+  .top .ttl{font-size:21px;font-weight:700;margin-top:2px}
+  .body{flex:1;overflow-y:auto;padding:14px 14px 90px}
+  .nav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px 12px}
+  .nav button{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;color:var(--muted);border-radius:12px}
+  .nav button[aria-current=page]{color:var(--brand);background:#e7efe9}
+  .nav i{font-style:normal;font-size:20px}
+  .card{background:#fff;border-radius:18px;box-shadow:0 1px 3px rgba(20,32,26,.08)}
+  .sec{font-size:13px;font-weight:700;color:var(--muted);margin:16px 4px 8px}
+  .wait{overflow:hidden}
+  .wait button{width:100%;display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:64px;text-align:left;border-top:1px solid var(--line)}
+  .wait button:first-child{border-top:0}
+  .pill{min-width:64px;height:42px;border-radius:12px;background:var(--alert);color:#fff;font-weight:700;display:grid;place-items:center}
+  .pill.late{animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(251,146,60,.7)}50%{box-shadow:0 0 0 6px rgba(251,146,60,0)}}
+  .grow{flex:1;min-width:0}
+  .grow b{display:block;font-size:16px}
+  .grow span{font-size:13px;color:var(--muted)}
+  .act{font-weight:700;color:var(--brand);font-size:14px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{border-radius:16px;padding:12px;text-align:left;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;background:#fff;box-shadow:0 1px 3px rgba(20,32,26,.08)}
+  .tile.busy{background:var(--busy-bg);color:var(--busy-ink);box-shadow:none}
+  .tile.alert{background:var(--alert);color:#fff;box-shadow:none}
+  .tile .n{font-size:20px;font-weight:700}
+  .tile .st{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .tile .meta{font-size:13px;opacity:.85;margin-top:2px}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .dot.free{border:2px solid var(--free)}
+  .dot.busy{background:var(--busy)}
+  .dot.alert{background:#fff;border-radius:2px;transform:rotate(45deg);width:9px;height:9px}
+  .ready{color:var(--ready);font-weight:700}
+  /* hoja inferior */
+  .sheet-bg{position:absolute;inset:0;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:.2s}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:18px 18px 22px;transform:translateY(105%);transition:transform .25s;max-height:86%;overflow:auto}
+  .open .sheet-bg{opacity:1;pointer-events:auto}
+  .open .sheet{transform:none}
+  .grab{width:40px;height:5px;border-radius:3px;background:#cbd5cf;margin:0 auto 12px}
+  .sheet h3{margin:0;font-size:24px}
+  .sheet .s2{color:var(--muted);font-size:14px;margin:2px 0 14px}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:15px}
+  .btn{width:100%;min-height:54px;border-radius:14px;font-weight:700;font-size:16px;margin-top:10px}
+  .btn.main{background:var(--brand);color:#fff}
+  .btn.alt{background:#fff;border:1px solid #c5cfc6}
+  .btn.go{background:var(--brand-2);color:#fff}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+  .seg button{min-height:48px;border-radius:12px;border:1px solid var(--line);font-weight:600;font-size:13px}
+  .seg button[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .bills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .bills button{min-height:44px;padding:0 14px;border-radius:12px;background:#eef2ec;font-weight:600}
+  .total{font-size:38px;font-weight:800;letter-spacing:-.5px;margin:6px 0 0}
+  .toast{position:absolute;left:16px;right:16px;bottom:96px;background:#14201a;color:#fff;padding:14px 16px;border-radius:14px;font-weight:600;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+  .toast.show{opacity:1;transform:none}
+
+  /* ---- tablet admin ---- */
+  .tablet{width:min(100%,860px);height:560px;background:#fff;border-radius:24px;border:10px solid #111;overflow:hidden;display:grid;grid-template-columns:170px 1fr;box-shadow:0 24px 50px rgba(0,0,0,.25)}
+  .side{background:var(--brand);color:#d7e4db;padding:16px 10px;display:flex;flex-direction:column;gap:4px}
+  .side .logo{font-weight:800;color:#fff;font-size:18px;padding:4px 10px 14px}
+  .side button{min-height:44px;text-align:left;padding:0 12px;border-radius:10px;font-weight:600;font-size:14px;color:#c4d4c9}
+  .side button[aria-current=page]{background:rgba(255,255,255,.12);color:#fff}
+  .main{background:var(--bg);padding:16px;overflow:auto}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+  .kpi{padding:12px 14px}
+  .kpi small{color:var(--muted);font-size:12px;display:block}
+  .kpi b{font-size:22px}
+  .two{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
+  @media(max-width:700px){.two{grid-template-columns:1fr}.tablet{grid-template-columns:1fr;height:auto}.side{display:none}}
+  .plan{position:relative;height:250px;background:#f6f8f5;border-radius:14px;margin:8px 0}
+  .t{position:absolute;display:grid;place-items:center;font-weight:700;font-size:12px;border-radius:10px;border:2px solid var(--free);background:#fff;color:var(--ink)}
+  .t.r{border-radius:50%}
+  .t.busy{background:var(--busy-bg);border-color:var(--busy);color:var(--busy-ink)}
+  .t.alert{background:var(--alert);border-color:var(--alert);color:#fff}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .legend span{display:flex;gap:6px;align-items:center}
+  .legend .dot.alert{background:var(--alert)}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:10px}
+  .bars div{flex:1;background:#bfdccb;border-radius:6px 6px 0 0;position:relative}
+  .bars div.pk{background:var(--brand)}
+  .bars small{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+  .alerts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .alerts div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:10px 12px;background:#fff7f2;border-radius:12px;color:#7c2d12}
+  .alerts div.ok{background:#eef7f1;color:#14532d}
+  .admin-wrap{display:grid;grid-template-columns:minmax(0,860px) minmax(260px,1fr);gap:30px;align-items:start}
+  @media(max-width:1000px){.admin-wrap{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:1fr}.tablet{border-width:8px}}
+  .hide{display:none!important}
+  .foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Maqueta · App de gestión de restaurantes</h1>
+  <p class="sub">Cada rol abre la app y ve primero lo único que le importa. Probala: cambiá de rol, tocá una mesa del mozo, tocá una fila del cajero para cobrar y tocá una mesa del plano del administrador. Es una maqueta, no hay datos reales.</p>
+
+  <div class="roles" role="group" aria-label="Rol">
+    <button data-role="mozo" aria-pressed="true">Mozo</button>
+    <button data-role="cajero" aria-pressed="false">Cajero</button>
+    <button data-role="admin" aria-pressed="false">Administrador</button>
+  </div>
+
+  <!-- ================= MOZO ================= -->
+  <div class="stage" id="v-mozo">
+    <div class="phone"><div class="screen" id="mozo-screen">
+      <div class="top"><div class="hi">Turno noche · 21:40</div><div class="ttl">Hola, Lucía</div></div>
+      <div class="body">
+        <div class="sec" style="margin-top:2px">Esperando atención · 2</div>
+        <div class="card wait">
+          <button data-open="m7"><span class="pill late">6 min</span><span class="grow"><b>Mesa 7</b><span>Pide la cuenta</span></span><span class="act">Cobrar</span></button>
+          <button data-open="m3"><span class="pill">2 min</span><span class="grow"><b>Mesa 3</b><span>Pedido por QR</span></span><span class="act">Atender</span></button>
+        </div>
+        <div class="sec">Mis mesas · 6</div>
+        <div class="tiles">
+          <button class="tile alert" data-open="m3"><span class="n">3</span><span><span class="st"><span class="dot alert"></span>Pedido por QR</span><span class="meta">hace 2 min</span></span></button>
+          <button class="tile busy" data-open="m5"><span class="n">5</span><span><span class="st"><span class="dot busy"></span>Ocupada · 42 min</span><span class="meta ready">✓ 2 platos listos</span></span></button>
+          <button class="tile alert" data-open="m7"><span class="n">7</span><span><span class="st"><span class="dot alert"></span>Pide la cuenta</span><span class="meta">hace 6 min</span></span></button>
+          <button class="tile busy" data-open="m9"><span class="n">9</span><span><span class="st"><span class="dot busy"></span>Ocupada · 12 min</span><span class="meta">$ 14.800</span></span></button>
+          <button class="tile" data-open="m10"><span class="n">10</span><span><span class="st"><span class="dot free"></span>Libre</span><span class="meta">Sin pedido</span></span></button>
+          <button class="tile" data-open="m11"><span class="n">11</span><span><span class="st"><span class="dot free"></span>Libre</span><span class="meta">Reservada 22:15</span></span></button>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Principal">
+        <button aria-current="page"><i>▦</i>Mesas</button><button><i>＋</i>Pedido</button><button><i>✓</i>Listos</button><button><i>☺</i>Yo</button>
+      </nav>
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="Detalle de la mesa" id="mozo-sheet">
+        <div class="grab"></div>
+        <h3 id="ms-title">Mesa 7</h3><div class="s2" id="ms-sub">Ocupada hace 54 min · 4 personas</div>
+        <div id="ms-items"></div>
+        <div class="row"><b>Total parcial</b><b id="ms-total">$ 38.400</b></div>
+        <button class="btn main" id="ms-main">＋ Agregar al pedido</button>
+        <button class="btn alt" id="ms-repeat">↻ Repetir el último pedido</button>
+        <button class="btn go" id="ms-bill">Pedir la cuenta</button>
+      </div>
+      <div class="toast" id="mozo-toast"></div>
+    </div></div>
+    <div class="notes">
+      <span class="tag">Celular</span><span class="tag">Una mano</span>
+      <h2>Inicio del mozo</h2>
+      <ul>
+        <li><b>Lo urgente primero:</b> arriba, con cuánto hace que espera cada cliente. Los más viejos laten.</li>
+        <li><b>Solo sus mesas.</b> No ve las 56 del local: ve las 6 que atiende.</li>
+        <li><b>Cada ficha cuenta algo útil:</b> tiempo ocupada, consumo parcial, platos listos para servir.</li>
+        <li><b>Todo al alcance del pulgar:</b> navegación abajo, hoja de la mesa desde abajo, botones de 54px.</li>
+        <li><b>Atajos:</b> “Repetir el último pedido” y “Pedir la cuenta” sin pasar por menús.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= CAJERO ================= -->
+  <div class="stage hide" id="v-cajero">
+    <div class="phone"><div class="screen" id="caja-screen">
+      <div class="top"><div class="hi">Caja abierta · $ 10.000 de apertura</div><div class="ttl">Para cobrar · 3</div></div>
+      <div class="body">
+        <div class="card wait" id="caja-list">
+          <button data-pay="7"><span class="pill late">9 min</span><span class="grow"><b>Mesa 7</b><span>4 personas · Lucía</span></span><b>$ 38.400</b></button>
+          <button data-pay="2"><span class="pill">4 min</span><span class="grow"><b>Mesa 2</b><span>2 personas · Martín</span></span><b>$ 21.900</b></button>
+          <button data-pay="12"><span class="pill">1 min</span><span class="grow"><b>Mesa 12</b><span>6 personas · Lucía</span></span><b>$ 74.300</b></button>
+        </div>
+        <div class="sec">Cobrado en este turno</div>
+        <div class="card" style="padding:14px">
+          <div class="row" style="border:0;padding-top:0"><span>Efectivo</span><b>$ 52.600</b></div>
+          <div class="row"><span>Tarjeta</span><b>$ 31.200</b></div>
+          <div class="row"><span>Transferencia y QR</span><b>$ 18.600</b></div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Principal">
+        <button aria-current="page"><i>$</i>Cobrar</button><button><i>▦</i>Mesas</button><button><i>▤</i>Caja</button><button><i>⌂</i>Mostrador</button>
+      </nav>
+      <div class="sheet-bg" data-close></div>
+      <div class="sheet" role="dialog" aria-modal="true" aria-label="Cobrar" id="caja-sheet">
+        <div class="grab"></div>
+        <div class="s2" style="margin:0" id="cs-sub">Mesa 7 · 4 personas</div>
+        <div class="total" id="cs-total">$ 38.400</div>
+        <div class="seg" role="group" aria-label="Método de pago">
+          <button aria-pressed="true">Efectivo</button><button aria-pressed="false">Tarjeta</button><button aria-pressed="false">Transf.</button><button aria-pressed="false">QR</button>
+        </div>
+        <div id="cash-block">
+          <div class="s2" style="margin:0 0 6px">Recibido</div>
+          <div class="bills"><button data-bill="40000">$ 40.000</button><button data-bill="50000">$ 50.000</button><button data-bill="0">Justo</button></div>
+          <div class="row"><span>Vuelto a entregar</span><b id="cs-change">$ 1.600</b></div>
+        </div>
+        <button class="btn go" id="cs-go">Cobrar $ 38.400 · Efectivo</button>
+      </div>
+      <div class="toast" id="caja-toast"></div>
+    </div></div>
+    <div class="notes">
+      <span class="tag">Celular o tablet</span><span class="tag">Velocidad</span>
+      <h2>Inicio del cajero</h2>
+      <ul>
+        <li><b>Es una cola, no un salón.</b> Solo mesas con la cuenta pedida, la que espera hace más arriba.</li>
+        <li><b>Un toque para cobrar:</b> el total es lo más grande de la pantalla.</li>
+        <li><b>Efectivo preseleccionado</b> con billetes rápidos y el vuelto calculado; el botón dice exactamente qué va a pasar.</li>
+        <li><b>Cuadre de caja a la vista:</b> lo cobrado por método, sin entrar a un reporte.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= ADMIN ================= -->
+  <div class="stage hide" id="v-admin" style="grid-template-columns:1fr">
+    <div class="admin-wrap">
+      <div class="tablet">
+        <aside class="side">
+          <div class="logo">Tavolapp</div>
+          <button aria-current="page">Hoy</button><button>Salón</button><button>Cocina</button><button>Caja</button><button>Reportes</button><button>Inventario</button><button>Ajustes</button>
+        </aside>
+        <div class="main">
+          <div class="kpis">
+            <div class="card kpi"><small>Ventas del turno</small><b>$ 102.400</b></div>
+            <div class="card kpi"><small>Ticket promedio</small><b>$ 20.480</b></div>
+            <div class="card kpi"><small>Ocupación</small><b>11 / 56 · 20%</b></div>
+          </div>
+          <div class="two">
+            <div class="card" style="padding:14px">
+              <b>Plano del salón</b>
+              <div class="plan" id="plan">
+                <button class="t busy" style="left:6%;top:10%;width:11%;height:17%" data-tip="Mesa 1 · ocupada 31 min · $ 18.200">1</button>
+                <button class="t" style="left:22%;top:10%;width:11%;height:17%" data-tip="Mesa 2 · libre">2</button>
+                <button class="t alert" style="left:38%;top:10%;width:11%;height:17%" data-tip="Mesa 3 · pedido QR hace 2 min">3</button>
+                <button class="t busy r" style="left:6%;top:42%;width:14%;height:22%" data-tip="Mesa 5 · ocupada 42 min · 2 platos listos">5</button>
+                <button class="t r" style="left:28%;top:42%;width:14%;height:22%" data-tip="Mesa 6 · libre">6</button>
+                <button class="t alert r" style="left:50%;top:42%;width:14%;height:22%" data-tip="Mesa 7 · pide la cuenta hace 9 min">7</button>
+                <button class="t" style="left:70%;top:12%;width:22%;height:14%" data-tip="Mesa 9 · libre">9</button>
+                <button class="t busy" style="left:70%;top:36%;width:22%;height:14%" data-tip="Mesa 10 · ocupada 12 min · $ 14.800">10</button>
+                <button class="t" style="left:70%;top:60%;width:22%;height:14%" data-tip="Mesa 11 · reservada 22:15">11</button>
+                <button class="t busy" style="left:6%;top:76%;width:30%;height:16%" data-tip="Barra · ocupada">Barra</button>
+              </div>
+              <div class="legend"><span><i class="dot free"></i>Libre</span><span><i class="dot busy"></i>Ocupada</span><span><i class="dot alert"></i>Necesita atención</span></div>
+              <div id="plan-tip" style="margin-top:10px;font-size:13px;color:var(--muted);min-height:18px">Tocá una mesa del plano.</div>
+            </div>
+            <div class="card" style="padding:14px">
+              <b>Requiere tu atención</b>
+              <div class="alerts">
+                <div><span>Mesa 7 espera la cuenta hace 9 min</span><b>Ver</b></div>
+                <div><span>Permanencia promedio subió a 1 h 40</span><b>Ver</b></div>
+                <div><span>Faltan 6 unidades de gaseosa</span><b>Pedir</b></div>
+                <div class="ok"><span>Caja cuadra con lo cobrado</span><b>✓</b></div>
+              </div>
+              <div style="margin-top:14px"><b>Ventas por hora</b></div>
+              <div class="bars" aria-label="Ventas por hora">
+                <div style="height:20%"><small>19</small></div><div style="height:45%"><small>20</small></div><div class="pk" style="height:100%"><small>21</small></div><div style="height:70%"><small>22</small></div><div style="height:30%"><small>23</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <span class="tag">Tablet o escritorio</span><span class="tag">Visión del día</span>
+        <h2>Inicio del administrador</h2>
+        <ul>
+          <li><b>El día de un vistazo:</b> ventas, ticket promedio y ocupación arriba, sin entrar a reportes.</li>
+          <li><b>Plano del salón:</b> las mesas donde están de verdad. Se ubica por posición, no por nombre.</li>
+          <li><b>“Requiere tu atención”</b> en vez de cifras sueltas: cosas que alguien tiene que decidir hoy.</li>
+          <li><b>Navegación lateral</b> con pocas secciones, y los detalles (stock, reportes) un nivel más adentro.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot"><b>Sistema visual:</b> Inter con cifras tabulares · verde de marca para acciones · rojo ladrillo = ocupada · naranja = lo único urgente (con rombo y texto, no solo color) · blanco con aro verde = libre · objetivos táctiles de 44 a 56px · modo oscuro previsto con los mismos tres estados.<br>
+  <b>Pendiente de validar:</b> esta maqueta es mi criterio; la probaría con 3 mozos y 1 cajero reales midiendo cuánto tardan en tomar un pedido y cobrar.</p>
+</div>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => [...r.querySelectorAll(s)];
+// roles
+$$('.roles button').forEach(b => b.onclick = () => {
+  $$('.roles button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  ['mozo','cajero','admin'].forEach(r => $('#v-' + r).classList.toggle('hide', r !== b.dataset.role));
+});
+const toast = (id, msg) => { const t = $(id); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); };
+// ---- mozo ----
+const mesas = {
+  m3:{t:'Mesa 3',s:'Pedido por QR hace 2 min · 2 personas',items:[['1× Café con leche','$ 2.800'],['2× Medialuna','$ 1.800']],total:'$ 4.600'},
+  m5:{t:'Mesa 5',s:'Ocupada hace 42 min · 3 personas · 2 platos listos',items:[['2× Hamburguesa completa','$ 25.000'],['3× Coca cola','$ 12.000'],['1× Flan casero','$ 5.200']],total:'$ 42.200'},
+  m7:{t:'Mesa 7',s:'Pide la cuenta hace 6 min · 4 personas',items:[['2× Pizza muzzarella','$ 25.000'],['4× Cerveza','$ 20.000'],['1× Tiramisú','$ 6.400'],['2× Café','$ 5.600']],total:'$ 38.400',bill:true},
+  m9:{t:'Mesa 9',s:'Ocupada hace 12 min · 2 personas',items:[['2× Lomo completo','$ 29.000']],total:'$ 14.800'},
+  m10:{t:'Mesa 10',s:'Libre',items:[],total:'$ 0'},
+  m11:{t:'Mesa 11',s:'Libre · reservada 22:15',items:[],total:'$ 0'}
+};
+let cur = 'm7';
+$$('[data-open]').forEach(b => b.onclick = () => {
+  cur = b.dataset.open; const m = mesas[cur];
+  $('#ms-title').textContent = m.t; $('#ms-sub').textContent = m.s;
+  $('#ms-items').innerHTML = m.items.length ? m.items.map(i => `<div class="row"><span>${i[0]}</span><span>${i[1]}</span></div>`).join('') : '<div class="row"><span style="color:var(--muted)">Todavía no hay pedido.</span></div>';
+  $('#ms-total').textContent = m.total;
+  $('#ms-main').textContent = m.items.length ? '＋ Agregar al pedido' : 'Tomar pedido';
+  $('#ms-repeat').style.display = m.items.length ? '' : 'none';
+  $('#ms-bill').style.display = m.items.length ? '' : 'none';
+  $('#ms-bill').textContent = m.bill ? 'Cuenta ya pedida · avisar a caja' : 'Pedir la cuenta';
+  $('#mozo-screen').classList.add('open');
+});
+$$('[data-close]').forEach(b => b.onclick = () => { $('#mozo-screen').classList.remove('open'); $('#caja-screen').classList.remove('open'); });
+$('#ms-main').onclick = () => { $('#mozo-screen').classList.remove('open'); toast('#mozo-toast', 'Abriendo la carta para ' + mesas[cur].t); };
+$('#ms-repeat').onclick = () => { $('#mozo-screen').classList.remove('open'); toast('#mozo-toast', 'Último pedido repetido y enviado a cocina ✓'); };
+$('#ms-bill').onclick = () => { $('#mozo-screen').classList.remove('open'); toast('#mozo-toast', 'Aviso enviado a caja ✓'); };
+// ---- cajero ----
+const nums = {7:38400,2:21900,12:74300}; let due = 38400, method = 'Efectivo', recv = 40000;
+const fmt = n => '$ ' + n.toLocaleString('es-AR');
+function renderPay() {
+  $('#cs-total').textContent = fmt(due);
+  $('#cash-block').style.display = method === 'Efectivo' ? '' : 'none';
+  $('#cs-change').textContent = fmt(Math.max(0, recv - due));
+  $('#cs-go').textContent = `Cobrar ${fmt(due)} · ${method}`;
+}
+$$('[data-pay]').forEach(b => b.onclick = () => {
+  const n = b.dataset.pay; due = nums[n]; recv = Math.ceil(due / 10000) * 10000;
+  $('#cs-sub').textContent = 'Mesa ' + n; renderPay(); $('#caja-screen').classList.add('open');
+});
+$$('.seg button').forEach(b => b.onclick = () => { $$('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b)); method = b.textContent.replace('Transf.', 'Transferencia'); renderPay(); });
+$$('[data-bill]').forEach(b => b.onclick = () => { recv = +b.dataset.bill || due; renderPay(); });
+$('#cs-go').onclick = () => { $('#caja-screen').classList.remove('open'); toast('#caja-toast', 'Cobrado ✓ · ticket listo para imprimir'); };
+// ---- admin ----
+$$('#plan .t').forEach(t => t.onclick = () => { $('#plan-tip').textContent = t.dataset.tip; });
+</script>
+</body>
+</html>

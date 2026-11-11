@@ -42,8 +42,8 @@ import { Component, Input } from '@angular/core';
         z-index: 2000;
         justify-content: center;
         gap: 14px;
-        background: #1b2822;
-        color: #edf1ea;
+        background: #0b7d66;
+        color: #eef0f3;
         font: 500 18px Roboto, system-ui, sans-serif;
         letter-spacing: 0.01em;
       }
@@ -79,10 +79,10 @@ export class AppLoaderComponent {
   @Input() splash = false;
 
   get rim() {
-    return this.splash ? '#5fae86' : '#1d5b3e';
+    return this.splash ? '#2ed0ab' : '#0b7d66';
   }
   get well() {
-    return this.splash ? '#22322a' : '#f6f8f4';
+    return this.splash ? '#363f4e' : '#f3f5f7';
   }
   get accent() {
     return this.splash ? '#d9786a' : '#8a2a1c';

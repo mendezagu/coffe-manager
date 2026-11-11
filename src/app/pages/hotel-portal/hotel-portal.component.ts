@@ -133,7 +133,7 @@ export class HotelPortalComponent implements OnInit {
     if (!w) return this.fail('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes.');
     const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string);
     w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(s.hotel.name)}</title>
-      <style>body{font-family:Roboto,Arial,sans-serif;text-align:center;padding:40px;color:#1b2822}
+      <style>body{font-family:Roboto,Arial,sans-serif;text-align:center;padding:40px;color:#0b7d66}
       h1{font-size:28px;margin:0 0 8px}p{margin:6px 0;font-size:16px}.code{font-size:30px;letter-spacing:6px;font-weight:700;margin:14px 0}
       img{width:260px;height:260px;margin:16px 0}</style></head><body>
       <h1>${esc(s.hotel.name)}</h1>

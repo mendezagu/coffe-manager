@@ -53,6 +53,10 @@ export class CounterComponent implements OnInit, OnDestroy {
   editFavs = false;
 
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
+  // Al registrar una venta el foco va a "Nueva venta": con Enter se sigue con el próximo cliente
+  @ViewChild('newSaleBtn') set newSaleBtn(el: ElementRef<HTMLButtonElement> | undefined) {
+    if (el) setTimeout(() => el.nativeElement.focus(), 0);
+  }
 
   // lo que lleva el cliente: id del producto -> cantidad
   cart = new Map<string, number>();

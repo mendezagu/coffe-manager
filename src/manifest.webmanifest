@@ -1,8 +1,8 @@
 {
   "name": "Tavolapp",
   "short_name": "Tavolapp",
-  "theme_color": "#1b2822",
-  "background_color": "#1b2822",
+  "theme_color": "#2f3643",
+  "background_color": "#2f3643",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

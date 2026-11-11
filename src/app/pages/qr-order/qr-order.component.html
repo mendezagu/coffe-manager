@@ -9,8 +9,8 @@
     [attr.aria-label]="(inCart(item) ? 'Agregar otra unidad de ' : 'Agregar ') + item.name"
     [attr.title]="inCart(item) ? 'Agregado ×' + qtyInCart(item) : null"
     class="flex-shrink-0 rounded-full flex items-center justify-center text-white shadow-sm active:scale-90 transition-all"
-    [ngClass]="[sm ? 'w-7 h-7' : 'w-8 h-8', inCart(item) ? 'bg-forest' : 'bg-leaf', justAdded === item.id ? 'added-pop' : '']">
-    <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">{{ inCart(item) ? 'check' : 'add' }}</mat-icon>
+    [ngClass]="[sm ? 'w-9 h-9' : 'w-11 h-11', inCart(item) ? 'bg-leaf ring-4 ring-leaf/25' : 'bg-forest', justAdded === item.id ? 'added-pop' : '']">
+    <mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">{{ inCart(item) ? 'check' : 'add' }}</mat-icon>
   </button>
 </ng-template>
 
@@ -21,24 +21,26 @@
 
 <!-- Precio, "Agotado" y "Con opciones" -->
 <ng-template #metaTpl let-item>
-  <span class="block font-bold text-[14px] text-forest leading-tight">{{ priceText(item) }}</span>
+  <span class="block font-extrabold text-[15px] tabular-nums text-forest leading-tight">{{ priceText(item) }}</span>
   <span *ngIf="item.soldOut" class="mt-[3px] inline-block px-[8px] py-[1px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Agotado</span>
   <span *ngIf="!item.soldOut && hasOptions(item)" class="mt-[2px] flex items-center gap-[2px] text-[11px] font-medium text-leaf">{{ browseOnly ? 'Ver opciones' : 'Con opciones' }}<mat-icon *ngIf="browseOnly" class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">chevron_right</mat-icon></span>
 </ng-template>
 
 <!-- Tarjeta en grilla (2 columnas): foto arriba -->
 <ng-template #gridCard let-item>
-  <article class="h-full rounded-xl bg-surface-lowest p-[10px] shadow-soft flex flex-col justify-between gap-[8px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
+  <article class="h-full rounded-[24px] bg-surface-lowest p-[8px] shadow-soft flex flex-col justify-between gap-[10px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
     [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
     <div>
-      <div class="relative w-full h-24 rounded-lg overflow-hidden mb-[8px]">
+      <div class="relative w-full h-32 rounded-[18px] overflow-hidden mb-[10px]">
         <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
         <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
       </div>
-      <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[15px] text-forest m-0 leading-tight line-clamp-2">{{ item.name }}</p>
-      <p *ngIf="item.description" class="text-xs text-ink-variant mt-[2px] mb-0 leading-snug line-clamp-1">{{ item.description }}</p>
+      <div class="px-[6px]">
+        <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[15px] text-forest m-0 leading-tight line-clamp-2">{{ item.name }}</p>
+        <p *ngIf="item.description" class="text-xs text-ink-variant mt-[3px] mb-0 leading-snug line-clamp-1">{{ item.description }}</p>
+      </div>
     </div>
-    <div class="flex items-center justify-between gap-[8px]">
+    <div class="flex items-center justify-between gap-[8px] px-[6px] pb-[2px]">
       <p class="m-0 min-w-0"><ng-container *ngTemplateOutlet="metaTpl; context: { $implicit: item }"></ng-container></p>
       <ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item, sm: true }"></ng-container>
     </div>
@@ -47,21 +49,21 @@
 
 <!-- Tarjeta en lista: foto a la izquierda (o solo texto si no hay foto) -->
 <ng-template #listCard let-item>
-  <article class="rounded-xl bg-surface-lowest p-[12px] shadow-soft flex items-center gap-[12px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
+  <article class="rounded-[24px] bg-surface-lowest p-[10px] shadow-soft flex items-center gap-[14px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
     [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div *ngIf="item.imageUrl" class="relative flex-none w-24 h-24 rounded-lg overflow-hidden">
-      <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" width="96" height="96" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
-      <span *ngIf="item.badge" class="absolute left-[4px] top-[4px] px-[6px] py-[1px] rounded-full text-[9px] font-bold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
+    <div *ngIf="item.imageUrl" class="relative flex-none w-[112px] h-[112px] rounded-[18px] overflow-hidden">
+      <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" width="112" height="112" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
+      <span *ngIf="item.badge" class="absolute left-[6px] top-[6px] px-[7px] py-[1px] rounded-full text-[10px] font-bold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
     </div>
-    <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-[2px]">
+    <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-[2px] pr-[4px]" [class.pl-[8px]]="!item.imageUrl">
       <div>
         <div class="flex items-start justify-between gap-[8px]">
-          <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[15px] text-forest m-0 leading-tight">{{ item.name }}</p>
+          <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[16px] text-forest m-0 leading-tight">{{ item.name }}</p>
           <span *ngIf="item.badge && !item.imageUrl" class="flex-none px-[8px] py-[1px] rounded-full text-[10px] font-bold" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
         </div>
-        <p *ngIf="item.description" class="text-xs text-ink-variant mt-[2px] mb-0 leading-snug line-clamp-2">{{ item.description }}</p>
+        <p *ngIf="item.description" class="text-xs text-ink-variant mt-[3px] mb-0 leading-snug line-clamp-2">{{ item.description }}</p>
       </div>
-      <div class="flex items-end justify-between gap-[8px] mt-[6px]">
+      <div class="flex items-end justify-between gap-[8px] mt-[8px]">
         <p class="m-0 min-w-0"><ng-container *ngTemplateOutlet="metaTpl; context: { $implicit: item }"></ng-container></p>
         <ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item }"></ng-container>
       </div>
@@ -71,19 +73,19 @@
 
 <!-- Tarjeta grande: foto a todo el ancho con el nombre y el precio encima -->
 <ng-template #heroCard let-item>
-  <article class="relative overflow-hidden rounded-xl bg-surface-high shadow-soft" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
+  <article class="relative overflow-hidden rounded-[28px] bg-surface-high shadow-soft" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
     [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div class="relative h-56 w-full">
+    <div class="relative h-[280px] w-full">
       <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="w-full h-full object-cover" [class.grayscale]="item.soldOut" />
-      <div class="absolute inset-0 bg-gradient-to-t from-forest via-forest/45 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
       <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
-      <div class="absolute inset-x-0 bottom-0 p-[12px] flex flex-col gap-[4px] text-white">
-        <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[20px] font-bold leading-tight">{{ item.name }}</p>
+      <div class="absolute inset-x-0 bottom-0 p-[16px] flex flex-col gap-[4px] text-white">
+        <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[24px] font-extrabold leading-[1.05] tracking-tight">{{ item.name }}</p>
         <p *ngIf="item.description" class="m-0 text-xs text-white/80 leading-snug line-clamp-2">{{ item.description }}</p>
         <div class="flex items-center justify-between gap-[8px] mt-[2px]">
           <span class="text-[17px] font-bold text-tertiary-fixed">{{ priceText(item) }}<span *ngIf="item.soldOut" class="ml-[6px] px-[8px] py-[1px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Agotado</span></span>
           <button *ngIf="!browseOnly && !item.soldOut" type="button" (click)="hasOptions(item) ? openItem(item) : quickAdd(item, $event); $event.stopPropagation()"
-            class="flex items-center gap-[4px] py-[6px] px-[12px] rounded-full bg-leaf text-white text-xs font-bold shadow-sm active:scale-95 transition-all">
+            class="flex items-center gap-[6px] h-11 px-[18px] rounded-full bg-[#ffffff] text-[#181d26] text-sm font-bold shadow-sm active:scale-95 transition-all">
             {{ inCart(item) ? 'Agregado' : 'Pedir' }}<mat-icon class="!w-4 !h-4 !text-base !leading-4">{{ inCart(item) ? 'check' : 'arrow_forward' }}</mat-icon>
           </button>
         </div>
@@ -94,21 +96,18 @@
 
 <!-- Tarjeta del carrusel de destacados -->
 <ng-template #featuredCard let-item>
-  <article class="rounded-xl bg-surface-lowest p-[12px] shadow-soft flex flex-col justify-between h-full" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
+  <article class="relative h-[320px] overflow-hidden rounded-[28px] bg-forest shadow-soft" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
     [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div>
-      <div *ngIf="item.imageUrl" class="relative w-full h-36 rounded-lg overflow-hidden mb-[10px]">
-        <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
-        <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
-        <span class="absolute left-[8px] bottom-[8px] px-[8px] py-[2px] rounded-full bg-surface-highest/90 backdrop-blur-md text-forest text-[11px] font-bold">{{ priceText(item) }}</span>
+    <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="absolute inset-0 h-full w-full object-cover" [class.grayscale]="item.soldOut" />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+    <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
+    <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-[10px] p-[16px] text-white">
+      <div class="min-w-0">
+        <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[22px] font-extrabold leading-[1.05] tracking-tight line-clamp-2">{{ item.name }}</p>
+        <p *ngIf="item.description" class="m-0 mt-[4px] text-xs text-white/80 leading-snug line-clamp-1">{{ item.description }}</p>
+        <p class="m-0 mt-[8px] inline-flex items-center rounded-full bg-[#ffffff] px-[12px] py-[4px] text-[14px] font-extrabold tabular-nums text-[#181d26]">{{ priceText(item) }}</p>
       </div>
-      <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[16px] font-bold text-forest leading-tight">{{ item.name }}</p>
-      <p *ngIf="item.description" class="m-0 mt-[2px] text-xs text-ink-variant leading-snug line-clamp-1">{{ item.description }}</p>
-      <p *ngIf="!item.imageUrl" class="m-0 mt-[4px] font-bold text-sm text-forest">{{ priceText(item) }}</p>
-    </div>
-    <div *ngIf="!browseOnly && !item.soldOut" class="flex items-center justify-between mt-[12px]">
-      <span class="text-[11px] font-semibold text-leaf">{{ hasOptions(item) ? 'Con opciones' : 'Listo para pedir' }}</span>
-      <ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item }"></ng-container>
+      <ng-container *ngIf="!browseOnly && !item.soldOut"><ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item }"></ng-container></ng-container>
     </div>
   </article>
 </ng-template>
@@ -117,25 +116,10 @@
 <!-- Pie de la carta: invitación discreta a otros comercios (colores fijos: se ve igual en claro, en oscuro y sobre cualquier fondo) -->
 <ng-template #poweredBy>
   <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Quiero una tienda así para mi negocio (abre la página de Tavolapp)"
-    class="group inline-flex max-w-full items-center gap-[10px] rounded-full bg-[#07241a]/95 py-[7px] pl-[14px] pr-[10px] no-underline ring-1 ring-white/10 transition-colors hover:bg-[#07241a] active:scale-[0.98]">
-    <span class="inline-flex flex-none items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 14px; line-height: 1; letter-spacing: -0.035em; color: #ffffff">
-      <span>Tav</span>
-      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
-        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#07241a" stroke="#aff1ce" />
-        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#aff1ce" />
-        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#07241a" stroke="#aff1ce" stroke-opacity=".35" />
-        <g fill="none" stroke="#aff1ce" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
-          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
-          <path d="M39 50 V69" stroke-width="3.6" />
-        </g>
-        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#ff8f78" />
-        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#ff8f78" />
-      </svg>
-      <span>lapp</span>
-    </span>
+    class="group inline-flex max-w-full items-center gap-[10px] rounded-full bg-[#2f3643]/95 py-[7px] pl-[14px] pr-[10px] no-underline ring-1 ring-white/10 transition-colors hover:bg-[#2f3643] active:scale-[0.98]">
+    <img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="74" height="18" style="height:18px;width:auto;display:block">
     <span class="min-w-0 text-[12px] font-medium leading-tight text-[#b9cfc2]">Quiero una tienda así para mi negocio</span>
-    <span class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full bg-[#aff1ce] text-[#07241a] transition-transform group-hover:translate-x-[2px]">
+    <span class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full bg-[#6fe3c6] text-[#2f3643] transition-transform group-hover:translate-x-[2px]">
       <mat-icon class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">arrow_forward</mat-icon>
     </span>
   </a>
@@ -143,27 +127,37 @@
 
 <!-- Encabezado del local: portada (si tiene), logo, nombre y estado -->
 <ng-template #brandHeader>
-  <div *ngIf="info?.business?.coverUrl" class="h-32 w-full bg-forest" [ngStyle]="coverStyle"></div>
-  <div class="px-[16px] pb-[12px] flex items-center gap-[12px] min-w-0" [ngClass]="info?.business?.coverUrl ? '-mt-[26px]' : 'pt-[20px]'">
-    <div class="w-14 h-14 rounded-2xl bg-forest border-[3px] border-surface flex items-center justify-center text-white shadow-floating flex-shrink-0 overflow-hidden">
-      <img *ngIf="info?.business?.logoUrl; else cupIcon" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="w-full h-full object-cover" />
-      <ng-template #cupIcon><mat-icon>local_cafe</mat-icon></ng-template>
-    </div>
-    <div class="min-w-0" [ngClass]="info?.business?.coverUrl ? 'pt-[26px]' : ''">
-      <div class="flex flex-wrap items-center gap-x-[6px] gap-y-[2px]">
-        <h1 class="!font-jakarta font-bold text-[18px] tracking-tight text-forest leading-tight m-0 break-words">{{ info?.business?.name }}</h1>
-        <span class="px-[8px] py-[2px] rounded-full bg-leaf-container text-leaf-ink text-[10px] font-bold uppercase tracking-wider flex-shrink-0">
+  <header class="relative isolate overflow-hidden rounded-b-[36px] text-white" [ngClass]="dark ? 'bg-surface-lowest' : 'bg-forest'">
+    <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10" [ngStyle]="coverStyle"></div>
+    <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10 bg-gradient-to-b from-black/0 via-black/25 to-black/70"></div>
+    <!-- Sin portada: anillos concéntricos, como el plato visto desde arriba -->
+    <svg *ngIf="!info?.business?.coverUrl" class="absolute -right-[70px] -top-[70px] -z-10 h-[280px] w-[280px]" [ngClass]="dark ? 'text-forest' : 'text-white'" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
+      <circle cx="50" cy="50" r="48" stroke-opacity=".14" stroke-width="1.2" /><circle cx="50" cy="50" r="36" stroke-opacity=".12" stroke-width="1.2" /><circle cx="50" cy="50" r="24" stroke-opacity=".1" stroke-width="1.2" />
+    </svg>
+    <div class="px-[20px] pb-[26px]" [ngClass]="info?.business?.coverUrl ? 'pt-[112px]' : 'pt-[32px]'">
+      <div class="flex items-center gap-[14px] min-w-0">
+        <div class="w-[68px] h-[68px] rounded-[22px] bg-[#ffffff] flex items-center justify-center shadow-floating flex-shrink-0 overflow-hidden text-[rgb(var(--brand-rgb,11_125_102))]">
+          <img *ngIf="info?.business?.logoUrl; else cupIcon" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="w-full h-full object-cover" />
+          <ng-template #cupIcon><mat-icon class="!w-8 !h-8 !text-[32px]">local_cafe</mat-icon></ng-template>
+        </div>
+        <div class="min-w-0">
+          <h1 class="!font-jakarta font-extrabold text-[28px] tracking-tight text-white leading-[1.05] m-0 break-words">{{ info?.business?.name }}</h1>
+        </div>
+      </div>
+      <div class="mt-[16px] flex flex-wrap items-center gap-[8px]">
+        <span class="inline-flex items-center gap-[6px] px-[12px] py-[5px] rounded-full bg-white/15 ring-1 ring-white/25 backdrop-blur-md text-white text-[12px] font-bold">
+          <mat-icon class="!w-4 !h-4 !text-base !leading-4">{{ storeMode ? 'storefront' : viewOnly ? 'menu_book' : 'table_restaurant' }}</mat-icon>
           {{ storeMode ? 'Tienda online' : viewOnly ? 'Carta online' : 'Mesa ' + info?.table?.name }}
         </span>
+        <span class="inline-flex items-center gap-[7px] px-[12px] py-[5px] rounded-full bg-black/25 backdrop-blur-md text-white text-[12px] font-semibold">
+          <span class="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" [ngClass]="storeMode && shop?.paused ? 'bg-[#ff8f78]' : 'bg-[#6fe3c6]'"></span>
+          <span *ngIf="storeMode">{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora · ~' + (shop?.prepMin ?? 30) + ' min' }}</span>
+          <span *ngIf="!storeMode && !viewOnly">Pedí desde tu celular</span>
+          <span *ngIf="viewOnly">Nuestra carta</span>
+        </span>
       </div>
-      <p class="text-[11px] font-semibold text-ink-variant mt-[2px] mb-0 flex items-center gap-[6px]">
-        <span class="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" [ngClass]="storeMode && shop?.paused ? 'bg-cafe-red-700' : 'bg-leaf'"></span>
-        <span class="truncate" *ngIf="storeMode">{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora · ~' + (shop?.prepMin ?? 30) + ' min' }}</span>
-        <span class="truncate" *ngIf="!storeMode && !viewOnly">Pedí desde tu celular</span>
-        <span class="truncate" *ngIf="viewOnly">Nuestra carta</span>
-      </p>
     </div>
-  </div>
+  </header>
 </ng-template>
 
 <!-- Pasos de un pedido: círculos unidos por una línea que avanza -->
@@ -184,7 +178,7 @@
 
 <div class="min-h-screen bg-surface-high text-ink font-inter flex justify-center selection:bg-forest selection:text-white" [class.qr-dark]="dark" [attr.style]="brandStyle">
   <div class="w-full max-w-md bg-surface min-h-screen flex flex-col shadow-2xl relative border-x-[1px] border-surface-highest/60"
-    [ngClass]="viewOnly ? 'pb-[32px]' : (cartUnits > 0 && !cartOpen ? 'pb-[170px]' : 'pb-[96px]')" [ngStyle]="pageStyle">
+    [ngClass]="viewOnly ? 'pb-[32px]' : (cartUnits > 0 && !cartOpen ? 'pb-[180px]' : 'pb-[110px]')" [ngStyle]="pageStyle">
 
     <!-- Cargando -->
     <app-loader *ngIf="phase === 'loading'" [splash]="true" label="Cargando la carta…"></app-loader>
@@ -208,8 +202,8 @@
     <ng-container *ngIf="phase === 'pin' && info">
       <ng-container *ngTemplateOutlet="brandHeader"></ng-container>
 
-      <main class="px-[16px] pt-[8px] flex flex-col gap-[16px]">
-        <section class="rounded-xl bg-surface-lowest p-[24px] shadow-soft text-center flex flex-col items-center">
+      <main class="px-[16px] pt-[20px] flex flex-col gap-[16px]">
+        <section class="rounded-[28px] bg-surface-lowest p-[24px] shadow-soft text-center flex flex-col items-center">
           <div class="mb-[12px] flex items-center justify-center w-16 h-16 rounded-full bg-forest-soft text-forest"><mat-icon class="!w-7 !h-7 !text-[28px]">lock</mat-icon></div>
           <span class="inline-flex items-center gap-[6px] px-[12px] py-[4px] rounded-full bg-surface-mid text-ink-variant text-xs font-semibold mb-[8px]">
             <mat-icon class="!w-4 !h-4 !text-base text-forest">table_restaurant</mat-icon>{{ info.table.name }}
@@ -220,7 +214,7 @@
           <!-- Un solo campo (transparente) recibe lo que se escribe; los casilleros solo lo muestran -->
           <div class="relative mb-[14px] w-full" (click)="focusPin()">
             <div class="grid grid-cols-4 gap-[10px]" aria-hidden="true">
-              <div *ngFor="let i of pinSlots" class="h-14 flex items-center justify-center text-2xl font-bold bg-surface-low text-forest rounded-xl border-[2px] transition-all"
+              <div *ngFor="let i of pinSlots" class="h-16 flex items-center justify-center text-3xl font-extrabold tabular-nums bg-surface-low text-forest rounded-[20px] border-[2px] transition-all"
                 [ngClass]="pinError ? 'border-cafe-red-300' : (pinValue[i] ? 'border-forest/40' : (i === pinValue.length ? 'border-forest bg-white' : 'border-transparent'))">{{ pinValue[i] }}</div>
             </div>
             <input id="pin-input" name="pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false"
@@ -234,12 +228,12 @@
             <span>{{ pinError || (pinComplete ? 'Código completo. Validando…' : 'Ingresá los 4 números para abrir la carta') }}</span>
           </p>
 
-          <button type="button" (click)="submitPin()" class="w-full h-12 bg-forest hover:bg-forest-hover text-white rounded-full font-bold text-sm flex items-center justify-center gap-[8px] shadow-floating active:scale-[0.98] transition-all">
+          <button type="button" (click)="submitPin()" class="w-full h-14 bg-forest hover:bg-forest-hover text-white rounded-full font-bold text-base flex items-center justify-center gap-[8px] shadow-floating active:scale-[0.98] transition-all">
             <span>Ingresar a la carta</span><mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon>
           </button>
         </section>
 
-        <section class="rounded-xl bg-surface-mid p-[16px] flex items-center justify-between gap-[12px]">
+        <section class="rounded-[20px] bg-surface-mid p-[16px] flex items-center justify-between gap-[12px]">
           <div class="flex items-center gap-[12px] min-w-0">
             <div class="w-10 h-10 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon>support_agent</mat-icon></div>
             <div class="min-w-0">
@@ -262,14 +256,14 @@
       <ng-container *ngTemplateOutlet="brandHeader"></ng-container>
 
       <!-- Tienda en pausa -->
-      <div *ngIf="storeMode && shop?.paused" role="status" class="mx-[16px] mb-[8px] flex items-start gap-[10px] rounded-xl bg-cafe-red-50 px-[14px] py-[12px] text-cafe-red-700">
+      <div *ngIf="storeMode && shop?.paused" role="status" class="mx-[16px] mb-[8px] flex items-start gap-[10px] rounded-[20px] bg-cafe-red-50 px-[14px] py-[12px] text-cafe-red-700">
         <mat-icon class="!w-5 !h-5 !text-xl flex-shrink-0">pause_circle</mat-icon>
         <p class="m-0 text-sm font-semibold leading-snug">Por ahora no estamos recibiendo pedidos. Podés mirar la carta y volver más tarde.</p>
       </div>
 
       <!-- Aviso -->
       <div *ngIf="banner" role="status" aria-live="polite"
-        class="fixed left-[16px] right-[16px] top-[12px] z-50 max-w-sm mx-auto px-[14px] py-[10px] rounded-xl text-sm font-semibold shadow-floating text-white flex items-center gap-[8px]"
+        class="fixed left-[16px] right-[16px] top-[12px] z-50 max-w-sm mx-auto px-[14px] py-[10px] rounded-[20px] text-sm font-semibold shadow-floating text-white flex items-center gap-[8px]"
         [ngClass]="banner.kind === 'ok' ? 'bg-forest' : 'bg-cafe-red-700'">
         <mat-icon class="!w-5 !h-5 !text-xl flex-shrink-0">{{ banner.kind === 'ok' ? 'check_circle' : 'error' }}</mat-icon>{{ banner.text }}
       </div>
@@ -302,7 +296,7 @@
           </div>
 
           <!-- Resumen del pedido -->
-          <div class="w-full bg-surface-lowest rounded-xl p-[14px] mt-[20px] shadow-soft">
+          <div class="w-full bg-surface-lowest rounded-[20px] p-[14px] mt-[20px] shadow-soft">
             <div class="flex items-center justify-between gap-[12px]">
               <div class="flex items-center gap-[8px] min-w-0">
                 <mat-icon class="text-leaf flex-shrink-0">table_restaurant</mat-icon>
@@ -319,7 +313,7 @@
           </div>
 
           <!-- Cuenta regresiva hacia el seguimiento -->
-          <div class="w-full mt-[24px] bg-surface-mid rounded-xl p-[12px]">
+          <div class="w-full mt-[24px] bg-surface-mid rounded-[20px] p-[12px]">
             <div class="flex items-center justify-between text-ink-variant mb-[6px]">
               <div class="flex items-center gap-[6px]">
                 <mat-icon class="!w-4 !h-4 !text-base text-forest animate-spin">refresh</mat-icon>
@@ -365,47 +359,45 @@
         </section>
 
         <!-- Mesa: llamar al mozo / pedir la cuenta -->
-        <section *ngIf="!viewOnly && !storeMode" class="px-[16px] pb-[4px]">
-          <div class="grid grid-cols-2 gap-[8px]">
+        <section *ngIf="!viewOnly && !storeMode" class="px-[16px] pt-[16px]">
+          <div class="grid grid-cols-2 gap-[10px]">
             <button type="button" (click)="call('WAITER')" [disabled]="orders.calls.waiter || callBusy"
-              class="flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-xl bg-surface-lowest shadow-soft active:scale-[0.98] text-forest text-xs font-bold transition-all disabled:opacity-60">
-              <mat-icon class="!w-4 !h-4 !text-base">notifications_active</mat-icon>
+              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-forest text-[13px] font-bold transition-all disabled:opacity-60">
+              <mat-icon class="!w-5 !h-5 !text-xl text-leaf">campaign</mat-icon>
               <span>{{ orders.calls.waiter ? 'Mozo avisado' : 'Llamar al mozo' }}</span>
             </button>
             <button type="button" (click)="call('BILL')" [disabled]="orders.calls.bill || callBusy"
-              class="flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-xl bg-surface-lowest shadow-soft active:scale-[0.98] text-forest text-xs font-bold transition-all disabled:opacity-60">
-              <mat-icon class="!w-4 !h-4 !text-base">receipt_long</mat-icon>
+              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-forest text-[13px] font-bold transition-all disabled:opacity-60">
+              <mat-icon class="!w-5 !h-5 !text-xl text-leaf">receipt_long</mat-icon>
               <span>{{ orders.calls.bill ? 'Cuenta pedida' : 'Pedir la cuenta' }}</span>
             </button>
           </div>
         </section>
 
-        <section class="px-[16px] pt-[8px] pb-[8px]">
-          <div class="relative mb-[12px]">
+        <section class="sticky top-0 z-20 px-[16px] pt-[12px] pb-[10px] bg-surface/95 backdrop-blur-xl">
+          <div class="relative mb-[10px]">
             <mat-icon class="!w-5 !h-5 !text-xl text-line absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none">search</mat-icon>
             <input type="search" [(ngModel)]="search" name="search" placeholder="Buscar en la carta" aria-label="Buscar en la carta"
-              class="w-full bg-surface-low rounded-xl pl-[42px] pr-[16px] py-[11px] text-sm text-ink placeholder-line focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+              class="w-full h-12 bg-surface-lowest rounded-full ring-1 ring-line-soft/70 pl-[44px] pr-[16px] text-[15px] text-ink placeholder-line focus:outline-none focus:ring-2 focus:ring-forest/50 transition-all" />
           </div>
 
           <nav *ngIf="categories.length > 1 && !search" appDragScroll aria-label="Categorías" class="flex items-center gap-[8px] overflow-x-auto py-[2px] -mx-[16px] px-[16px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <button type="button" (click)="categoryId = 'all'" class="whitespace-nowrap flex items-center gap-[6px] px-[14px] py-[8px] rounded-full text-xs transition-all"
-              [ngClass]="categoryId === 'all' ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-low text-ink-variant hover:text-ink font-medium'"><mat-icon class="!w-4 !h-4 !text-base !leading-4">restaurant_menu</mat-icon>Todo</button>
-            <button *ngFor="let c of categories" type="button" (click)="categoryId = c.id" class="whitespace-nowrap px-[14px] py-[8px] rounded-full text-xs transition-all"
-              [ngClass]="categoryId === c.id ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-low text-ink-variant hover:text-ink font-medium'">{{ c.name }}</button>
+            <button type="button" (click)="categoryId = 'all'" class="whitespace-nowrap flex items-center gap-[6px] min-h-[40px] px-[16px] rounded-full text-[13px] transition-all"
+              [ngClass]="categoryId === 'all' ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-lowest ring-1 ring-line-soft/60 text-ink-variant hover:text-ink font-medium'"><mat-icon class="!w-4 !h-4 !text-base !leading-4">restaurant_menu</mat-icon>Todo</button>
+            <button *ngFor="let c of categories" type="button" (click)="categoryId = c.id" class="whitespace-nowrap min-h-[40px] px-[16px] rounded-full text-[13px] transition-all"
+              [ngClass]="categoryId === c.id ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-lowest ring-1 ring-line-soft/60 text-ink-variant hover:text-ink font-medium'">{{ c.name }}</button>
           </nav>
         </section>
 
         <!-- Destacados -->
         <section *ngIf="featuredItems.length" class="pt-[6px]" aria-label="Destacados">
           <div class="flex items-center justify-between px-[20px] mb-[10px]">
-            <h2 class="flex items-center gap-[6px] !font-jakarta !text-[17px] !font-bold text-forest tracking-tight m-0">
-              <span class="w-2 h-2 rounded-full bg-tertiary-container"></span>Imperdibles y destacados
-            </h2>
-            <span class="text-[11px] font-semibold text-leaf">Deslizar →</span>
+            <h2 class="!font-jakarta !text-[22px] !font-extrabold text-forest tracking-tight m-0 !leading-tight">Imperdibles</h2>
+            <span class="text-xs font-semibold text-ink-variant">Deslizá →</span>
           </div>
           <div class="relative">
             <ul appDragScroll #rail="dragScroll" class="list-none m-0 pt-0 flex gap-[12px] overflow-x-auto snap-x snap-mandatory scroll-px-[16px] pl-[16px] pr-[16px] pb-[10px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <li *ngFor="let item of featuredItems" class="snap-start flex-none w-64">
+              <li *ngFor="let item of featuredItems" class="snap-start flex-none w-[264px]">
                 <ng-container *ngTemplateOutlet="featuredCard; context: { $implicit: item }"></ng-container>
               </li>
             </ul>
@@ -421,21 +413,21 @@
           </div>
         </section>
 
-        <main class="px-[16px] py-[8px] flex flex-col gap-[24px]">
+        <main class="px-[16px] py-[12px] flex flex-col gap-[32px]">
           <p *ngIf="grouped.length === 0" class="text-center text-sm text-ink-variant py-[32px] m-0">No encontramos nada con ese nombre.</p>
 
           <section *ngFor="let g of grouped; trackBy: trackSection" class="flex flex-col gap-[10px]">
             <!-- Título de la sección -->
             <div class="flex items-center justify-between gap-[12px]">
               <div class="min-w-0 flex items-center flex-wrap gap-x-[8px] gap-y-[2px]">
-                <h2 class="!font-jakarta !text-[18px] !font-bold text-forest tracking-tight m-0 !leading-tight">{{ g.name }}</h2>
-                <span class="px-[8px] py-[1px] rounded-full bg-surface-mid text-ink-variant text-[11px] font-semibold">{{ g.items.length }} {{ g.items.length === 1 ? 'opción' : 'opciones' }}</span>
+                <h2 class="!font-jakarta !text-[22px] !font-extrabold text-forest tracking-tight m-0 !leading-tight">{{ g.name }}</h2>
+                <span class="text-xs font-semibold tabular-nums text-ink-variant">{{ g.items.length }} {{ g.items.length === 1 ? 'opción' : 'opciones' }}</span>
               </div>
               <span *ngIf="g.tagline" class="flex-none text-[11px] font-semibold text-line text-right">{{ g.tagline }}</span>
             </div>
             <p *ngIf="g.subtitle" class="text-xs text-ink-variant m-0 -mt-[6px]">{{ g.subtitle }}</p>
 
-            <ul class="list-none p-0 m-0" [ngClass]="g.layout === 'grid' ? 'grid grid-cols-2 gap-[8px]' : 'flex flex-col gap-[8px]'">
+            <ul class="list-none p-0 m-0" [ngClass]="g.layout === 'grid' ? 'grid grid-cols-2 gap-[10px]' : 'flex flex-col gap-[10px]'">
               <li *ngFor="let item of g.items" [class.col-span-2]="g.layout === 'grid' && cardStyle(g.layout, item) === 'list'">
                 <ng-container [ngSwitch]="cardStyle(g.layout, item)">
                   <ng-container *ngSwitchCase="'grid'"><ng-container *ngTemplateOutlet="gridCard; context: { $implicit: item }"></ng-container></ng-container>
@@ -459,7 +451,7 @@
         </div>
 
         <!-- Aviso en vivo -->
-        <div *ngIf="liveRequests.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-xl flex items-center justify-between shadow-floating">
+        <div *ngIf="liveRequests.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-[20px] flex items-center justify-between shadow-floating">
           <div class="flex items-center gap-[10px]">
             <span class="relative flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-leaf-container animate-ping absolute opacity-75"></span><span class="w-2.5 h-2.5 rounded-full bg-leaf-container relative"></span></span>
             <span class="text-[11px] tracking-wide text-forest-soft uppercase font-bold">{{ activeCount }} {{ activeCount === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
@@ -468,7 +460,7 @@
         </div>
 
         <!-- Pedidos en marcha -->
-        <article *ngFor="let r of liveRequests" class="w-full bg-surface-lowest rounded-xl shadow-soft p-[16px] flex flex-col gap-[16px]">
+        <article *ngFor="let r of liveRequests" class="w-full bg-surface-lowest rounded-[20px] shadow-soft p-[16px] flex flex-col gap-[16px]">
           <div class="flex items-start justify-between gap-[8px]">
             <div class="min-w-0">
               <div class="flex items-center gap-[8px] flex-wrap">
@@ -484,9 +476,9 @@
           </div>
 
           <!-- Avance -->
-          <div class="bg-surface-low rounded-xl p-[14px] flex flex-col gap-[12px]">
+          <div class="bg-surface-low rounded-[20px] p-[14px] flex flex-col gap-[12px]">
             <ng-container *ngTemplateOutlet="stepper; context: { labels: stepLabels, icons: stepIcons, index: stepIndex(r.step) }"></ng-container>
-            <p class="m-0 rounded-lg bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
+            <p class="m-0 rounded-[14px] bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
               <mat-icon class="!w-5 !h-5 !text-xl text-leaf flex-shrink-0">local_cafe</mat-icon>{{ statusText(r.step) }}
             </p>
           </div>
@@ -494,7 +486,7 @@
           <!-- Detalle -->
           <div class="flex flex-col gap-[6px]">
             <span class="text-[10px] uppercase font-bold text-line tracking-wider">Detalle del pedido</span>
-            <div *ngFor="let l of r.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-lg">
+            <div *ngFor="let l of r.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-[14px]">
               <div class="min-w-0">
                 <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-xs font-bold text-leaf">{{ l.quantity }}×</span><span class="text-sm font-semibold text-ink truncate">{{ l.name }}</span></p>
                 <p *ngIf="l.extras.length" class="text-xs text-ink-variant m-0 truncate">{{ l.extras.join(' · ') }}</p>
@@ -517,7 +509,7 @@
 
         <!-- Pedidos terminados (plegados) -->
         <ng-container *ngFor="let r of pastRequests">
-          <div class="w-full bg-surface-lowest rounded-xl shadow-soft overflow-hidden">
+          <div class="w-full bg-surface-lowest rounded-[20px] shadow-soft overflow-hidden">
             <button type="button" (click)="togglePast(r.id)" [attr.aria-expanded]="!!openPast[r.id]" class="w-full p-[14px] flex items-center justify-between gap-[12px] text-left hover:bg-surface-low transition-colors">
               <div class="flex items-center gap-[10px] min-w-0">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -535,7 +527,7 @@
               </div>
             </button>
             <div *ngIf="openPast[r.id]" class="px-[14px] pb-[14px] bg-surface-low">
-              <div *ngIf="r.step === 'REJECTED'" class="mt-[12px] px-[12px] py-[10px] rounded-xl bg-cafe-red-50 text-cafe-red-700 text-sm" role="alert">
+              <div *ngIf="r.step === 'REJECTED'" class="mt-[12px] px-[12px] py-[10px] rounded-[20px] bg-cafe-red-50 text-cafe-red-700 text-sm" role="alert">
                 <p class="font-bold m-0">El mozo no pudo tomar este pedido</p>
                 <p *ngIf="r.rejectReason" class="m-0 mt-[2px]">{{ r.rejectReason }}</p>
               </div>
@@ -550,7 +542,7 @@
         </ng-container>
 
         <!-- ¿Estás en el salón? -->
-        <div class="bg-surface-mid p-[14px] rounded-xl flex items-center justify-between gap-[12px]">
+        <div class="bg-surface-mid p-[14px] rounded-[20px] flex items-center justify-between gap-[12px]">
           <div class="flex items-center gap-[12px] min-w-0">
             <div class="w-10 h-10 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">room_service</mat-icon></div>
             <div class="min-w-0">
@@ -568,7 +560,7 @@
       <main *ngIf="storeMode && tab === 'orders'" class="px-[16px] pt-[4px] flex flex-col gap-[16px]">
 
         <!-- Pedido recién enviado -->
-        <section *ngIf="sentOrder as sent" class="w-full rounded-xl bg-surface-lowest p-[16px] shadow-soft ring-2 ring-forest/30 flex flex-col gap-[12px]" aria-live="polite">
+        <section *ngIf="sentOrder as sent" class="w-full rounded-[20px] bg-surface-lowest p-[16px] shadow-soft ring-2 ring-forest/30 flex flex-col gap-[12px]" aria-live="polite">
           <div class="flex items-start gap-[12px]">
             <div class="w-11 h-11 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon>{{ sent.stored ? 'check' : 'chat' }}</mat-icon></div>
             <div class="min-w-0">
@@ -579,7 +571,7 @@
               </p>
             </div>
           </div>
-          <div *ngIf="sent.order.payMethod === 'transfer' && sent.order.bankInfo" class="rounded-xl bg-surface-low p-[12px]">
+          <div *ngIf="sent.order.payMethod === 'transfer' && sent.order.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
             <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir {{ money(sent.order.total) }}</p>
             <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ sent.order.bankInfo }}</p>
             <p class="m-0 mt-[6px] text-xs text-ink-variant">Hacé la transferencia y avisale al local.</p>
@@ -598,7 +590,7 @@
         </div>
 
         <!-- Aviso en vivo -->
-        <div *ngIf="activeOrders.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-xl flex items-center justify-between shadow-floating">
+        <div *ngIf="activeOrders.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-[20px] flex items-center justify-between shadow-floating">
           <div class="flex items-center gap-[10px]">
             <span class="relative flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-leaf-container animate-ping absolute opacity-75"></span><span class="w-2.5 h-2.5 rounded-full bg-leaf-container relative"></span></span>
             <span class="text-[11px] tracking-wide text-forest-soft uppercase font-bold">{{ activeOrders.length }} {{ activeOrders.length === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
@@ -607,7 +599,7 @@
         </div>
 
         <!-- Pedidos en marcha -->
-        <article *ngFor="let o of activeOrders" class="w-full bg-surface-lowest rounded-xl shadow-soft p-[16px] flex flex-col gap-[16px]">
+        <article *ngFor="let o of activeOrders" class="w-full bg-surface-lowest rounded-[20px] shadow-soft p-[16px] flex flex-col gap-[16px]">
           <div class="flex items-start justify-between gap-[8px]">
             <div class="min-w-0">
               <div class="flex items-center gap-[8px] flex-wrap">
@@ -622,21 +614,21 @@
             </div>
           </div>
 
-          <div class="bg-surface-low rounded-xl p-[14px] flex flex-col gap-[12px]">
+          <div class="bg-surface-low rounded-[20px] p-[14px] flex flex-col gap-[12px]">
             <ng-container *ngTemplateOutlet="stepper; context: { labels: storeLabels(o), icons: storeIcons(o), index: storeStepIndex(o) }"></ng-container>
-            <p class="m-0 rounded-lg bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
+            <p class="m-0 rounded-[14px] bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
               <mat-icon class="!w-5 !h-5 !text-xl text-leaf flex-shrink-0">{{ o.mode === 'delivery' ? 'two_wheeler' : 'local_cafe' }}</mat-icon>{{ storeStatusText(o) }}
             </p>
           </div>
 
-          <div *ngIf="o.payMethod === 'transfer' && o.bankInfo" class="rounded-xl bg-surface-low p-[12px]">
+          <div *ngIf="o.payMethod === 'transfer' && o.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
             <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir</p>
             <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ o.bankInfo }}</p>
           </div>
 
           <div class="flex flex-col gap-[6px]">
             <span class="text-[10px] uppercase font-bold text-line tracking-wider">Detalle del pedido</span>
-            <div *ngFor="let l of o.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-lg">
+            <div *ngFor="let l of o.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-[14px]">
               <div class="min-w-0">
                 <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-xs font-bold text-leaf">{{ l.quantity }}×</span><span class="text-sm font-semibold text-ink truncate">{{ l.name }}</span></p>
                 <p *ngIf="l.extras.length" class="text-xs text-ink-variant m-0 truncate">{{ l.extras.join(' · ') }}</p>
@@ -649,11 +641,11 @@
           </div>
 
           <div class="grid gap-[8px]" [ngClass]="info.business.phone ? 'grid-cols-2' : 'grid-cols-1'">
-            <a *ngIf="info.business.phone" [href]="'tel:' + info.business.phone" class="flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-lg bg-leaf-container text-leaf-ink2 text-xs font-bold no-underline active:scale-[0.98] transition-transform">
+            <a *ngIf="info.business.phone" [href]="'tel:' + info.business.phone" class="flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-[14px] bg-leaf-container text-leaf-ink2 text-xs font-bold no-underline active:scale-[0.98] transition-transform">
               <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">call</mat-icon>Llamar al local
             </a>
             <button *ngIf="o.status === 'PENDING'" type="button" (click)="cancelStoreOrder(o)"
-              class="flex items-center justify-center gap-[6px] py-[10px] px-[12px] rounded-lg bg-surface-mid text-cafe-red-700 text-xs font-bold hover:bg-cafe-red-50 transition-colors">
+              class="flex items-center justify-center gap-[6px] py-[10px] px-[12px] rounded-[14px] bg-surface-mid text-cafe-red-700 text-xs font-bold hover:bg-cafe-red-50 transition-colors">
               <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">remove_circle_outline</mat-icon>Cancelar pedido
             </button>
           </div>
@@ -661,7 +653,7 @@
 
         <!-- Pedidos terminados (plegados) -->
         <ng-container *ngFor="let o of pastOrders">
-          <div class="w-full bg-surface-lowest rounded-xl shadow-soft overflow-hidden">
+          <div class="w-full bg-surface-lowest rounded-[20px] shadow-soft overflow-hidden">
             <button type="button" (click)="togglePast(o.token ?? '')" [attr.aria-expanded]="!!openPast[o.token ?? '']" class="w-full p-[14px] flex items-center justify-between gap-[12px] text-left hover:bg-surface-low transition-colors">
               <div class="flex items-center gap-[10px] min-w-0">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" [ngClass]="o.status === 'COMPLETED' ? 'bg-leaf-container text-leaf-ink2' : 'bg-cafe-red-50 text-cafe-red-700'">
@@ -678,7 +670,7 @@
               </div>
             </button>
             <div *ngIf="openPast[o.token ?? '']" class="px-[14px] pb-[14px] bg-surface-low">
-              <div *ngIf="o.status === 'REJECTED'" class="mt-[12px] px-[12px] py-[10px] rounded-xl bg-cafe-red-50 text-cafe-red-700 text-sm" role="alert">
+              <div *ngIf="o.status === 'REJECTED'" class="mt-[12px] px-[12px] py-[10px] rounded-[20px] bg-cafe-red-50 text-cafe-red-700 text-sm" role="alert">
                 <p class="font-bold m-0">El local no pudo tomar este pedido</p>
                 <p *ngIf="o.rejectReason" class="m-0 mt-[2px]">{{ o.rejectReason }}</p>
               </div>
@@ -696,48 +688,44 @@
       </main>
 
       <!-- ===== Barra flotante del pedido ===== -->
-      <aside *ngIf="cartUnits > 0 && !cartOpen && !viewOnly" class="fixed bottom-[88px] inset-x-0 mx-auto max-w-md px-[16px] z-30" data-purpose="cart-floating-bar">
-        <div class="bg-forest text-white rounded-2xl p-[10px] pl-[12px] shadow-floating flex items-center justify-between">
-          <div class="flex items-center gap-[10px] min-w-0">
-            <div class="relative w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-              <mat-icon class="!w-5 !h-5 !text-xl text-leaf-dim">shopping_bag</mat-icon>
-              <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-tertiary-fixed text-tertiary-ink text-[10px] flex items-center justify-center font-bold">{{ cartUnits }}</span>
-            </div>
-            <div class="min-w-0 leading-tight">
-              <p class="text-[10px] text-leaf-dim font-bold uppercase tracking-wider m-0">Tu bolsa</p>
-              <p class="text-base font-bold tracking-tight m-0">{{ money(cartTotal) }}</p>
-            </div>
-          </div>
-          <button type="button" (click)="cartOpen = true" class="bg-leaf-container text-leaf-ink text-xs font-bold py-[10px] px-[16px] rounded-full flex items-center gap-[6px] shadow-md active:scale-95 transition-transform flex-shrink-0">
-            <span>Ver pedido</span><mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">arrow_forward</mat-icon>
-          </button>
-        </div>
+      <aside *ngIf="cartUnits > 0 && !cartOpen && !viewOnly" class="fixed bottom-[96px] inset-x-0 mx-auto max-w-md px-[16px] z-30" data-purpose="cart-floating-bar">
+        <button type="button" (click)="cartOpen = true" aria-label="Ver pedido"
+          class="w-full bg-forest text-white rounded-full p-[8px] pl-[10px] shadow-[0_14px_34px_-10px_rgba(0,0,0,0.5)] flex items-center justify-between gap-[12px] active:scale-[0.98] transition-transform text-left">
+          <span class="flex items-center gap-[12px] min-w-0">
+            <span class="grid h-12 w-12 flex-none place-items-center rounded-full bg-[#ffffff] text-[18px] font-extrabold tabular-nums text-[rgb(var(--brand-rgb,11_125_102))]">{{ cartUnits }}</span>
+            <span class="min-w-0 leading-tight">
+              <span class="block text-[11px] font-bold uppercase tracking-wider text-white/75">Tu bolsa</span>
+              <span class="block text-[18px] font-extrabold tabular-nums tracking-tight">{{ money(cartTotal) }}</span>
+            </span>
+          </span>
+          <span class="flex h-12 flex-none items-center gap-[6px] rounded-full bg-[#ffffff] px-[18px] text-sm font-bold text-[#181d26]">Ver pedido<mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon></span>
+        </button>
       </aside>
 
-      <!-- ===== Navegación inferior ===== -->
-      <nav *ngIf="!viewOnly" class="fixed bottom-0 inset-x-0 mx-auto max-w-md z-30 bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(30,58,47,0.06)] pb-[env(safe-area-inset-bottom,0px)]" aria-label="Secciones">
-        <div class="flex justify-around items-center h-[76px] px-[4px]">
-          <button type="button" (click)="tab = 'menu'" [attr.aria-current]="tab === 'menu' ? 'page' : null" class="flex flex-col items-center justify-center gap-[2px] w-20 h-14 transition-all" [ngClass]="tab === 'menu' ? 'text-forest font-bold' : 'text-ink-variant'">
-            <mat-icon class="!w-6 !h-6 !text-2xl">menu_book</mat-icon><span class="text-[11px]">Carta</span>
+      <!-- ===== Navegación inferior: dock flotante ===== -->
+      <nav *ngIf="!viewOnly" class="fixed bottom-0 inset-x-0 mx-auto max-w-md z-30 px-[16px] pb-[max(12px,env(safe-area-inset-bottom,0px))] pointer-events-none" aria-label="Secciones">
+        <div class="pointer-events-auto flex items-center gap-[4px] rounded-full bg-surface-lowest/90 p-[6px] ring-1 ring-line-soft/60 backdrop-blur-xl shadow-[0_12px_32px_-10px_rgba(0,0,0,0.4)]">
+          <button type="button" (click)="tab = 'menu'" [attr.aria-current]="tab === 'menu' ? 'page' : null" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all" [ngClass]="tab === 'menu' ? 'bg-forest text-white shadow-sm' : 'text-ink-variant'">
+            <mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">menu_book</mat-icon><span>Carta</span>
           </button>
-          <button type="button" (click)="tab = 'orders'" [attr.aria-current]="tab === 'orders' ? 'page' : null" class="flex flex-col items-center justify-center gap-[2px] w-20 h-14 transition-all" [ngClass]="tab === 'orders' ? 'text-forest font-bold' : 'text-ink-variant'">
-            <span class="relative"><mat-icon class="!w-6 !h-6 !text-2xl">receipt_long</mat-icon>
-              <span *ngIf="activeCount > 0" class="absolute -top-1 -right-2 min-w-[16px] h-4 px-[4px] rounded-full bg-leaf text-white text-[10px] leading-4 text-center font-bold">{{ activeCount }}</span></span>
-            <span class="text-[11px]">Pedidos</span>
+          <button type="button" (click)="tab = 'orders'" [attr.aria-current]="tab === 'orders' ? 'page' : null" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all" [ngClass]="tab === 'orders' ? 'bg-forest text-white shadow-sm' : 'text-ink-variant'">
+            <span class="relative"><mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">receipt_long</mat-icon>
+              <span *ngIf="activeCount > 0" class="absolute -top-[6px] -right-[8px] min-w-[16px] h-4 px-[4px] rounded-full bg-[#c2410c] text-white text-[10px] leading-4 text-center font-bold">{{ activeCount }}</span></span>
+            <span>Pedidos</span>
           </button>
-          <button type="button" (click)="cartUnits > 0 ? cartOpen = true : tab = 'menu'" class="flex flex-col items-center justify-center gap-[2px] w-20 h-14 transition-all text-ink-variant">
-            <span class="relative"><mat-icon class="!w-6 !h-6 !text-2xl">shopping_bag</mat-icon>
-              <span *ngIf="cartUnits > 0" class="absolute -top-1 -right-2 min-w-[16px] h-4 px-[4px] rounded-full bg-tertiary-container text-white text-[10px] leading-4 text-center font-bold">{{ cartUnits }}</span></span>
-            <span class="text-[11px]">Bolsa</span>
+          <button type="button" (click)="cartUnits > 0 ? cartOpen = true : tab = 'menu'" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all text-ink-variant">
+            <span class="relative"><mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">shopping_bag</mat-icon>
+              <span *ngIf="cartUnits > 0" class="absolute -top-[6px] -right-[8px] min-w-[16px] h-4 px-[4px] rounded-full bg-[#c2410c] text-white text-[10px] leading-4 text-center font-bold">{{ cartUnits }}</span></span>
+            <span>Bolsa</span>
           </button>
         </div>
       </nav>
 
       <!-- ===== Ficha: opciones y precios de un plato (solo lectura) ===== -->
       <div *ngIf="detailItem as d" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeDetail()">
-        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[28px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="d.name" (click)="$event.stopPropagation()">
+        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="d.name" (click)="$event.stopPropagation()">
           <div class="w-11 h-1.5 rounded-full bg-surface-highest mx-auto mb-[14px]"></div>
-          <img *ngIf="d.imageUrl" [src]="d.imageUrl" [alt]="d.name" class="w-full aspect-[16/9] object-cover rounded-xl mb-[12px] bg-surface-mid" />
+          <img *ngIf="d.imageUrl" [src]="d.imageUrl" [alt]="d.name" class="w-full aspect-[16/9] object-cover rounded-[20px] mb-[12px] bg-surface-mid" />
           <div class="flex items-start justify-between gap-[12px]">
             <div class="min-w-0">
               <p role="heading" aria-level="2" class="!font-jakarta m-0 text-xl font-bold text-forest leading-tight">{{ d.name }}</p>
@@ -747,7 +735,7 @@
           </div>
 
           <div class="mt-[16px] flex flex-col gap-[12px]">
-            <section *ngFor="let g of d.groups" class="rounded-xl bg-surface-lowest p-[14px] shadow-soft">
+            <section *ngFor="let g of d.groups" class="rounded-[20px] bg-surface-lowest p-[14px] shadow-soft">
               <div class="flex items-center justify-between gap-[8px] mb-[8px]">
                 <p role="heading" aria-level="3" class="m-0 text-sm font-bold text-forest">{{ g.name }}</p>
                 <span class="text-[11px] font-bold px-[8px] py-[2px] rounded-full" [ngClass]="g.required ? 'bg-tertiary-fixed text-tertiary-ink' : 'bg-surface-mid text-ink-variant'">
@@ -770,9 +758,9 @@
 
       <!-- ===== Hoja: armar un plato ===== -->
       <div *ngIf="sheetItem" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeSheet()">
-        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[28px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="sheetItem.name" (click)="$event.stopPropagation()">
+        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="sheetItem.name" (click)="$event.stopPropagation()">
           <div class="w-11 h-1.5 rounded-full bg-surface-highest mx-auto mb-[14px]"></div>
-          <img *ngIf="sheetItem.imageUrl" [src]="sheetItem.imageUrl" [alt]="sheetItem.name" class="w-full aspect-[16/9] object-cover rounded-xl mb-[12px] bg-surface-mid" />
+          <img *ngIf="sheetItem.imageUrl" [src]="sheetItem.imageUrl" [alt]="sheetItem.name" class="w-full aspect-[16/9] object-cover rounded-[20px] mb-[12px] bg-surface-mid" />
           <div class="flex items-start justify-between gap-[12px] mb-[14px]">
             <div>
               <h2 class="!font-jakarta text-lg font-bold text-forest m-0">{{ sheetItem.name }}</h2>
@@ -789,7 +777,7 @@
               <span class="text-xs font-medium ml-[6px]" [ngClass]="g.required ? 'text-cafe-red-700' : 'text-ink-variant'">{{ g.required ? 'Obligatorio' : (g.selection === 'MULTIPLE' ? 'Podés elegir varias' : 'Opcional') }}</span>
             </legend>
             <button *ngFor="let o of g.options" type="button" (click)="toggleOption(g, o.id)"
-              class="w-full flex items-center justify-between gap-[10px] px-[12px] py-[10px] mb-[6px] rounded-xl border-[1px] text-left text-sm bg-surface-lowest"
+              class="w-full flex items-center justify-between gap-[10px] px-[12px] py-[10px] mb-[6px] rounded-[20px] border-[1px] text-left text-sm bg-surface-lowest"
               [ngClass]="isChosen(g, o.id) ? 'border-forest bg-forest-soft' : 'border-surface-highest'" [attr.aria-pressed]="isChosen(g, o.id)">
               <span class="flex items-center gap-[10px]">
                 <span class="w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1px]"
@@ -804,7 +792,7 @@
 
           <label class="block text-sm font-bold text-forest mb-[6px]" for="note">Aclaración <span class="text-xs font-medium text-ink-variant">(opcional)</span></label>
           <input id="note" name="note" [(ngModel)]="sheetNote" maxlength="140" placeholder="Ej: sin cebolla"
-            class="w-full px-[12px] py-[11px] rounded-xl bg-surface-low text-sm mb-[14px] focus:outline-none focus:ring-2 focus:ring-forest/30" />
+            class="w-full px-[12px] py-[11px] rounded-[20px] bg-surface-low text-sm mb-[14px] focus:outline-none focus:ring-2 focus:ring-forest/30" />
 
           <p *ngIf="sheetError" class="text-cafe-red-700 text-sm font-medium m-0 mb-[10px]" role="alert">{{ sheetError }}</p>
 
@@ -821,7 +809,7 @@
 
       <!-- ===== Hoja: Mi pedido ===== -->
       <div *ngIf="cartOpen" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="cartOpen = false">
-        <div class="w-full max-w-md max-h-[92vh] flex flex-col bg-surface rounded-t-[28px] shadow-2xl overflow-hidden font-inter" role="dialog" aria-modal="true" aria-label="Mi pedido" (click)="$event.stopPropagation()">
+        <div class="w-full max-w-md max-h-[92vh] flex flex-col bg-surface rounded-t-[32px] shadow-2xl overflow-hidden font-inter" role="dialog" aria-modal="true" aria-label="Mi pedido" (click)="$event.stopPropagation()">
           <div class="w-full flex justify-center pt-[12px] pb-[4px]"><div class="w-11 h-1.5 rounded-full bg-surface-highest"></div></div>
           <div class="px-[20px] pt-[8px] pb-[14px] flex items-center justify-between">
             <div class="flex items-center gap-[8px]">
@@ -834,12 +822,12 @@
           </div>
 
           <div class="px-[20px] flex flex-col gap-[16px] overflow-y-auto pb-[20px]">
-            <div *ngIf="!storeMode" class="flex items-center justify-between px-[14px] py-[8px] rounded-xl bg-surface-mid">
+            <div *ngIf="!storeMode" class="flex items-center justify-between px-[14px] py-[8px] rounded-[20px] bg-surface-mid">
               <span class="flex items-center gap-[8px] text-xs font-bold text-forest"><mat-icon class="!w-4 !h-4 !text-base text-leaf">table_restaurant</mat-icon>Mesa {{ info.table.name }}</span>
             </div>
 
             <ul class="list-none p-0 m-0 flex flex-col gap-[10px]">
-              <li *ngFor="let l of cart" class="bg-surface-lowest rounded-xl p-[14px] shadow-soft flex flex-col gap-[10px]">
+              <li *ngFor="let l of cart" class="bg-surface-lowest rounded-[20px] p-[14px] shadow-soft flex flex-col gap-[10px]">
                 <div class="flex items-start justify-between gap-[8px]">
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-bold text-forest m-0 truncate">{{ l.name }}</p>
@@ -888,41 +876,41 @@
               <div class="flex flex-col gap-[6px]">
                 <label class="text-xs font-bold text-forest" for="st-name">Tu nombre</label>
                 <input id="st-name" name="stName" [(ngModel)]="checkout.name" maxlength="60" autocomplete="name" placeholder="Ej: Lucas Pérez"
-                  class="w-full bg-surface-lowest rounded-xl px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
               </div>
               <div class="flex flex-col gap-[6px]">
                 <label class="text-xs font-bold text-forest" for="st-phone">Teléfono <span class="font-normal text-ink-variant">(para avisarte de tu pedido)</span></label>
                 <input id="st-phone" name="stPhone" type="tel" inputmode="tel" [(ngModel)]="checkout.phone" maxlength="25" autocomplete="tel" placeholder="Ej: 11 5555 1234"
-                  class="w-full bg-surface-lowest rounded-xl px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
               </div>
               <div *ngIf="checkout.mode === 'delivery'" class="flex flex-col gap-[6px]">
                 <label class="text-xs font-bold text-forest" for="st-address">Dirección de entrega</label>
                 <input id="st-address" name="stAddress" [(ngModel)]="checkout.address" maxlength="160" autocomplete="street-address" placeholder="Calle, número, piso y referencias"
-                  class="w-full bg-surface-lowest rounded-xl px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
               </div>
               <div class="flex flex-col gap-[6px]">
                 <label class="text-xs font-bold text-forest" for="st-note">Aclaración para el pedido <span class="font-normal text-ink-variant">(opcional)</span></label>
                 <input id="st-note" name="stNote" [(ngModel)]="checkout.note" maxlength="300" placeholder="Ej: tocar timbre 2B"
-                  class="w-full bg-surface-lowest rounded-xl px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
               </div>
 
               <div class="flex flex-col gap-[8px]">
                 <span class="text-xs font-bold text-forest">¿Cómo pagás?</span>
                 <div class="grid gap-[8px]" [ngClass]="shop.payCash && shop.payTransfer ? 'grid-cols-2' : 'grid-cols-1'">
                   <button *ngIf="shop.payCash" type="button" (click)="checkout.pay = 'cash'" [attr.aria-pressed]="checkout.pay === 'cash'"
-                    class="rounded-xl border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'cash' ? 'border-forest' : 'border-transparent shadow-soft'">
+                    class="rounded-[20px] border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'cash' ? 'border-forest' : 'border-transparent shadow-soft'">
                     <mat-icon class="!w-5 !h-5 !text-xl text-leaf">payments</mat-icon>
                     <span class="block text-sm font-bold text-forest">Efectivo</span>
                     <span class="block text-xs text-ink-variant">{{ checkout.mode === 'delivery' ? 'Al recibirlo' : 'Al retirar' }}</span>
                   </button>
                   <button *ngIf="shop.payTransfer" type="button" (click)="checkout.pay = 'transfer'" [attr.aria-pressed]="checkout.pay === 'transfer'"
-                    class="rounded-xl border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'transfer' ? 'border-forest' : 'border-transparent shadow-soft'">
+                    class="rounded-[20px] border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'transfer' ? 'border-forest' : 'border-transparent shadow-soft'">
                     <mat-icon class="!w-5 !h-5 !text-xl text-leaf">account_balance</mat-icon>
                     <span class="block text-sm font-bold text-forest">Transferencia</span>
                     <span class="block text-xs text-ink-variant">Te damos los datos</span>
                   </button>
                 </div>
-                <div *ngIf="checkout.pay === 'transfer' && shop.bankInfo" class="rounded-xl bg-surface-low p-[12px]">
+                <div *ngIf="checkout.pay === 'transfer' && shop.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
                   <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir</p>
                   <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ shop.bankInfo }}</p>
                 </div>
@@ -934,12 +922,12 @@
               <div class="relative flex items-center">
                 <mat-icon class="!w-4 !h-4 !text-base absolute left-[14px] text-line pointer-events-none">person</mat-icon>
                 <input id="name" name="customerName" [(ngModel)]="customerName" maxlength="40" autocomplete="given-name" placeholder="Ej: Lucas (para que el mozo sepa quién pidió)"
-                  class="w-full bg-surface-lowest shadow-soft rounded-xl pl-[40px] pr-[16px] py-[11px] text-xs text-ink placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="w-full bg-surface-lowest shadow-soft rounded-[20px] pl-[40px] pr-[16px] py-[11px] text-xs text-ink placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
               </div>
             </div>
 
             <!-- Totales -->
-            <div *ngIf="storeMode" class="bg-surface-mid rounded-xl p-[16px] flex flex-col gap-[8px]">
+            <div *ngIf="storeMode" class="bg-surface-mid rounded-[20px] p-[16px] flex flex-col gap-[8px]">
               <div class="flex items-center justify-between text-xs text-ink-variant"><span>Subtotal</span><span class="font-medium text-ink">{{ money(cartTotal) }}</span></div>
               <div *ngIf="checkout.mode === 'delivery'" class="flex items-center justify-between text-xs text-ink-variant"><span>Envío a domicilio</span><span class="font-medium text-ink">{{ deliveryFee ? money(deliveryFee) : 'Sin cargo' }}</span></div>
               <div class="h-px bg-surface-highest my-[2px]"></div>
@@ -947,7 +935,7 @@
               <p class="text-[11px] text-ink-variant m-0">{{ checkout.pay === 'cash' ? (checkout.mode === 'delivery' ? 'Pagás en efectivo cuando te lo entregan.' : 'Pagás en efectivo cuando retirás.') : 'Pagás por transferencia.' }}</p>
             </div>
 
-            <div *ngIf="!storeMode" class="bg-surface-mid rounded-xl p-[16px] flex flex-col gap-[8px]">
+            <div *ngIf="!storeMode" class="bg-surface-mid rounded-[20px] p-[16px] flex flex-col gap-[8px]">
               <div class="flex items-center justify-between text-xs text-ink-variant"><span>Subtotal pedido</span><span class="font-medium text-ink">{{ money(cartTotal) }}</span></div>
               <div class="h-px bg-surface-highest my-[2px]"></div>
               <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-forest">Total del pedido</span><span class="!font-jakarta text-xl font-bold text-forest tracking-tight">{{ money(cartTotal) }}</span></div>

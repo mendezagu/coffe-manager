@@ -31,7 +31,7 @@
         <!-- (El modo de venta —mostrador, mesas o ambos— lo define la Consola de plataforma, no el dueño) -->
 
         <!-- Marca -->
-        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-4">Marca</div>
 
           <div class="flex items-center gap-4 mb-4">
@@ -58,7 +58,7 @@
         </section>
 
         <!-- Color de marca (carta QR y reservas) -->
-        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Color de tu marca</div>
           <p class="mb-4 text-sm text-sage-500">Lo ven tus clientes en la carta de la mesa (QR) y en la página para reservar. El panel interno no cambia.</p>
 
@@ -97,7 +97,7 @@
 
         <!-- Datos del ticket -->
         <!-- Apariencia de la carta: portada y fondo (carta online y pedido por QR) -->
-        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Portada y fondo de la carta</div>
           <p class="m-0 text-sm text-sage-500">Se ve en tu carta online y en el pedido por QR de las mesas. Las imágenes se achican solas y se guardan al elegirlas.</p>
 
@@ -175,7 +175,7 @@
           </div>
         </section>
 
-        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-5 shadow-soft grid gap-4 sm:grid-cols-2">
+        <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft grid gap-4 sm:grid-cols-2">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:col-span-2">Datos para el ticket</div>
 
           <label class="block sm:col-span-2">
@@ -229,7 +229,7 @@
         </section>
 
         <!-- Moneda y turnos -->
-        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-5 shadow-soft grid gap-4 sm:grid-cols-3">
+        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-[20px] shadow-soft grid gap-4 sm:grid-cols-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:col-span-3">Moneda y turnos</div>
 
           <label class="block sm:col-span-3">
@@ -264,11 +264,11 @@
         </section>
 
         <!-- Cobro: propinas y caja -->
-        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Cobro</div>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="requireOpenRegister" [(ngModel)]="form.requireOpenRegister" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="requireOpenRegister" [(ngModel)]="form.requireOpenRegister" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Exigir caja abierta para cobrar</span>
               <span class="block text-xs text-sage-500">Cada cobro queda asociado a la caja del turno y a quien la maneja. Se abre y se cierra desde <a routerLink="/cash" class="text-cafe-green-700 font-medium underline">Caja</a>.</span>
@@ -276,7 +276,7 @@
           </label>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="cashierDiscounts" [(ngModel)]="form.cashierDiscounts" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="cashierDiscounts" [(ngModel)]="form.cashierDiscounts" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Permitir descuentos al cajero</span>
               <span class="block text-xs text-sage-500">Si lo activás, el cajero ve las opciones de descuento al cobrar (por plato y general). El administrador siempre puede. Los platos en promo nunca llevan descuento.</span>
@@ -284,7 +284,7 @@
           </label>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="tipEnabled" [(ngModel)]="form.tipEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Ofrecer propina al cobrar</span>
               <span class="block text-xs text-sage-500">La propina se suma a lo que paga el cliente pero no cuenta como venta: es del mozo que atendió la mesa.</span>
@@ -302,12 +302,12 @@
         </section>
 
         <!-- Comisión para los mozos -->
-        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Comisión para los mozos <app-plan-badge feature="commission"></app-plan-badge></div>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canCommission || form.commissionEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="commissionEnabled" [(ngModel)]="form.commissionEnabled" [disabled]="!canCommission && !form.commissionEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="commissionEnabled" [(ngModel)]="form.commissionEnabled" [disabled]="!canCommission && !form.commissionEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Ofrecer una comisión a los mozos</span>
               <span class="block text-xs text-sage-500">Cada mozo gana un porcentaje de lo que se vende en las mesas que atendió. Lo ves calculado en Reportes, mozo por mozo.</span>
@@ -337,7 +337,7 @@
         </section>
 
         <!-- Inventario -->
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Inventario <app-plan-badge feature="inventory"></app-plan-badge></div>
           <p class="text-sm text-sage-600 m-0">
             Llevá la cuenta de insumos y productos: cada venta descuenta lo que consumió, los platos que no se pueden preparar aparecen como <strong>agotados</strong> y se calcula cuánto ganás con cada uno.
@@ -345,7 +345,7 @@
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canInventory ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="inventoryEnabled" [(ngModel)]="form.inventoryEnabled" [disabled]="!canInventory" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="inventoryEnabled" [(ngModel)]="form.inventoryEnabled" [disabled]="!canInventory" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Usar inventario y stock</span>
               <span *ngIf="canInventory" class="block text-xs text-sage-500">Cuando lo actives vas a ver <a routerLink="/inventory" class="text-cafe-green-700 font-medium underline">Inventario</a> en el menú, para cargar insumos y recetas.</span>
@@ -354,7 +354,7 @@
           </label>
 
           <label *ngIf="form.inventoryEnabled && canInventory" class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="blockOutOfStock" [(ngModel)]="form.blockOutOfStock" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="blockOutOfStock" [(ngModel)]="form.blockOutOfStock" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">No dejar pedir lo que no hay</span>
               <span class="block text-xs text-sage-500">Si falta un insumo, el mozo no puede agregar el plato. Si lo apagás, se puede pedir igual y el stock queda en negativo (solo se avisa).</span>
@@ -363,7 +363,7 @@
         </section>
 
         <!-- Permisos del personal -->
-        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section [class.hidden]="tab !== 'operacion'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Permisos del personal</div>
           <p class="text-sm text-sage-600 mb-3">Qué pueden hacer los mozos y cajeros además de lo básico. El administrador siempre puede todo.</p>
 
@@ -375,14 +375,14 @@
 
           <div class="grid gap-2 sm:grid-cols-2">
             <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="waiterCanRemoveItems" [(ngModel)]="form.waiterCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+              <input type="checkbox" name="waiterCanRemoveItems" [(ngModel)]="form.waiterCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Mozos</span>
                 <span class="block text-xs text-sage-500">Pueden eliminar ítems de las órdenes.</span>
               </span>
             </label>
             <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="cashierCanRemoveItems" [(ngModel)]="form.cashierCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+              <input type="checkbox" name="cashierCanRemoveItems" [(ngModel)]="form.cashierCanRemoveItems" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Cajeros</span>
                 <span class="block text-xs text-sage-500">Pueden eliminar ítems de las órdenes.</span>
@@ -392,7 +392,7 @@
         </section>
 
         <!-- Pedido por QR -->
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Pedido por QR en la mesa <app-plan-badge feature="qr_ordering"></app-plan-badge></div>
           <p class="text-sm text-sage-600 mb-3">
             Cada mesa tiene un QR: el cliente lo escanea con su celular, ve la carta y manda su pedido. El mozo lo confirma desde el sistema y recién ahí pasa a la cocina.
@@ -400,7 +400,7 @@
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canQr ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="qrEnabled" [(ngModel)]="form.qrEnabled" [disabled]="!canQr" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="qrEnabled" [(ngModel)]="form.qrEnabled" [disabled]="!canQr" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Permitir pedidos por QR</span>
               <span *ngIf="canQr" class="block text-xs text-sage-500">Después imprimí los QR en <a routerLink="/admin/qr" class="text-cafe-green-700 font-medium underline">Administrar → Códigos QR</a>.</span>
@@ -410,7 +410,7 @@
 
           <ng-container *ngIf="form.qrEnabled && canQr">
             <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="qrAutoConfirm" [(ngModel)]="form.qrAutoConfirm" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+              <input type="checkbox" name="qrAutoConfirm" [(ngModel)]="form.qrAutoConfirm" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Confirmar los pedidos automáticamente</span>
                 <span class="block text-xs text-sage-500">Si lo activás, los pedidos entran directo a la cocina sin que un mozo los apruebe. Recomendado solo si confiás en tus clientes o hay poco movimiento. Si lo dejás apagado, un mozo confirma cada pedido (más seguro).</span>
@@ -418,7 +418,7 @@
             </label>
 
             <label class="flex items-start gap-3 p-3 mt-2 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-              <input type="checkbox" name="qrRequirePin" [(ngModel)]="form.qrRequirePin" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+              <input type="checkbox" name="qrRequirePin" [(ngModel)]="form.qrRequirePin" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
               <span class="text-sm">
                 <span class="block font-bold text-sage-900">Pedir un código de mesa de 4 dígitos</span>
                 <span class="block text-xs text-sage-500">Evita que alguien que sacó una foto del QR pida desde afuera. El mozo le da el código al cliente y cambia solo cuando la mesa se libera.</span>
@@ -429,14 +429,14 @@
           <!-- Sonido: se guarda solo en este dispositivo -->
           <div *ngIf="canQr" class="mt-3 p-3 rounded-xl border border-sage-200 bg-sage-50">
             <label class="flex items-center gap-3 select-none cursor-pointer">
-              <input type="checkbox" name="soundEnabled" [(ngModel)]="sound.enabled" (ngModelChange)="saveSound()" class="w-5 h-5 accent-[#1b2822]" />
+              <input type="checkbox" name="soundEnabled" [(ngModel)]="sound.enabled" (ngModelChange)="saveSound()" class="w-5 h-5 accent-[#2ed0ab]" />
               <span class="text-sm font-bold text-sage-900">Sonido de aviso cuando llega un pedido</span>
             </label>
             <p class="text-xs text-sage-500 mt-1 mb-2">Se guarda en este dispositivo: cada tablet o compu puede tener su propio volumen.</p>
             <div class="flex items-center gap-3" [class.opacity-50]="!sound.enabled">
               <mat-icon class="text-sage-600">volume_down</mat-icon>
               <input type="range" name="soundVolume" min="0" max="100" step="5" [(ngModel)]="sound.volume" (ngModelChange)="saveSound()" [disabled]="!sound.enabled"
-                aria-label="Volumen del aviso" class="flex-1 accent-[#1b2822]" />
+                aria-label="Volumen del aviso" class="flex-1 accent-[#2ed0ab]" />
               <mat-icon class="text-sage-600">volume_up</mat-icon>
               <span class="w-10 text-right text-sm font-bold text-sage-800">{{ sound.volume }}%</span>
             </div>
@@ -448,11 +448,11 @@
 
         <!-- Reservas -->
         <!-- Carta online: para todos los planes -->
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Carta online</div>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="menuPublicEnabled" [(ngModel)]="form.menuPublicEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="menuPublicEnabled" [(ngModel)]="form.menuPublicEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Mostrar mi carta en internet</span>
               <span class="block text-xs text-sage-500">Cualquiera puede ver tu carta con precios desde un link o un QR, sin código y sin instalar nada. No permite pedir: para eso está el pedido por QR en la mesa.</span>
@@ -480,12 +480,12 @@
         </section>
 
         <!-- Tienda online: pedidos para retirar o con envío -->
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Tienda online <app-plan-badge feature="online_store"></app-plan-badge></div>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canStore || form.deliveryEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="deliveryEnabled" [(ngModel)]="form.deliveryEnabled" [disabled]="!canStore && !form.deliveryEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="deliveryEnabled" [(ngModel)]="form.deliveryEnabled" [disabled]="!canStore && !form.deliveryEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Recibir pedidos por internet</span>
               <span class="block text-xs text-sage-500">Tus clientes eligen de tu carta, arman el pedido y lo retiran o lo reciben en su casa. Usa lo que ya tenés cargado en el menú.</span>
@@ -516,11 +516,11 @@
               <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">¿Cómo lo reciben tus clientes?</p>
               <div class="grid gap-2 sm:grid-cols-2">
                 <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-                  <input type="checkbox" name="deliveryPickup" [(ngModel)]="form.deliveryPickup" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <input type="checkbox" name="deliveryPickup" [(ngModel)]="form.deliveryPickup" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
                   <span class="text-sm"><span class="block font-bold text-sage-900">Retiro en el local</span><span class="block text-xs text-sage-500">Pasan a buscarlo, sin costo.</span></span>
                 </label>
                 <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-                  <input type="checkbox" name="deliveryHome" [(ngModel)]="form.deliveryHome" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <input type="checkbox" name="deliveryHome" [(ngModel)]="form.deliveryHome" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
                   <span class="text-sm"><span class="block font-bold text-sage-900">Envío a domicilio</span><span class="block text-xs text-sage-500">Hacés delivery. El cliente deja su dirección.</span></span>
                 </label>
               </div>
@@ -535,11 +535,11 @@
               <p class="m-0 mb-1.5 text-xs font-bold text-sage-500">¿Cómo te pagan?</p>
               <div class="grid gap-2 sm:grid-cols-2">
                 <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-                  <input type="checkbox" name="deliveryPayCash" [(ngModel)]="form.deliveryPayCash" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <input type="checkbox" name="deliveryPayCash" [(ngModel)]="form.deliveryPayCash" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
                   <span class="text-sm"><span class="block font-bold text-sage-900">Efectivo</span><span class="block text-xs text-sage-500">Pagan al retirar o al recibir.</span></span>
                 </label>
                 <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-                  <input type="checkbox" name="deliveryPayTransfer" [(ngModel)]="form.deliveryPayTransfer" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <input type="checkbox" name="deliveryPayTransfer" [(ngModel)]="form.deliveryPayTransfer" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
                   <span class="text-sm"><span class="block font-bold text-sage-900">Transferencia bancaria</span><span class="block text-xs text-sage-500">Les mostramos tus datos para que transfieran.</span></span>
                 </label>
               </div>
@@ -556,7 +556,7 @@
               <div class="grid gap-2 sm:grid-cols-3">
                 <label *ngFor="let d of deliveryDests" class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer select-none"
                   [ngClass]="form.deliveryDest === d.value ? 'border-cafe-green-700 bg-cafe-green-50' : 'border-sage-200 bg-sage-50'">
-                  <input type="radio" name="deliveryDest" [value]="d.value" [(ngModel)]="form.deliveryDest" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+                  <input type="radio" name="deliveryDest" [value]="d.value" [(ngModel)]="form.deliveryDest" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
                   <span class="text-sm"><span class="block font-bold text-sage-900">{{ d.label }}</span><span class="block text-xs text-sage-500">{{ d.hint }}</span></span>
                 </label>
               </div>
@@ -577,12 +577,12 @@
           </div>
         </section>
 
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft space-y-3">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft space-y-3">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Reservas de mesa <app-plan-badge feature="reservations"></app-plan-badge></div>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canReservations || form.reservationsEnabled ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
-            <input type="checkbox" name="reservationsEnabled" [(ngModel)]="form.reservationsEnabled" [disabled]="!canReservations && !form.reservationsEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="reservationsEnabled" [(ngModel)]="form.reservationsEnabled" [disabled]="!canReservations && !form.reservationsEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Recibir reservas</span>
               <span class="block text-xs text-sage-500">Tus clientes reservan desde una página propia, sin instalar nada. Vos las ves en la pantalla "Reservas", y si no hay lugar pueden anotarse en una lista de espera.</span>
@@ -679,7 +679,7 @@
         </section>
 
         <!-- Cocina -->
-        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1">Cocina</div>
           <p class="text-sm text-sage-600 mb-3">
             La pantalla de cocina es un tablero para quien <strong>prepara</strong> los pedidos (cocineros o barra).
@@ -688,7 +688,7 @@
           </p>
 
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 bg-sage-50 cursor-pointer select-none">
-            <input type="checkbox" name="kitchenEnabled" [(ngModel)]="form.kitchenEnabled" class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+            <input type="checkbox" name="kitchenEnabled" [(ngModel)]="form.kitchenEnabled" class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Usar pantalla de cocina</span>
               <span class="block text-xs text-sage-500">Activala si en tu local alguien prepara los pedidos y necesita verlos en una pantalla.</span>
@@ -717,7 +717,7 @@
         </section>
 
         <!-- Cocina y barra (solo si se usa la cocina) -->
-        <section *ngIf="form.kitchenEnabled" [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-5 shadow-soft">
+        <section *ngIf="form.kitchenEnabled" [class.hidden]="tab !== 'funciones'" class="rounded-2xl bg-white p-[20px] shadow-soft">
           <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">Cocina y barra <app-plan-badge feature="kitchen_bar_split"></app-plan-badge></div>
           <p class="text-sm text-sage-600 mb-3">
             Si lo activás, cada categoría del menú va a la pantalla de la cocina o a la de la barra, según el destino que le pongas.
@@ -727,7 +727,7 @@
           <label class="flex items-start gap-3 p-3 rounded-xl border border-sage-200 select-none"
             [ngClass]="canSplit ? 'bg-sage-50 cursor-pointer' : 'bg-sage-50/60 opacity-70 cursor-not-allowed'">
             <input type="checkbox" name="splitKitchenBar" [(ngModel)]="form.splitKitchenBar" [disabled]="!canSplit"
-              class="w-5 h-5 mt-0.5 accent-[#1b2822]" />
+              class="w-5 h-5 mt-0.5 accent-[#2ed0ab]" />
             <span class="text-sm">
               <span class="block font-bold text-sage-900">Separar cocina y barra</span>
               <span *ngIf="canSplit" class="block text-xs text-sage-500">
@@ -752,7 +752,7 @@
       </div>
 
       <!-- Vista previa del ticket -->
-      <aside [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-5 shadow-soft lg:sticky lg:top-20">
+      <aside [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft lg:sticky lg:top-20">
         <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-3">Así sale en el ticket</div>
         <div class="space-y-1 rounded-lg bg-sage-50 p-3 font-mono text-xs text-sage-900">
           <img *ngIf="previewLogo" [src]="previewLogo" alt="" class="w-14 h-auto mx-auto mb-2" />
@@ -768,7 +768,7 @@
     <!-- Plan: lo mismo que la pantalla "Tu plan", dentro de Mi negocio -->
     <app-plan-page *ngIf="tab === 'plan'" [embedded]="true"></app-plan-page>
 
-    <section id="mi-contrasena" [class.hidden]="tab !== 'cuenta'" class="max-w-[460px] rounded-2xl bg-white p-5 shadow-soft">
+    <section id="mi-contrasena" [class.hidden]="tab !== 'cuenta'" class="max-w-[460px] rounded-2xl bg-white p-[20px] shadow-soft">
       <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 mb-1 flex items-center gap-2">
         Mi contraseña
       </div>

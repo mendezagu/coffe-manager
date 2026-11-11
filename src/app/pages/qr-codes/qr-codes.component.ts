@@ -173,15 +173,15 @@ export class QrCodesComponent implements OnInit {
       <style>
         @page { size: A4; margin: 10mm; }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: Roboto, Arial, sans-serif; color: #1e2b24; }
+        body { margin: 0; font-family: Roboto, Arial, sans-serif; color: #262d39; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
-        .card { border: 1.5px dashed #86958b; border-radius: 6mm; padding: 8mm 6mm; text-align: center; break-inside: avoid; page-break-inside: avoid; height: 135mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .card { border: 1.5px dashed #8a94a4; border-radius: 6mm; padding: 8mm 6mm; text-align: center; break-inside: avoid; page-break-inside: avoid; height: 135mm; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .logo { width: 22mm; height: 22mm; object-fit: cover; border-radius: 50%; margin-bottom: 3mm; }
         h1 { font-size: 17pt; margin: 0 0 3mm; }
-        .lead { font-size: 11pt; margin: 0 0 4mm; color: #3b4a41; }
+        .lead { font-size: 11pt; margin: 0 0 4mm; color: #363f4e; }
         .qr { width: 62mm; height: 62mm; }
         .table { font-size: 22pt; font-weight: 700; margin: 4mm 0 2mm; }
-        .hint { font-size: 8.5pt; color: #6a7a70; margin: 0; }
+        .hint { font-size: 8.5pt; color: #667184; margin: 0; }
         @media print { .card { border-color: #999; } }
       </style></head><body><div class="grid">${sheets}</div>
       <script>window.onload = function () { setTimeout(function () { window.print(); }, 300); };<\/script>

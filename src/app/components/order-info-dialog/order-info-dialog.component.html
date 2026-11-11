@@ -9,8 +9,8 @@
   <mat-dialog-content class="thin-scroll relative max-h-[55vh] overflow-y-auto px-5 py-2 sm:px-6">
     <!-- Productos de la mesa: filas separadas por una línea fina -->
     <ul class="m-0 list-none divide-y divide-sage-100 p-0">
-      <li *ngFor="let order of table?.orders" class="flex items-start gap-[12px] py-[14px]">
-        <div class="min-w-0 flex-1">
+      <li *ngFor="let order of table?.orders" class="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-[12px] gap-y-[8px] py-[14px]">
+        <div class="min-w-0 sm:row-span-2">
           <div class="font-semibold leading-tight text-sage-900">{{ order.name || 'Nombre no disponible' }}</div>
           <div class="mt-[2px] text-sm tabular-nums text-sage-500">
             {{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}
@@ -21,20 +21,20 @@
           <p *ngIf="order.note" class="m-0 mt-[2px] text-sm italic text-sage-600">↳ {{ order.note }}</p>
         </div>
 
-        <div class="flex flex-none flex-col items-end gap-[8px]">
-          <span class="font-bold tabular-nums text-sage-900">{{ (order.price * (order.quantity || 1)) | money }}</span>
-          <div class="flex items-center gap-[4px]">
+        <div class="contents">
+          <span class="text-right font-bold tabular-nums text-sage-900">{{ (order.price * (order.quantity || 1)) | money }}</span>
+          <div class="col-span-2 flex items-center justify-end gap-[4px] sm:col-span-1">
             <button type="button" (click)="decreaseQuantity(order)" [disabled]="(order.quantity || 1) <= 1" aria-label="Una menos"
-              class="grid h-10 w-10 place-items-center rounded-lg bg-sage-100 text-sage-700 transition-colors hover:bg-sage-200 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-700 transition-colors hover:bg-sage-200 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
               <mat-icon class="!h-5 !w-5 !text-xl">remove</mat-icon>
             </button>
             <span class="w-9 text-center text-base font-bold tabular-nums text-sage-900">{{ order.quantity || 1 }}</span>
             <button type="button" (click)="increaseQuantity(order)" aria-label="Una más"
-              class="grid h-10 w-10 place-items-center rounded-lg bg-sage-100 text-sage-700 transition-colors hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-700 transition-colors hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
               <mat-icon class="!h-5 !w-5 !text-xl">add</mat-icon>
             </button>
             <button *ngIf="canRemove(role$ | async)" type="button" (click)="removeOrder(order)" aria-label="Quitar de la mesa"
-              class="ml-[4px] grid h-10 w-10 place-items-center rounded-lg text-cafe-red-700 transition-colors hover:bg-cafe-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">
+              class="ml-[4px] grid h-11 w-11 place-items-center rounded-lg text-cafe-red-700 transition-colors hover:bg-cafe-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">
               <mat-icon class="!h-5 !w-5 !text-xl">delete</mat-icon>
             </button>
           </div>
@@ -50,13 +50,13 @@
   </mat-dialog-content>
 
   <!-- Acciones -->
-  <mat-dialog-actions class="relative flex flex-wrap gap-[8px] border-t border-sage-100 bg-white px-5 py-4 sm:px-6">
+  <mat-dialog-actions class="relative flex flex-wrap gap-[8px] border-t border-sage-100 bg-white px-[20px] py-[16px] sm:px-6">
     <button type="button" mat-dialog-close
-      class="min-w-[100px] flex-1 rounded-xl border border-sage-300 bg-white px-[16px] py-[11px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+      class="min-w-[100px] flex-1 rounded-xl border border-sage-300 bg-white min-h-[48px] px-[16px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
       Cerrar
     </button>
     <button *ngIf="hasChanges" type="button" (click)="saveChanges()"
-      class="min-w-[100px] flex-1 rounded-xl bg-cafe-green-700 px-[16px] py-[11px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+      class="min-w-[100px] flex-1 rounded-xl bg-cafe-green-700 min-h-[48px] px-[16px] text-sm font-semibold text-white transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
       Guardar cambios
     </button>
   </mat-dialog-actions>

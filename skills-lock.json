@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
       "computedHash": "32fd095cccdb137d71e3834c1e1da945aff214cb047202c2417c7d2b47d002c1"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "97892bbdba4c4aebac5b61b9519c0fa71eb8e5049946ead8202ce2e214d15c51"
     }
   }
 }

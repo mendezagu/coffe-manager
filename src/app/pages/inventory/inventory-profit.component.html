@@ -12,7 +12,11 @@
 
   <ng-container *ngIf="rows.length">
     <div class="flex flex-wrap items-center gap-4 mb-4">
-      <p class="m-0 text-sm text-sage-600"><strong class="font-jakarta text-xl font-bold tabular-nums text-cafe-green-700">{{ (averageMargin ?? 0) / 100 | percent:'1.0-0' }}</strong><span class="ml-[6px]">de margen promedio</span></p>
+      <div class="min-w-[200px] rounded-2xl bg-white p-[16px] shadow-soft sm:p-[20px]">
+        <p class="m-0 text-sm font-medium text-sage-600">Margen promedio</p>
+        <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ (averageMargin ?? 0) / 100 | percent:'1.0-0' }}</p>
+        <p class="m-0 mt-[2px] text-sm text-sage-600">de {{ rows.length }} {{ rows.length === 1 ? 'plato con receta' : 'platos con receta' }}</p>
+      </div>
       <label class="flex items-center gap-2 text-sm text-sage-700 ml-auto">
         Ordenar por
         <select [(ngModel)]="sortBy" class="px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white">

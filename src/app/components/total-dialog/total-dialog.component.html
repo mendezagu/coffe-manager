@@ -4,7 +4,7 @@
   <div class="relative flex-shrink-0 bg-white px-5 pb-2 pr-14 pt-5 sm:px-6 sm:pt-6">
     <!-- X de cierre en la esquina -->
     <button type="button" mat-dialog-close aria-label="Cerrar" title="Cerrar"
-      class="absolute right-1.5 top-1.5 z-10 grid h-10 w-10 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 sm:right-3 sm:top-3">
+      class="absolute right-1.5 top-1.5 z-10 grid h-11 w-11 place-items-center rounded-full text-sage-500 transition-colors hover:bg-sage-100 hover:text-sage-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 sm:right-3 sm:top-3">
       <mat-icon>close</mat-icon>
     </button>
     <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900">Detalle de la orden</div>
@@ -21,16 +21,16 @@
       <div role="heading" aria-level="3" class="mb-[8px] text-sm font-semibold text-sage-700">Productos ordenados</div>
 
       <!-- Cobrar solo una parte: elegir qué platos paga esta persona -->
-      <label class="mb-[8px] flex cursor-pointer select-none items-center gap-[8px] text-sm font-medium text-sage-800">
-        <input type="checkbox" [ngModel]="partial" (ngModelChange)="setPartial($event)" class="h-4 w-4 accent-cafe-green-700" />
+      <label class="mb-[8px] flex min-h-[44px] cursor-pointer select-none items-center gap-[10px] text-sm font-medium text-sage-800">
+        <input type="checkbox" [ngModel]="partial" (ngModelChange)="setPartial($event)" class="h-5 w-5 accent-cafe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700" />
         Cobrar solo una parte de la cuenta
       </label>
 
       <div *ngIf="partial" class="mb-[12px] text-sm text-sage-700">
         Elegí los platos que paga <strong>esta persona</strong>. Lo demás <strong>queda en la mesa</strong> para cobrarlo después.
         <div class="mt-[8px] flex gap-[8px]">
-          <button type="button" (click)="selectAll()" class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Agregar todo</button>
-          <button type="button" (click)="selectNone()" [disabled]="chargeLines.length === 0" class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar todo</button>
+          <button type="button" (click)="selectAll()" class="rounded-lg border border-sage-300 bg-white min-h-[44px] px-[14px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Agregar todo</button>
+          <button type="button" (click)="selectNone()" [disabled]="chargeLines.length === 0" class="rounded-lg border border-sage-300 bg-white min-h-[44px] px-[14px] text-sm font-medium text-sage-800 hover:bg-sage-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar todo</button>
         </div>
       </div>
 
@@ -46,9 +46,9 @@
               <strong class="tabular-nums">{{ o.maxQuantity - o.quantity }}×</strong> {{ o.name }}
               <span *ngIf="o.modifiers?.length" class="text-xs text-cafe-green-700"> · {{ modifiersText(o.modifiers) }}</span>
             </span>
-            <button type="button" (click)="addToPart(o)" class="rounded-lg bg-cafe-green-700 px-[12px] py-[8px] text-sm font-semibold text-white hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">+ Agregar</button>
+            <button type="button" (click)="addToPart(o)" class="rounded-lg bg-cafe-green-700 min-h-[44px] px-[14px] text-sm font-semibold text-white hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">+ Agregar</button>
             <button *ngIf="o.maxQuantity - o.quantity > 1" type="button" (click)="addToPart(o, o.maxQuantity - o.quantity)"
-              class="rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Todos</button>
+              class="rounded-lg border border-sage-300 bg-white min-h-[44px] px-[14px] text-sm font-medium text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Todos</button>
           </li>
         </ul>
       </div>
@@ -78,10 +78,10 @@
           <!-- Cantidad que entra en esta parte -->
           <div *ngIf="partial" class="mt-[6px] flex flex-wrap items-center gap-[8px] text-sm text-sage-600">
             <button type="button" (click)="stepQuantity(order, -1)" aria-label="Una menos"
-              class="h-10 w-10 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">−</button>
+              class="h-11 w-11 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">−</button>
             <strong class="min-w-[1.5rem] text-center text-base tabular-nums text-sage-900">{{ order.quantity }}</strong>
             <button type="button" (click)="stepQuantity(order, 1)" [disabled]="order.quantity >= order.maxQuantity" aria-label="Una más"
-              class="h-10 w-10 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">+</button>
+              class="h-11 w-11 rounded-lg bg-sage-100 text-lg font-bold text-sage-700 hover:bg-sage-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">+</button>
             <span *ngIf="order.maxQuantity > 1">de {{ order.maxQuantity }} en la mesa</span>
             <button type="button" (click)="stepQuantity(order, -order.quantity)" class="ml-auto rounded-lg px-[8px] py-[6px] font-medium text-cafe-red-700 hover:bg-cafe-red-50">Quitar</button>
           </div>
@@ -100,7 +100,7 @@
             <span class="text-sm text-sage-500">Precio unitario <span class="font-medium tabular-nums text-sage-700">{{ (order.modifiers?.length ? (order.basePrice ?? order.price) : order.price) | money }}</span></span>
             <label *ngIf="!order.isPromo && manualDiscountAllowed" class="flex items-center gap-[6px] text-sm text-sage-500">
               % desc.
-              <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="w-16 rounded-lg border border-sage-300 px-[6px] py-[6px] text-center text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
+              <input type="number" min="0" max="100" [(ngModel)]="order.discount" (ngModelChange)="calculateTotal()" class="min-h-[44px] w-[72px] rounded-xl border border-sage-300 px-[6px] py-[6px] text-center text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25" />
             </label>
             <span *ngIf="order.isPromo" class="text-sm font-medium text-cafe-red-700">Promo: sin descuento</span>
           </div>
@@ -136,7 +136,7 @@
           <p class="m-0 truncate text-sm text-cafe-green-800">Huésped: {{ voucher.guestName }}<ng-container *ngIf="voucher.documentHint"> (documento terminado en {{ voucher.documentHint }})</ng-container> · código {{ voucher.code }}</p>
           <p class="m-0 text-sm text-cafe-green-800">Un voucher por mesa. No se suma a otros descuentos ni toca los ítems en promo.</p>
         </div>
-        <button type="button" (click)="removeVoucher()" class="flex-shrink-0 rounded-lg border border-sage-300 bg-white px-[12px] py-[8px] text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar</button>
+        <button type="button" (click)="removeVoucher()" class="flex-shrink-0 rounded-lg border border-sage-300 bg-white min-h-[44px] px-[14px] text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Quitar</button>
       </div>
     </div>
 
@@ -146,7 +146,7 @@
       <p class="m-0 mb-[8px] mt-[2px] text-sm text-sage-500">No se aplica a los ítems en promo.</p>
       <div class="flex flex-wrap gap-[8px]" role="group" aria-label="Porcentaje de descuento">
         <button *ngFor="let p of discountOptions" type="button" (click)="applyDiscount(p)" [attr.aria-pressed]="discountPercentage === p && !voucher"
-          class="min-w-[56px] rounded-full border px-[14px] py-[8px] text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+          class="min-w-[56px] inline-flex min-h-[44px] items-center rounded-full border px-[16px] text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
           [ngClass]="discountPercentage === p && !voucher ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-700 hover:border-sage-300'">{{ p }}%</button>
       </div>
     </div>
@@ -189,7 +189,7 @@
     </app-payment-panel>
   </mat-dialog-content>
 
-  <mat-dialog-actions class="relative flex flex-shrink-0 flex-wrap gap-[8px] border-t border-sage-100 bg-white px-5 py-4 sm:px-6">
+  <mat-dialog-actions class="relative flex flex-shrink-0 flex-wrap gap-[8px] border-t border-sage-100 bg-white px-[20px] py-[16px] sm:px-6">
     <button type="button" mat-dialog-close class="hidden min-w-[85px] flex-1 items-center justify-center rounded-xl border border-sage-300 bg-white px-[16px] py-[12px] text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 sm:flex">
       Cerrar
     </button>

@@ -48,7 +48,7 @@
         <p *ngIf="filteredDishes.length === 0" class="text-sm text-sage-500 m-0 py-4 text-center">No hay platos con ese filtro.</p>
       </section>
 
-      <section class="bg-white rounded-2xl shadow-soft p-5 lg:sticky lg:top-20">
+      <section class="bg-white rounded-2xl shadow-soft p-[20px] lg:sticky lg:top-20">
         <p *ngIf="!selectedDish" class="text-sm text-sage-500 m-0 py-8 text-center">Elegí un plato de la lista para armar o ver su receta.</p>
 
         <ng-container *ngIf="selectedDish as d">
@@ -121,7 +121,7 @@
         </ul>
       </section>
 
-      <section class="bg-white rounded-2xl shadow-soft p-5 lg:sticky lg:top-20">
+      <section class="bg-white rounded-2xl shadow-soft p-[20px] lg:sticky lg:top-20">
         <p *ngIf="!selectedOption" class="text-sm text-sage-500 m-0 py-8 text-center">Elegí un extra para indicar qué insumos consume.</p>
 
         <ng-container *ngIf="selectedOption as o">

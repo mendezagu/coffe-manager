@@ -6,7 +6,7 @@
   <app-upgrade-wall *ngIf="!view.planIncluded" feature="qr_ordering" benefit="Tus clientes escanean el QR de la mesa y piden desde el celular, sin esperar al mozo."></app-upgrade-wall>
 
   <!-- Pedido por QR apagado: no se muestran ni se generan códigos -->
-  <div *ngIf="view.planIncluded && !view.active" class="p-5 sm:p-[24px] rounded-2xl bg-white shadow-soft flex flex-col sm:flex-row sm:items-center gap-[16px]">
+  <div *ngIf="view.planIncluded && !view.active" class="p-[20px] sm:p-[24px] rounded-2xl bg-white shadow-soft flex flex-col sm:flex-row sm:items-center gap-[16px]">
     <div class="flex-1 min-w-0">
       <p class="font-bold text-sage-900 m-0 mb-[4px]">El pedido por QR está apagado</p>
       <p class="text-sm text-sage-600 m-0">

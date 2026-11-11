@@ -65,10 +65,10 @@
           </div>
           <div class="flex flex-wrap gap-[6px]">
             <button type="button" (click)="row.tendered = row.amount; onRowChange()"
-              class="rounded-xl border border-sage-200 bg-white px-[12px] py-[8px] text-sm font-medium tabular-nums text-cafe-green-700 transition-colors hover:bg-cafe-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Exacto ({{ row.amount | money }})</button>
+              class="rounded-xl border border-sage-200 bg-white px-[12px] min-h-[44px] py-[8px] text-sm font-medium tabular-nums text-cafe-green-700 transition-colors hover:bg-cafe-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Exacto ({{ row.amount | money:true }})</button>
             <button *ngFor="let v of quickAmounts(row)" type="button" (click)="row.tendered = v; onRowChange()"
-              class="rounded-xl border px-[12px] py-[8px] text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-              [ngClass]="row.tendered === v ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-100'">{{ v | money }}</button>
+              class="rounded-xl border px-[12px] min-h-[44px] py-[8px] text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+              [ngClass]="row.tendered === v ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-100'">{{ v | money:true }}</button>
           </div>
           <div *ngIf="row.tendered !== null && !cashShort(row)" class="flex items-baseline justify-between border-t border-sage-100 pt-[12px]">
             <span class="text-sm font-semibold text-sage-700">Vuelto a entregar</span>
@@ -91,14 +91,14 @@
 
     <div *ngIf="variant !== 'pos' || moreOptions || rows.length > 1 || splitN > 1" class="mt-2 flex flex-wrap items-center gap-2">
       <button type="button" (click)="addRow()" [disabled]="splitN > 1"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-sage-200 text-sage-700 bg-white hover:bg-sage-50 disabled:opacity-40 disabled:cursor-not-allowed">
+        class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-4 text-sm font-medium text-sage-800 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 disabled:cursor-not-allowed disabled:opacity-40">
         + Pagar con otro método
       </button>
 
-      <label class="flex items-center gap-1.5 text-xs text-sage-600 ml-auto">
+      <label class="ml-auto flex items-center gap-2 text-sm text-sage-600">
         Dividir en partes iguales
         <select [ngModel]="splitN" (ngModelChange)="setSplit($event)" aria-label="Cantidad de personas"
-          class="px-2 py-1.5 border border-sage-200 rounded-lg bg-white text-sm">
+          class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-3 py-2 text-sm">
           <option [ngValue]="1">No dividir</option>
           <option *ngFor="let n of [2,3,4,5,6,7,8,9,10]" [ngValue]="n">{{ n }} personas</option>
         </select>

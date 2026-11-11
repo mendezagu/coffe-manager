@@ -28,7 +28,7 @@
     </section>
 
     <!-- Alta -->
-    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-2xl p-5 mb-6 grid gap-3 sm:grid-cols-2">
+    <form (ngSubmit)="create()" #f="ngForm" class="bg-sage-50 border border-sage-200 rounded-2xl p-[20px] mb-6 grid gap-3 sm:grid-cols-2">
       <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 sm:col-span-2">Nuevo usuario</div>
 
       <label class="block">
@@ -67,8 +67,8 @@
 
     <!-- Listado -->
     <div class="bg-white border border-sage-200 rounded-2xl overflow-hidden">
-      <p *ngIf="loading" class="p-5 text-sage-600 text-sm">Cargando…</p>
-      <p *ngIf="!loading && users.length === 0" class="p-5 text-sage-600 text-sm">No hay usuarios.</p>
+      <p *ngIf="loading" class="p-[20px] text-sage-600 text-sm">Cargando…</p>
+      <p *ngIf="!loading && users.length === 0" class="p-[20px] text-sage-600 text-sm">No hay usuarios.</p>
 
       <ul class="divide-y divide-sage-200">
         <li *ngFor="let u of users" class="p-4 flex flex-wrap items-center gap-3" [class.opacity-60]="!u.active">

@@ -5,7 +5,7 @@
   </p>
 
   <!-- Resultado del último conteo -->
-  <section *ngIf="result as r" class="mb-5 rounded-2xl p-5" [ngClass]="r.differences === 0 ? 'bg-cafe-green-50' : 'bg-cafe-red-50'" role="status">
+  <section *ngIf="result as r" class="mb-5 rounded-2xl p-[20px]" [ngClass]="r.differences === 0 ? 'bg-cafe-green-50' : 'bg-cafe-red-50'" role="status">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0">Conteo registrado</div>

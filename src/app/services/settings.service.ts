@@ -113,7 +113,7 @@ const DEFAULTS: TenantSettings = {
   phone: '',
   ticketFooter: '',
   logoUrl: null,
-  brandColor: '#1b2822',
+  brandColor: '#0b7d66',
   currencyCode: 'ARS',
   locale: 'es-AR',
   shiftMorningStart: 6,

@@ -9,15 +9,15 @@ type Preset = 'today' | '7d' | '30d' | 'month' | 'custom';
 
 // Colores de la marca (tailwind.config.js). Una sola tonalidad: en estos gráficos la longitud
 // de la barra es el dato, y el nombre va en la etiqueta, no en el color.
-const GREEN = '#1d5b3e';
-const GREEN_HOVER = '#154630';
+const GREEN = '#2ed0ab';
+const GREEN_HOVER = '#22b592';
 // Texto y líneas de los ejes: en el modo oscuro del panel se usan grises suaves (si no, las líneas claras se ven blancas)
 const isDark = () => document.documentElement.classList.contains('dark');
-const inkColor = () => (isDark() ? '#b5bac1' : '#55655b'); // sage-600
-const gridColor = () => (isDark() ? '#35373c' : '#e0e7dc'); // sage-200
+const inkColor = () => (isDark() ? '#b4bcc8' : '#4f5a6b'); // sage-600
+const gridColor = () => (isDark() ? '#35373c' : '#e1e5ea'); // sage-200
 
 // Colores de las porciones de la torta: la gama de la marca y algunos tonos de apoyo bien distinguibles
-const PIE_COLORS = ['#1d5b3e', '#c98f3a', '#3f8f67', '#8a2a1c', '#7bbf9a', '#e2b66b', '#c9695a', '#55655b', '#b9dcc7', '#a7b4ab'];
+const PIE_COLORS = ['#2ed0ab', '#c98f3a', '#0b7d66', '#8a2a1c', '#7bd9c0', '#e2b66b', '#c9695a', '#4f5a6b', '#b9efe0', '#a7b0bd'];
 
 const PAYMENT_LABELS: Record<string, string> = {
   efectivo: 'Efectivo',
@@ -356,7 +356,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
         type: 'doughnut',
         data: {
           labels,
-          datasets: [{ data, backgroundColor: PIE_COLORS, borderColor: isDark() ? '#2b2d31' : '#ffffff', borderWidth: 2 }],
+          datasets: [{ data, backgroundColor: PIE_COLORS, borderColor: isDark() ? '#252b36' : '#ffffff', borderWidth: 2 }],
         },
         options: {
           responsive: true,

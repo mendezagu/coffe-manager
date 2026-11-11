@@ -1,9 +1,9 @@
 <div class="flex max-h-[88vh] flex-col bg-white">
 
   <!-- Encabezado -->
-  <header class="flex items-center gap-3 border-b border-sage-200 px-5 py-4">
+  <header class="flex items-center gap-3 border-b border-sage-200 px-[20px] py-[16px]">
     <span class="grid h-10 w-10 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
-      <mat-icon>{{ isPopup ? 'campaign' : 'notifications' }}</mat-icon>
+      <mat-icon>campaign</mat-icon>
     </span>
     <div class="min-w-0 flex-1">
       <p role="heading" aria-level="2" class="m-0 text-lg font-bold text-sage-900">{{ isPopup ? 'Qué hay de nuevo en Tavolapp' : 'Novedades' }}</p>
@@ -15,11 +15,11 @@
   </header>
 
   <!-- Contenido -->
-  <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+  <div class="min-h-0 flex-1 overflow-y-auto px-[20px] py-[16px]">
     <p *ngIf="loading" class="m-0 py-8 text-center text-sm text-sage-500">Cargando…</p>
     <p *ngIf="error" class="m-0 py-8 text-center text-sm text-cafe-red-700">No se pudieron cargar las novedades. Probá de nuevo en un rato.</p>
     <div *ngIf="!loading && !error && !items.length" class="flex flex-col items-center gap-2 py-10 text-center text-sage-500">
-      <mat-icon class="!h-10 !w-10 !text-[40px] text-sage-300">notifications_none</mat-icon>
+      <mat-icon class="!h-10 !w-10 !text-[40px] text-sage-300">campaign</mat-icon>
       <p class="m-0 text-sm">Todavía no hay novedades. Cuando sumemos algo, lo vas a ver acá.</p>
     </div>
 

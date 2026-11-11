@@ -42,7 +42,7 @@ interface BalanceEntry {
 
 type BalanceView = 'mesas' | 'takeaway';
 
-const GREEN = '#2e7a57';
+const GREEN = '#2ed0ab';
 const AMBER = '#d49a12';
 const BLUE = '#3b82a8';
 const GRID = { color: 'rgba(128,128,128,.18)' };

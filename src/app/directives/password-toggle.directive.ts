@@ -27,8 +27,8 @@ export class PasswordToggleDirective implements AfterViewInit, OnDestroy {
     button.title = 'Mostrar la contraseña';
     button.style.cssText =
       'position:absolute;right:6px;width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:9999px;' +
-      'background:transparent;color:#86958b;cursor:pointer;padding:0;';
-    button.onmouseenter = () => (button.style.background = '#edf1ea');
+      'background:transparent;color:#8a94a4;cursor:pointer;padding:0;';
+    button.onmouseenter = () => (button.style.background = '#eef0f3');
     button.onmouseleave = () => (button.style.background = 'transparent');
 
     const icon = document.createElement('span');

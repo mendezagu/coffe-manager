@@ -1,12 +1,12 @@
 // Color de marca de un restaurante para las pantallas que ven sus clientes (carta QR y reservas).
-// El token `forest` de Tailwind lee estas variables; sin ellas rige el verde bosque de siempre.
+// El token `forest` de Tailwind lee estas variables; sin ellas rige el verde agua de la marca.
 
-export const DEFAULT_BRAND = '#1b2822';
+export const DEFAULT_BRAND = '#0b7d66';
 
 // Colores sugeridos: todos oscuros, para que el texto blanco se lea bien encima
 export const BRAND_SWATCHES: { label: string; value: string }[] = [
-  { label: 'Verde bosque', value: '#1b2822' },
-  { label: 'Verde', value: '#1d5b3e' },
+  { label: 'Verde agua', value: '#0b7d66' },
+  { label: 'Verde azulado', value: '#08604f' },
   { label: 'Azul noche', value: '#1e3a5f' },
   { label: 'Violeta', value: '#4a3170' },
   { label: 'Bordó', value: '#7a1f2b' },
@@ -61,7 +61,7 @@ export function brandStyle(hex: string | null | undefined, dark = false): string
       `--brand-rgb: ${triple(base)}`,
       `--brand-hover-rgb: ${triple(mix(base, BLACK, 0.18))}`,
       `--brand-light-rgb: ${triple(mix(base, WHITE, 0.1))}`,
-      `--brand-soft-rgb: ${triple(mix(base, [30, 31, 34], 0.78))}`,
+      `--brand-soft-rgb: ${triple(mix(base, [43, 50, 62], 0.78))}`,
     ].join('; ');
   }
   return [

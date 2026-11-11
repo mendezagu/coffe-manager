@@ -93,7 +93,7 @@ export class CustomSelectDirective implements OnDestroy {
     const panel = document.createElement('div');
     panel.setAttribute('role', 'listbox');
     panel.style.cssText =
-      'position:fixed;z-index:100000;overflow-y:auto;box-sizing:border-box;padding:6px;background:#fff;border:1px solid #e0e7dc;' +
+      'position:fixed;z-index:100000;overflow-y:auto;box-sizing:border-box;padding:6px;background:#fff;border:1px solid #e1e5ea;' +
       'border-radius:14px;box-shadow:0 18px 40px -12px rgba(30,43,36,.35),0 2px 6px rgba(30,43,36,.08);font:500 14px Roboto,system-ui,sans-serif;';
 
     this.items = this.options.map((opt, i) => {
@@ -101,7 +101,7 @@ export class CustomSelectDirective implements OnDestroy {
       item.setAttribute('role', 'option');
       item.setAttribute('aria-selected', String(opt.selected));
       item.style.cssText =
-        'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;color:#1e2b24;line-height:1.3;user-select:none;';
+        'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;color:#262d39;line-height:1.3;user-select:none;';
       const label = document.createElement('span');
       label.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
       label.textContent = opt.textContent?.trim() || ' ';
@@ -109,7 +109,7 @@ export class CustomSelectDirective implements OnDestroy {
       if (opt.selected && !opt.disabled) {
         const check = document.createElement('span');
         check.className = 'material-icons';
-        check.style.cssText = 'font-size:18px;line-height:1;color:#1d5b3e;';
+        check.style.cssText = 'font-size:18px;line-height:1;color:#0b7d66;';
         check.textContent = 'check';
         item.appendChild(check);
         item.style.fontWeight = '700';
@@ -194,7 +194,7 @@ export class CustomSelectDirective implements OnDestroy {
     this.active = index;
     const item = this.items[index];
     if (!item) return;
-    item.style.background = '#edf1ea';
+    item.style.background = '#eef0f3';
     item.scrollIntoView({ block: 'nearest' });
   }
 

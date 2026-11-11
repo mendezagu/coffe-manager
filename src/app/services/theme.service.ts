@@ -47,7 +47,7 @@ export class ThemeService {
   private apply() {
     const dark = this.inShell && this.dark;
     document.documentElement.classList.toggle('dark', dark);
-    Chart.defaults.color = dark ? '#b5bac1' : '#666666';
+    Chart.defaults.color = dark ? '#b4bcc8' : '#666666';
     Chart.defaults.borderColor = dark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
   }
 

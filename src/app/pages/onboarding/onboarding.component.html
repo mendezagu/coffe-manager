@@ -3,22 +3,7 @@
   <!-- Barra superior: marca y salida -->
   <header class="flex items-center justify-between gap-3 px-3 sm:px-8 py-4">
     <!-- Marca del producto: la "o" de Tavolapp es un plato (la misma del menú lateral) -->
-    <span class="inline-flex items-baseline font-bold text-sage-800 whitespace-nowrap" role="img" aria-label="Tavolapp" style="font-size: 30px; line-height: 1; letter-spacing: -0.035em">
-      <span>Tav</span>
-      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
-        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#f6f8f4" stroke="#1d5b3e" />
-        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#1d5b3e" />
-        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#f6f8f4" stroke="#1d5b3e" stroke-opacity=".35" />
-        <g fill="none" stroke="#1d5b3e" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
-          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
-          <path d="M39 50 V69" stroke-width="3.6" />
-        </g>
-        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#8a2a1c" />
-        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#8a2a1c" />
-      </svg>
-      <span>lapp</span>
-    </span>
+    <img src="assets/logo/tavolapp-gris.png" alt="Tavolapp" width="123" height="30" style="height:30px;width:auto;display:block">
     <button type="button" (click)="skip()" [disabled]="busy || loading"
       class="px-3 py-2 rounded-lg text-sm font-medium text-sage-500 hover:text-sage-800 hover:bg-sage-100 transition-colors disabled:opacity-50">
       Saltar por ahora
@@ -45,49 +30,46 @@
         </li>
       </ng-container>
     </ol>
-    <p class="sm:hidden mt-3 mb-0 text-xs font-bold uppercase tracking-wider text-sage-500">Paso {{ visiblePosition }} de {{ visibleSteps.length }} · {{ current.label }}</p>
+    <p class="sm:hidden mt-3 mb-0 text-sm font-medium text-sage-700">Paso {{ visiblePosition }} de {{ visibleSteps.length }} · {{ current.label }}</p>
   </nav>
 
   <main class="flex-1 px-1.5 pb-10 sm:px-6">
 
     <!-- Cargando -->
-    <div *ngIf="loading" class="mx-auto w-full max-w-[640px] bg-white rounded-card shadow-soft-lg p-8 animate-pulse" aria-busy="true" aria-label="Cargando">
+    <div *ngIf="loading" class="mx-auto w-full max-w-[640px] bg-white rounded-2xl shadow-soft p-8 animate-pulse" aria-busy="true" aria-label="Cargando">
       <div class="h-12 w-12 rounded-xl bg-sage-100"></div>
       <div class="h-6 w-2/3 rounded bg-sage-100 mt-5"></div>
       <div class="h-4 w-full rounded bg-sage-100 mt-3"></div>
       <div class="h-12 w-full rounded-lg bg-sage-100 mt-8"></div>
     </div>
 
-    <section *ngIf="!loading" class="mx-auto w-full max-w-[640px] bg-white rounded-card shadow-soft-lg">
+    <section *ngIf="!loading" class="mx-auto w-full max-w-[640px] bg-white rounded-2xl shadow-soft">
 
       <!-- Contenido del paso (se vuelve a animar al cambiar de paso) -->
       <ng-container *ngFor="let s of [step]">
       <div class="step-enter p-3.5 sm:p-8">
 
         <div class="flex items-start gap-4 mb-6">
-          <span class="grid h-12 w-12 flex-none place-items-center rounded-xl bg-cafe-green-50 text-cafe-green-700">
-            <mat-icon>{{ current.icon }}</mat-icon>
-          </span>
           <div class="min-w-0">
             <ng-container [ngSwitch]="step">
               <ng-container *ngSwitchCase="0">
-                <h1 class="m-0 text-2xl font-bold tracking-tight text-sage-900">¡Bienvenido! Empecemos</h1>
+                <h1 class="m-0 font-jakarta text-2xl font-bold tracking-tight text-sage-900">¡Bienvenido! Empecemos</h1>
                 <p class="m-0 mt-1 text-sm text-sage-500">Contanos cómo se llama tu negocio. Son {{ visibleSteps.length }} pasos rápidos y en unos 5 minutos ya podés cobrar.</p>
               </ng-container>
               <ng-container *ngSwitchCase="1">
-                <h1 class="m-0 text-2xl font-bold tracking-tight text-sage-900">Armá tu menú</h1>
+                <h1 class="m-0 font-jakarta text-2xl font-bold tracking-tight text-sage-900">Armá tu menú</h1>
                 <p class="m-0 mt-1 text-sm text-sage-500">Lo que vendés, con su precio. Con unos pocos platos alcanza para empezar: el resto lo sumás después.</p>
               </ng-container>
               <ng-container *ngSwitchCase="2">
-                <h1 class="m-0 text-2xl font-bold tracking-tight text-sage-900">¿Cuántas mesas tenés?</h1>
+                <h1 class="m-0 font-jakarta text-2xl font-bold tracking-tight text-sage-900">¿Cuántas mesas tenés?</h1>
                 <p class="m-0 mt-1 text-sm text-sage-500">Las creamos todas juntas, numeradas. Después podés cambiarles el nombre o sumar más.</p>
               </ng-container>
               <ng-container *ngSwitchCase="3">
-                <h1 class="m-0 text-2xl font-bold tracking-tight text-sage-900">¿Quién atiende las mesas?</h1>
+                <h1 class="m-0 font-jakarta text-2xl font-bold tracking-tight text-sage-900">¿Quién atiende las mesas?</h1>
                 <p class="m-0 mt-1 text-sm text-sage-500">Cargá al menos un mozo: sin mozo no se puede tomar un pedido. Si atendés solo, poné tu propio nombre.</p>
               </ng-container>
               <ng-container *ngSwitchCase="4">
-                <h1 class="m-0 text-2xl font-bold tracking-tight text-sage-900">¡Todo listo! Hora de probar</h1>
+                <h1 class="m-0 font-jakarta text-2xl font-bold tracking-tight text-sage-900">¡Todo listo! Hora de probar</h1>
                 <p class="m-0 mt-1 text-sm text-sage-500">Tu negocio ya está armado. Hacé tu primera venta de prueba siguiendo estos tres pasos.</p>
               </ng-container>
             </ng-container>
@@ -105,7 +87,7 @@
             <div class="flex items-center gap-4">
               <label class="relative grid h-24 w-24 flex-none cursor-pointer place-items-center overflow-hidden rounded-full border-2 border-dashed border-sage-300 bg-sage-50 text-sage-400 hover:border-cafe-green-700 hover:text-cafe-green-700 transition-colors focus-within:ring-2 focus-within:ring-cafe-green-700/40">
                 <img *ngIf="logo" [src]="logo" alt="Logo de tu negocio" class="h-full w-full object-cover" />
-                <span *ngIf="!logo" class="flex flex-col items-center gap-0.5 text-[11px] font-bold">
+                <span *ngIf="!logo" class="flex flex-col items-center gap-0.5 text-xs font-bold">
                   <mat-icon>add_a_photo</mat-icon>
                   Logo
                 </span>
@@ -119,14 +101,14 @@
             </div>
 
             <div>
-              <label for="biz-name" class="block text-xs font-bold text-sage-500 mb-1.5">Nombre del negocio</label>
+              <label for="biz-name" class="block text-sm font-medium text-sage-700 mb-1.5">Nombre del negocio</label>
               <input id="biz-name" type="text" [(ngModel)]="name" maxlength="80" autocomplete="organization" placeholder="Ej: Café del Centro"
                 (keydown.enter)="next()"
                 class="w-full px-4 h-12 border border-sage-200 rounded-lg text-base text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
             </div>
 
             <div>
-              <label for="biz-region" class="block text-xs font-bold text-sage-500 mb-1.5">País y moneda</label>
+              <label for="biz-region" class="block text-sm font-medium text-sage-700 mb-1.5">País y moneda</label>
               <!-- Selector con flecha propia: se quita la nativa (queda pegada al borde y desentona) -->
               <div class="relative">
                 <select id="biz-region" [(ngModel)]="region"
@@ -147,8 +129,8 @@
               <button type="button" (click)="applyTemplate()" [disabled]="busy || !template"
                 class="group text-left rounded-2xl border-2 border-cafe-green-700 bg-cafe-green-50/60 p-4 hover:bg-cafe-green-50 transition-colors disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700/40">
                 <span class="flex items-center justify-between">
-                  <span class="grid h-10 w-10 place-items-center rounded-xl bg-cafe-green-700 text-white"><mat-icon>auto_awesome</mat-icon></span>
-                  <span class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-[11px] font-bold text-white">Recomendado</span>
+                  <span class="grid h-10 w-10 place-items-center rounded-xl bg-cafe-green-700 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2"><mat-icon>auto_awesome</mat-icon></span>
+                  <span class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-xs font-bold text-white">Recomendado</span>
                 </span>
                 <span class="mt-3 block text-base font-bold text-sage-900">Cargar un menú de ejemplo</span>
                 <span class="mt-0.5 block text-sm text-sage-600">{{ template?.label || 'Cafetería' }}: bebidas y algo para comer, listo en un clic. Solo cambiás los precios.</span>
@@ -187,8 +169,8 @@
                 </button>
               </div>
 
-              <div *ngFor="let g of groups" class="rounded-xl border border-sage-200 overflow-hidden">
-                <p class="m-0 px-4 py-2 text-xs font-bold uppercase tracking-wider text-sage-500 bg-sage-50 border-b border-sage-200">{{ g.name }}</p>
+              <div *ngFor="let g of groups" class="rounded-xl border border-sage-300 overflow-hidden">
+                <p class="m-0 px-4 py-2 text-sm font-medium text-sage-700">{{ g.name }}</p>
                 <ul class="m-0 p-0 list-none divide-y divide-sage-100">
                   <li *ngFor="let item of g.items" class="flex items-center gap-2 px-4 py-2.5">
                     <!-- Foto (opcional) -->
@@ -227,12 +209,12 @@
                   <img *ngIf="newPhotoPreview" [src]="newPhotoPreview" alt="Foto elegida" class="h-full w-full object-cover" />
                   <span *ngIf="!newPhotoPreview" class="flex flex-col items-center gap-0.5 px-1">
                     <mat-icon class="!h-6 !w-6 !text-2xl">add_a_photo</mat-icon>
-                    <span class="text-[11px] font-bold leading-tight">Foto</span>
-                    <span class="text-[10px] font-normal leading-tight">opcional</span>
+                    <span class="text-xs font-bold leading-tight">Foto</span>
+                    <span class="text-xs font-normal leading-tight">opcional</span>
                   </span>
                   <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" (change)="onNewPhoto($event)" aria-label="Foto del plato (opcional)" />
                 </label>
-                <button *ngIf="newPhotoPreview" type="button" (click)="clearNewPhoto()" class="mt-1 w-full text-center text-[11px] font-medium text-cafe-red-700 underline">Quitar</button>
+                <button *ngIf="newPhotoPreview" type="button" (click)="clearNewPhoto()" class="mt-1 w-full text-center text-xs font-medium text-cafe-red-700 underline">Quitar</button>
               </div>
               <div class="min-w-0 flex-1">
               <div class="grid gap-3 sm:grid-cols-[1fr_130px]">
@@ -255,7 +237,7 @@
                   <datalist id="onb-cats"><option *ngFor="let c of categories" [value]="c.name"></option></datalist>
                 </div>
                 <button type="submit" [disabled]="!canAddItem || busy"
-                  class="h-11 px-5 rounded-lg bg-cafe-green-700 text-white text-sm font-bold hover:bg-cafe-green-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5">
+                  class="h-11 px-5 rounded-xl bg-cafe-green-700 text-white text-sm font-semibold hover:bg-cafe-green-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
                   <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon> Agregar
                 </button>
               </div>
@@ -287,7 +269,7 @@
                 <label for="table-count" class="sr-only">Cantidad de mesas</label>
                 <input id="table-count" type="number" inputmode="numeric" min="0" max="100" [ngModel]="tableCount" (ngModelChange)="setTables($event)"
                   class="no-spin w-24 text-center text-5xl font-bold tracking-tight text-sage-900 bg-transparent focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 rounded-lg" />
-                <p class="m-0 text-xs font-bold uppercase tracking-wider text-sage-400">{{ tableCount === 1 ? 'mesa' : 'mesas' }}</p>
+                <p class="m-0 text-sm font-medium text-sage-700">{{ tableCount === 1 ? 'mesa' : 'mesas' }}</p>
               </div>
               <button type="button" (click)="setTables(tableCount + 1)" [disabled]="tableCount >= 100" aria-label="Una mesa más"
                 class="grid h-14 w-14 place-items-center rounded-full bg-cafe-green-700 text-white hover:bg-cafe-green-800 active:scale-95 transition disabled:opacity-40">
@@ -303,9 +285,9 @@
 
             <!-- Vista previa -->
             <div *ngIf="tableCount > 0" class="rounded-xl bg-sage-50 border border-sage-200 p-3.5">
-              <p class="m-0 mb-2.5 text-xs font-bold uppercase tracking-wider text-sage-500">Así van a quedar</p>
+              <p class="m-0 mb-2.5 text-sm font-medium text-sage-700">Así van a quedar</p>
               <div class="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                <span *ngFor="let n of tablePreview" class="pop-in rounded-lg bg-cafe-green-700 py-2 text-center text-xs font-bold text-white shadow-green">Mesa {{ n }}</span>
+                <span *ngFor="let n of tablePreview" class="pop-in rounded-xl bg-cafe-green-700 py-2 text-center text-xs font-semibold text-white  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Mesa {{ n }}</span>
               </div>
               <p *ngIf="tablesHidden > 0" class="m-0 mt-2.5 text-xs text-sage-500">… y {{ tablesHidden }} más</p>
             </div>
@@ -320,7 +302,7 @@
                   class="w-full px-4 h-12 border border-sage-200 rounded-lg text-base text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all" />
               </div>
               <button type="submit" [disabled]="!newWaiter.trim() || busy"
-                class="h-12 px-5 rounded-lg bg-cafe-green-700 text-white text-sm font-bold hover:bg-cafe-green-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5">
+                class="h-12 px-5 rounded-xl bg-cafe-green-700 text-white text-sm font-semibold hover:bg-cafe-green-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon> Agregar
               </button>
             </form>
@@ -340,14 +322,14 @@
           <!-- ============ Paso 5: a probar ============ -->
           <div *ngSwitchCase="4" class="flex flex-col gap-5">
             <ol class="m-0 p-0 list-none flex flex-col gap-3">
-              <li class="flex items-start gap-3.5 rounded-xl border border-sage-200 p-3.5">
+              <li class="flex items-start gap-3.5 rounded-xl border border-sage-300 p-3.5">
                 <span class="grid h-9 w-9 flex-none place-items-center rounded-full bg-cafe-green-50 text-sm font-bold text-cafe-green-700">1</span>
                 <div>
                   <p class="m-0 text-sm font-bold text-sage-900">Abrí la caja</p>
                   <p class="m-0 mt-0.5 text-sm text-sage-500">En el menú, entrá a <strong>Caja</strong> y tocá "Abrir caja". Sin caja abierta no se puede cobrar.</p>
                 </div>
               </li>
-              <li class="flex items-start gap-3.5 rounded-xl border border-sage-200 p-3.5">
+              <li class="flex items-start gap-3.5 rounded-xl border border-sage-300 p-3.5">
                 <span class="grid h-9 w-9 flex-none place-items-center rounded-full bg-cafe-green-50 text-sm font-bold text-cafe-green-700">2</span>
                 <div>
                   <p class="m-0 text-sm font-bold text-sage-900">Cargá un pedido</p>
@@ -355,7 +337,7 @@
                   <p *ngIf="counterOnly" class="m-0 mt-0.5 text-sm text-sage-500">En el menú, entrá al <strong>Mostrador</strong> y tocá los productos que vende el cliente para sumarlos al pedido.</p>
                 </div>
               </li>
-              <li class="flex items-start gap-3.5 rounded-xl border border-sage-200 p-3.5">
+              <li class="flex items-start gap-3.5 rounded-xl border border-sage-300 p-3.5">
                 <span class="grid h-9 w-9 flex-none place-items-center rounded-full bg-cafe-green-50 text-sm font-bold text-cafe-green-700">3</span>
                 <div>
                   <p class="m-0 text-sm font-bold text-sage-900">Cobrá</p>
@@ -376,13 +358,13 @@
       </ng-container>
 
       <!-- Botones: quedan fijos abajo si el paso es largo -->
-      <footer class="sticky bottom-0 z-10 flex flex-col-reverse gap-3 rounded-b-card border-t border-sage-200 bg-white/95 backdrop-blur p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 sm:px-8 sm:py-5">
+      <footer class="sticky bottom-0 z-10 flex flex-col-reverse gap-3 rounded-b-2xl border-t border-sage-200 bg-white  p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 sm:px-8 sm:py-5">
         <button type="button" (click)="back()" [disabled]="busy" [class.invisible]="step === 0"
           class="h-12 px-5 rounded-xl text-sm font-bold text-sage-600 hover:bg-sage-100 transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-50">
           <mat-icon class="!w-5 !h-5 !text-xl">arrow_back</mat-icon> Volver
         </button>
         <button type="button" (click)="next()" [disabled]="!canContinue || busy"
-          class="h-12 px-6 rounded-xl bg-cafe-green-700 text-white text-base font-bold shadow-green hover:bg-cafe-green-800 active:scale-[0.99] transition disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
+          class="h-12 px-6 rounded-xl bg-cafe-green-700 text-white text-base font-semibold  hover:bg-cafe-green-800 active:scale-[0.99] transition disabled:opacity-40  disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
           <ng-container *ngIf="!busy; else working">
             {{ continueLabel }}
             <mat-icon class="!w-5 !h-5 !text-xl">{{ step === 4 ? 'storefront' : 'arrow_forward' }}</mat-icon>

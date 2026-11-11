@@ -252,4 +252,81 @@ Pestañas como chips de texto (sin íconos). Paneles `rounded-2xl bg-white shado
 
 ### Resto de la app
 
-Mismo criterio aplicado en bloque a Balance, Inventario (todas las pestañas), Cocina, Modificadores, Categorías, Usuarios, Reservas, Delivery, QR, Plan, Administración, Portal del hotel y los diálogos internos: títulos `div role="heading"`, `rounded-2xl` con una sola elevación, etiquetas `text-sm font-medium`, botones primarios `rounded-xl` con foco visible, cifras en línea en vez de tarjetas, sin íconos decorativos ni bordes de color (estado con fondo tenue). Quedan sin pasar por Impeccable las pantallas públicas (ingreso, onboarding, reservas públicas, carta QR, landing de hotel).
+Mismo criterio aplicado en bloque a Balance, Inventario (todas las pestañas), Cocina, Modificadores, Categorías, Usuarios, Reservas, Delivery, QR, Plan, Administración, Portal del hotel y los diálogos internos: títulos `div role="heading"`, `rounded-2xl` con una sola elevación, etiquetas `text-sm font-medium`, botones primarios `rounded-xl` con foco visible, cifras en línea en vez de tarjetas, sin íconos decorativos ni bordes de color (estado con fondo tenue). Pantallas públicas (ingreso, onboarding, reserva pública, landing de hotel) con el mismo criterio: sin círculos de ícono sobre los títulos, sin rótulos en mayúsculas, títulos Jakarta. Falta la carta QR del cliente (`qr-order`).
+
+### Mesas y sus diálogos (pasada UI UX Pro Max)
+
+Objetivos táctiles de 44px (48px en la acción principal de la tarjeta y en los botones de pie de diálogo), nada de texto bajo 12px, texto secundario sobre blanco en `sage-600` (no `sage-400`, que da ~2:1), foco visible en toda acción. Aplicado en `app-card`, `order-info`, `total`, `waiter`, `menu`, `link-table`, `qr-inbox` y `modifier-picker`. Skill instalado en `.agents/skills/ui-ux-pro-max` (enlazado a `.claude/skills`); su buscador pide Python 3, que no está instalado: se usó leyendo sus CSV y `SKILL.md` directo.
+
+### Mesas v3 (estado del salón y tarjetas)
+
+Panel de estado con barra de ocupación (rojo/verde) cuyos rótulos filtran la lista; turno y cocina a la derecha. Barra de trabajo en filas separadas: búsqueda, Sectores/Conjunta y sectores desplazables. Ocupada y pendiente por QR son tarjetas llenas (ladrillo / ámbar), libre queda en menta. Cada sector muestra su propia barra de ocupación. Los blancos fijos sobre tarjetas llenas van con valor arbitrario (`bg-[#ffffff]`) para que el modo oscuro no los invierta. IMPORTANTE: todo `*ngFor` de mesas/botones lleva `trackBy`; sin él, cada refresco recrea el DOM y un clic real de mouse (mousedown + mouseup) se pierde. "Primeros pasos" va debajo del encabezado de Mesas.
+
+### Mesas v4: salón compacto (paleta propia, derivada de UI UX Pro Max)
+
+Sistema de diseño del salón (clase `.floor`, variables `--floor-*` en `styles.scss`, con versión oscura): Inter en todo el salón; **Libre** = ficha blanca con aro verde, **Ocupada** = rojo ladrillo tenue (`#8a2a1c` sobre `#fbe9e5`); las acciones principales usan el verde de la marca (`--floor-action`), **Atención** (pedido por QR, cuenta pedida o platos listos) = naranja quemado `#c2410c`, el único color urgente. El rojo vuelve a ser el color de ocupada (decisión del dueño); el naranja sigue siendo lo único urgente y se distingue por ir lleno, con rombo y texto. Cada estado se distingue también por forma (aro / punto / rombo) y texto, no solo por color. Fichas de 148px mínimo (8 por fila a 1440px) con nombre sin el prefijo del sector, estado y mozo; tocar una ficha abre un panel lateral (hoja desde abajo en celular) con Ordenar / Órdenes / Cobrar / Imprimir. Esc o tocar fuera lo cierra. Las acciones cierran el panel y abren sus diálogos. Falta (necesita API): tiempo ocupada y consumo en la ficha.
+
+**Ficha en atención:** el motivo va primero ("Pedido por QR"), debajo el tiempo de espera ("hace 4 min", sale de la hora del pedido, sin tocar la API) y a partir de 5 minutos la ficha late con un halo (se apaga con reducir movimiento). Un pedido por confirmar se resuelve tocando la ficha: abre directo la bandeja, sin pasar por el panel.
+
+### Mesas v5: sistema "Salón en servicio"
+
+Jerarquía en tres niveles: (1) **Esperando atención**, lista fija arriba con las mesas que esperan, la que espera hace más primero, con su tiempo y la acción ("Atender", "Cobrar", "Ver mesa", "Servir"); muestra 5 y el resto se despliega; (2) estado del salón (barra de ocupación y filtros); (3) mesas por sector. Las fichas no se reordenan por estado (memoria muscular): la urgencia vive en la lista. En celular las cifras del turno empiezan plegadas. La barra flotante de avisos solo aparece cuando la lista quedó fuera de pantalla (IntersectionObserver). `--floor-action-text` aclara el texto de acción en oscuro para cumplir contraste. "Primeros pasos" va después de lo urgente. El scroll de la app NO es el de `window`: para pruebas usar `scrollIntoView`.
+
+**Modo oscuro de Mesas:** grises neutros de la app (`#313338` / `#2b2d31`), sin azules ni verdes saturados. Los únicos colores son el rojo ladrillo tenue (ocupada), el naranja (atención) y el verde de marca (acciones). Libre es gris con aro verde.
+
+**Platos listos (cocina):** no pintan la ficha de naranja; una mesa ocupada sigue roja y muestra "✓ N platos listos" en verde. En la lista "Esperando atención" esas mesas entran con una píldora verde "Listo" y la acción "Servir"; el naranja queda solo para clientes que esperan (pedido por QR, cuenta, mozo). El nombre de la mesa baja de 20 a 18 o 16 px según su largo y la cantidad de órdenes va junto al estado, así no se corta ("reservado1"). El prefijo del sector se quita sin importar tildes o mayúsculas.
+
+La lista "Esperando atención" muestra SOLO clientes esperando (pedido por QR, cuenta, mozo). Los platos listos de cocina quedan en la ficha de cada mesa y en el contador de cocina del panel de estado: en un salón con cocina se acumulaban decenas de filas y tapaban lo urgente.
+
+Panel de estado compacto: en escritorio las cifras del turno van en dos columnas (ventas | permanencia) y cocina debajo, el bloque mide 480px de ancho y el panel unos 170px de alto (antes ~320, con un hueco blanco bajo los filtros).
+
+Panel de estado por rol: el bloque oscuro del turno es solo del administrador. Mozos y cajeros ven la ocupación y los filtros en una fila (número + barra a la izquierda, filtros a la derecha) y las cifras de cocina ("N platos listos para servir · N en preparación") como una línea bajo los filtros. Panel de ~116px de alto para esos roles.
+
+**Filtro por estado:** ya no son chips dentro del panel; es el botón "Filtrar" de la barra de trabajo (junto al buscador) que despliega Todas / Libres / Ocupadas / Por QR con su cantidad; si hay un filtro activo el botón muestra cuál y se pinta oscuro. El panel de estado quedó con solo el número y la barra. Para el administrador, el bloque oscuro del turno es una franja a todo el ancho debajo (ventas | permanencia | cocina) y recién desde 1700px de ancho pasa a ser una columna a la derecha (`min-[1700px]`), porque el ancho de la pantalla no incluye el menú lateral.
+
+### Mostrador v3: venta rápida
+
+Barra de cobro inferior ("Cobrar · N productos · total") en lugar del carrito flotante. Tarjetas con pie fijo de dos líneas (precio + acción de 44px): el "+" se vuelve un selector "− 2 +" cuando el producto ya está en el pedido, y como la altura no cambia, agregar un producto nunca mueve la grilla (evita toques errados en plena venta). Hasta 6 columnas en pantalla ancha y 2 en celular; fotos más bajas. Venta registrada: total grande, "Vuelto a entregar" destacado, foco en "Nueva venta" (Enter) e "Imprimir ticket" debajo. Importes rápidos sin centavos (`money:true`). Objetivos táctiles de 44px.
+
+### Caja v3
+
+La cifra principal es el **efectivo esperado en caja** (40px) con el cierre a un toque en la misma tarjeta; vendidos, cobros digitales y propinas van debajo. Movimientos: tipo con botones (Retiro o gasto / Ingreso) y campos de 48px. Cobrado por método: una sola barra verde (el rojo y el naranja parecían alertas). "Efectivo de la caja" termina con **Esperado en caja** y los ceros van sin color. Historial: la diferencia es una etiqueta (Justa = verde, Faltan = rojo, **Sobran = ámbar**, Abierta = gris), filas de 14px de alto, importes alineados a la derecha, y en celular cada cierre es una tarjeta (no una tabla con scroll). Importes redondos sin centavos (`money:true`).
+
+## Paleta actual: verde agua y pizarra (reemplaza a "verde botella" y "salvia")
+
+Tomada de una imagen de referencia: menta `#2ED0AB`, verde azulado oscuro `#084440`, pizarra `#363F4E` y grises fríos. Lo que dicen más arriba sobre "verde botella casi negro" y "salvia" está superado por esto.
+
+- `cafe-green`: verde agua de marca. **700 = `#0b7d66` es la acción principal** (texto blanco, contraste 5,1:1), 800 el hover, 900 `#084440` para texto oscuro, 50-200 tintes.
+- `cafe-mint`: menta brillante `#2ED0AB` (500) para acentos; sobre ella va texto oscuro (900), nunca blanco.
+- `sage`: ahora son grises fríos de pizarra: 100 `#eef0f3` fondo de página, 200 bordes, 600 `#4f5a6b` y 500 `#5d6879` texto secundario (4,9:1 sobre el fondo), 700 `#363f4e` pizarra, 900 `#181d26` tinta.
+- Menú lateral en pizarra `#2f3643` con acento menta `#6fe3c6`. Modo oscuro: pizarra (`#2b323e` fondo, `#252b36` tarjetas, `#3a4252` bordes).
+- Se mantienen el rojo ladrillo (ocupada, destructivo) y el ámbar/naranja (atención).
+- El color por defecto de la marca del local (carta y reservas) pasó a `#0b7d66`; los locales que ya eligieron otro color lo conservan.
+- Contrastes verificados: blanco sobre verde agua 5,1, verde agua sobre blanco 5,1, menta sobre pizarra 7,8, texto 600 sobre tarjeta oscura 7,4.
+- Regla: ningún color nuevo suelto; para cambiar la paleta se tocan `tailwind.config.js`, las variables `--floor-*` de `styles.scss` y `tools/gen-dark-theme.js` (luego `npm run gen:dark`).
+
+### Acción principal en menta
+
+Los botones y las acciones principales (`bg-cafe-green-700/600/800`), el ícono del encabezado (`.page-header__icon`), el selector "− 2 +" y los botones del panel de Mesas (`--floor-action`) van en menta `#2ED0AB` con texto verde azulado oscuro `#084440` (5,6:1), en claro y en oscuro. Se resuelve con una regla global al final de `styles.scss` (el color lleva `!important` porque Bootstrap `.text-white` también). Los textos verdes sobre blanco (enlaces, importes) siguen en `#0b7d66`. Las pantallas del cliente (carta, reservas) usan el color de marca del local (`forest`) y siguen con texto blanco.
+
+**Cuidado con Bootstrap:** `p-3/4/5`, `px-*`, `py-*`, `m*-3/4/5` y `gap-3/4/5` de Bootstrap pisan a Tailwind (p-5 = 48px). En plantillas nuevas usar valores explícitos (`p-[20px]`, `px-[20px]`).
+
+### Panel de estado de Mesas v5 (bloques iguales)
+
+Una sola tarjeta blanca con bloques de la misma forma (etiqueta chica, cifra de 28px y una línea de contexto), separados por líneas finas: **Ocupación** (con la barra y su leyenda "N ocupadas · N libres"), **Ventas del turno**, **Ticket promedio** y **Permanencia promedio**. Sin el bloque oscuro. Mozos y cajeros ven solo Ocupación; la línea de cocina (platos listos / en preparación) va al pie para todos. En celular: Ocupación a todo el ancho y las cifras del turno plegadas ("Ver cifras del turno"), después en grilla de 2.
+
+## Carta online y pedido por QR (pantalla del cliente)
+
+Rediseño de `qr-order` (`/mesa/:token`, `/carta/:slug`, `/delivery/:slug`). Solo plantilla; la lógica no cambió.
+
+- **Portada de marca**: banda a todo el ancho con esquinas inferiores de 36px en el color del local (o su foto de portada con degradé), logo en ficha blanca de 68px, nombre en 28px extrabold y dos píldoras de vidrio (mesa/carta/tienda y estado). Sin portada, anillos concéntricos como motivo. En carta oscura la banda usa la superficie oscura (el color de marca aclarado no da contraste con texto blanco).
+- **Buscador y categorías fijos** (`sticky`) con píldoras de 40px de alto.
+- **Destacados** ("Imperdibles"): afiches de 264×320 con la foto a sangre, nombre encima y precio en píldora blanca.
+- **Tarjetas**: radio 24px, foto de 112px (lista) o 128px (grilla), precio en extrabold, botón de agregar de 36–44px en el color de marca; el verde queda solo para "ya agregado".
+- **Dock flotante** abajo (Carta / Pedidos / Bolsa, pestaña activa en color de marca) y, encima, la barra "Tu bolsa" como píldora con total y "Ver pedido".
+- Esquinas más amplias en toda la pantalla (`rounded-xl` → 20px, `rounded-lg` → 14px, hojas 32px).
+- Pendiente: el modo oscuro aclara el color de marca y el texto blanco sobre botones queda con contraste justo; la pestaña Pedidos conserva la banda completa arriba (ocupa ~170px).
+
+## Cifras en bloques (Reportes, Balance, Caja, Inventario, Mesas)
+
+Las cifras de resumen ya no van "en una línea" con cifra + texto al lado. Todas usan el mismo bloque: etiqueta (14px, `text-sage-600`), cifra (26–28px bold, Inter, `tabular-nums`, `whitespace-nowrap`) y contexto debajo (14px). Los bloques se separan con líneas finas de 1px (`gap-px` sobre `bg-sage-200`), dentro de una sola tarjeta de 20px de radio: en pantallas grandes van todos en una fila de columnas iguales (`lg:grid-flow-col lg:auto-cols-fr`), en celular de a dos, con el último ocupando todo el ancho si queda impar. Importes con `money:true` (sin ",00"). Si se agrega un resumen nuevo, copiar este bloque.
