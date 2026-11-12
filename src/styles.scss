@@ -599,3 +599,18 @@ html [class~="bg-cafe-green-700"][disabled] {
 
 /* Fondo detrás del menú lateral abierto (celular): oscurecido y difuminado */
 .mat-drawer-backdrop.mat-drawer-shown { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+/* Interruptor: <label class="sw"><input type="checkbox" class="sw__in"><span class="sw__ui"></span></label>
+   El input real queda encima (transparente), así que se maneja con teclado y lector de pantalla como un checkbox. */
+.sw { position: relative; display: inline-flex; flex: none; width: 52px; height: 32px; }
+.sw__in { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.sw__in:disabled { cursor: not-allowed; }
+.sw__ui { position: absolute; inset: 0; border-radius: 999px; background: #cdd3da; transition: background-color .15s ease; }
+.sw__ui::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(24, 29, 38, 0.3); transition: transform .15s ease; }
+.sw__in:checked + .sw__ui { background: #2ed0ab; }
+.sw__in:checked + .sw__ui::after { transform: translateX(20px); }
+.sw__in:focus-visible + .sw__ui { outline: 2px solid #0b7d66; outline-offset: 2px; }
+.sw__in:disabled + .sw__ui { opacity: 0.45; }
+html.dark .sw__ui { background: #454e5f; }
+html.dark .sw__in:checked + .sw__ui { background: #2ed0ab; }
+@media (prefers-reduced-motion: reduce) { .sw__ui, .sw__ui::after { transition: none; } }
