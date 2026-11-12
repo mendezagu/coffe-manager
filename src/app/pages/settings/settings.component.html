@@ -95,72 +95,6 @@
           </div>
         </section>
 
-        <!-- Apariencia de la carta: portada y fondo (carta online y pedido por QR) -->
-        <section [class.hidden]="tab !== 'negocio'" class="space-y-4 rounded-2xl bg-white p-[20px] shadow-soft">
-          <div>
-            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900">Portada y fondo de la carta</div>
-            <p class="m-0 mt-0.5 text-sm text-sage-600">Se ven en la carta online y en el pedido por QR. Activalos en
-              <button type="button" (click)="setTab('funciones')" class="font-semibold text-cafe-green-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Funciones</button>.</p>
-          </div>
-
-          <div>
-            <p class="m-0 text-sm font-medium text-sage-700">Estilo de la carta</p>
-            <div class="mt-1.5 inline-flex rounded-xl bg-sage-100 p-[3px]" role="radiogroup" aria-label="Estilo de la carta">
-              <button type="button" role="radio" *ngFor="let t of [{ v: 'light', label: 'Clara', icon: 'light_mode' }, { v: 'dark', label: 'Oscura', icon: 'dark_mode' }]"
-                [attr.aria-checked]="(form.menuTheme || 'light') === t.v" (click)="setMenuTheme(t.v)"
-                class="h-11 rounded-lg px-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-                [ngClass]="(form.menuTheme || 'light') === t.v ? 'bg-white text-sage-900 shadow-soft' : 'text-sage-600 hover:text-sage-800'">
-                {{ t.label }}
-              </button>
-            </div>
-            <p class="m-0 mt-1.5 text-sm text-sage-600">Si usás un fondo oscuro, elegí Oscura.</p>
-          </div>
-
-          <p *ngIf="!imagesAvailable" class="m-0 text-sm text-sage-500">Las imágenes todavía no están activadas en este servidor.</p>
-
-          <!-- En pantallas anchas cada columna comparte las filas (título, ayuda, vista previa, botones, intensidad): así las dos vistas previas quedan alineadas aunque la ayuda tenga distinto largo -->
-          <div *ngIf="imagesAvailable" class="grid gap-6 pt-1 sm:grid-cols-2 sm:gap-y-0">
-            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba. Va mejor una foto horizontal.', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de los platos. Se aclara para que se lea bien.', url: form.backgroundImageUrl }]"
-              class="min-w-0 sm:row-span-5 sm:grid sm:[grid-template-rows:subgrid]">
-              <p class="m-0 text-sm font-semibold text-sage-900">{{ b.title }}</p>
-              <p class="m-0 mt-0.5 text-sm text-sage-600">{{ b.hint }}</p>
-              <div class="relative mt-2.5 grid h-28 place-items-center overflow-hidden rounded-xl bg-sage-100 text-sm text-sage-500">
-                <img *ngIf="b.url" [src]="b.url" [alt]="b.title" class="h-full w-full object-cover" />
-                <span *ngIf="b.url" class="pointer-events-none absolute inset-0" [style.background-image]="veil($any(b.kind))" aria-hidden="true"></span>
-                <span *ngIf="!b.url">Sin imagen</span>
-                <span *ngIf="brandBusy === b.kind" class="absolute inset-0 grid place-items-center bg-white/80 text-xs font-bold text-cafe-green-700">Subiendo…</span>
-              </div>
-              <div class="mt-2.5 flex flex-wrap items-center gap-2">
-                <label class="inline-flex h-11 cursor-pointer items-center rounded-xl border border-sage-300 bg-white px-4 text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-within:ring-2 focus-within:ring-cafe-green-700">
-                  {{ b.url ? 'Cambiar' : 'Subir imagen' }}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="brandBusy === b.kind" (change)="onBrandPicked($any(b.kind), $event)" [attr.aria-label]="b.title" />
-                </label>
-                <button *ngIf="b.url" type="button" (click)="removeBrand($any(b.kind))" [disabled]="brandBusy === b.kind" class="min-h-[44px] rounded px-2 text-sm font-medium text-cafe-red-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">Quitar</button>
-              </div>
-
-              <!-- Intensidad: cuánto se ve la imagen -->
-              <div *ngIf="b.url" class="mt-4">
-                <div class="flex items-center justify-between gap-2">
-                  <label [for]="'int-' + b.kind" class="text-sm font-medium text-sage-700">Intensidad</label>
-                  <label class="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm text-sage-600">
-                    <input type="checkbox" class="h-4 w-4 accent-cafe-green-700" [checked]="isAuto($any(b.kind))" (change)="toggleAuto($any(b.kind))" />
-                    Automática
-                  </label>
-                </div>
-                <input [id]="'int-' + b.kind" type="range" min="0" max="100" step="1" class="mt-2 w-full accent-cafe-green-700 disabled:opacity-40"
-                  [disabled]="isAuto($any(b.kind))" [value]="sliderValue($any(b.kind))" (input)="setIntensity($any(b.kind), +$any($event.target).value)"
-                  [attr.aria-valuetext]="isAuto($any(b.kind)) ? 'Automática' : sliderValue($any(b.kind)) + ' por ciento'" />
-                <div class="mt-0.5 flex justify-between text-sm tabular-nums text-sage-500">
-                  <span>{{ b.kind === 'cover' ? 'Más oscura' : 'Más tenue' }}</span>
-                  <span class="font-bold text-sage-700">{{ isAuto($any(b.kind)) ? 'Automática' : sliderValue($any(b.kind)) + '%' }}</span>
-                  <span>{{ b.kind === 'cover' ? 'Más visible' : 'Más visible' }}</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
         <section [class.hidden]="tab !== 'negocio'" class="rounded-2xl bg-white p-[20px] shadow-soft grid gap-4 sm:grid-cols-2">
           <div class="sm:col-span-2"><div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900">Datos para el ticket</div><p class="m-0 mt-0.5 text-sm text-sage-600">Aparecen arriba del ticket. Podés dejar vacío lo que no uses.</p></div>
 
@@ -393,8 +327,9 @@
           <div *ngIf="form.menuPublicEnabled" class="mt-3">
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
-              <div *ngIf="menuLink; else menuLinkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ menuLink }}</code>
+              <div *ngIf="menuLink; else menuLinkPending" class="mt-1.5 space-y-2">
+                <code class="block w-full break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ menuLink }}</code>
+                <div class="flex flex-wrap gap-2">
                 <button type="button" (click)="copyMenuLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
@@ -404,8 +339,74 @@
                 <button type="button" (click)="downloadMenuQr()" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">qr_code_2</mat-icon> Descargar QR
                 </button>
+                </div>
               </div>
               <ng-template #menuLinkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
+            </div>
+          </div>
+        </section>
+
+        <!-- Apariencia de la carta: portada y fondo (carta online y pedido por QR) -->
+        <section [class.hidden]="tab !== 'funciones'" class="space-y-4 rounded-2xl bg-white p-[20px] shadow-soft">
+          <div>
+            <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900">Portada y fondo de la carta</div>
+            <p class="m-0 mt-0.5 text-sm text-sage-600">Se ven en la carta online, el pedido por QR y la tienda.</p>
+          </div>
+
+          <div>
+            <p class="m-0 text-sm font-medium text-sage-700">Estilo de la carta</p>
+            <div class="mt-1.5 inline-flex rounded-xl bg-sage-100 p-[3px]" role="radiogroup" aria-label="Estilo de la carta">
+              <button type="button" role="radio" *ngFor="let t of [{ v: 'light', label: 'Clara', icon: 'light_mode' }, { v: 'dark', label: 'Oscura', icon: 'dark_mode' }]"
+                [attr.aria-checked]="(form.menuTheme || 'light') === t.v" (click)="setMenuTheme(t.v)"
+                class="h-11 rounded-lg px-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+                [ngClass]="(form.menuTheme || 'light') === t.v ? 'bg-white text-sage-900 shadow-soft' : 'text-sage-600 hover:text-sage-800'">
+                {{ t.label }}
+              </button>
+            </div>
+            <p class="m-0 mt-1.5 text-sm text-sage-600">Si usás un fondo oscuro, elegí Oscura.</p>
+          </div>
+
+          <p *ngIf="!imagesAvailable" class="m-0 text-sm text-sage-500">Las imágenes todavía no están activadas en este servidor.</p>
+
+          <!-- En pantallas anchas cada columna comparte las filas (título, ayuda, vista previa, botones, intensidad): así las dos vistas previas quedan alineadas aunque la ayuda tenga distinto largo -->
+          <div *ngIf="imagesAvailable" class="grid gap-6 pt-1 sm:grid-cols-2 sm:gap-y-0">
+            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba. Va mejor una foto horizontal.', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de los platos. Se aclara para que se lea bien.', url: form.backgroundImageUrl }]"
+              class="min-w-0 sm:row-span-5 sm:grid sm:[grid-template-rows:subgrid]">
+              <p class="m-0 text-sm font-semibold text-sage-900">{{ b.title }}</p>
+              <p class="m-0 mt-0.5 text-sm text-sage-600">{{ b.hint }}</p>
+              <div class="relative mt-2.5 grid h-28 place-items-center overflow-hidden rounded-xl bg-sage-100 text-sm text-sage-500">
+                <img *ngIf="b.url" [src]="b.url" [alt]="b.title" class="h-full w-full object-cover" />
+                <span *ngIf="b.url" class="pointer-events-none absolute inset-0" [style.background-image]="veil($any(b.kind))" aria-hidden="true"></span>
+                <span *ngIf="!b.url">Sin imagen</span>
+                <span *ngIf="brandBusy === b.kind" class="absolute inset-0 grid place-items-center bg-white/80 text-xs font-bold text-cafe-green-700">Subiendo…</span>
+              </div>
+              <div class="mt-2.5 flex flex-wrap items-center gap-2">
+                <label class="inline-flex h-11 cursor-pointer items-center rounded-xl border border-sage-300 bg-white px-4 text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-within:ring-2 focus-within:ring-cafe-green-700">
+                  {{ b.url ? 'Cambiar' : 'Subir imagen' }}
+                  <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="brandBusy === b.kind" (change)="onBrandPicked($any(b.kind), $event)" [attr.aria-label]="b.title" />
+                </label>
+                <button *ngIf="b.url" type="button" (click)="removeBrand($any(b.kind))" [disabled]="brandBusy === b.kind" class="min-h-[44px] rounded px-2 text-sm font-medium text-cafe-red-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">Quitar</button>
+              </div>
+
+              <!-- Intensidad: cuánto se ve la imagen -->
+              <div *ngIf="b.url" class="mt-4">
+                <div class="flex items-center justify-between gap-2">
+                  <label [for]="'int-' + b.kind" class="text-sm font-medium text-sage-700">Intensidad</label>
+                  <label class="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm text-sage-600">
+                    <input type="checkbox" class="h-4 w-4 accent-cafe-green-700" [checked]="isAuto($any(b.kind))" (change)="toggleAuto($any(b.kind))" />
+                    Automática
+                  </label>
+                </div>
+                <input [id]="'int-' + b.kind" type="range" min="0" max="100" step="1" class="mt-2 w-full accent-cafe-green-700 disabled:opacity-40"
+                  [disabled]="isAuto($any(b.kind))" [value]="sliderValue($any(b.kind))" (input)="setIntensity($any(b.kind), +$any($event.target).value)"
+                  [attr.aria-valuetext]="isAuto($any(b.kind)) ? 'Automática' : sliderValue($any(b.kind)) + ' por ciento'" />
+                <div class="mt-0.5 flex justify-between text-sm tabular-nums text-sage-500">
+                  <span>{{ b.kind === 'cover' ? 'Más oscura' : 'Más tenue' }}</span>
+                  <span class="font-bold text-sage-700">{{ isAuto($any(b.kind)) ? 'Automática' : sliderValue($any(b.kind)) + '%' }}</span>
+                  <span>{{ b.kind === 'cover' ? 'Más visible' : 'Más visible' }}</span>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
@@ -423,8 +424,9 @@
           <div *ngIf="form.deliveryEnabled" class="mt-3 space-y-5">
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
-              <div *ngIf="storeLink; else storeLinkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ storeLink }}</code>
+              <div *ngIf="storeLink; else storeLinkPending" class="mt-1.5 space-y-2">
+                <code class="block w-full break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ storeLink }}</code>
+                <div class="flex flex-wrap gap-2">
                 <button type="button" (click)="copyStoreLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
@@ -434,6 +436,7 @@
                 <button type="button" (click)="downloadStoreQr()" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">qr_code_2</mat-icon> Descargar QR
                 </button>
+                </div>
               </div>
               <ng-template #storeLinkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
             </div>
@@ -516,11 +519,13 @@
           <div *ngIf="form.reservationsEnabled" class="mt-3 space-y-5">
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
-              <div *ngIf="reservationLink; else linkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ reservationLink }}</code>
+              <div *ngIf="reservationLink; else linkPending" class="mt-1.5 space-y-2">
+                <code class="block w-full break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ reservationLink }}</code>
+                <div class="flex flex-wrap gap-2">
                 <button type="button" (click)="copyReservationLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
+                </div>
               </div>
               <ng-template #linkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
             </div>

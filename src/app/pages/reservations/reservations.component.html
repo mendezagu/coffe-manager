@@ -29,9 +29,11 @@
       </div>
 
       <!-- Dirección para compartir -->
-      <div *ngIf="settings.value.reservationsEnabled && shareLink" class="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 shadow-soft">
-        <mat-icon class="text-cafe-green-700">link</mat-icon>
-        <code class="min-w-0 flex-1 break-all text-sm text-sage-800">{{ shareLink }}</code>
+      <div *ngIf="settings.value.reservationsEnabled && shareLink" class="space-y-2 rounded-2xl bg-white p-3 shadow-soft">
+        <div class="flex items-center gap-2">
+          <mat-icon class="flex-none text-cafe-green-700">link</mat-icon>
+          <code class="block w-full min-w-0 break-all text-sm text-sage-800">{{ shareLink }}</code>
+        </div>
         <button type="button" (click)="copyLink()" class="inline-flex h-10 items-center gap-1.5 rounded-xl border border-sage-300 px-3 text-sm font-bold text-sage-700 hover:bg-sage-50">
           <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
         </button>

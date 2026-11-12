@@ -34,15 +34,19 @@
       </div>
 
       <!-- Dirección para compartir -->
-      <div *ngIf="settings.value.deliveryActive && link" class="flex flex-wrap items-center gap-2 rounded-2xl bg-white p-3 shadow-soft">
-        <mat-icon class="text-cafe-green-700">link</mat-icon>
-        <code class="min-w-0 flex-1 break-all text-sm text-sage-800">{{ link }}</code>
+      <div *ngIf="settings.value.deliveryActive && link" class="space-y-2 rounded-2xl bg-white p-3 shadow-soft">
+        <div class="flex items-center gap-2">
+          <mat-icon class="flex-none text-cafe-green-700">link</mat-icon>
+          <code class="block w-full min-w-0 break-all text-sm text-sage-800">{{ link }}</code>
+        </div>
+        <div class="flex flex-wrap gap-2">
         <button type="button" (click)="copyLink()" class="inline-flex h-10 items-center gap-1.5 rounded-xl border border-sage-300 px-3 text-sm font-bold text-sage-700 hover:bg-sage-50">
           <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
         </button>
         <a [href]="link" target="_blank" rel="noopener" class="inline-flex h-10 items-center gap-1.5 rounded-xl border border-sage-300 px-3 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
           <mat-icon class="!h-4 !w-4 !text-base">open_in_new</mat-icon> Ver tienda
         </a>
+        </div>
       </div>
 
       <p *ngIf="error" class="m-0 rounded-2xl bg-cafe-red-50 p-3 text-sm font-semibold text-cafe-red-700" role="alert">{{ error }}</p>
