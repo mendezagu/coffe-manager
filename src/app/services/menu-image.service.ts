@@ -29,7 +29,7 @@ export class MenuImageService {
 
   constructor(private http: HttpClient) {}
 
-  // Achica la foto a WebP: un archivo de varios MB sale de unos 60–150 KB, sin pérdida que se note en pantalla
+  // Achica la foto a WebP (o JPEG en iPhone): un archivo de varios MB sale de unos 60–150 KB, sin pérdida que se note en pantalla
   async shrink(file: File, maxSide = MAX_SIDE, targetBytes = TARGET_BYTES): Promise<Blob> {
     if (!file.type.startsWith('image/')) throw new Error('Elegí una foto (JPG, PNG o WebP)');
     const bitmap = await createImageBitmap(file);
@@ -42,13 +42,23 @@ export class MenuImageService {
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close?.();
 
-    const toBlob = (quality: number) => new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
-    let blob: Blob | null = null;
-    for (const quality of [0.82, 0.7, 0.55, 0.4]) {
-      blob = await toBlob(quality);
-      if (blob && blob.size <= targetBytes) break;
+    const toBlob = (type: string, quality: number) => new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
+    // Safari (iPhone) no sabe guardar WebP desde un canvas y devuelve PNG (pesado): en ese caso se usa JPEG
+    let type = 'image/webp';
+    let blob: Blob | null = await toBlob(type, 0.82);
+    if (!blob || blob.type !== 'image/webp') {
+      type = 'image/jpeg';
+      // JPEG no tiene transparencia: se pinta fondo blanco debajo de la foto
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      blob = await toBlob(type, 0.82);
     }
-    if (!blob || blob.type !== 'image/webp') throw new Error('Tu navegador no pudo preparar la foto. Probá con otro.');
+    for (const quality of [0.7, 0.55, 0.4]) {
+      if (blob && blob.size <= targetBytes) break;
+      blob = await toBlob(type, quality);
+    }
+    if (!blob || (blob.type !== 'image/webp' && blob.type !== 'image/jpeg')) throw new Error('Tu navegador no pudo preparar la foto. Probá con otra.');
     return blob;
   }
 

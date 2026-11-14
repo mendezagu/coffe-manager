@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService, SettingsUpdate, TenantSettings } from 'src/app/services/settings.service';
 import { QrService } from 'src/app/services/qr.service';
 import { BrandImages, BrandKind, MenuImageService } from 'src/app/services/menu-image.service';
+import { COVER_ASPECTS, BACKGROUND_ASPECTS, ImageCropService } from 'src/app/components/image-crop-dialog/image-crop-dialog.component';
 import { AUTO_BACKGROUND_INTENSITY, AUTO_COVER_INTENSITY, backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
 import { minToTime } from 'src/app/services/reservations.service';
 import { BRAND_SWATCHES, DEFAULT_BRAND, brandStyle, legibleBrand } from 'src/app/services/brand';
@@ -196,7 +197,7 @@ export class SettingsComponent implements OnInit {
   // Sonido de aviso de pedidos QR: se guarda en este dispositivo apenas se cambia
   sound = { ...this.qr.sound };
 
-  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService, private images: MenuImageService) {}
+  constructor(private settings: SettingsService, private snackBar: MatSnackBar, private qr: QrService, private images: MenuImageService, private cropper: ImageCropService) {}
 
   // Portada y fondo de la carta: se suben y quedan guardadas en el momento (no hace falta apretar Guardar)
   brandBusy: BrandKind | null = null;
@@ -210,9 +211,14 @@ export class SettingsComponent implements OnInit {
     const file = input.files?.[0];
     input.value = '';
     if (!file) return;
+    const ready = await this.cropper.crop(file, {
+      title: kind === 'cover' ? 'Portada' : 'Fondo',
+      aspects: kind === 'cover' ? COVER_ASPECTS : BACKGROUND_ASPECTS,
+    });
+    if (!ready) return;
     this.brandBusy = kind;
     try {
-      this.applyBrand(await this.images.uploadBrand(kind, file));
+      this.applyBrand(await this.images.uploadBrand(kind, ready));
       this.notify(kind === 'cover' ? 'Portada guardada' : 'Fondo guardado');
     } catch (e: any) {
       const msg = e?.error?.message ?? e?.message;

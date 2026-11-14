@@ -79,6 +79,7 @@ import { ReservationsComponent } from './pages/reservations/reservations.compone
 import { DeliveryOrdersComponent } from './pages/delivery-orders/delivery-orders.component';
 import { ReserveComponent } from './pages/reserve/reserve.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { ImageCropDialogComponent } from './components/image-crop-dialog/image-crop-dialog.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 import { ChangePasswordFormComponent } from './components/change-password-form/change-password-form.component';
 
@@ -139,6 +140,7 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     DeliveryOrdersComponent,
     ReserveComponent,
     ConfirmDialogComponent,
+    ImageCropDialogComponent,
     ChangePasswordComponent,
     ChangePasswordFormComponent,
   ],
