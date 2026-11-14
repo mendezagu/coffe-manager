@@ -8,6 +8,7 @@ import { SettingsService } from 'src/app/services/settings.service';
 import { REGIONS, Region } from 'src/app/pages/settings/settings.component';
 import { shrinkImage } from 'src/app/utils/shrink-image';
 import { MenuImageService } from 'src/app/services/menu-image.service';
+import { DISH_ASPECTS, ImageCropService } from 'src/app/components/image-crop-dialog/image-crop-dialog.component';
 
 const STEPS = [
   { label: 'Tu negocio', icon: 'storefront' },
@@ -72,6 +73,7 @@ export class OnboardingComponent implements OnInit {
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
     private menuImages: MenuImageService,
+    private cropper: ImageCropService,
   ) {}
 
   ngOnInit() {
@@ -378,7 +380,7 @@ export class OnboardingComponent implements OnInit {
   newPhotoPreview: string | null = null;
   photoBusyId: string | null = null;
 
-  onNewPhoto(event: Event) {
+  async onNewPhoto(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';
@@ -388,9 +390,11 @@ export class OnboardingComponent implements OnInit {
       return;
     }
     this.error = '';
+    const ready = await this.cropper.crop(file, { title: 'Foto del plato', aspects: DISH_ASPECTS });
+    if (!ready) return;
     this.clearNewPhoto();
-    this.newPhoto = file;
-    this.newPhotoPreview = URL.createObjectURL(file);
+    this.newPhoto = ready;
+    this.newPhotoPreview = URL.createObjectURL(ready);
   }
 
   clearNewPhoto() {
@@ -405,10 +409,12 @@ export class OnboardingComponent implements OnInit {
     const file = input.files?.[0];
     input.value = '';
     if (!file) return;
+    const ready = await this.cropper.crop(file, { title: 'Foto de ' + item.name, aspects: DISH_ASPECTS });
+    if (!ready) return;
     this.photoBusyId = item._id;
     this.error = '';
     try {
-      const updated = await this.menuImages.upload(item._id, file);
+      const updated = await this.menuImages.upload(item._id, ready);
       item.imageUrl = updated.imageUrl ?? null;
       this.reload();
     } catch (e: any) {

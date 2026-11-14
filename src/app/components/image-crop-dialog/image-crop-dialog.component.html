@@ -1,0 +1,60 @@
+<div class="flex max-h-[94vh] flex-col overflow-y-auto">
+  <div class="px-5 pb-3 pt-5">
+    <h2 class="m-0 font-jakarta text-base font-bold text-sage-900">{{ data.title || 'Ajustar la foto' }}</h2>
+    <p class="m-0 mt-1 text-sm text-sage-600">Arrastrá la foto para encuadrarla y acercala con el control. Si no querés recortar, usala tal cual.</p>
+  </div>
+
+  <!-- Zona de trabajo: la foto se mueve por detrás de un marco fijo -->
+  <div #stage
+    class="relative mx-5 h-[min(52vh,340px)] cursor-grab touch-none select-none overflow-hidden rounded-xl bg-[#0c1511] outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 active:cursor-grabbing"
+    tabindex="0" role="application"
+    aria-label="Encuadre de la foto. Con las flechas se mueve y con más y menos se acerca o aleja."
+    (pointerdown)="onPointerDown($event)" (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)" (pointercancel)="onPointerUp($event)"
+    (wheel)="onWheel($event)" (keydown)="onKey($event)">
+    <img #img [src]="url" alt="" draggable="false" (load)="onLoad()" (error)="onError()"
+      class="pointer-events-none absolute max-w-none" [class.opacity-0]="!loaded"
+      [style.width.px]="imgDispW" [style.height.px]="imgDispH" [style.left.px]="imgL" [style.top.px]="imgT" />
+
+    <!-- Marco: lo de afuera se oscurece -->
+    <div *ngIf="loaded" class="pointer-events-none absolute rounded-sm border-2 border-[#ffffff]"
+      [style.width.px]="frameW" [style.height.px]="frameH" [style.left.px]="frameL" [style.top.px]="frameT"
+      style="box-shadow: 0 0 0 9999px rgba(12, 21, 17, 0.62)" aria-hidden="true"></div>
+
+    <p *ngIf="!loaded && !failed" class="absolute inset-0 m-0 grid place-items-center text-sm text-[#ffffff]">Cargando foto…</p>
+    <p *ngIf="failed" class="absolute inset-0 m-0 grid place-items-center px-6 text-center text-sm text-[#ffffff]">
+      No se pudo mostrar esta foto para recortarla. Podés usarla tal cual.
+    </p>
+  </div>
+
+  <div *ngIf="loaded" class="px-5 pt-4">
+    <!-- Proporción -->
+    <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Proporción del recorte">
+      <span class="mr-1 text-sm font-medium text-sage-700">Forma</span>
+      <button *ngFor="let a of aspects; let i = index" type="button" (click)="setAspect(i)" [attr.aria-pressed]="i === aspectIdx"
+        class="h-9 rounded-full border px-3.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+        [ngClass]="i === aspectIdx ? 'border-cafe-green-700 bg-cafe-green-700 text-white' : 'border-sage-300 bg-white text-sage-800 hover:bg-sage-50'">
+        {{ a.label }}
+      </button>
+    </div>
+
+    <!-- Zoom -->
+    <div class="mt-3 flex items-center gap-3">
+      <mat-icon class="text-sage-600" aria-hidden="true">zoom_out</mat-icon>
+      <input type="range" min="1" [max]="maxZoom" step="0.01" [value]="zoom" (input)="setZoom($any($event.target).value)"
+        class="h-11 min-w-0 flex-1 accent-cafe-green-700" aria-label="Acercar" />
+      <mat-icon class="text-sage-600" aria-hidden="true">zoom_in</mat-icon>
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-col-reverse gap-2 px-5 pb-5 sm:flex-row sm:justify-end">
+    <button type="button" (click)="ref.close(null)"
+      class="h-11 rounded-xl px-4 text-sm font-semibold text-sage-700 hover:bg-sage-100">Cancelar</button>
+    <button type="button" (click)="useOriginal()"
+      class="h-11 rounded-xl border border-sage-300 bg-white px-4 text-sm font-bold text-sage-800 hover:bg-sage-50">Usar sin recortar</button>
+    <button type="button" (click)="apply()" [disabled]="!loaded || busy"
+      class="h-11 rounded-xl bg-cafe-green-700 px-5 text-sm font-bold text-white hover:bg-cafe-green-800 disabled:opacity-50">
+      {{ noCrop ? 'Usar foto' : 'Recortar y usar' }}
+    </button>
+  </div>
+</div>

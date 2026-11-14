@@ -16,6 +16,7 @@ import { Sector } from 'src/app/services/gestionService';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
 import { PlanService } from 'src/app/services/plan.service';
 import { MenuImageService } from 'src/app/services/menu-image.service';
+import { DISH_ASPECTS, ImageCropService } from 'src/app/components/image-crop-dialog/image-crop-dialog.component';
 
 export type AdminSection = 'tables' | 'sectors' | 'menu' | 'categories' | 'modifiers' | 'waiters' | 'users' | 'qr';
 
@@ -198,6 +199,7 @@ export class AdminPanelComponent {
     private settings: SettingsService,
     public plans: PlanService,
     private menuImages: MenuImageService,
+    private cropper: ImageCropService,
     route: ActivatedRoute
   ) {
     route.paramMap.subscribe((params) => {
@@ -537,9 +539,11 @@ export class AdminPanelComponent {
     const file = input.files?.[0];
     input.value = ''; // permite volver a elegir la misma foto
     if (!file) return;
+    const ready = await this.cropper.crop(file, { title: 'Foto de ' + item.name, aspects: DISH_ASPECTS });
+    if (!ready) return;
     this.imageBusy = item._id;
     try {
-      const updated = await this.menuImages.upload(item._id, file);
+      const updated = await this.menuImages.upload(item._id, ready);
       item.imageUrl = updated.imageUrl ?? null;
       this.gestionService.refreshMenu().subscribe({ error: () => {} });
       this.snackBar.open('Foto guardada', 'Cerrar', { duration: 2500 });
