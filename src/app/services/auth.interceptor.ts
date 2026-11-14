@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UserService } from './user.service';
+import { OfflineService } from './offline.service';
 
 // Agrega el token a las llamadas a la API y cierra la sesión si el servidor responde 401.
 // UserService se obtiene con Injector (no por constructor) para evitar la dependencia
@@ -23,6 +24,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((err) => {
+        // Sin red: se avisa al resto de la app (el Mostrador sigue en modo sin conexión)
+        if (err instanceof HttpErrorResponse && err.status === 0) this.injector.get(OfflineService).reportNetworkError();
         const isLogin = req.url.endsWith('/auth/login');
         if (err instanceof HttpErrorResponse && err.status === 401 && !isLogin) {
           users.logout();

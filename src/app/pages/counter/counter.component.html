@@ -217,7 +217,8 @@
               <div class="thin-scroll min-h-0 flex-1 overflow-y-auto p-[20px]">
               <!-- Venta registrada -->
               <div *ngIf="lastSale as s" role="status" class="pt-[8px] text-center">
-                <p class="m-0 flex items-center justify-center gap-[8px] text-base font-semibold text-cafe-green-700"><mat-icon class="!h-6 !w-6 !text-2xl">check_circle</mat-icon>Venta registrada</p>
+                <p class="m-0 flex items-center justify-center gap-[8px] text-base font-semibold text-cafe-green-700"><mat-icon class="!h-6 !w-6 !text-2xl">check_circle</mat-icon>{{ s.pending ? 'Venta guardada' : 'Venta registrada' }}</p>
+                <p *ngIf="s.pending" class="mx-auto mb-0 mt-[8px] max-w-xs rounded-xl bg-cafe-amber-50 px-[12px] py-[8px] text-sm font-medium text-cafe-amber-800">Sin conexión: quedó guardada en este equipo y se envía sola cuando vuelva internet.</p>
                 <p class="mb-0 mt-[10px] font-jakarta text-5xl font-extrabold tabular-nums text-sage-900">{{ shortPrice(s.totalAmount) }}</p>
                 <div *ngIf="s.change > 0" class="mt-[18px]">
                   <p class="m-0 text-sm font-medium text-sage-600">Vuelto a entregar</p>

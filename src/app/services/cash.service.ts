@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { cacheGet, cacheSet } from '../utils/local-cache';
 import { environment } from 'src/environments/environment';
 
 export interface CashMovement {
@@ -67,7 +69,20 @@ export class CashService {
   }
 
   refresh(): Observable<CashState> {
-    return this.http.get<CashState>(`${this.baseUrl}/current`).pipe(tap((s) => this.state.next(s)));
+    return this.http.get<CashState>(`${this.baseUrl}/current`).pipe(
+      tap((s) => {
+        this.state.next(s);
+        cacheSet('cash', s);
+      }),
+      // Sin conexión se sigue con el último estado conocido de la caja (abierta o cerrada)
+      catchError((err) => {
+        if (!this.state.value) {
+          const last = cacheGet<CashState>('cash');
+          if (last) this.state.next(last);
+        }
+        return throwError(() => err);
+      }),
+    );
   }
 
   open(openingAmount: number): Observable<CashRegisterSummary> {

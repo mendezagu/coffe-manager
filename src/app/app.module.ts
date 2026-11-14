@@ -42,6 +42,7 @@ import { CategoriesComponent } from './pages/categories/categories.component';
 import { ModifiersComponent } from './pages/modifiers/modifiers.component';
 import { CashComponent } from './pages/cash/cash.component';
 import { CounterComponent } from './pages/counter/counter.component';
+import { ConnectionBannerComponent, PendingSalesDialogComponent } from './components/connection-banner/connection-banner.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
 import { InventoryStockComponent } from './pages/inventory/inventory-stock.component';
 import { InventoryRecipesComponent } from './pages/inventory/inventory-recipes.component';
@@ -86,6 +87,8 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
 
 @NgModule({
   declarations: [
+    ConnectionBannerComponent,
+    PendingSalesDialogComponent,
     AppComponent,
     MenuDialogComponent,
     CardComponent,

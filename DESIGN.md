@@ -334,3 +334,15 @@ Las cifras de resumen ya no van "en una línea" con cifra + texto al lado. Todas
 ## Mi negocio → Funciones (menos texto)
 
 Cada función (Inventario, Pedido por QR, Carta online, Tienda online, Reservas, Cocina) es una tarjeta con una **fila principal**: nombre, una sola línea de ayuda y un **interruptor** a la derecha (`.sw` en `styles.scss`; es un checkbox real, toda la fila se toca). Lo que depende de la función aparece debajo en **filas secundarias** del mismo estilo, separadas por líneas finas. Lo que casi nunca se toca va en `<details>` ("Capacidad y límites" en Reservas, "¿Qué cambia?" en Cocina). "Cocina y barra" pasó a ser una fila dentro de Cocina. Reglas: etiquetas de 2 a 4 palabras, ayudas de una línea, avisos de plan sólo cuando la función está bloqueada. También se pasó Operación (Cobro, Comisión y Permisos como filas con interruptor; "Cómo se calcula" plegado). Negocio también: textos más cortos (se sacó el bloque "¿Dónde activo mi carta?"), campos y botones de 44 px de alto.
+
+## Modo sin conexión, nivel 1 (un solo dispositivo)
+
+Pensado para el Mostrador. No cambia la API: el cobro (`POST /counter/checkout`) ya es idempotente por `checkoutId`, así que reenviar la misma venta no la duplica.
+
+- `services/offline.service.ts`: sabe si "se llega al servidor" (falla una llamada, evento del navegador o chequeo liviano cada 15 s) y guarda en `localStorage` (`tavolapp_offline_queue`) las ventas hechas sin conexión. Las envía solas, una por una y en orden, apenas vuelve la conexión, y sólo con la sesión del usuario que las cobró. Si el servidor rechaza una (4xx), queda como "rechazada" con su mensaje; si es un error de red, se reintenta.
+- `utils/local-cache.ts`: copia local (por usuario) del menú, las categorías y el estado de la caja. Se usa cuando falla la carga.
+- Mostrador: si no hay conexión, cobra **sólo en efectivo**; la pantalla dice "Venta guardada" y el ticket se puede imprimir igual.
+- `components/connection-banner`: franja arriba con el estado ("Sin conexión…", "Enviando N ventas…", "N ventas no se pudieron registrar") y un diálogo "Ventas sin enviar" para reintentar o descartar.
+- `AuthInterceptor` avisa al servicio ante cualquier error de red (status 0).
+
+Límites conocidos: el service worker sólo corre en la compilación de producción (en desarrollo no se prueba el arranque sin red); las fotos de los platos no se guardan; abrir y cerrar caja, Mesas, QR, tienda y reservas siguen necesitando conexión; el nivel 2 (Mesas) queda pendiente.

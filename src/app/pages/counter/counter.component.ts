@@ -7,6 +7,8 @@ import { SettingsService } from 'src/app/services/settings.service';
 import { PlanService } from 'src/app/services/plan.service';
 import { TicketService } from 'src/app/services/ticket.service';
 import { UserService } from 'src/app/services/user.service';
+import { OfflineService, CounterCheckoutBody } from 'src/app/services/offline.service';
+import { cacheGet, cacheSet } from 'src/app/utils/local-cache';
 import { MenuItem } from 'src/app/models/coffe.models';
 import { PaymentValue } from 'src/app/components/payment-panel/payment-panel.component';
 import { CuentaLine, CuentaRow } from 'src/app/utils/ticket-html';
@@ -77,12 +79,15 @@ export class CounterComponent implements OnInit, OnDestroy {
     private tickets: TicketService,
     private users: UserService,
     private snack: MatSnackBar,
+    private offline: OfflineService,
   ) {}
 
   ngOnInit() {
     this.isAdmin = this.users.currentRole() === 'admin';
     this.cash.refresh().subscribe({ error: () => {} });
     this.load();
+    // Cuando una venta hecha sin conexión llega al servidor, el stock cambió: se refrescan los productos
+    this.subs.add(this.offline.synced$.subscribe(() => this.load()));
   }
 
   ngOnDestroy() {
@@ -94,10 +99,25 @@ export class CounterComponent implements OnInit, OnDestroy {
       next: (items) => {
         this.items = items;
         this.loading = false;
+        cacheSet('menu', items);
       },
-      error: () => (this.loading = false),
+      // Sin conexión se usa la última carta guardada en este equipo
+      error: () => {
+        const last = cacheGet<MenuItem[]>('menu');
+        if (last && !this.items.length) this.items = last;
+        this.loading = false;
+      },
     });
-    this.gestion.getCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
+    this.gestion.getCategories().subscribe({
+      next: (c) => {
+        this.categories = c;
+        cacheSet('categories', c);
+      },
+      error: () => {
+        const last = cacheGet<Category[]>('categories');
+        if (last && !this.categories.length) this.categories = last;
+      },
+    });
   }
 
   private newId(): string {
@@ -343,33 +363,68 @@ export class CounterComponent implements OnInit, OnDestroy {
     if (!this.canCharge || !this.payment) return;
     this.busy = true;
     this.error = '';
-    this.gestion
-      .counterCheckout({
-        checkoutId: this.checkoutId,
-        items: this.lines.map((l) => ({ menuItemId: l.item._id, quantity: l.quantity })),
-        takeaway: this.takeaway,
-        payments: this.payment.payments,
-        tip: this.payment.tip,
-      })
-      .subscribe({
-        next: (sale) => {
-          this.lastSale = { ...sale, change: this.payment?.change ?? 0 };
-          this.gestion.saveLog(
-            `Venta por mostrador de <strong>${this.settings.format(sale.totalAmount)}</strong> (${this.takeaway ? 'para llevar' : 'en el local'}), cobrada por <strong>${sale.cashierName}</strong>`,
-          );
-          this.cart.clear();
-          this.checkoutId = this.newId();
-          this.busy = false;
-          this.load(); // el stock cambió: se actualizan los productos agotados
-        },
-        error: (e) => {
-          const msg = e?.error?.message;
-          this.error =
-            (Array.isArray(msg) ? msg.join('. ') : msg) || 'No se pudo cobrar. Revisá la conexión e intentá de nuevo: no se registró ningún cobro.';
-          this.cash.refresh().subscribe({ error: () => {} }); // por si el motivo fue una caja cerrada
-          this.busy = false;
-        },
-      });
+    const body: CounterCheckoutBody = {
+      checkoutId: this.checkoutId,
+      items: this.lines.map((l) => ({ menuItemId: l.item._id, quantity: l.quantity })),
+      takeaway: this.takeaway,
+      payments: this.payment.payments,
+      tip: this.payment.tip,
+    };
+    // Si ya se sabe que no hay conexión, va directo a la cola; si no, se intenta y, si falla por la red, también
+    if (!this.offline.isOnline) {
+      this.chargeOffline(body);
+      return;
+    }
+    this.gestion.counterCheckout(body).subscribe({
+      next: (sale) => {
+        this.lastSale = { ...sale, change: this.payment?.change ?? 0 };
+        this.gestion.saveLog(
+          `Venta por mostrador de <strong>${this.settings.format(sale.totalAmount)}</strong> (${this.takeaway ? 'para llevar' : 'en el local'}), cobrada por <strong>${sale.cashierName}</strong>`,
+        );
+        this.cart.clear();
+        this.checkoutId = this.newId();
+        this.busy = false;
+        this.load(); // el stock cambió: se actualizan los productos agotados
+      },
+      error: (e) => {
+        if (this.offline.isNetworkError(e)) {
+          this.chargeOffline(body);
+          return;
+        }
+        const msg = e?.error?.message;
+        this.error = (Array.isArray(msg) ? msg.join('. ') : msg) || 'No se pudo cobrar. Intentá de nuevo: no se registró ningún cobro.';
+        this.cash.refresh().subscribe({ error: () => {} }); // por si el motivo fue una caja cerrada
+        this.busy = false;
+      },
+    });
+  }
+
+  // Sin conexión: la venta queda guardada en este equipo y se envía sola cuando vuelva internet.
+  // Sólo en efectivo (los demás medios se confirman contra el banco o la tarjeta y necesitan conexión).
+  private chargeOffline(body: CounterCheckoutBody) {
+    if (body.payments.some((p) => p.method !== 'efectivo')) {
+      this.error = 'Sin conexión: por ahora sólo se puede cobrar en efectivo. Cambiá el medio de pago o esperá a que vuelva internet.';
+      this.busy = false;
+      return;
+    }
+    const items = this.lines.map((l) => ({ name: l.item.name, quantity: l.quantity, lineTotal: l.amount, isPromo: !!(l.item as any).isPromo }));
+    const total = this.total;
+    const cashierName = this.users.currentName();
+    this.offline.enqueueCounterSale(body, { total, cashierName, takeaway: this.takeaway });
+    this.lastSale = {
+      id: body.checkoutId,
+      pending: true,
+      totalAmount: total,
+      tipAmount: body.tip,
+      takeaway: this.takeaway,
+      cashierName,
+      items,
+      payments: body.payments,
+      change: this.payment?.change ?? 0,
+    };
+    this.cart.clear();
+    this.checkoutId = this.newId();
+    this.busy = false;
   }
 
   newSale() {

@@ -121,6 +121,11 @@ export class UserService {
     return this.authState.value !== null && !!this.getToken();
   }
 
+  // Nombre del usuario con sesión (para el ticket de una venta hecha sin conexión)
+  currentName(): string {
+    return this.authState.value?.name ?? "";
+  }
+
   currentRole(): AppRole | null {
     return this.authState.value?.role ?? null;
   }
