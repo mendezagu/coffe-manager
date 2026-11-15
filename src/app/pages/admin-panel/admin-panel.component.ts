@@ -147,6 +147,9 @@ export class AdminPanelComponent {
   editItemIsPromo: boolean = false;
   editItemCategoryId: string = '';
   editItemGroupIds: string[] = [];
+  // Secciones plegables del diálogo de plato: arrancan abiertas solo si ya tienen algo cargado
+  editMoreOpen = false;
+  editOptionsOpen = false;
 
   // WAITERS
   waiters: Waiter[] = [];
@@ -584,6 +587,8 @@ export class AdminPanelComponent {
     this.editItemVisible = item.visibleInMenu !== false;
     this.editOptionPrices = { ...(item.optionPrices ?? {}) };
     this.editOwnGroups = new Set(this.modifierGroups.filter((g) => g.options.some((o) => o._id in this.editOptionPrices)).map((g) => g._id));
+    this.editMoreOpen = !!(this.editItemDescription || this.editItemBadge);
+    this.editOptionsOpen = this.editItemGroupIds.length > 0;
     this.openEditDialog(this.editMenuDialog, () => (this.editItemId = undefined));
   }
 

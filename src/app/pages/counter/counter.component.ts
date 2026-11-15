@@ -8,6 +8,7 @@ import { PlanService } from 'src/app/services/plan.service';
 import { TicketService } from 'src/app/services/ticket.service';
 import { UserService } from 'src/app/services/user.service';
 import { MenuItem } from 'src/app/models/coffe.models';
+import { ConfirmService } from 'src/app/components/confirm-dialog/confirm-dialog.component';
 import { PaymentValue } from 'src/app/components/payment-panel/payment-panel.component';
 import { CuentaLine, CuentaRow } from 'src/app/utils/ticket-html';
 
@@ -77,6 +78,7 @@ export class CounterComponent implements OnInit, OnDestroy {
     private tickets: TicketService,
     private users: UserService,
     private snack: MatSnackBar,
+    private confirmDialog: ConfirmService,
   ) {}
 
   ngOnInit() {
@@ -282,7 +284,17 @@ export class CounterComponent implements OnInit, OnDestroy {
 
   // "Vaciar" borra todo el pedido: se pide confirmar para que un toque de más no lo pierda
   confirmClear() {
-    if (window.confirm('¿Vaciar el pedido?')) this.clear();
+    this.confirmDialog
+      .ask({
+        title: '¿Vaciar el pedido?',
+        message: 'Se van a quitar todos los productos del pedido actual.',
+        confirmText: 'Vaciar',
+        tone: 'danger',
+        icon: 'delete_outline',
+      })
+      .subscribe((ok) => {
+        if (ok) this.clear();
+      });
   }
 
   clear() {

@@ -394,16 +394,18 @@
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
               <div *ngIf="menuLink; else menuLinkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ menuLink }}</code>
-                <button type="button" (click)="copyMenuLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
+                <code class="block w-0 min-w-full overflow-x-auto whitespace-nowrap rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200 sm:w-auto sm:min-w-0 sm:flex-1 sm:overflow-visible sm:whitespace-normal sm:break-all">{{ menuLink }}</code>
+                <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                <button type="button" (click)="copyMenuLink()" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
-                <a [href]="menuLink" target="_blank" rel="noopener" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
+                <a [href]="menuLink" target="_blank" rel="noopener" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">open_in_new</mat-icon> Ver
                 </a>
-                <button type="button" (click)="downloadMenuQr()" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
+                <button type="button" (click)="downloadMenuQr()" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">qr_code_2</mat-icon> Descargar QR
                 </button>
+                </div>
               </div>
               <ng-template #menuLinkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
             </div>
@@ -424,16 +426,18 @@
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
               <div *ngIf="storeLink; else storeLinkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ storeLink }}</code>
-                <button type="button" (click)="copyStoreLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
+                <code class="block w-0 min-w-full overflow-x-auto whitespace-nowrap rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200 sm:w-auto sm:min-w-0 sm:flex-1 sm:overflow-visible sm:whitespace-normal sm:break-all">{{ storeLink }}</code>
+                <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                <button type="button" (click)="copyStoreLink()" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
-                <a [href]="storeLink" target="_blank" rel="noopener" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
+                <a [href]="storeLink" target="_blank" rel="noopener" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 no-underline hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">open_in_new</mat-icon> Ver
                 </a>
-                <button type="button" (click)="downloadStoreQr()" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
+                <button type="button" (click)="downloadStoreQr()" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg border border-sage-200 bg-white px-4 text-sm font-bold text-sage-700 hover:bg-sage-50">
                   <mat-icon class="!h-4 !w-4 !text-base">qr_code_2</mat-icon> Descargar QR
                 </button>
+                </div>
               </div>
               <ng-template #storeLinkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
             </div>
@@ -517,10 +521,12 @@
             <div class="rounded-xl border border-cafe-green-200 bg-cafe-green-50 p-3">
               <p class="m-0 text-sm font-semibold text-cafe-green-800">Dirección para compartir</p>
               <div *ngIf="reservationLink; else linkPending" class="mt-1.5 flex flex-wrap items-center gap-2">
-                <code class="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200">{{ reservationLink }}</code>
-                <button type="button" (click)="copyReservationLink()" class="inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
+                <code class="block w-0 min-w-full overflow-x-auto whitespace-nowrap rounded-lg bg-white px-3 py-2 text-sm text-sage-900 ring-1 ring-sage-200 sm:w-auto sm:min-w-0 sm:flex-1 sm:overflow-visible sm:whitespace-normal sm:break-all">{{ reservationLink }}</code>
+                <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+                <button type="button" (click)="copyReservationLink()" class="flex-1 justify-center sm:flex-none inline-flex h-11 items-center gap-1.5 rounded-lg bg-cafe-green-700 px-4 text-sm font-bold text-white hover:bg-cafe-green-800">
                   <mat-icon class="!h-4 !w-4 !text-base">content_copy</mat-icon> Copiar
                 </button>
+                </div>
               </div>
               <ng-template #linkPending><p class="m-0 mt-1 text-sm text-cafe-green-800">Se crea apenas guardes los cambios.</p></ng-template>
             </div>

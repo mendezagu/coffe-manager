@@ -46,15 +46,16 @@
         </span>
 
         <ng-container *ngIf="!c.editing">
-          <span class="flex-1 min-w-0 truncate text-sm font-semibold text-sage-800">{{ c.name }}</span>
+          <!-- Celular: el nombre completo en su fila (sin cortarse) y debajo el destino, la cantidad y las acciones -->
+          <span class="min-w-0 flex-1 basis-[calc(100%-3rem)] break-words text-sm font-semibold text-sage-800 sm:basis-0 sm:truncate">{{ c.name }}</span>
           <span *ngIf="canSplit" class="px-2.5 py-0.5 rounded-full text-xs font-bold"
             [ngClass]="c.destination === 'BAR' ? 'bg-cafe-green-50 text-cafe-green-700' : 'bg-sage-100 text-sage-700'">{{ destinationLabel(c.destination) }}</span>
           <span class="text-xs text-sage-500 whitespace-nowrap">{{ c.itemsCount || 0 }} {{ c.itemsCount === 1 ? 'plato' : 'platos' }}</span>
-          <button type="button" (click)="startEdit(c)" aria-label="Editar categoría" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600">
-            <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
+          <button type="button" (click)="startEdit(c)" aria-label="Editar categoría" class="ml-auto sm:ml-0 inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-sage-200 bg-white text-sage-700 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
           </button>
-          <button type="button" (click)="remove(c)" aria-label="Eliminar categoría" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
-            <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+          <button type="button" (click)="remove(c)" aria-label="Eliminar categoría" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-red-50 text-cafe-red-700 transition-colors hover:bg-cafe-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
           </button>
         </ng-container>
 

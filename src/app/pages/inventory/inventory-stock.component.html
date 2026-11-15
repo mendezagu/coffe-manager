@@ -83,11 +83,11 @@
           <button type="button" (click)="open(i, 'purchase')" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-cafe-green-700 hover:bg-cafe-green-800 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">+ Entrada</button>
           <button type="button" (click)="open(i, 'waste')" class="px-3 py-1.5 text-xs font-medium rounded-xl border border-sage-300 text-sage-700 hover:bg-sage-50">Merma</button>
           <button type="button" (click)="open(i, 'adjust')" class="px-3 py-1.5 text-xs font-medium rounded-xl border border-sage-300 text-sage-700 hover:bg-sage-50">Ajustar</button>
-          <button type="button" (click)="open(i, 'edit')" aria-label="Editar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600">
-            <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
+          <button type="button" (click)="open(i, 'edit')" aria-label="Editar insumo" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-sage-200 bg-white text-sage-700 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
           </button>
-          <button type="button" (click)="remove(i)" aria-label="Eliminar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
-            <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+          <button type="button" (click)="remove(i)" aria-label="Eliminar insumo" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-red-50 text-cafe-red-700 transition-colors hover:bg-cafe-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
           </button>
         </div>
       </div>

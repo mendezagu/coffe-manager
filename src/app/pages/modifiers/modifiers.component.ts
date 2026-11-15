@@ -74,6 +74,8 @@ export class ModifiersComponent implements OnInit {
 
   // Grupo para el que se está eligiendo una categoría donde ofrecerlo
   applyingId: string | null = null;
+  // Acordeón: un solo modificador abierto a la vez
+  openId: string | null = null;
   applyCategoryId = '';
 
   // Avisa al panel de administración (para refrescar lo que depende de los modificadores)
@@ -214,6 +216,14 @@ export class ModifiersComponent implements OnInit {
       },
       error: (err) => this.notify(this.message(err, 'No se pudo aplicar a la categoría')),
     });
+  }
+
+  toggleOpen(group: ModifierGroup) {
+    this.openId = this.openId === group._id ? null : group._id;
+  }
+
+  activeCount(group: ModifierGroup): number {
+    return group.options.filter((o) => o.active).length;
   }
 
   // "Chico, Grande (+$500)": resumen de las opciones activas

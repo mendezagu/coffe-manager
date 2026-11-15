@@ -1,8 +1,7 @@
 <div>
   <p class="text-sm text-sage-600 mt-0 mb-5">
-    Son las opciones que se ofrecen al pedir un plato: <strong>Tamaño</strong> (Chico, Grande), <strong>Leche</strong> (entera, almendras),
-    <strong>Extras</strong> (shot extra, queso). Cada opción puede sumar al precio. Después elegís en qué platos se ofrece desde
-    <a routerLink="/admin/menu" class="text-cafe-green-700 font-medium underline">Menú</a>, o de una vez para toda una categoría.
+    Opciones que se ofrecen al pedir un plato, como tamaño, leche o extras. Elegí en qué platos van desde
+    <a routerLink="/admin/menu" class="text-cafe-green-700 font-medium underline">Menú</a> o aplicalas a toda una categoría.
   </p>
 
   <!-- Editor -->
@@ -92,30 +91,47 @@
   </p>
 
   <div cdkDropList (cdkDropListDropped)="drop($event)" class="space-y-2">
-    <div *ngFor="let g of groups" cdkDrag class="p-3 bg-white border border-sage-200 rounded-xl">
-      <div class="flex flex-wrap items-center gap-2.5">
-        <span cdkDragHandle class="w-8 h-8 flex items-center justify-center text-sage-400 cursor-grab" aria-hidden="true">
+    <div *ngFor="let g of groups" cdkDrag class="rounded-2xl bg-sage-50">
+      <!-- Encabezado del acordeón: nombre y resumen; al tocar se abren las opciones -->
+      <div class="flex items-center">
+        <span cdkDragHandle class="flex h-11 w-9 flex-none cursor-grab items-center justify-center pl-[6px] text-sage-500" aria-hidden="true">
           <mat-icon class="!w-5 !h-5 !text-xl">drag_indicator</mat-icon>
         </span>
-        <div class="flex-1 min-w-0">
-          <p class="m-0 text-sm font-bold text-sage-900 truncate">
-            {{ g.name }}
-            <span *ngIf="g.required" class="ml-1 px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold align-middle">Obligatorio</span>
-            <span class="ml-1 px-2 py-0.5 rounded-full bg-sage-100 text-sage-700 text-xs font-bold align-middle">{{ g.selection === 'SINGLE' ? 'Una opción' : 'Varias' }}</span>
-          </p>
-          <p class="m-0 text-xs text-sage-500 truncate">{{ summary(g) }}</p>
-        </div>
-        <span class="text-xs text-sage-500 whitespace-nowrap">{{ g.itemsCount || 0 }} {{ g.itemsCount === 1 ? 'plato' : 'platos' }}</span>
-        <button type="button" (click)="startApply(g)" class="px-3 py-1.5 text-xs font-medium rounded-xl border border-sage-300 text-sage-700 hover:bg-sage-50">Aplicar a categoría</button>
-        <button type="button" (click)="startEdit(g)" aria-label="Editar modificador" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sage-100 text-sage-600">
-          <mat-icon class="!w-5 !h-5 !text-xl">edit</mat-icon>
-        </button>
-        <button type="button" (click)="remove(g)" aria-label="Eliminar modificador" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
-          <mat-icon class="!w-5 !h-5 !text-xl">delete</mat-icon>
+        <button type="button" (click)="toggleOpen(g)" [attr.aria-expanded]="openId === g._id" [attr.aria-controls]="'mod-' + g._id"
+          class="flex min-h-[60px] min-w-0 flex-1 items-center gap-[10px] rounded-2xl py-[12px] pr-[14px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+          <span class="min-w-0 flex-1">
+            <span class="block break-words text-[15px] font-bold leading-snug text-sage-900">
+              {{ g.name }}
+              <span *ngIf="g.required" class="ml-1 rounded-full bg-cafe-red-50 px-2 py-0.5 align-middle text-xs font-bold text-cafe-red-700">Obligatorio</span>
+            </span>
+            <span class="mt-[2px] block text-xs text-sage-600">
+              {{ g.selection === 'SINGLE' ? 'Elige una' : 'Elige varias' }} · {{ activeCount(g) }} {{ activeCount(g) === 1 ? 'opción' : 'opciones' }} · {{ g.itemsCount || 0 }} {{ g.itemsCount === 1 ? 'plato' : 'platos' }}
+            </span>
+          </span>
+          <mat-icon class="flex-none text-sage-500 transition-transform" [class.rotate-180]="openId === g._id" aria-hidden="true">expand_more</mat-icon>
         </button>
       </div>
 
-      <div *ngIf="applyingId === g._id" class="mt-3 pt-3 border-t border-sage-100 flex flex-wrap items-center gap-2">
+      <!-- Opciones y acciones -->
+      <div *ngIf="openId === g._id" [id]="'mod-' + g._id" class="px-[16px] pb-[16px]">
+        <ul class="m-0 list-none divide-y divide-sage-100 border-t border-sage-100 p-0">
+          <li *ngFor="let o of g.options" class="flex min-h-[44px] items-center justify-between gap-[12px] py-[8px] text-sm" [class.opacity-60]="!o.active">
+            <span class="min-w-0 break-words text-sage-900">{{ o.name }}<span *ngIf="!o.active" class="ml-[6px] text-xs text-sage-600">No disponible</span></span>
+            <span class="flex-none font-medium tabular-nums" [ngClass]="o.priceDelta ? 'text-sage-900' : 'text-sage-600'">{{ o.priceDelta ? ((o.priceDelta > 0 ? '+' : '') + (o.priceDelta | money:true)) : 'Sin costo' }}</span>
+          </li>
+        </ul>
+        <div class="mt-[12px] flex flex-wrap items-center gap-[8px]">
+          <button type="button" (click)="startApply(g)" class="h-11 min-w-[150px] flex-1 rounded-xl border border-sage-300 bg-white px-[14px] text-sm font-medium text-sage-700 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Aplicar a categoría</button>
+          <button type="button" (click)="startEdit(g)" [attr.aria-label]="'Editar ' + g.name" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-sage-200 bg-white text-sage-700 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">edit</mat-icon>
+          </button>
+          <button type="button" (click)="remove(g)" [attr.aria-label]="'Eliminar ' + g.name" class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-cafe-red-50 text-cafe-red-700 transition-colors hover:bg-cafe-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base">delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="applyingId === g._id && openId === g._id" class="mx-[16px] mb-[16px] mt-[-4px] flex flex-wrap items-center gap-2 border-t border-sage-100 pt-[12px]">
         <span class="text-sm text-sage-700">Ofrecerlo en todos los platos de:</span>
         <select [(ngModel)]="applyCategoryId" aria-label="Categoría" class="px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white">
           <option value="">Elegí una categoría</option>

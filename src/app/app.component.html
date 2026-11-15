@@ -3,7 +3,7 @@
   <!-- Sidebar (solo visible si está autenticado) -->
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" [mode]="isMobile ? 'over' : 'side'" [(opened)]="drawerOpen" (click)="onDrawerClick($event)" *ngIf="isLoggedIn && !publicPage">
     <!-- Marca del producto: la "o" de Tavolapp es un plato -->
-    <div class="px-4 pt-1 flex items-center justify-between" aria-label="Tavolapp"><img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="123" height="30" style="height:30px;width:auto;display:block"><button *ngIf="isMobile" type="button" (click)="drawerOpen = false" aria-label="Cerrar el menú" class="nav-item-btn grid h-12 w-12 flex-none place-items-center rounded-full bg-white/10 text-white active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ed0ab]"><mat-icon>close</mat-icon></button></div>
+    <div class="px-4 pt-1 flex items-center justify-between" aria-label="Tavolapp"><img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="123" height="30" style="height:30px;width:auto;display:block"><button *ngIf="isMobile" type="button" (click)="drawerOpen = false" aria-label="Cerrar el menú" class="nav-item-btn grid h-12 w-12 flex-none place-items-center rounded-full text-white [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ed0ab]"><mat-icon>close</mat-icon></button></div>
 
     <!-- Negocio: logo arriba y nombre debajo -->
     <div class="mt-5 mb-2 px-3 flex flex-col items-center text-center">

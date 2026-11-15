@@ -7,7 +7,6 @@ html.dark .\!text-cafe-green-700 { color: #95dacc !important; }
 html.dark .\!text-cafe-green-800 { color: #aee3d8 !important; }
 html.dark .\!text-cafe-red-700 { color: #e0a397 !important; }
 html.dark .\!text-sage-600 { color: #b4bcc8 !important; }
-html.dark .active\:bg-white\/20:active { background-color: rgba(37, 43, 54, 0.2) !important; }
 html.dark .bg-cafe-amber-100 { background-color: #5f453c !important; }
 html.dark .bg-cafe-amber-50 { background-color: #4c3d3a !important; }
 html.dark .bg-cafe-green-100 { background-color: #275453 !important; }
@@ -30,7 +29,6 @@ html.dark .bg-sage-50\/60 { background-color: rgba(47, 55, 68, 0.6) !important; 
 html.dark .bg-sage-50\/70 { background-color: rgba(47, 55, 68, 0.7) !important; }
 html.dark .bg-sky-50 { background-color: #29485d !important; }
 html.dark .bg-white { background-color: #252b36 !important; }
-html.dark .bg-white\/10 { background-color: rgba(37, 43, 54, 0.1) !important; }
 html.dark .bg-white\/15 { background-color: rgba(37, 43, 54, 0.15) !important; }
 html.dark .bg-white\/20 { background-color: rgba(37, 43, 54, 0.2) !important; }
 html.dark .bg-white\/70 { background-color: rgba(37, 43, 54, 0.7) !important; }
@@ -80,6 +78,11 @@ html.dark .placeholder\:text-sage-500::placeholder { color: #9ba5b4 !important; 
 html.dark .ring-cafe-amber-300 { --tw-ring-color: #a26443 !important; }
 html.dark .ring-sage-100 { --tw-ring-color: #3a4252 !important; }
 html.dark .ring-sage-200 { --tw-ring-color: #3a4252 !important; }
+@media (min-width: 640px) { html.dark .sm\:bg-sage-50 { background-color: #2f3744 !important; } }
+@media (min-width: 640px) { html.dark .sm\:bg-white { background-color: #252b36 !important; } }
+@media (min-width: 640px) { html.dark .sm\:border-sage-200 { border-color: #3a4252 !important; } }
+@media (min-width: 640px) { html.dark .sm\:divide-sage-100 > :not([hidden]) ~ :not([hidden]) { border-color: #3a4252 !important; } }
+@media (min-width: 640px) { html.dark .sm\:hover\:bg-sage-50:hover { background-color: #2f3744 !important; } }
 html.dark .text-cafe-amber-700 { color: #f3c1a5 !important; }
 html.dark .text-cafe-amber-800 { color: #f6d0ba !important; }
 html.dark .text-cafe-amber-900 { color: #f9dfd0 !important; }

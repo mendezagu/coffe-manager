@@ -121,10 +121,10 @@
                         <mat-icon class="!h-[22px] !w-[22px] !text-[22px]">add</mat-icon>
                       </span>
                       <span *ngIf="inCart(i)" class="flex h-11 w-full items-center justify-between rounded-xl bg-cafe-green-700 text-white" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-                        <button type="button" (click)="step(i._id, -1)" [attr.aria-label]="'Quitar uno de ' + i.name"
+                        <button type="button" (click)="step(i._id, -1); $event.stopPropagation()" [attr.aria-label]="'Quitar uno de ' + i.name"
                           class="grid h-11 w-12 place-items-center rounded-l-xl text-xl font-bold leading-none transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">−</button>
                         <span class="text-base font-bold tabular-nums" aria-live="polite">{{ inCart(i) }}</span>
-                        <button type="button" (click)="step(i._id, 1)" [attr.aria-label]="'Agregar uno de ' + i.name"
+                        <button type="button" (click)="step(i._id, 1); $event.stopPropagation()" [attr.aria-label]="'Agregar uno de ' + i.name"
                           class="grid h-11 w-12 place-items-center rounded-r-xl text-xl font-bold leading-none transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">+</button>
                       </span>
                     </ng-container>
@@ -150,13 +150,20 @@
                     <span *ngIf="soldOut(i)" class="text-xs font-semibold text-cafe-red-700">Agotado</span>
                   </span>
                 </div>
-                <span *ngIf="inCart(i)" class="grid h-6 min-w-[24px] flex-none place-items-center rounded-full bg-cafe-green-700 px-[7px] text-xs font-bold tabular-nums text-white">{{ inCart(i) }}</span>
                 <button *ngIf="isAdmin && editFavs" type="button" (click)="toggleFavorite(i, $event)" [attr.aria-label]="i.isFavorite ? 'Quitar de favoritos' : 'Fijar como favorito'"
                   class="grid h-9 w-9 flex-none place-items-center rounded-full hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700" [ngClass]="i.isFavorite ? 'text-[#d49a12]' : 'text-sage-400 hover:text-[#d49a12]'">
                   <mat-icon class="!h-5 !w-5 !text-xl">{{ i.isFavorite ? 'star' : 'star_outline' }}</mat-icon>
                 </button>
-                <span *ngIf="!soldOut(i)" class="grid h-9 w-9 flex-none place-items-center rounded-lg bg-sage-100 text-cafe-green-700 transition-colors group-hover:bg-cafe-green-700 group-hover:text-white" aria-hidden="true">
+                <span *ngIf="!soldOut(i) && !inCart(i)" class="grid h-9 w-9 flex-none place-items-center rounded-lg bg-sage-100 text-cafe-green-700 transition-colors group-hover:bg-cafe-green-700 group-hover:text-white" aria-hidden="true">
                   <mat-icon class="!h-5 !w-5 !text-xl">add</mat-icon>
+                </span>
+                <!-- Ya está en el pedido: se puede restar (y quitar del todo) sin abrir el carrito -->
+                <span *ngIf="!soldOut(i) && inCart(i)" class="flex h-9 flex-none items-center rounded-lg bg-cafe-green-700 text-white" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+                  <button type="button" (click)="step(i._id, -1); $event.stopPropagation()" [attr.aria-label]="'Quitar uno de ' + i.name"
+                    class="grid h-9 w-9 place-items-center rounded-l-lg text-lg font-bold leading-none transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">−</button>
+                  <span class="min-w-[20px] text-center text-sm font-bold tabular-nums" aria-live="polite">{{ inCart(i) }}</span>
+                  <button type="button" (click)="step(i._id, 1); $event.stopPropagation()" [attr.aria-label]="'Agregar uno de ' + i.name"
+                    class="grid h-9 w-9 place-items-center rounded-r-lg text-lg font-bold leading-none transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">+</button>
                 </span>
               </div>
             </ng-template>
@@ -217,7 +224,8 @@
               <div class="thin-scroll min-h-0 flex-1 overflow-y-auto p-[20px]">
               <!-- Venta registrada -->
               <div *ngIf="lastSale as s" role="status" class="pt-[8px] text-center">
-                <p class="m-0 flex items-center justify-center gap-[8px] text-base font-semibold text-cafe-green-700"><mat-icon class="!h-6 !w-6 !text-2xl">check_circle</mat-icon>Venta registrada</p>
+                <p class="m-0 flex items-center justify-center gap-[8px] text-base font-semibold text-cafe-green-700"><mat-icon class="!h-6 !w-6 !text-2xl">check_circle</mat-icon>{{ s.pending ? 'Venta guardada' : 'Venta registrada' }}</p>
+                <p *ngIf="s.pending" class="mx-auto mb-0 mt-[8px] max-w-xs rounded-xl bg-cafe-amber-50 px-[12px] py-[8px] text-sm font-medium text-cafe-amber-800">Sin conexión: quedó guardada en este equipo y se envía sola cuando vuelva internet.</p>
                 <p class="mb-0 mt-[10px] font-jakarta text-5xl font-extrabold tabular-nums text-sage-900">{{ shortPrice(s.totalAmount) }}</p>
                 <div *ngIf="s.change > 0" class="mt-[18px]">
                   <p class="m-0 text-sm font-medium text-sage-600">Vuelto a entregar</p>
