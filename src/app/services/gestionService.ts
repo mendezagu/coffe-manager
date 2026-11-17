@@ -98,6 +98,9 @@ export interface Table {
   sectorId?: string | null;
   sectorName?: string | null;
   sectorPosition?: number | null;
+  // lugar en el plano del salón, en % del ancho y del alto (null = todavía sin ubicar)
+  layoutX?: number | null;
+  layoutY?: number | null;
 }
 
 export interface Waiter {
@@ -137,6 +140,11 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
     }
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
+  }
+
+  // Plano del salón: guarda de una vez el lugar de varias mesas (solo el administrador)
+  saveTableLayout(positions: { id: string; x: number | null; y: number | null }[]): Observable<unknown> {
+    return this.http.put(`${this.apiUrl}/tables/layout`, { positions }).pipe(catchError(this.handleError));
   }
 
   // 📌 Tables

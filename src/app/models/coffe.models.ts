@@ -29,6 +29,8 @@ export interface Table {
   waiterId?: any;
   waiterName?: any;
   waiter?: Waiter;
+  layoutX?: number | null;
+  layoutY?: number | null;
 }
 
 export interface Waiter {

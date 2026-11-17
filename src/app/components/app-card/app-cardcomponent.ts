@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MenuDialogComponent } from '../menu-dialog/menu-dialog.component';
@@ -32,7 +32,7 @@ interface TableGroup {
   templateUrl: './app-card.component.html',
   styleUrls: ['./app-card.component.scss']
 })
-export class CardComponent implements OnInit, OnDestroy {
+export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   private tablesSub?: Subscription;
   private guideSub?: Subscription;
   private shiftSub?: Subscription;
@@ -43,7 +43,8 @@ export class CardComponent implements OnInit, OnDestroy {
   guideOn = false;
   searchText: string = '';
   // 'grouped': una sección por sector, con su título. 'flat': todas las mesas juntas en una sola grilla.
-  viewMode: 'grouped' | 'flat' = 'grouped';
+  // 'plan': el salón dibujado como plano (solo en pantallas anchas; en el celular se ve como 'grouped')
+  viewMode: 'grouped' | 'flat' | 'plan' = 'grouped';
   selectedGroupKey: string | null = null; // sector elegido en las pestañas; null o '__all__' = todos
   statusFilter: 'all' | 'free' | 'busy' | 'qr' = 'all';
   // false hasta que llega la primera respuesta: mientras tanto se muestra un esqueleto en vez de "sin mesas"
@@ -73,6 +74,7 @@ export class CardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.nowTimer = setInterval(() => (this.now = Date.now()), 30000);
+    this.watchDesktop();
     this.restoreView();
     this.guideSub = this.onboarding.guideActive$.subscribe((on) => (this.guideOn = on));
     // Las mesas se actualizan en el momento en que el servidor avisa un cambio (otro mozo, la cocina, un pedido por QR).
@@ -126,6 +128,8 @@ export class CardComponent implements OnInit, OnDestroy {
     if (this.liveTimer) clearInterval(this.liveTimer);
     this.qrSub?.unsubscribe();
     this.dragEnd();
+    this.desktopQuery?.removeEventListener?.('change', this.onDesktopChange);
+    this.planObserver?.disconnect();
   }
 
   private qrSub?: Subscription;
@@ -527,19 +531,213 @@ export class CardComponent implements OnInit, OnDestroy {
   get visibleGroups(): TableGroup[] {
     let groups = this.tableGroups;
     // El sector elegido solo filtra en la vista por sector; en la vista conjunta se ven todas las mesas
-    if (this.viewMode === 'grouped' && this.hasSectors && this.activeGroupKey !== '__all__') {
+    if (this.effectiveMode !== 'flat' && this.hasSectors && this.activeGroupKey !== '__all__') {
       groups = groups.filter(g => g.key === this.activeGroupKey);
     }
     // Vista conjunta: sin títulos de sector, todas las mesas en una sola grilla
-    if (this.viewMode === 'flat' && groups.length > 0) {
+    if (this.effectiveMode === 'flat' && groups.length > 0) {
       return [{ key: '__flat__', name: null, tables: groups.flatMap(g => g.tables) }];
     }
     return groups;
   }
 
-  setViewMode(mode: 'grouped' | 'flat'): void {
+  setViewMode(mode: 'grouped' | 'flat' | 'plan'): void {
+    if (this.editingPlan) return;
     this.viewMode = mode;
     this.persistView('tablesViewMode', mode);
+  }
+
+  // ---- Plano del salón (pantallas anchas) ----
+  // En el celular el plano no entra bien: ahí la vista guardada como "plano" se muestra por sectores, como siempre.
+  isDesktop = false;
+  private desktopQuery?: MediaQueryList;
+  private onDesktopChange = () => this.syncDesktop();
+
+  // El ancho de la ventana se vuelve a mirar al cambiar de tamaño y al volver a la pestaña: no depende solo del aviso
+  // del navegador, así el botón Plano no se queda escondido si la ventana estaba angosta al abrir la pantalla.
+  @HostListener('window:resize')
+  @HostListener('window:focus')
+  syncDesktop(): void {
+    const wide = this.desktopQuery ? this.desktopQuery.matches : typeof window !== 'undefined' && window.innerWidth >= 1024;
+    this.isDesktop = wide || (typeof window !== 'undefined' && window.innerWidth >= 1024);
+    if (!this.isDesktop) this.editingPlan = false;
+  }
+
+  private watchDesktop(): void {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    this.desktopQuery = window.matchMedia('(min-width: 1024px)');
+    this.syncDesktop();
+    this.desktopQuery.addEventListener?.('change', this.onDesktopChange);
+  }
+
+  get effectiveMode(): 'grouped' | 'flat' | 'plan' {
+    return this.viewMode === 'plan' && !this.isDesktop ? 'grouped' : this.viewMode;
+  }
+
+  get planActive(): boolean {
+    return this.effectiveMode === 'plan';
+  }
+
+  editingPlan = false;
+  planSaving = false;
+  // Lugar de cada mesa mientras se edita (id -> % del ancho y del alto)
+  planDraft: Record<string, { x: number; y: number }> = {};
+  private dragging: { id: string; rect: DOMRect; sx: number; sy: number; ox: number; oy: number } | null = null;
+
+  // El plano se dibuja SIEMPRE en un lienzo de diseño de 1200 × 675 px y se escala entero al ancho disponible:
+  // así el salón se ve idéntico (mismas distancias y proporciones) en un monitor chico y en uno grande.
+  readonly planDesignW = 1200;
+  readonly planDesignH = 675;
+  readonly planTileW = 144;
+  readonly planTileH = 96;
+  planScale = 1;
+  @ViewChildren('planHost') planHosts?: QueryList<ElementRef<HTMLElement>>;
+  private planObserver?: ResizeObserver;
+
+  ngAfterViewInit(): void {
+    this.syncDesktop();
+    this.planHosts?.changes.subscribe(() => this.observePlan());
+    this.observePlan();
+  }
+
+  private observePlan(): void {
+    this.planObserver?.disconnect();
+    // Se mide el contenedor (no el plano): el plano ocupa todo el ancho, igual que las otras vistas
+    const host = this.planHosts?.first?.nativeElement?.parentElement;
+    if (!host || typeof ResizeObserver === 'undefined') return;
+    const update = () => this.zone.run(() => {
+      const w = host.clientWidth;
+      if (w > 0) this.planScale = Math.min(1.25, Math.max(0.6, w / this.planDesignW));
+    });
+    this.planObserver = new ResizeObserver(update);
+    this.planObserver.observe(host);
+    update();
+  }
+
+  // Las mesas se acomodan a una grilla fija de 8 px del plano de diseño: el espacio entre mesas se ajusta con la
+  // misma precisión en cualquier pantalla, y se pueden dejar bien pegadas o bien separadas.
+  private readonly stepPx = 8;
+  private snap(x: number, y: number): { x: number; y: number } {
+    const halfW = this.planTileW / 2 + 4;
+    const halfH = this.planTileH / 2 + 4;
+    const px = Math.round(((x / 100) * this.planDesignW) / this.stepPx) * this.stepPx;
+    const py = Math.round(((y / 100) * this.planDesignH) / this.stepPx) * this.stepPx;
+    const cx = Math.min(this.planDesignW - halfW, Math.max(halfW, px));
+    const cy = Math.min(this.planDesignH - halfH, Math.max(halfH, py));
+    return { x: Math.round((cx / this.planDesignW) * 10000) / 100, y: Math.round((cy / this.planDesignH) * 10000) / 100 };
+  }
+
+  // Una mesa guardada en otro momento (con otro tamaño de ficha) nunca se muestra cortada por el borde del plano
+  private keepInside(x: number, y: number): { x: number; y: number } {
+    const mx = ((this.planTileW / 2 + 4) / this.planDesignW) * 100;
+    const my = ((this.planTileH / 2 + 4) / this.planDesignH) * 100;
+    return { x: Math.min(100 - mx, Math.max(mx, x)), y: Math.min(100 - my, Math.max(my, y)) };
+  }
+
+  // Lugar por defecto de las mesas que todavía no se ubicaron: una grilla pareja, sin que se pisen
+  private gridPositions(tables: Table[]): Map<string, { x: number; y: number }> {
+    const n = tables.length;
+    const cw = this.planTileW + 16;
+    const ch = this.planTileH + 16;
+    const cols = Math.max(1, Math.min(n, Math.floor((this.planDesignW - 40) / cw)));
+    const totalW = cols * cw - 16;
+    const left = (this.planDesignW - totalW) / 2 + this.planTileW / 2;
+    const out = new Map<string, { x: number; y: number }>();
+    tables.forEach((t, i) => {
+      const px = left + (i % cols) * cw;
+      const py = 24 + this.planTileH / 2 + Math.floor(i / cols) * ch;
+      out.set(t.id, this.snap((px / this.planDesignW) * 100, (py / this.planDesignH) * 100));
+    });
+    return out;
+  }
+
+  // Mesas de un sector con su lugar: el guardado, el del borrador (si se está editando) o el automático
+  planItems(group: TableGroup): { table: Table; x: number; y: number }[] {
+    const hasPlace = (t: Table) => (this.editingPlan ? !!this.planDraft[t.id] : t.layoutX != null && t.layoutY != null);
+    const auto = this.gridPositions(group.tables.filter((t) => !hasPlace(t)));
+    return group.tables.map((t) => {
+      const p = this.editingPlan && this.planDraft[t.id] ? this.planDraft[t.id] : hasPlace(t) ? { x: t.layoutX as number, y: t.layoutY as number } : auto.get(t.id)!;
+      const c = this.keepInside(p.x, p.y);
+      return { table: t, x: c.x, y: c.y };
+    });
+  }
+
+  trackPlanItem = (_: number, it: { table: Table }) => it.table.id;
+
+  startPlanEdit(): void {
+    if (!this.planActive || this.roleValue !== 'admin') return;
+    // Se editan todas las mesas: sin búsqueda ni filtros que escondan alguna
+    this.searchText = '';
+    this.statusFilter = 'all';
+    const draft: Record<string, { x: number; y: number }> = {};
+    for (const group of this.tableGroups) for (const it of this.planItems(group)) draft[it.table.id] = { x: it.x, y: it.y };
+    this.planDraft = draft;
+    this.editingPlan = true;
+  }
+
+  cancelPlanEdit(): void {
+    this.editingPlan = false;
+    this.dragging = null;
+    this.planDraft = {};
+  }
+
+  autoArrange(): void {
+    const draft = { ...this.planDraft };
+    for (const group of this.tableGroups) this.gridPositions(group.tables).forEach((p, id) => (draft[id] = p));
+    this.planDraft = draft;
+  }
+
+  savePlan(): void {
+    if (this.planSaving) return;
+    const positions = this.tables.filter((t) => this.planDraft[t.id]).map((t) => ({ id: t.id, x: this.planDraft[t.id].x, y: this.planDraft[t.id].y }));
+    if (!positions.length) return this.cancelPlanEdit();
+    this.planSaving = true;
+    this.gestionService.saveTableLayout(positions).subscribe({
+      next: () => {
+        this.planSaving = false;
+        this.editingPlan = false;
+        this.planDraft = {};
+        this.loadTables();
+        this.snackBar.open('Plano guardado', 'Cerrar', { duration: 2500 });
+      },
+      error: () => {
+        this.planSaving = false;
+        this.snackBar.open('No se pudo guardar el plano. Probá de nuevo.', 'Cerrar', { duration: 4000 });
+      },
+    });
+  }
+
+  // Arrastrar una mesa (mouse, lápiz o dedo)
+  planDown(event: PointerEvent, table: Table, canvas: HTMLElement): void {
+    const cur = this.planDraft[table.id];
+    if (!this.editingPlan || !cur) return;
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+    this.dragging = { id: table.id, rect: canvas.getBoundingClientRect(), sx: event.clientX, sy: event.clientY, ox: cur.x, oy: cur.y };
+  }
+
+  planMove(event: PointerEvent): void {
+    const d = this.dragging;
+    if (!d) return;
+    const x = d.ox + ((event.clientX - d.sx) / d.rect.width) * 100;
+    const y = d.oy + ((event.clientY - d.sy) / d.rect.height) * 100;
+    this.planDraft = { ...this.planDraft, [d.id]: this.snap(x, y) };
+  }
+
+  planUp(): void {
+    this.dragging = null;
+  }
+
+  // Con teclado: flechas mueven la mesa de a un paso
+  planKey(event: KeyboardEvent, table: Table): void {
+    const cur = this.planDraft[table.id];
+    if (!this.editingPlan || !cur) return;
+    const step = (event.shiftKey ? 4 : 1) * this.stepPx; // Mayús: pasos de 32 px
+    const dx = ({ ArrowLeft: -1, ArrowRight: 1 } as Record<string, number>)[event.key] ?? 0;
+    const dy = ({ ArrowUp: -1, ArrowDown: 1 } as Record<string, number>)[event.key] ?? 0;
+    if (!dx && !dy) return;
+    event.preventDefault();
+    this.planDraft = { ...this.planDraft, [table.id]: this.snap(cur.x + ((dx * step) / this.planDesignW) * 100, cur.y + ((dy * step) / this.planDesignH) * 100) };
   }
 
   // Arrastrar las pestañas de sector con el mouse (con el dedo ya se desplazan solas).
@@ -602,7 +800,9 @@ export class CardComponent implements OnInit, OnDestroy {
   private restoreView(): void {
     try {
       const mode = localStorage.getItem('tablesViewMode');
-      if (mode === 'grouped' || mode === 'flat') this.viewMode = mode;
+      if (mode === 'grouped' || mode === 'flat' || mode === 'plan') this.viewMode = mode;
+      // Sin elección guardada, en pantalla ancha el salón arranca como plano
+      else if (this.isDesktop) this.viewMode = 'plan';
       this.selectedGroupKey = localStorage.getItem('tablesSelectedGroup');
     } catch {
       /* sin persistencia */

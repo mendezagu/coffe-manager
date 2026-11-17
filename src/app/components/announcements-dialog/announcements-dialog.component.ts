@@ -4,8 +4,9 @@ import { Announcement, AnnouncementsService } from 'src/app/services/announcemen
 import { richText } from 'src/app/utils/rich-text';
 
 export interface AnnouncementsDialogData {
-  // 'popup': una novedad importante al entrar. 'list': todas las novedades (la campanita).
-  mode: 'popup' | 'list';
+  // 'popup': una novedad importante al entrar. 'detail': una novedad elegida en el menú de la campanita.
+  // 'list': todas las novedades en una ventana.
+  mode: 'popup' | 'detail' | 'list';
   item?: Announcement;
 }
 
@@ -31,8 +32,13 @@ export class AnnouncementsDialogComponent implements OnInit {
     return this.data.mode === 'popup' && !!this.data.item;
   }
 
+  // Una sola novedad (la de entrada o la elegida en el menú)
+  get isSingle(): boolean {
+    return (this.data.mode === 'popup' || this.data.mode === 'detail') && !!this.data.item;
+  }
+
   ngOnInit(): void {
-    if (this.isPopup) {
+    if (this.isSingle) {
       this.items = [this.data.item!];
       return;
     }

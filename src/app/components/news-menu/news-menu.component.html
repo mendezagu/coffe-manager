@@ -1,0 +1,54 @@
+<div class="relative">
+  <!-- Campanita con las novedades sin leer -->
+  <button type="button" (click)="toggle()" [attr.aria-expanded]="open" aria-haspopup="true"
+    class="relative flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 text-sage-600 transition-colors hover:bg-sage-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+    [ngClass]="open ? '!bg-sage-200' : ''"
+    [attr.aria-label]="(news.unread$ | async)?.count ? 'Novedades de Tavolapp: ' + (news.unread$ | async)?.count + ' sin leer' : 'Novedades de Tavolapp'" title="Novedades de Tavolapp">
+    <mat-icon class="!h-6 !w-6 !text-2xl">campaign</mat-icon>
+    <span *ngIf="(news.unread$ | async)?.count as n" class="absolute -right-0.5 -top-0.5 min-w-[18px] rounded-full bg-cafe-red-700 px-1 text-center text-[11px] font-bold leading-[18px] text-white">{{ n }}</span>
+  </button>
+
+  <!-- Menú de novedades: en celular ocupa el ancho; en pantalla ancha cuelga de la campanita -->
+  <div *ngIf="open" role="dialog" aria-label="Novedades de Tavolapp"
+    class="fixed left-[12px] right-[12px] top-[68px] z-[60] flex max-h-[min(640px,calc(100vh-88px))] flex-col overflow-hidden whitespace-normal rounded-2xl bg-white shadow-dialog sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+8px)] sm:w-[400px]">
+
+    <div class="flex items-center justify-between gap-[8px] px-[16px] pb-[4px] pt-[14px]">
+      <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900">Novedades</div>
+      <button *ngIf="unreadInList > 0" type="button" (click)="markAllRead()"
+        class="min-h-[44px] rounded-lg px-[8px] text-sm font-semibold text-cafe-green-700 hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Marcar todas como leídas</button>
+    </div>
+
+    <!-- Todas / No leídas -->
+    <div class="flex gap-[8px] px-[16px] pb-[8px]" role="group" aria-label="Filtrar novedades">
+      <button type="button" (click)="tab = 'all'" [attr.aria-pressed]="tab === 'all'"
+        class="min-h-[40px] rounded-full px-[14px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+        [ngClass]="tab === 'all' ? 'bg-cafe-green-50 text-cafe-green-800' : 'text-sage-700 hover:bg-sage-100'">Todas</button>
+      <button type="button" (click)="tab = 'unread'" [attr.aria-pressed]="tab === 'unread'"
+        class="min-h-[40px] rounded-full px-[14px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+        [ngClass]="tab === 'unread' ? 'bg-cafe-green-50 text-cafe-green-800' : 'text-sage-700 hover:bg-sage-100'">No leídas<span *ngIf="unreadInList" class="ml-[6px] tabular-nums">{{ unreadInList }}</span></button>
+    </div>
+
+    <div class="min-h-0 flex-1 overflow-y-auto px-[8px] pb-[8px]">
+      <p *ngIf="loading" class="m-0 px-[8px] py-[32px] text-center text-sm text-sage-600">Cargando…</p>
+      <p *ngIf="error" class="m-0 px-[8px] py-[32px] text-center text-sm text-cafe-red-700">No se pudieron cargar las novedades. Probá de nuevo en un rato.</p>
+      <p *ngIf="!loading && !error && !shown.length" class="m-0 px-[8px] py-[32px] text-center text-sm text-sage-600">{{ tab === 'unread' ? 'No tenés novedades sin leer.' : 'Todavía no hay novedades.' }}</p>
+
+      <ul class="m-0 list-none p-0">
+        <li *ngFor="let a of shown; trackBy: trackItem">
+          <button type="button" (click)="openItem(a)"
+            class="flex w-full items-start gap-[12px] rounded-xl px-[12px] py-[10px] text-left transition-colors hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm leading-snug text-sage-900" [ngClass]="a.read ? 'font-medium' : 'font-bold'">
+                {{ a.title }}
+                <span *ngIf="a.important && a.showTag !== false" class="ml-[4px] rounded-full bg-cafe-red-50 px-2 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-cafe-red-700">Importante</span>
+              </span>
+              <span class="mt-[2px] line-clamp-2 block text-sm leading-snug text-sage-600">{{ snippet(a) }}</span>
+              <span class="mt-[4px] block text-xs" [ngClass]="a.read ? 'text-sage-600' : 'font-bold text-cafe-green-700'">{{ when(a) }}</span>
+            </span>
+            <span *ngIf="!a.read" class="mt-[6px] h-[10px] w-[10px] flex-none rounded-full bg-cafe-green-700" role="img" aria-label="Sin leer"></span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

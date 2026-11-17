@@ -10,6 +10,8 @@ export interface Announcement {
   body: string;
   images: { key: string; url: string | null }[];
   important: boolean;
+  // false = no mostrar la etiqueta "Importante" (por defecto se muestra)
+  showTag?: boolean;
   publishedAt: string | null;
   read: boolean;
 }

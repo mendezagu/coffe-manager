@@ -6,8 +6,8 @@
       <mat-icon>campaign</mat-icon>
     </span>
     <div class="min-w-0 flex-1">
-      <p role="heading" aria-level="2" class="m-0 text-lg font-bold text-sage-900">{{ isPopup ? 'Qué hay de nuevo en Tavolapp' : 'Novedades' }}</p>
-      <p *ngIf="!isPopup" class="m-0 text-xs text-sage-500">Lo último que sumamos o mejoramos.</p>
+      <p role="heading" aria-level="2" class="m-0 text-lg font-bold text-sage-900">{{ isSingle ? 'Qué hay de nuevo en Tavolapp' : 'Novedades' }}</p>
+      <p *ngIf="!isSingle" class="m-0 text-xs text-sage-500">Lo último que sumamos o mejoramos.</p>
     </div>
     <button type="button" (click)="close()" aria-label="Cerrar" class="grid h-9 w-9 flex-none place-items-center rounded-lg text-sage-500 hover:bg-sage-100">
       <mat-icon class="!h-5 !w-5 !text-xl">close</mat-icon>
@@ -24,11 +24,14 @@
     </div>
 
     <article *ngFor="let a of items; trackBy: trackItem" class="mb-4 rounded-2xl border p-4 last:mb-0"
-      [ngClass]="!a.read && !isPopup ? 'border-cafe-green-700/40 bg-cafe-green-50/60' : 'border-sage-200 bg-white'">
+      [ngClass]="!a.read && !isSingle ? 'border-cafe-green-700/40 bg-cafe-green-50/60' : 'border-sage-200 bg-white'">
       <div class="flex flex-wrap items-center gap-2">
-        <span *ngIf="!a.read && !isPopup" class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#ffffff]">Nuevo</span>
-        <span *ngIf="a.important" class="rounded-full bg-cafe-red-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cafe-red-700">Importante</span>
-        <span *ngIf="a.publishedAt" class="text-xs text-sage-500">{{ a.publishedAt | date: 'dd/MM/yyyy' }}</span>
+        <span *ngIf="!a.read && !isSingle" class="rounded-full bg-cafe-green-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#ffffff]">Nuevo</span>
+        <!-- "Importante" y la fecha, pegados al borde derecho -->
+        <div class="ml-auto flex items-center gap-2">
+          <span *ngIf="a.important && a.showTag !== false" class="rounded-full bg-cafe-red-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cafe-red-700">Importante</span>
+          <span *ngIf="a.publishedAt" class="text-xs text-sage-500">{{ a.publishedAt | date: 'dd/MM/yyyy' }}</span>
+        </div>
       </div>
       <p role="heading" aria-level="3" class="m-0 mt-2 text-base font-bold text-sage-900">{{ a.title }}</p>
       <div class="news-rich mt-1.5 text-sm leading-relaxed text-sage-700" [innerHTML]="rich(a.body)"></div>

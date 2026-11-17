@@ -144,18 +144,25 @@
           </ng-container>
         </div>
 
-        <div *ngIf="hasSectors" class="flex min-w-0 flex-1 whitespace-nowrap rounded-xl bg-sage-200/70 p-[3px] sm:ml-auto sm:inline-flex sm:w-auto sm:flex-none" role="group" aria-label="Tipo de vista">
-          <button type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="viewMode === 'grouped'"
+        <div *ngIf="hasSectors || isDesktop" class="flex min-w-0 flex-1 whitespace-nowrap rounded-xl bg-sage-200/70 p-[3px] sm:ml-auto sm:inline-flex sm:w-auto sm:flex-none" role="group" aria-label="Tipo de vista">
+          <button *ngIf="hasSectors" type="button" (click)="setViewMode('grouped')" [attr.aria-pressed]="effectiveMode === 'grouped'"
             class="min-h-[40px] flex-1 rounded-[10px] px-[14px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-            [ngClass]="viewMode === 'grouped' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Sectores</button>
-          <button type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="viewMode === 'flat'"
+            [ngClass]="effectiveMode === 'grouped' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Sectores</button>
+          <button *ngIf="hasSectors" type="button" (click)="setViewMode('flat')" [attr.aria-pressed]="effectiveMode === 'flat'"
             class="min-h-[40px] flex-1 rounded-[10px] px-[14px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-            [ngClass]="viewMode === 'flat' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Conjunta</button>
+            [ngClass]="effectiveMode === 'flat' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Conjunta</button>
+          <button *ngIf="isDesktop" type="button" (click)="setViewMode('plan')" [attr.aria-pressed]="effectiveMode === 'plan'"
+            class="min-h-[40px] flex-1 rounded-[10px] px-[14px] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+            [ngClass]="effectiveMode === 'plan' ? 'bg-white font-semibold text-sage-900 shadow-soft' : 'font-medium text-sage-600 hover:text-sage-900'">Plano</button>
         </div>
+        <button *ngIf="planActive && roleValue === 'admin' && !editingPlan" type="button" (click)="startPlanEdit()"
+          class="inline-flex min-h-[44px] flex-none items-center gap-[8px] rounded-xl border border-sage-300 bg-white px-[14px] text-sm font-medium text-sage-800 shadow-soft transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+          <mat-icon class="!h-5 !w-5 !text-xl">edit</mat-icon>Editar plano
+        </button>
       </div>
 
       <!-- Sectores: se desplazan arrastrando (mouse o dedo), sin barra visible -->
-      <div *ngIf="hasSectors && viewMode === 'grouped'" #sectorTabs class="-mx-4 flex cursor-grab select-none items-center gap-[8px] overflow-x-auto px-4 active:cursor-grabbing sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
+      <div *ngIf="hasSectors && effectiveMode !== 'flat'" #sectorTabs class="-mx-4 flex cursor-grab select-none items-center gap-[8px] overflow-x-auto px-4 active:cursor-grabbing sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Sectores"
         (mousedown)="dragStart($event, sectorTabs)">
         <button type="button" role="tab" [attr.aria-selected]="activeGroupKey === '__all__'" (click)="selectGroup('__all__')"
           class="inline-flex min-h-[44px] flex-none items-center whitespace-nowrap rounded-full border px-[16px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
@@ -168,6 +175,14 @@
           {{ group.name }}<span class="ml-[6px] text-xs font-normal tabular-nums" [ngClass]="activeGroupKey === group.key ? 'text-[#084440]/80' : 'text-sage-600'">{{ group.tables.length }}</span>
         </button>
       </div>
+    </div>
+
+    <!-- Edición del plano: se arrastran las mesas y se guarda -->
+    <div *ngIf="editingPlan" role="region" aria-label="Edición del plano" class="flex flex-wrap items-center gap-[12px] rounded-2xl bg-white px-[16px] py-[12px] shadow-soft">
+      <p class="m-0 min-w-0 flex-1 text-sm text-sage-700"><strong class="font-bold text-sage-900">Editando el plano.</strong> Arrastrá cada mesa a su lugar (o usá las flechas).</p>
+      <button type="button" (click)="autoArrange()" class="min-h-[44px] rounded-xl px-[14px] text-sm font-medium text-sage-700 hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Acomodar solas</button>
+      <button type="button" (click)="cancelPlanEdit()" class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-[16px] text-sm font-bold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Cancelar</button>
+      <button type="button" (click)="savePlan()" [disabled]="planSaving" class="min-h-[44px] rounded-xl bg-cafe-green-700 px-[20px] text-sm font-bold text-white hover:bg-cafe-green-800 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">{{ planSaving ? 'Guardando…' : 'Guardar plano' }}</button>
     </div>
 
     <!-- Cargando: esqueleto con la forma de las tarjetas (no salta el contenido al llegar) -->
@@ -197,26 +212,37 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-[10px] sm:gap-[12px]">
+      <div *ngIf="!planActive" class="grid grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-[10px] sm:gap-[12px]">
         <button *ngFor="let table of group.tables; trackBy: trackTable" type="button" (click)="tileClick(table)"
           [attr.aria-label]="shortName(table, group.name) + ': ' + (tileTone(table) === 'alert' ? 'necesita atención, ' + tileReason(table) + (waitText(table) ? ', ' + waitText(table) : '') : isFree(table) ? 'libre' : 'ocupada') + (table.waiterId && table.waiterName?.trim() ? ', mozo ' + table.waiterName : '')"
           [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)" [class.floor-late]="waitingLate(table)"
           class="relative flex min-h-[112px] min-w-0 flex-col justify-between rounded-2xl p-[14px] text-left transition duration-150 hover:-translate-y-[1px] hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transform-none"
           [ngClass]="tileStyles[tileTone(table)].tile">
-          <span class="block min-w-0 break-words font-inter font-bold leading-tight" [ngClass]="nameSizeClass(shortName(table, group.name))">{{ shortName(table, group.name) }}</span>
-          <span class="mt-[10px] block min-w-0">
-            <span class="flex items-center gap-[8px] text-sm font-semibold">
-              <span class="h-[10px] w-[10px] flex-none" [ngClass]="tileStyles[tileTone(table)].dot"></span>
-              <span class="min-w-0 flex-1 truncate">{{ tileTone(table) === 'alert' ? tileReason(table) : isFree(table) ? 'Libre' : 'Ocupada' }}</span>
-              <span *ngIf="table.orders && table.orders.length" class="flex h-[22px] min-w-[22px] flex-none items-center justify-center rounded-full px-[6px] text-xs font-bold tabular-nums" [ngClass]="tileStyles[tileTone(table)].count" [attr.title]="table.orders.length + ' órdenes'">{{ table.orders.length }}</span>
-            </span>
-            <span class="mt-[2px] block truncate text-sm" [ngClass]="tileStyles[tileTone(table)].sub">
-              <ng-container *ngIf="tileTone(table) === 'alert'"><span [class.font-bold]="waitingLate(table)" class="tabular-nums">{{ waitText(table) || (table.waiterId && table.waiterName?.trim() ? table.waiterName : 'Sin mozo') }}</span></ng-container>
-              <ng-container *ngIf="tileTone(table) !== 'alert' && readyCount(table) > 0"><span class="font-semibold text-[var(--floor-ready)]">✓ {{ readyCount(table) === 1 ? '1 plato listo' : readyCount(table) + ' platos listos' }}</span></ng-container>
-              <ng-container *ngIf="tileTone(table) !== 'alert' && !(readyCount(table) > 0)"><ng-container *ngIf="table.waiterId && table.waiterName?.trim(); else noWaiter">{{ table.waiterName }}</ng-container><ng-template #noWaiter>Sin mozo</ng-template></ng-container>
-            </span>
-          </span>
+          <ng-container *ngTemplateOutlet="tileBody; context: { $implicit: table, name: group.name }"></ng-container>
         </button>
+      </div>
+
+      <!-- Plano del salón (pantalla ancha): se dibuja en un lienzo fijo de 1200 × 675 y se escala entero al ancho disponible,
+           así se ve igual en cualquier monitor. -->
+      <div *ngIf="planActive" #planHost class="relative mx-auto max-w-full" [style.width.px]="planDesignW * planScale" [style.height.px]="planDesignH * planScale">
+        <div #canvas role="group" [attr.aria-label]="'Plano de ' + (group.name || 'el salón')"
+          class="absolute left-0 top-0 origin-top-left overflow-hidden rounded-2xl border-[1px] border-[color-mix(in_srgb,var(--floor-muted)_40%,transparent)] bg-[var(--floor-bg)]"
+          [ngClass]="editingPlan ? 'ring-2 ring-[var(--floor-action)]' : ''"
+          [style.width.px]="planDesignW" [style.height.px]="planDesignH" [style.transform]="'scale(' + planScale + ')'"
+          [style.background-image]="editingPlan ? 'radial-gradient(circle, color-mix(in srgb, var(--floor-muted) 55%, transparent) 2px, transparent 2.2px)' : null"
+          [style.background-size]="editingPlan ? '32px 32px' : null">
+          <button *ngFor="let it of planItems(group); trackBy: trackPlanItem" type="button"
+            (click)="editingPlan ? null : tileClick(it.table)"
+            (pointerdown)="planDown($event, it.table, canvas)" (pointermove)="planMove($event)" (pointerup)="planUp()" (pointercancel)="planUp()"
+            (keydown)="planKey($event, it.table)"
+            [attr.aria-label]="shortName(it.table, group.name) + ': ' + (tileTone(it.table) === 'alert' ? 'necesita atención' : isFree(it.table) ? 'libre' : 'ocupada') + (editingPlan ? '. Con las flechas se mueve de lugar' : '')"
+            [class.floor-late]="!editingPlan && waitingLate(it.table)"
+            [style.left.%]="it.x" [style.top.%]="it.y" [style.width.px]="planTileW" [style.height.px]="planTileH"
+            class="absolute flex min-w-0 -translate-x-1/2 -translate-y-1/2 flex-col justify-between overflow-hidden rounded-2xl p-[10px] text-left transition-shadow duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2"
+            [ngClass]="[tileStyles[tileTone(it.table)].tile, editingPlan ? 'cursor-grab touch-none select-none active:cursor-grabbing' : 'hover:shadow-soft-lg motion-safe:active:scale-[0.98]']">
+            <ng-container *ngTemplateOutlet="tileBody; context: { $implicit: it.table, name: group.name }"></ng-container>
+          </button>
+        </div>
       </div>
     </section>
   </div>
@@ -302,3 +328,20 @@
   </div>
 </div>
 </div>
+
+<!-- Contenido de una ficha de mesa (nombre, estado y mozo): lo usan la grilla y el plano -->
+<ng-template #tileBody let-table let-name="name">
+          <span class="block min-w-0 break-words font-inter font-bold leading-tight" [ngClass]="nameSizeClass(shortName(table, name))">{{ shortName(table, name) }}</span>
+          <span class="mt-[10px] block min-w-0">
+            <span class="flex items-center gap-[8px] text-sm font-semibold">
+              <span class="h-[10px] w-[10px] flex-none" [ngClass]="tileStyles[tileTone(table)].dot"></span>
+              <span class="min-w-0 flex-1 truncate">{{ tileTone(table) === 'alert' ? tileReason(table) : isFree(table) ? 'Libre' : 'Ocupada' }}</span>
+              <span *ngIf="table.orders && table.orders.length" class="flex h-[22px] min-w-[22px] flex-none items-center justify-center rounded-full px-[6px] text-xs font-bold tabular-nums" [ngClass]="tileStyles[tileTone(table)].count" [attr.title]="table.orders.length + ' órdenes'">{{ table.orders.length }}</span>
+            </span>
+            <span class="mt-[2px] block truncate text-sm" [ngClass]="tileStyles[tileTone(table)].sub">
+              <ng-container *ngIf="tileTone(table) === 'alert'"><span [class.font-bold]="waitingLate(table)" class="tabular-nums">{{ waitText(table) || (table.waiterId && table.waiterName?.trim() ? table.waiterName : 'Sin mozo') }}</span></ng-container>
+              <ng-container *ngIf="tileTone(table) !== 'alert' && readyCount(table) > 0"><span class="font-semibold text-[var(--floor-ready)]">✓ {{ readyCount(table) === 1 ? '1 plato listo' : readyCount(table) + ' platos listos' }}</span></ng-container>
+              <ng-container *ngIf="tileTone(table) !== 'alert' && !(readyCount(table) > 0)"><ng-container *ngIf="table.waiterId && table.waiterName?.trim(); else noWaiter">{{ table.waiterName }}</ng-container><ng-template #noWaiter>Sin mozo</ng-template></ng-container>
+            </span>
+          </span>
+</ng-template>

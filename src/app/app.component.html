@@ -161,13 +161,8 @@
         <!-- Derecha: alertas, caja, turno y usuario -->
         <div class="d-flex align-items-center gap-2">
 
-          <!-- Novedades de Tavolapp (solo el administrador): campanita con las que todavía no leyó -->
-          <button *ngIf="(role$ | async) === 'admin'" type="button" (click)="openNews()"
-            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-sage-100 text-sage-600 hover:bg-sage-200 transition-colors"
-            [attr.aria-label]="(news.unread$ | async)?.count ? 'Novedades de Tavolapp: ' + (news.unread$ | async)?.count + ' sin leer' : 'Novedades de Tavolapp'" title="Novedades de Tavolapp">
-            <mat-icon class="!w-6 !h-6 !text-2xl">campaign</mat-icon>
-            <span *ngIf="(news.unread$ | async)?.count as n" class="absolute -top-0.5 -right-0.5 min-w-[18px] px-1 rounded-full bg-cafe-red-700 text-white text-[11px] font-bold leading-[18px] text-center">{{ n }}</span>
-          </button>
+          <!-- Novedades de Tavolapp (solo el administrador): menú con las novedades, al estilo de las notificaciones -->
+          <app-news-menu *ngIf="(role$ | async) === 'admin'"></app-news-menu>
 
           <!-- Alertas: solo aparecen si hay algo que atender -->
           <button *ngIf="(qr.inbox$ | async) as q" [hidden]="!q.active || (q.requests.length + q.calls.length) === 0" type="button" (click)="openQrInbox()"
