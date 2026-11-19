@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { map, Observable, catchError, throwError, BehaviorSubject, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { OrderModifier } from 'src/app/utils/modifiers';
+import { UserService } from './user.service';
 
 export interface MenuItem {
   menuItem: any;
@@ -125,7 +126,16 @@ private menuCache$ = new BehaviorSubject<MenuItem[] | null>(null);
   private apiUrl = environment.apiUrl;
   tables: any;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private users: UserService) {
+    // El menú cacheado es de un restaurante: si cambia la sesión (cierre de sesión o ingreso de otro
+    // usuario) se descarta, para no mostrar los platos del restaurante anterior.
+    let lastUserId: string | null | undefined;
+    this.users.getAuthState().subscribe((u) => {
+      const id = u?.id ?? null;
+      if (lastUserId !== undefined && id !== lastUserId) this.menuCache$.next(null);
+      lastUserId = id;
+    });
+  }
 
   // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
