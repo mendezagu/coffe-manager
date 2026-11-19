@@ -55,7 +55,16 @@
           <div role="heading" aria-level="3" class="text-sm font-semibold text-sage-700 m-0">{{ d.name }}</div>
           <p class="text-sm text-sage-500 mt-1 mb-4">Precio de venta {{ d.price | money }}. Receta de <strong>una</strong> unidad.</p>
 
-          <div *ngIf="rows.length === 0" class="mb-4 p-4 bg-sage-50 border border-dashed border-sage-300 rounded-lg">
+          <div class="mb-4 inline-flex rounded-xl border border-sage-300 bg-white p-[3px]" role="group" aria-label="Cómo armar la receta">
+            <button type="button" (click)="setRecipeMode('text')" [attr.aria-pressed]="recipeMode === 'text'"
+              class="min-h-[40px] rounded-lg px-3.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+              [ngClass]="recipeMode === 'text' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Escribirla</button>
+            <button type="button" (click)="setRecipeMode('rows')" [attr.aria-pressed]="recipeMode === 'rows'"
+              class="min-h-[40px] rounded-lg px-3.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+              [ngClass]="recipeMode === 'rows' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Armar de a uno</button>
+          </div>
+
+          <div *ngIf="noIngredients" class="mb-4 p-4 bg-sage-50 border border-dashed border-sage-300 rounded-lg">
             <p class="text-sm text-sage-700 m-0 mb-3"><strong>¿Es algo que se vende tal cual?</strong> Una gaseosa, un agua, un alfajor: se descuenta 1 unidad por cada venta.</p>
             <button type="button" (click)="makeSimple(d)" [disabled]="busy"
               class="px-4 py-2 border border-cafe-green-700 text-cafe-green-700 bg-white hover:bg-cafe-green-50 font-bold text-sm rounded-lg disabled:opacity-50">Es un producto que se vende tal cual</button>
@@ -68,17 +77,54 @@
               <button type="button" (click)="linkSimple(d)" [disabled]="!simpleItemId || busy"
                 class="px-3 py-1.5 border border-cafe-green-700 text-cafe-green-700 bg-white hover:bg-cafe-green-50 font-bold text-xs rounded-lg disabled:opacity-50">Vincular (1 unidad por venta)</button>
             </div>
-            <p class="text-xs text-sage-500 mt-3 mb-0">Si en cambio se prepara con varios insumos, agregalos abajo.</p>
+            <p class="text-xs text-sage-500 mt-3 mb-0">Si en cambio se prepara con varios insumos, escribilos o agregalos abajo.</p>
           </div>
 
+          <!-- Receta escrita: una línea por ingrediente, con lo que se entendió de cada una -->
+          <ng-container *ngIf="recipeMode === 'text'">
+            <label class="block">
+              <span class="sr-only">Ingredientes de una unidad del plato, uno por línea</span>
+              <textarea [(ngModel)]="recipeText" rows="5" autocapitalize="sentences" spellcheck="false"
+                placeholder="Granos de café 18 g&#10;Leche 100 ml"
+                class="w-full rounded-xl border border-sage-300 bg-white px-[14px] py-[12px] text-sm text-sage-900 focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25"></textarea>
+            </label>
+            <p class="m-0 mt-[6px] text-xs text-sage-600">Un ingrediente por línea: el nombre y cuánto lleva <strong>una</strong> unidad del plato. Ej: Leche 100 ml.</p>
+
+            <ul *ngIf="textLines.length" class="m-0 mt-[12px] list-none divide-y divide-sage-100 border-y border-sage-100 p-0" aria-label="Lo que se entendió">
+              <li *ngFor="let l of textLines; trackBy: trackLine" class="py-[8px] text-sm">
+                <div class="flex flex-wrap items-center gap-x-[12px] gap-y-[2px]">
+                  <span class="min-w-0 flex-1 break-words font-semibold text-sage-900">{{ l.status === 'ok' ? l.item!.name : (l.name || l.line) }}</span>
+                  <span *ngIf="l.status !== 'problem' || l.item" class="tabular-nums text-sage-700">{{ l.quantity }} {{ unitShort(l.unit) }}</span>
+                  <mat-icon *ngIf="l.status === 'ok'" class="!h-5 !w-5 !text-xl text-cafe-green-700" aria-label="Entendido">check</mat-icon>
+                </div>
+                <p *ngIf="l.status === 'ok' && l.item!.name.toLowerCase() !== l.name.toLowerCase()" class="m-0 text-xs text-sage-600">Es el insumo «{{ l.item!.name }}» de tu stock.</p>
+                <p *ngIf="l.status === 'problem'" class="m-0 mt-[2px] text-xs font-medium text-cafe-red-700">{{ l.problem }}</p>
+                <div *ngIf="l.status === 'missing'" class="mt-[6px] flex flex-wrap items-center gap-[8px]">
+                  <span class="w-full text-xs font-medium text-cafe-red-700">«{{ l.name }}» no está en tu stock.</span>
+                  <button type="button" (click)="createFromLine(l)" [disabled]="creatingLine"
+                    class="min-h-[44px] rounded-xl bg-cafe-green-700 px-[14px] text-sm font-bold text-white hover:bg-cafe-green-800 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Crear «{{ l.name }}»</button>
+                  <select (change)="pick(l, $any($event.target).value)" aria-label="O elegir un insumo que ya tenés"
+                    class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-[10px] text-sm">
+                    <option value="">o elegí uno que ya tenés…</option>
+                    <option *ngFor="let c of items" [value]="c._id">{{ c.name }}</option>
+                  </select>
+                </div>
+              </li>
+            </ul>
+          </ng-container>
+
+          <ng-container *ngIf="recipeMode === 'rows'">
           <div class="space-y-2">
             <div *ngFor="let r of rows; let i = index" class="flex flex-wrap items-center gap-2 p-2 bg-sage-50 rounded-xl border border-sage-300">
-              <select [(ngModel)]="r.stockItemId" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
+              <select [ngModel]="r.stockItemId" (ngModelChange)="r.stockItemId = $event; onItemChange(r)" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
                 <option *ngFor="let c of choices(r)" [value]="c._id">{{ c.name }}</option>
               </select>
               <input type="number" min="0" step="any" [(ngModel)]="r.quantity" [attr.aria-label]="'Cantidad ' + (i + 1)" placeholder="Cantidad"
                 class="w-28 px-2 py-2 rounded-xl border border-sage-300 text-sm text-right bg-white" />
-              <span class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
+              <select *ngIf="unitOptions(r).length > 1" [(ngModel)]="r.unit" [attr.aria-label]="'Unidad ' + (i + 1)" class="w-[76px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
+                <option *ngFor="let u of unitOptions(r)" [value]="u">{{ unitShort(u) }}</option>
+              </select>
+              <span *ngIf="unitOptions(r).length <= 1" class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
               <button type="button" (click)="removeRow(i)" aria-label="Quitar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
                 <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
               </button>
@@ -86,15 +132,16 @@
           </div>
 
           <button type="button" (click)="addRow()" class="mt-2 px-3 py-1.5 text-sm font-medium rounded-xl border border-sage-300 text-sage-700 bg-white hover:bg-sage-50">+ Agregar insumo</button>
+          </ng-container>
 
-          <div *ngIf="rows.length" class="mt-4 p-3 bg-cafe-green-50 border border-cafe-green-200 rounded-lg text-sm grid grid-cols-3 gap-2 text-center">
+          <div *ngIf="hasPreview" class="mt-4 p-3 bg-cafe-green-50 border border-cafe-green-200 rounded-lg text-sm grid grid-cols-3 gap-2 text-center">
             <div><p class="m-0 text-xs font-bold text-sage-500">Costo</p><p class="m-0 font-bold text-sage-900">{{ previewCost | money }}</p></div>
             <div><p class="m-0 text-xs font-bold text-sage-500">Ganancia</p><p class="m-0 font-bold" [ngClass]="(previewMargin ?? 0) < 0 ? 'text-cafe-red-700' : 'text-cafe-green-700'">{{ previewMargin | money }}</p></div>
             <div><p class="m-0 text-xs font-bold text-sage-500">Margen</p><p class="m-0 font-bold text-sage-900">{{ d.price > 0 && previewMargin !== null ? ((previewMargin / d.price) | percent:'1.0-0') : '–' }}</p></div>
           </div>
 
           <div class="mt-4 flex gap-2">
-            <button type="button" (click)="saveDish()" [disabled]="busy"
+            <button type="button" (click)="saveDish()" [disabled]="busy || (recipeMode === 'text' && !canSaveText)"
               class="px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">{{ busy ? 'Guardando…' : 'Guardar receta' }}</button>
             <button type="button" (click)="dishId = null" class="px-5 py-2.5 border border-sage-200 text-sage-700 font-medium text-sm rounded-lg hover:bg-sage-50">Cerrar</button>
           </div>
@@ -134,12 +181,15 @@
           <div class="space-y-2">
             <div *ngFor="let r of rows; let i = index" class="p-2 bg-sage-50 rounded-xl border border-sage-300">
               <div class="flex flex-wrap items-center gap-2">
-                <select [(ngModel)]="r.stockItemId" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
+                <select [ngModel]="r.stockItemId" (ngModelChange)="r.stockItemId = $event; onItemChange(r)" [attr.aria-label]="'Insumo ' + (i + 1)" class="flex-1 min-w-[150px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
                   <option *ngFor="let c of choices(r)" [value]="c._id">{{ c.name }}</option>
                 </select>
                 <input type="number" min="0" step="any" [(ngModel)]="r.quantity" [attr.aria-label]="'Cantidad ' + (i + 1)" placeholder="Cantidad"
                   class="w-28 px-2 py-2 rounded-xl border border-sage-300 text-sm text-right bg-white" />
-                <span class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
+                <select *ngIf="unitOptions(r).length > 1" [(ngModel)]="r.unit" [attr.aria-label]="'Unidad ' + (i + 1)" class="w-[76px] px-2 py-2 rounded-xl border border-sage-300 text-sm bg-white">
+                <option *ngFor="let u of unitOptions(r)" [value]="u">{{ unitShort(u) }}</option>
+              </select>
+              <span *ngIf="unitOptions(r).length <= 1" class="text-sm text-sage-600 w-10">{{ unitShort(item(r.stockItemId)?.unit || '') }}</span>
                 <button type="button" (click)="removeRow(i)" aria-label="Quitar insumo" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-cafe-red-50 text-cafe-red-700">
                   <mat-icon class="!w-5 !h-5 !text-xl">close</mat-icon>
                 </button>

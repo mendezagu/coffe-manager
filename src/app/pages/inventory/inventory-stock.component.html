@@ -7,9 +7,53 @@
       <input type="checkbox" [(ngModel)]="onlyAlerts" class="w-4 h-4 accent-[#2ed0ab]" />
       Solo bajos y agotados <span *ngIf="alertCount" class="px-2 py-0.5 rounded-full bg-cafe-red-50 text-cafe-red-700 text-xs font-bold">{{ alertCount }}</span>
     </label>
-    <button type="button" (click)="creating = !creating"
+    <button type="button" (click)="toggleBulk()" [attr.aria-expanded]="bulk"
+      class="min-h-[44px] rounded-xl border border-sage-300 bg-white px-4 text-sm font-semibold text-sage-800 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">{{ bulk ? 'Cancelar' : 'Cargar varios' }}</button>
+    <button type="button" (click)="toggleCreating()"
       class="px-4 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">{{ creating ? 'Cancelar' : '+ Nuevo insumo' }}</button>
   </div>
+
+  <!-- Carga de varios: una línea por insumo, con vista previa de lo que se va a crear -->
+  <section *ngIf="bulk" class="mb-5 rounded-2xl bg-white p-[20px] shadow-soft" aria-labelledby="bulk-title">
+    <div class="flex flex-wrap items-start justify-between gap-[12px]">
+      <div class="min-w-0">
+        <div id="bulk-title" role="heading" aria-level="3" class="m-0 font-jakarta text-base font-bold text-sage-900">Cargá todos tus insumos juntos</div>
+        <p class="m-0 mt-[4px] text-sm text-sage-600">Una línea por insumo: el nombre, cuánto tenés y la unidad.</p>
+      </div>
+      <button type="button" (click)="useExample()" class="min-h-[44px] rounded-lg px-[12px] text-sm font-semibold text-cafe-green-700 hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Ver un ejemplo</button>
+    </div>
+
+    <label class="mt-[12px] block">
+      <span class="sr-only">Lista de insumos, uno por línea</span>
+      <textarea [(ngModel)]="bulkText" rows="7" autocapitalize="sentences" spellcheck="false"
+        placeholder="Café en grano 5 kg&#10;Leche 20 litros&#10;Vasos 200"
+        class="w-full rounded-xl border border-sage-300 bg-white px-[14px] py-[12px] text-sm text-sage-900 focus:border-cafe-green-700 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25"></textarea>
+    </label>
+    <p class="m-0 mt-[6px] text-xs text-sage-600">Unidades: kg, g, litros (l), ml o unidades. Si no ponés unidad, se cuenta en unidades. Podés pegar una lista de tus notas.</p>
+
+    <!-- Lo que se entendió -->
+    <ul *ngIf="bulkRows.length" class="m-0 mt-[16px] list-none divide-y divide-sage-100 border-y border-sage-100 p-0" aria-label="Vista previa">
+      <li *ngFor="let r of bulkRows; trackBy: trackBulk" class="flex min-h-[44px] flex-wrap items-center gap-x-[12px] gap-y-[2px] py-[8px] text-sm">
+        <span class="min-w-0 flex-1 break-words font-semibold" [ngClass]="r.ok && !r.dup && (!r.similar || r.forced) ? 'text-sage-900' : 'text-sage-600'">{{ r.ok ? r.name : r.line }}</span>
+        <span *ngIf="r.ok && !r.dup && (!r.similar || r.forced)" class="tabular-nums text-sage-700">{{ r.quantity ? formatQty(r.quantity, r.unit) : 'sin cantidad' }}</span>
+        <span *ngIf="r.similar && !r.forced" class="rounded-full bg-sage-100 px-2.5 py-0.5 text-xs font-bold text-sage-700">Se saltea</span>
+        <span *ngIf="r.similar" class="flex w-full flex-wrap items-center gap-x-[8px] text-xs text-sage-700">
+          <span>Se parece a «{{ r.similar }}», que ya tenés.</span>
+          <button type="button" (click)="toggleForce(r)" class="min-h-[36px] rounded-lg px-[8px] font-semibold text-cafe-green-700 hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">{{ r.forced ? 'No crear' : 'Crear igual' }}</button>
+        </span>
+        <span *ngIf="r.dup" class="rounded-full bg-sage-100 px-2.5 py-0.5 text-xs font-bold text-sage-700">Ya existe: se saltea</span>
+        <span *ngIf="!r.ok" class="w-full text-xs font-medium text-cafe-red-700">{{ r.problem }}</span>
+      </li>
+    </ul>
+
+    <div class="mt-[16px] flex flex-wrap items-center gap-[12px]">
+      <button type="button" (click)="createMany()" [disabled]="bulkBusy || !bulkReady.length"
+        class="min-h-[44px] rounded-xl bg-cafe-green-700 px-[20px] text-sm font-bold text-white hover:bg-cafe-green-800 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+        {{ bulkBusy ? 'Creando…' : bulkReady.length === 1 ? 'Crear 1 insumo' : bulkReady.length ? 'Crear ' + bulkReady.length + ' insumos' : 'Crear insumos' }}
+      </button>
+      <span class="text-sm text-sage-600">El mínimo y el costo se cargan después, en cada insumo.</span>
+    </div>
+  </section>
 
   <!-- Alta -->
   <form *ngIf="creating" (ngSubmit)="create()" #nf="ngForm" class="mb-5 p-[20px] bg-white rounded-2xl shadow-soft grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">

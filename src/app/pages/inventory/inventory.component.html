@@ -30,21 +30,71 @@
       <a routerLink="/settings" class="inline-block px-5 py-2.5 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">Ir a Mi negocio</a>
     </div>
 
-    <ng-container *ngIf="loaded && enabled">
+    <ng-container *ngIf="loaded && enabled && setupLoaded">
+
+      <!-- Guía de arranque: dos pasos; mientras falten, el resto del menú se va habilitando de a poco -->
+      <section *ngIf="showGuide" class="mb-5 rounded-2xl bg-white shadow-soft" aria-labelledby="inv-guide-title">
+        <div class="flex items-center gap-3 p-4 sm:p-5">
+          <div class="min-w-0 flex-1">
+            <div id="inv-guide-title" role="heading" aria-level="2" class="m-0 font-jakarta text-base font-bold text-sage-900">Poné en marcha tu inventario</div>
+            <div class="mt-1.5 flex items-center gap-3">
+              <div class="h-2 max-w-[220px] flex-1 overflow-hidden rounded-full bg-sage-100" role="progressbar" [attr.aria-valuenow]="percent" aria-valuemin="0" aria-valuemax="100">
+                <div class="h-full rounded-full bg-cafe-green-700 transition-all duration-500" [style.width.%]="percent"></div>
+              </div>
+              <span class="text-sm font-medium tabular-nums text-sage-700">{{ percent }} %</span>
+            </div>
+          </div>
+          <button type="button" (click)="hideGuide()" class="min-h-[44px] flex-none rounded-lg px-[12px] text-sm font-medium text-sage-600 hover:bg-sage-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">Ocultar</button>
+        </div>
+        <ul class="m-0 grid list-none grid-cols-[minmax(0,1fr)] gap-[4px] border-t border-sage-100 p-[12px] sm:p-[16px]">
+          <li *ngFor="let s of steps; let i = index">
+            <div class="flex min-h-[56px] flex-wrap items-center gap-[12px] rounded-xl p-[12px] sm:flex-nowrap" [ngClass]="i === nextStep ? 'bg-cafe-green-50' : ''">
+              <span class="grid h-8 w-8 flex-none place-items-center rounded-full" aria-hidden="true"
+                [ngClass]="s.done ? 'bg-cafe-green-700 text-white' : i === nextStep ? 'bg-cafe-green-700 text-white' : 'border-2 border-sage-300 text-sage-600'">
+                <mat-icon *ngIf="s.done" class="!h-5 !w-5 !text-xl">check</mat-icon>
+                <span *ngIf="!s.done" class="text-sm font-bold">{{ i + 1 }}</span>
+              </span>
+              <span class="min-w-0 flex-1 basis-[calc(100%-3rem)] sm:basis-0">
+                <span class="block font-bold" [ngClass]="s.done ? 'text-sm text-sage-600 line-through' : i === nextStep ? 'text-base text-sage-900' : 'text-sm text-sage-900'">{{ s.title }}</span>
+                <span class="block text-sm text-sage-600">{{ s.hint }}</span>
+              </span>
+              <button *ngIf="!s.done" type="button" (click)="go(s.tab)"
+                class="inline-flex min-h-[44px] w-full flex-none items-center justify-center rounded-xl px-[16px] text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2 sm:w-auto"
+                [ngClass]="i === nextStep ? 'bg-cafe-green-700 text-white hover:bg-cafe-green-800' : 'border border-sage-300 bg-white text-sage-800 hover:bg-sage-50'">{{ s.cta }}</button>
+              <span class="sr-only">{{ s.done ? '(hecho)' : '(pendiente)' }}</span>
+            </div>
+          </li>
+        </ul>
+        <p class="m-0 border-t border-sage-100 px-[16px] py-[12px] text-sm text-sage-600 sm:px-[20px]">
+          Con tu primer insumo se habilita <strong>Control</strong>; con tu primera receta, <strong>Rentabilidad</strong>.
+        </p>
+      </section>
+
       <div class="inline-flex flex-wrap p-[3px] mb-5 bg-white border border-sage-300 rounded-xl shadow-soft" role="tablist" aria-label="Secciones del inventario">
-        <button *ngFor="let t of tabs" type="button" role="tab" (click)="tab = t.key" [attr.aria-selected]="tab === t.key"
-          class="px-3.5 py-2 text-sm font-medium rounded-lg transition-colors inline-flex items-center gap-1.5"
+        <button *ngFor="let t of visibleTabs" type="button" role="tab" (click)="tab = t.key" [attr.aria-selected]="tab === t.key"
+          class="px-3.5 py-2 text-sm font-medium rounded-lg transition-colors inline-flex items-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
           [ngClass]="tab === t.key ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">
           <mat-icon class="!w-4 !h-4 !text-base">{{ t.icon }}</mat-icon>
           {{ t.label }}
         </button>
       </div>
 
-      <app-inventory-stock *ngIf="tab === 'stock'"></app-inventory-stock>
-      <app-inventory-recipes *ngIf="tab === 'recipes'"></app-inventory-recipes>
-      <app-inventory-count *ngIf="tab === 'count'"></app-inventory-count>
-      <app-inventory-movements *ngIf="tab === 'movements'"></app-inventory-movements>
+      <app-inventory-stock *ngIf="tab === 'stock'" (changed)="refreshSetup()"></app-inventory-stock>
+      <app-inventory-recipes *ngIf="tab === 'recipes'" (changed)="refreshSetup()"></app-inventory-recipes>
       <app-inventory-profit *ngIf="tab === 'profit'"></app-inventory-profit>
+
+      <ng-container *ngIf="tab === 'control'">
+        <div class="mb-4 inline-flex rounded-xl border border-sage-300 bg-white p-[3px] shadow-soft" role="group" aria-label="Qué controlar">
+          <button type="button" (click)="control = 'count'" [attr.aria-pressed]="control === 'count'"
+            class="min-h-[40px] rounded-lg px-3.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+            [ngClass]="control === 'count' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Contar el stock</button>
+          <button type="button" (click)="control = 'movements'" [attr.aria-pressed]="control === 'movements'"
+            class="min-h-[40px] rounded-lg px-3.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+            [ngClass]="control === 'movements' ? 'bg-cafe-green-700 text-white' : 'text-sage-700 hover:bg-sage-50'">Movimientos</button>
+        </div>
+        <app-inventory-count *ngIf="control === 'count'"></app-inventory-count>
+        <app-inventory-movements *ngIf="control === 'movements'"></app-inventory-movements>
+      </ng-container>
     </ng-container>
 
   </div>

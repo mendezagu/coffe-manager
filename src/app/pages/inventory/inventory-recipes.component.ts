@@ -1,12 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DishRecipe, InventoryService, OptionRecipe, StockItem, errorText } from 'src/app/services/inventory.service';
-import { unitShort } from 'src/app/utils/stock';
+import { convertQty, nameTokens, namesSimilar, normalizeName, parseStockLines, unitHint, unitShort } from 'src/app/utils/stock';
 
 interface Row {
   stockItemId: string;
   quantity: number | null;
+  // unidad en la que se escribe la cantidad (ej: ml aunque el insumo se cuente en litros)
+  unit?: string;
   replacesStockItemId?: string; // solo en opciones
+}
+
+// Una línea de la receta escrita y lo que se entendió de ella
+interface RecipeLine {
+  key: string;
+  line: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  status: 'ok' | 'missing' | 'problem';
+  item?: StockItem;
+  qtyItem?: number; // en la unidad del insumo
+  problem?: string;
 }
 
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -16,6 +31,9 @@ const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').repl
   templateUrl: './inventory-recipes.component.html',
 })
 export class InventoryRecipesComponent implements OnInit {
+  // Avisa a Inventario cuando cambian las recetas (para actualizar la guía de arranque)
+  @Output() changed = new EventEmitter<void>();
+
   mode: 'dishes' | 'options' = 'dishes';
   loading = true;
   busy = false;
@@ -37,6 +55,120 @@ export class InventoryRecipesComponent implements OnInit {
   // Para vincular un producto que se vende tal cual con un insumo que ya existe
   simpleItemId = '';
 
+  // ---- receta escrita en texto ----
+  // 'text': se escribe una línea por ingrediente ("Leche 100 ml"). 'rows': se arma de a uno, eligiendo de la lista.
+  recipeMode: 'text' | 'rows' = 'text';
+  recipeText = '';
+  // Insumo elegido a mano para una línea que no se encontró por nombre (clave = nombre escrito)
+  private picked: Record<string, string> = {};
+  creatingLine = false;
+
+  // Las líneas se recalculan en cada ciclo: sin esto Angular recrea los botones y un clic que los cruza se pierde
+  trackLine = (index: number, l: { key: string }) => index + "|" + l.key;
+
+  // Qué se entendió de cada línea
+  get textLines(): RecipeLine[] {
+    return parseStockLines(this.recipeText).map((p) => {
+      const key = normalizeName(p.name);
+      const base = { key, line: p.line, name: p.name, quantity: p.quantity, unit: p.unit };
+      if (!p.ok) return { ...base, status: 'problem' as const, problem: p.problem };
+      if (!(p.quantity > 0)) return { ...base, status: 'problem' as const, problem: `Falta la cantidad. Escribila así: «100 g de ${p.name}» o «${p.name} 100 g».` };
+      const item = this.picked[key] ? this.item(this.picked[key]) : this.findItem(p.name);
+      if (!item) return { ...base, status: 'missing' as const };
+      const qtyItem = convertQty(p.quantity, p.unit, item.unit);
+      if (qtyItem === null) return { ...base, status: 'problem' as const, item, problem: `«${item.name}» se cuenta en ${unitHint(item.unit)}.` };
+      return { ...base, status: 'ok' as const, item, qtyItem };
+    });
+  }
+
+  // El insumo que más se parece al nombre escrito: primero el igual, después el parecido más cercano
+  private findItem(name: string): StockItem | undefined {
+    const n = normalizeName(name);
+    const exact = this.items.find((i) => normalizeName(i.name) === n);
+    if (exact) return exact;
+    const mine = nameTokens(name).length;
+    return this.items
+      .filter((i) => namesSimilar(i.name, name))
+      .sort((a, b) => Math.abs(nameTokens(a.name).length - mine) - Math.abs(nameTokens(b.name).length - mine))[0];
+  }
+
+  get canSaveText(): boolean {
+    const lines = this.textLines;
+    return lines.length > 0 && lines.every((l) => l.status === 'ok');
+  }
+
+  pick(line: RecipeLine, itemId: string) {
+    if (itemId) this.picked = { ...this.picked, [line.key]: itemId };
+  }
+
+  // Crea el insumo que falta, ahí mismo: si la receta lo pide en ml o g, se cuenta en litros o kilos (como se compra)
+  createFromLine(line: RecipeLine) {
+    if (this.creatingLine) return;
+    this.creatingLine = true;
+    const unit = line.unit === 'ml' ? 'l' : line.unit === 'g' ? 'kg' : line.unit;
+    this.inventory.createItem({ name: line.name, unit, minStock: 0, costPerUnit: 0, initialQuantity: 0 }).subscribe({
+      next: (created) => {
+        this.creatingLine = false;
+        this.items = [...this.items, created];
+        this.notify(`Se creó «${created.name}». Cargá cuánto tenés y su costo en Stock.`);
+      },
+      error: (err) => {
+        this.creatingLine = false;
+        this.notify(errorText(err, 'No se pudo crear el insumo'));
+      },
+    });
+  }
+
+  setRecipeMode(mode: 'text' | 'rows') {
+    if (mode === this.recipeMode) return;
+    if (mode === 'rows') {
+      // lo ya entendido pasa a filas
+      const ok = this.textLines.filter((l) => l.status === 'ok');
+      if (ok.length) this.rows = ok.map((l) => ({ stockItemId: l.item!._id, quantity: l.quantity, unit: l.unit }));
+    } else {
+      this.recipeText = this.rows
+        .map((r) => {
+          const it = this.item(r.stockItemId);
+          return it ? `${it.name} ${Number(r.quantity) || ''} ${unitShort(r.unit ?? it.unit)}`.replace(/\s+/g, ' ').trim() : '';
+        })
+        .filter(Boolean)
+        .join('\n');
+    }
+    this.recipeMode = mode;
+  }
+
+  // Receta escrita: se guarda como las demás, con las cantidades ya pasadas a la unidad de cada insumo
+  private saveFromText() {
+    const d = this.selectedDish;
+    if (!d || this.busy) return;
+    if (!this.canSaveText) {
+      this.notify('Resolvé las líneas marcadas antes de guardar');
+      return;
+    }
+    const totals = new Map<string, number>();
+    for (const l of this.textLines) totals.set(l.item!._id, Math.round(((totals.get(l.item!._id) ?? 0) + l.qtyItem!) * 1e4) / 1e4);
+    const ingredients = [...totals.entries()].map(([stockItemId, quantity]) => ({ stockItemId, quantity }));
+    this.busy = true;
+    this.inventory.setRecipe(d.menuItemId, ingredients).subscribe({
+      next: () => {
+        this.busy = false;
+        this.load();
+        this.notify('Receta guardada');
+      },
+      error: (err) => this.fail(err, 'No se pudo guardar la receta'),
+    });
+  }
+
+  // Hay algo que mostrar en el costo y la ganancia
+  get hasPreview(): boolean {
+    return this.recipeMode === 'text' ? this.textLines.some((l) => l.status === 'ok') : this.rows.length > 0;
+  }
+
+  // El plato todavía no tiene ingredientes escritos ni elegidos
+  get noIngredients(): boolean {
+    return this.recipeMode === 'text' ? !this.recipeText.trim() : this.rows.length === 0;
+  }
+
   constructor(private inventory: InventoryService, private snackBar: MatSnackBar) {}
 
   ngOnInit() {
@@ -46,7 +178,10 @@ export class InventoryRecipesComponent implements OnInit {
   load() {
     let pending = 3;
     const done = () => {
-      if (--pending === 0) this.loading = false;
+      if (--pending === 0) {
+        this.loading = false;
+        this.changed.emit();
+      }
     };
     const fail = (err: any) => {
       done();
@@ -86,20 +221,28 @@ export class InventoryRecipesComponent implements OnInit {
   editDish(d: DishRecipe) {
     this.dishId = d.menuItemId;
     this.simpleItemId = '';
-    this.rows = d.ingredients.map((i) => ({ stockItemId: i.stockItemId, quantity: i.quantity }));
+    // Un plato sin receta arranca escribiéndola; uno con receta se ve en filas
+    this.recipeMode = d.ingredients.length ? 'rows' : 'text';
+    this.recipeText = '';
+    this.picked = {};
+    this.rows = d.ingredients.map((i) => ({ stockItemId: i.stockItemId, ...this.shown(i.quantity, i.unit) }));
   }
 
   // Costo de la receta que se está armando, con los costos actuales
   get previewCost(): number {
-    return this.rows.reduce((sum, r) => sum + (Number(r.quantity) || 0) * (this.item(r.stockItemId)?.costPerUnit ?? 0), 0);
+    if (this.recipeMode === 'text') {
+      return this.textLines.reduce((sum, l) => sum + (l.status === 'ok' ? l.qtyItem! * l.item!.costPerUnit : 0), 0);
+    }
+    return this.rows.reduce((sum, r) => sum + this.inItemUnit(r) * (this.item(r.stockItemId)?.costPerUnit ?? 0), 0);
   }
 
   get previewMargin(): number | null {
     const d = this.selectedDish;
-    return d && this.rows.length ? d.price - this.previewCost : null;
+    return d && this.hasPreview ? d.price - this.previewCost : null;
   }
 
   saveDish() {
+    if (this.recipeMode === 'text') return this.saveFromText();
     const d = this.selectedDish;
     if (!d || this.busy) return;
     const ingredients = this.cleanRows();
@@ -166,7 +309,7 @@ export class InventoryRecipesComponent implements OnInit {
 
   editOption(o: OptionRecipe) {
     this.optionId = o.optionId;
-    this.rows = o.ingredients.map((i) => ({ stockItemId: i.stockItemId, quantity: i.quantity, replacesStockItemId: i.replacesStockItemId ?? '' }));
+    this.rows = o.ingredients.map((i) => ({ stockItemId: i.stockItemId, ...this.shown(i.quantity, i.unit), replacesStockItemId: i.replacesStockItemId ?? '' }));
   }
 
   saveOption() {
@@ -199,11 +342,52 @@ export class InventoryRecipesComponent implements OnInit {
       this.notify('No quedan insumos para agregar. Creá uno nuevo en Stock.');
       return;
     }
-    this.rows.push({ stockItemId: next._id, quantity: null, ...(this.mode === 'options' ? { replacesStockItemId: '' } : {}) });
+    this.rows.push({ stockItemId: next._id, quantity: null, unit: this.defaultUnit(next.unit), ...(this.mode === 'options' ? { replacesStockItemId: '' } : {}) });
   }
 
   removeRow(index: number) {
     this.rows.splice(index, 1);
+  }
+
+  // ---- unidades de la receta ----
+  // Un insumo que se cuenta en litros se puede escribir en ml (y en kilos, en gramos): una receta usa 100 ml de leche,
+  // no 0,1 litros. Se guarda siempre en la unidad del insumo.
+  private readonly unitFamily: Record<string, string[]> = { l: ['ml', 'l'], ml: ['ml', 'l'], kg: ['g', 'kg'], g: ['g', 'kg'] };
+  private readonly bigUnits = ['l', 'kg'];
+
+  unitOptions(r: Row): string[] {
+    const u = this.item(r.stockItemId)?.unit;
+    return u ? this.unitFamily[u] ?? [u] : [];
+  }
+
+  private defaultUnit(itemUnit: string): string {
+    return itemUnit === 'l' ? 'ml' : itemUnit === 'kg' ? 'g' : itemUnit;
+  }
+
+  // Al elegir otro insumo, la unidad vuelve a la más cómoda para ese insumo
+  onItemChange(r: Row) {
+    const it = this.item(r.stockItemId);
+    if (it) r.unit = this.defaultUnit(it.unit);
+  }
+
+  // De lo escrito (en la unidad elegida) a la unidad del insumo
+  private inItemUnit(r: Row): number {
+    const q = Number(r.quantity) || 0;
+    const itemUnit = this.item(r.stockItemId)?.unit;
+    const shown = r.unit ?? itemUnit;
+    if (!itemUnit || !shown || shown === itemUnit) return q;
+    const itemBig = this.bigUnits.includes(itemUnit);
+    const shownBig = this.bigUnits.includes(shown);
+    const converted = itemBig && !shownBig ? q / 1000 : !itemBig && shownBig ? q * 1000 : q;
+    return Math.round(converted * 1e4) / 1e4;
+  }
+
+  // De lo guardado a lo que se muestra: 0,1 l pasa a "100 ml"
+  private shown(quantity: number, itemUnit: string): { quantity: number; unit: string } {
+    if (this.bigUnits.includes(itemUnit) && quantity > 0 && quantity < 1) {
+      return { quantity: Math.round(quantity * 1000 * 100) / 100, unit: this.defaultUnit(itemUnit) };
+    }
+    return { quantity, unit: itemUnit };
   }
 
   item(id: string): StockItem | undefined {
@@ -224,7 +408,7 @@ export class InventoryRecipesComponent implements OnInit {
         return null;
       }
     }
-    return this.rows.map((r) => ({ stockItemId: r.stockItemId, quantity: Number(r.quantity), replacesStockItemId: r.replacesStockItemId }));
+    return this.rows.map((r) => ({ stockItemId: r.stockItemId, quantity: this.inItemUnit(r), replacesStockItemId: r.replacesStockItemId }));
   }
 
   private fail(err: any, fallback: string) {

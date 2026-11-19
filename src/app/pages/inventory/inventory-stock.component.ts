@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { InventoryService, StockItem, STOCK_UNITS, errorText } from 'src/app/services/inventory.service';
-import { STATUS_LABELS, costUnitLabel, formatQty, toShownCost, toStoredCost, unitShort } from 'src/app/utils/stock';
+import { MAX_BULK_LINES, ParsedStockLine, STATUS_LABELS, costUnitLabel, formatQty, parseStockLines, toShownCost, toStoredCost, unitShort } from 'src/app/utils/stock';
+import { of } from 'rxjs';
+import { catchError, concatMap, toArray } from 'rxjs/operators';
+import { from } from 'rxjs';
 
 type PanelMode = 'purchase' | 'waste' | 'adjust' | 'edit';
 
@@ -10,6 +13,9 @@ type PanelMode = 'purchase' | 'waste' | 'adjust' | 'edit';
   templateUrl: './inventory-stock.component.html',
 })
 export class InventoryStockComponent implements OnInit {
+  // Avisa a Inventario cuando cambian los insumos (para actualizar la guía de arranque)
+  @Output() changed = new EventEmitter<void>();
+
   items: StockItem[] = [];
   loading = true;
   busy = false;
@@ -25,6 +31,7 @@ export class InventoryStockComponent implements OnInit {
 
   // Alta de insumo
   creating = false;
+  private autoOpened = false;
   newItem = { name: '', unit: 'unidad', minStock: null as number | null, cost: null as number | null, initial: null as number | null };
 
   // Panel de una fila (entrada, merma, ajuste o edición)
@@ -42,6 +49,12 @@ export class InventoryStockComponent implements OnInit {
       next: (items) => {
         this.items = items;
         this.loading = false;
+        // Sin ningún insumo, la carga de varios ya viene abierta: lo más rápido para empezar
+        if (items.length === 0 && !this.autoOpened) {
+          this.autoOpened = true;
+          this.bulk = true;
+        }
+        this.changed.emit();
       },
       error: (err) => {
         this.loading = false;
@@ -57,6 +70,118 @@ export class InventoryStockComponent implements OnInit {
 
   get alertCount(): number {
     return this.items.filter((i) => i.active && i.status !== 'ok').length;
+  }
+
+  // ---- alta de varios a la vez ----
+
+  bulk = false;
+  bulkText = '';
+  bulkBusy = false;
+  readonly bulkExample = 'Café en grano 5 kg\nLeche 20 litros\nAzúcar 10 kg\nVasos 200\nCoca-Cola 1.25L 24';
+  readonly maxBulk = MAX_BULK_LINES;
+
+  // La vista previa se recalcula en cada ciclo: sin esto el botón "Crear igual" se recrea y el clic se pierde
+  trackBulk = (index: number, r: { name: string }) => index + "|" + r.name;
+
+  toggleCreating() {
+    this.creating = !this.creating;
+    if (this.creating) this.bulk = false;
+  }
+
+  toggleBulk() {
+    this.bulk = !this.bulk;
+    if (this.bulk) this.creating = false;
+  }
+
+  useExample() {
+    this.bulkText = this.bulkExample;
+  }
+
+  private norm(s: string): string {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  // Palabras que cuentan de un nombre ("Granos de café" y "Café en grano" comparten café y grano)
+  private tokens(name: string): string[] {
+    const stop = new Set(['de', 'del', 'la', 'el', 'los', 'las', 'en', 'con', 'y', 'x']);
+    return this.norm(name)
+      .split(' ')
+      .map((w) => (w.length > 3 && w.endsWith('s') ? w.slice(0, -1) : w))
+      .filter((w) => w && !stop.has(w));
+  }
+
+  // Un nombre "se parece" a otro si todas las palabras del más corto están en el más largo
+  private similarTo(name: string, pool: string[]): string | null {
+    const mine = this.tokens(name);
+    if (!mine.length) return null;
+    for (const other of pool) {
+      const theirs = this.tokens(other);
+      if (!theirs.length) continue;
+      const [small, big] = mine.length <= theirs.length ? [mine, theirs] : [theirs, mine];
+      if (small.every((w) => big.includes(w))) return other;
+    }
+    return null;
+  }
+
+  // Los parecidos que el usuario decidió crear igual (por nombre)
+  private forced = new Set<string>();
+
+  toggleForce(r: { name: string }) {
+    const key = this.norm(r.name);
+    if (this.forced.has(key)) this.forced.delete(key);
+    else this.forced.add(key);
+  }
+
+  // Lo que se entiende de la lista, marcando los que ya existen, están repetidos o se parecen a uno que ya tenés
+  get bulkRows(): (ParsedStockLine & { dup: boolean; similar: string | null; forced: boolean })[] {
+    const pool = this.items.map((i) => i.name);
+    const seen = new Set(pool.map((n) => this.norm(n)));
+    return parseStockLines(this.bulkText).map((r) => {
+      const key = this.norm(r.name);
+      const dup = r.ok && seen.has(key);
+      const similar = r.ok && !dup ? this.similarTo(r.name, pool) : null;
+      const forced = !!similar && this.forced.has(key);
+      if (r.ok && !dup) {
+        seen.add(key);
+        // si se crea, los siguientes de la lista se comparan también con este
+        if (!similar || forced) pool.push(r.name);
+      }
+      return { ...r, dup, similar, forced };
+    });
+  }
+
+  get bulkReady(): ParsedStockLine[] {
+    return this.bulkRows.filter((r) => r.ok && !r.dup && (!r.similar || r.forced));
+  }
+
+  createMany() {
+    const rows = this.bulkReady;
+    if (this.bulkBusy || !rows.length) return;
+    this.bulkBusy = true;
+    // de a uno y en orden: si alguno falla, los demás se crean igual y se avisa cuáles faltaron
+    from(rows)
+      .pipe(
+        concatMap((r) =>
+          this.inventory.createItem({ name: r.name, unit: r.unit, minStock: 0, costPerUnit: 0, initialQuantity: r.quantity }).pipe(
+            concatMap(() => of({ row: r, ok: true })),
+            catchError(() => of({ row: r, ok: false })),
+          ),
+        ),
+        toArray(),
+      )
+      .subscribe((results) => {
+        this.bulkBusy = false;
+        const failed = results.filter((x) => !x.ok).map((x) => x.row.line);
+        const created = results.length - failed.length;
+        this.bulkText = failed.join('\n'); // lo que no se pudo crear queda para reintentar
+        if (!failed.length) this.bulk = false;
+        this.load();
+        this.notify(
+          failed.length
+            ? `Se crearon ${created}. No se pudieron crear ${failed.length}: revisalos abajo.`
+            : created === 1 ? 'Se creó 1 insumo' : `Se crearon ${created} insumos`,
+        );
+      });
   }
 
   // ---- alta ----
