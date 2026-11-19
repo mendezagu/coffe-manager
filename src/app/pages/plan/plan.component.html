@@ -1,15 +1,7 @@
 <div class="w-full" [ngClass]="embedded ? '' : 'min-h-screen bg-sage-100'">
-  <header *ngIf="!embedded" class="page-header">
-    <div class="page-header__inner">
-      <div class="flex min-w-0 items-center gap-4">
-        <div class="page-header__icon"><mat-icon>workspace_premium</mat-icon></div>
-        <div class="min-w-0">
-          <h1 class="page-title">Tu plan</h1>
-          <p class="page-sub">Hoy tenés el plan <strong>{{ plans.currentLabel }}</strong>.</p>
-        </div>
-      </div>
-    </div>
-  </header>
+  <app-page-header *ngIf="!embedded" icon="workspace_premium" title="Tu plan">
+    <div phChips class="contents"><span class="ph-chip ph-chip--ok">Plan {{ plans.currentLabel }}</span></div>
+  </app-page-header>
 
   <div [ngClass]="embedded ? '' : 'px-4 py-6 sm:px-8 sm:py-8'">
     <div class="mx-auto max-w-7xl space-y-10">

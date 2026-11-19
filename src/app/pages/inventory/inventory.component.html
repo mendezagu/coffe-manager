@@ -1,15 +1,13 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <header class="page-header">
-    <div class="page-header__inner">
-      <div class="flex min-w-0 items-center gap-4">
-        <div class="page-header__icon"><mat-icon>inventory_2</mat-icon></div>
-        <div class="min-w-0">
-          <h1 class="page-title">Inventario</h1>
-          <p class="page-sub">Qué tenés, cuánto te queda y cuánto ganás con cada plato.</p>
-        </div>
-      </div>
+  <app-page-header icon="inventory_2" title="Inventario">
+    <div phChips class="contents">
+      <ng-container *ngIf="enabled && stockSummary">
+        <span *ngIf="stockSummary.lowCount" class="ph-chip ph-chip--warn"><b>{{ stockSummary.lowCount }}</b> con poco stock</span>
+        <span *ngIf="stockSummary.outCount" class="ph-chip ph-chip--bad"><b>{{ stockSummary.outCount }}</b> {{ stockSummary.outCount === 1 ? 'agotado' : 'agotados' }}</span>
+        <span *ngIf="!stockSummary.lowCount && !stockSummary.outCount" class="ph-chip ph-chip--ok">Stock en orden</span>
+      </ng-container>
     </div>
-  </header>
+  </app-page-header>
 
   <div class="px-4 py-6 sm:px-8 sm:py-8">
   <div class="max-w-7xl mx-auto">

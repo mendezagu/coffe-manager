@@ -334,3 +334,19 @@ Las cifras de resumen ya no van "en una línea" con cifra + texto al lado. Todas
 ## Mi negocio → Funciones (menos texto)
 
 Cada función (Inventario, Pedido por QR, Carta online, Tienda online, Reservas, Cocina) es una tarjeta con una **fila principal**: nombre, una sola línea de ayuda y un **interruptor** a la derecha (`.sw` en `styles.scss`; es un checkbox real, toda la fila se toca). Lo que depende de la función aparece debajo en **filas secundarias** del mismo estilo, separadas por líneas finas. Lo que casi nunca se toca va en `<details>` ("Capacidad y límites" en Reservas, "¿Qué cambia?" en Cocina). "Cocina y barra" pasó a ser una fila dentro de Cocina. Reglas: etiquetas de 2 a 4 palabras, ayudas de una línea, avisos de plan sólo cuando la función está bloqueada. También se pasó Operación (Cobro, Comisión y Permisos como filas con interruptor; "Cómo se calcula" plegado). Negocio también: textos más cortos (se sacó el bloque "¿Dónde activo mi carta?"), campos y botones de 44 px de alto.
+
+## Mesas: mejoras de lectura (sin cambiar el diseño)
+
+Se mantiene el diseño de las fichas (libre blanca, ocupada en rojo suave, QR en naranja). Cambios chicos: etiqueta de sector arriba del nombre en la vista Conjunta; tiempo abierta en cada mesa ocupada ("13 min · Carlos", en negrita desde 1 h; requiere `openedAt` de la API); el "Sin mozo" ya no se repite en las mesas libres (en una ocupada sí, en negrita); el motivo de una mesa que pide atención ya no se corta (hasta 2 líneas); "Permanencia promedio" no se parte y muestra días ("2 d 5 h") en vez de horas sueltas; el lector de pantalla anuncia cuánto lleva abierta.
+
+Fichas con relieve (clase `.mt` en `styles.scss`, aplicada desde `tileStyles`): barra de estado de 6 px a la izquierda (verde, ladrillo o naranja claro), dibujo de mesa con sillas muy tenue al fondo (máscara SVG al 10 %) y sombra teñida con el color de cada estado; al pasar el mouse sube 2 px. En oscuro, borde de luz y luz superior en lugar de sombras. El estado sigue leyéndose por texto y forma; la barra y el dibujo son refuerzo.
+
+## Encabezado de pantalla unificado (`app-page-header`)
+
+Todas las vistas usan `<app-page-header icon title [subtitle]>` (`components/page-header`). Ranuras por atributo:
+`phBack` (volver), `phChips` (estado de solo lectura), `phActions` (una principal `.ph-btn--primary`, resto secundarias/destructivas)
+y `phTools` (fila de filtros/períodos debajo). Envolver el contenido en `<div phX class="contents">` y no poner `*ngIf` en el
+elemento proyectado. Estilos `.ph-*` al final de `styles.scss` (con variantes oscuras explícitas). Chips: verde = bien,
+naranja = atención, rojo = problema, gris = dato. Subtítulo solo en pantallas de menú/orientación (Panel admin, Mi negocio).
+En celular los chips y acciones bajan a una segunda fila. Mesas muestra "N de M ocupadas" y "N esperan atención";
+Inventario consulta `inventory.summary()` para sus chips de stock.

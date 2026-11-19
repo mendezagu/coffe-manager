@@ -101,6 +101,8 @@ export interface Table {
   // lugar en el plano del salón, en % del ancho y del alto (null = todavía sin ubicar)
   layoutX?: number | null;
   layoutY?: number | null;
+  // desde cuándo está abierta la mesa (primer pedido); null si está libre
+  openedAt?: string | null;
 }
 
 export interface Waiter {

@@ -3,31 +3,42 @@
   <!-- Sidebar (solo visible si está autenticado) -->
   <mat-drawer #sidenav class="example-sidenav d-flex flex-column" [mode]="isMobile ? 'over' : 'side'" [(opened)]="drawerOpen" (click)="onDrawerClick($event)" *ngIf="isLoggedIn && !publicPage">
     <!-- Marca del producto: la "o" de Tavolapp es un plato -->
-    <div class="px-4 pt-1 flex items-center justify-between" aria-label="Tavolapp"><img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="123" height="30" style="height:30px;width:auto;display:block"><button *ngIf="isMobile" type="button" (click)="drawerOpen = false" aria-label="Cerrar el menú" class="nav-item-btn grid h-12 w-12 flex-none place-items-center rounded-full text-white [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ed0ab]"><mat-icon>close</mat-icon></button></div>
+    <img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="103" height="25" class="mb-3 block flex-none self-start" style="height:25px;width:auto;max-width:100%">
 
-    <!-- Negocio: logo arriba y nombre debajo -->
-    <div class="mt-5 mb-2 px-3 flex flex-col items-center text-center">
-      <img
-        class="w-[76px] h-[76px] rounded-full object-cover ring-2 ring-white shadow-[0_0_0_3px_#cdd3da]"
-        [src]="(settings.settings$ | async)?.logoUrl || ''"
-        [alt]="(settings.settings$ | async)?.name"
-        *ngIf="(settings.settings$ | async)?.logoUrl"
-      />
-      <span class="block mt-3 text-sage-800 font-bold text-lg leading-tight break-words max-w-full">{{ (settings.settings$ | async)?.name }}</span>
-      <span *ngIf="user$ | async as user" class="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-cafe-green-50 text-cafe-green-700 text-xs font-bold">{{ roleLabels[user.role] }}</span>
-      <!-- Código del local: cualquier persona del equipo lo ve acá, por si tiene que ingresar en otro dispositivo -->
-      <p *ngIf="(settings.settings$ | async)?.loginCode as code" class="m-0 mt-2 text-[11px] leading-tight text-sage-500">
-        Código del local: <strong class="font-mono text-sage-700 select-all">{{ code }}</strong>
-      </p>
+    <!-- Negocio: avatar, nombre, rol y código en una sola fila compacta -->
+    <div class="flex items-center gap-3 pb-3 border-b-[1px] border-white/10">
+      <img *ngIf="(settings.settings$ | async)?.logoUrl as logo; else noLogo" class="h-10 w-10 flex-none rounded-xl object-cover" [src]="logo" [alt]="(settings.settings$ | async)?.name" />
+      <ng-template #noLogo><span class="grid h-10 w-10 flex-none place-items-center rounded-xl bg-white/10 text-base font-bold text-white" aria-hidden="true">{{ ((settings.settings$ | async)?.name || '?').charAt(0).toUpperCase() }}</span></ng-template>
+      <div class="min-w-0 flex-1">
+        <span class="block truncate text-[15px] font-bold leading-tight text-white">{{ (settings.settings$ | async)?.name }}</span>
+        <div class="mt-1 flex flex-wrap items-center gap-x-[6px] gap-y-1 text-[11px] leading-tight">
+          <span *ngIf="user$ | async as user" class="font-bold text-[#6fe3c6]">{{ roleLabels[user.role] }}</span>
+          <!-- Código del local: cualquier persona del equipo lo ve acá, por si tiene que ingresar en otro dispositivo -->
+          <button *ngIf="(settings.settings$ | async)?.loginCode as code" type="button" (click)="copyCode(code)" [attr.aria-label]="'Copiar el código del local ' + code" title="Copiar el código del local"
+            class="nav-item-btn inline-flex min-w-0 items-center gap-1 rounded-md bg-white/10 px-[6px] py-[1px] font-mono text-[10.5px] text-[#e3e7ed]">
+            <span class="truncate">{{ code }}</span><mat-icon class="!h-3 !w-3 !text-[12px] flex-none">content_copy</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button *ngIf="isMobile" type="button" (click)="drawerOpen = false" aria-label="Cerrar el menú" class="nav-item-btn grid h-12 w-12 flex-none place-items-center rounded-full text-white [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ed0ab]"><mat-icon>close</mat-icon></button>
     </div>
 
+    <!-- Estado de la caja a la vista (administrador y cajero) -->
+    <a *ngIf="((role$ | async) === 'admin' || (role$ | async) === 'cashier') && (cash.state$ | async) as c" routerLink="/cash"
+      class="mt-3 flex items-center gap-2 rounded-[10px] bg-white/10 px-3 py-[9px] text-xs font-semibold text-[#e3e7ed] no-underline hover:bg-white/15">
+      <span class="h-2 w-2 flex-none rounded-full" [ngClass]="c.open ? 'bg-[#2ed0ab] shadow-[0_0_0_3px_rgba(46,208,171,.22)]' : 'bg-[#98a4b5]'" aria-hidden="true"></span>
+      <span *ngIf="c.open">Caja abierta<ng-container *ngIf="c.register?.openedAt"> · desde {{ c.register?.openedAt | date: 'HH:mm' }}</ng-container></span>
+      <span *ngIf="!c.open">Caja cerrada</span>
+    </a>
+
+    <div class="sidenav-nav -mx-2 mt-1 min-h-0 flex-1 overflow-y-auto px-2">
     <ng-container *ngIf="role$ | async as role">
 
       <!-- Operación: lo que se usa todo el día -->
       <p class="px-3 mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-sage-400">Operación</p>
-      <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar' && plans.showTables" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
-        <mat-icon fontIcon="storefront"></mat-icon>
-        Inicio
+      <button mat-button routerLink="/home" *ngIf="role !== 'kitchen' && role !== 'bar' && plans.showTables" routerLinkActive="nav-active !font-bold" class="!text-sage-600 !rounded-xl !mb-1 !h-11 !justify-start">
+        <mat-icon fontIcon="table_restaurant"></mat-icon>
+        Mesas
         <app-plan-badge plan="basic"></app-plan-badge>
         <span *ngIf="(qr.inbox$ | async) as q" [hidden]="(q.requests.length + q.calls.length) === 0"
           class="absolute right-[12px] top-1/2 -translate-y-1/2 min-w-[26px] h-[26px] px-[8px] rounded-full bg-cafe-red-700 text-white text-[13px] font-bold leading-[26px] tabular-nums text-center"
@@ -77,11 +88,13 @@
       <!-- Configuración: casi nunca. Se habilita antes que el resto: en cuanto hay menú, mesas, mozo y caja -->
       <ng-container *ngIf="role === 'admin' && !(onboarding.adminLocked$ | async)">
         <p class="px-3 mt-4 mb-1 text-xs font-bold uppercase tracking-wider text-sage-400">Configuración</p>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'admin', link: '/admin', icon: 'settings', label: 'Administrar', plan: 'basic' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'admin', link: '/admin', icon: 'settings', label: 'Panel admin', plan: 'basic' }"></ng-container>
         <ng-container *ngTemplateOutlet="navItem; context: { key: 'settings', link: '/settings', icon: 'business', label: 'Mi negocio', plan: 'basic' }"></ng-container>
-        <ng-container *ngTemplateOutlet="navItem; context: { key: 'logs', link: '/logs', icon: 'lock', label: 'Logs', feature: 'logs' }"></ng-container>
+        <ng-container *ngTemplateOutlet="navItem; context: { key: 'logs', link: '/logs', icon: 'history', label: 'Historial', feature: 'logs' }"></ng-container>
       </ng-container>
     </ng-container>
+
+    </div>
 
     <!-- Ítem del menú. Si es nuevo (se habilitó durante los primeros pasos) se resalta, con la etiqueta "Nuevo" y una
          ayuda que explica en una frase para qué sirve -->
@@ -90,12 +103,13 @@
         <!-- La fila entera se resalta (no el botón): así el borde, el brillo y los íconos no se pisan -->
         <div class="flex items-center rounded-xl border-[1px] transition-colors"
           [ngClass]="nav.isNew(key) ? 'border-cafe-green-700/40 bg-cafe-green-50 nav-glow' : 'border-transparent'">
-          <button mat-button [routerLink]="link" (click)="nav.markSeen(key)" routerLinkActive="!bg-cafe-green-50 !text-cafe-green-700 !font-bold"
+          <button mat-button [routerLink]="link" (click)="nav.markSeen(key)" routerLinkActive="nav-active !font-bold"
             class="nav-item-btn !min-w-0 !flex-1 !rounded-xl !h-11 !justify-start"
             [ngClass]="nav.isNew(key) ? '!bg-transparent !text-cafe-green-800 !font-bold' : '!text-sage-600'">
             <mat-icon [fontIcon]="icon"></mat-icon>
             {{ label }}
             <app-plan-badge class="ml-auto" [plan]="plan" [feature]="feature"></app-plan-badge>
+            <span *ngIf="key === 'inventory' && stock && (stock.lowCount + stock.outCount) > 0" class="ml-auto mr-1 min-w-[22px] rounded-full bg-cafe-amber-700 px-[7px] text-center text-[11.5px] font-bold leading-[22px] text-white" [attr.aria-label]="(stock.lowCount + stock.outCount) + ' insumos por reponer'">{{ stock.lowCount + stock.outCount }}</span>
           </button>
           <!-- La ayuda se queda siempre; "nuevo" solo cambia su color (oscuro mientras no se entró a la sección) -->
           <button *ngIf="nav.hasHelp(key)" type="button" (click)="nav.toggleHelp(key)" [attr.aria-expanded]="nav.helpOpen === key"
@@ -114,10 +128,9 @@
       </div>
     </ng-template>
 
-<div class="flex-1"></div>
 
     <!-- Apariencia: claro, oscuro o automático (sigue al sistema) -->
-    <div class="mt-4 mb-3 px-1">
+    <div class="mt-3 mb-3 border-t-[1px] border-white/10 px-1 pt-3">
       <p class="mb-1.5 text-xs font-bold uppercase tracking-wider text-sage-400">Apariencia</p>
       <div class="flex rounded-xl bg-sage-100 p-[3px]" role="radiogroup" aria-label="Apariencia">
         <button *ngFor="let o of themeOptions" type="button" role="radio" [attr.aria-checked]="(theme.mode$ | async) === o.mode" [attr.aria-label]="o.label" [title]="o.label" (click)="theme.setMode(o.mode)"
@@ -190,15 +203,12 @@
             <span class="absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-white" [ngClass]="c.open ? 'bg-cafe-green-700' : 'bg-cafe-red-700'"></span>
           </a>
 
-          <!-- Turno y fecha -->
-          <div class="hidden md:flex items-center gap-2.5 pl-3 ml-1 border-l-[1px] border-sage-200">
-            <span class="w-9 h-9 rounded-xl bg-sage-100 text-sage-600 flex items-center justify-center">
-              <mat-icon class="!w-5 !h-5 !text-xl">{{ shiftIcon }}</mat-icon>
+          <!-- Turno y fecha: solo texto, para que no parezca un botón -->
+          <div class="hidden md:flex flex-col leading-tight pl-3 ml-1 border-l-[1px] border-sage-200">
+            <span class="flex items-center gap-[6px] text-sage-800 text-sm font-bold">
+              <mat-icon class="!w-4 !h-4 !text-base text-sage-500" aria-hidden="true">{{ shiftIcon }}</mat-icon>{{ shift }}
             </span>
-            <div class="flex flex-col leading-tight">
-              <span class="text-sage-800 text-sm font-bold">{{ shift }}</span>
-              <span class="text-sage-500 text-xs">{{ currentDate }}</span>
-            </div>
+            <span class="pl-[22px] text-sage-500 text-xs">{{ currentDate }}</span>
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { SettingsService } from 'src/app/services/settings.service';
 import { PlanService } from 'src/app/services/plan.service';
-import { InventoryService } from 'src/app/services/inventory.service';
+import { InventoryService, InventorySummary } from 'src/app/services/inventory.service';
 
 type Tab = 'stock' | 'recipes' | 'profit' | 'control';
 
@@ -57,7 +57,11 @@ export class InventoryComponent implements OnInit {
   }
 
   // Se vuelve a mirar cada vez que Stock o Recetas guardan algo
+  // Resumen para el encabezado: cuántos insumos tienen poco stock o se agotaron
+  stockSummary: InventorySummary | null = null;
+
   refreshSetup() {
+    this.inventory.summary().subscribe({ next: (s) => (this.stockSummary = s), error: () => {} });
     forkJoin({ items: this.inventory.items(), recipes: this.inventory.recipes() }).subscribe({
       next: ({ items, recipes }) => {
         this.hasItems = items.some((i) => i.active);

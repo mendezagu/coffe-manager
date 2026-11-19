@@ -1,19 +1,17 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <header class="page-header">
-    <div class="page-header__inner">
-      <div class="flex min-w-0 items-center gap-4">
-        <div class="page-header__icon"><mat-icon>event_seat</mat-icon></div>
-        <div class="min-w-0">
-          <h1 class="page-title">Reservas</h1>
-          <p class="page-sub">Las reservas del día y la lista de espera.</p>
-        </div>
-      </div>
-      <button *ngIf="!locked" type="button" (click)="openForm()"
-        class="inline-flex h-11 items-center gap-2 rounded-xl bg-cafe-green-700 px-5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-cafe-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
-        <mat-icon class="!h-5 !w-5 !text-xl">add</mat-icon> Nueva reserva
+  <app-page-header icon="event_seat" title="Reservas">
+    <div phChips class="contents">
+      <ng-container *ngIf="data">
+        <span class="ph-chip"><b>{{ live.length }}</b> {{ live.length === 1 ? 'reserva' : 'reservas' }}</span>
+        <span *ngIf="data.waitlist.length" class="ph-chip ph-chip--warn"><b>{{ data.waitlist.length }}</b> en lista de espera</span>
+      </ng-container>
+    </div>
+    <div phActions class="contents">
+      <button *ngIf="!locked" type="button" (click)="openForm()" class="ph-btn ph-btn--primary">
+        <mat-icon class="!h-5 !w-5 !text-xl" aria-hidden="true">add</mat-icon> Nueva reserva
       </button>
     </div>
-  </header>
+  </app-page-header>
 
   <div *ngIf="locked" class="px-4 py-6 sm:px-8 sm:py-8">
     <app-upgrade-wall feature="reservations" benefit="Tus clientes reservan solos desde una página propia y vos manejás el día y la lista de espera."></app-upgrade-wall>

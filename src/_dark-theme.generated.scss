@@ -1,10 +1,8 @@
 // ARCHIVO GENERADO por tools/gen-dark-theme.js: no se edita a mano.
 // Modo oscuro del panel interno. Si se agregan clases de color nuevas, correr:  node tools/gen-dark-theme.js
-html.dark .\!bg-cafe-green-50 { background-color: #26474a !important; }
 html.dark .\!bg-cafe-red-50 { background-color: #443035 !important; }
 html.dark .\!bg-sage-200 { background-color: #3a4252 !important; }
 html.dark .\!border-sage-200 { border-color: #3a4252 !important; }
-html.dark .\!text-cafe-green-700 { color: #95dacc !important; }
 html.dark .\!text-cafe-green-800 { color: #aee3d8 !important; }
 html.dark .\!text-cafe-red-700 { color: #e0a397 !important; }
 html.dark .\!text-sage-600 { color: #b4bcc8 !important; }
@@ -30,6 +28,7 @@ html.dark .bg-sage-50\/60 { background-color: rgba(47, 55, 68, 0.6) !important; 
 html.dark .bg-sage-50\/70 { background-color: rgba(47, 55, 68, 0.7) !important; }
 html.dark .bg-sky-50 { background-color: #29485d !important; }
 html.dark .bg-white { background-color: #252b36 !important; }
+html.dark .bg-white\/10 { background-color: rgba(37, 43, 54, 0.1) !important; }
 html.dark .bg-white\/15 { background-color: rgba(37, 43, 54, 0.15) !important; }
 html.dark .bg-white\/20 { background-color: rgba(37, 43, 54, 0.2) !important; }
 html.dark .bg-white\/70 { background-color: rgba(37, 43, 54, 0.7) !important; }
@@ -65,6 +64,7 @@ html.dark .hover\:bg-sage-100:hover { background-color: #2b323e !important; }
 html.dark .hover\:bg-sage-200:hover { background-color: #3a4252 !important; }
 html.dark .hover\:bg-sage-50:hover { background-color: #2f3744 !important; }
 html.dark .hover\:bg-white:hover { background-color: #252b36 !important; }
+html.dark .hover\:bg-white\/15:hover { background-color: rgba(37, 43, 54, 0.15) !important; }
 html.dark .hover\:border-cafe-green-200:hover { border-color: #287369 !important; }
 html.dark .hover\:border-cafe-green-300:hover { border-color: #298576 !important; }
 html.dark .hover\:border-sage-300:hover { border-color: #454e5f !important; }

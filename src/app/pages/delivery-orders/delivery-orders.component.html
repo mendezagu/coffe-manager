@@ -1,21 +1,15 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <header class="page-header">
-    <div class="page-header__inner">
-      <div class="flex min-w-0 items-center gap-4">
-        <div class="page-header__icon"><mat-icon>shopping_bag</mat-icon></div>
-        <div class="min-w-0">
-          <h1 class="page-title">Pedidos online</h1>
-          <p class="page-sub">Lo que piden tus clientes desde la tienda: aceptalo, prepará y entregá.</p>
-        </div>
-      </div>
-      <button *ngIf="!locked && settings.value.deliveryActive" type="button" (click)="pause(!settings.value.deliveryPaused)"
-        class="inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-bold transition-colors"
-        [ngClass]="settings.value.deliveryPaused ? 'bg-cafe-green-700 text-white shadow-soft hover:bg-cafe-green-800' : 'border border-sage-300 bg-white text-sage-800 hover:bg-sage-50'">
-        <mat-icon class="!h-5 !w-5 !text-xl">{{ settings.value.deliveryPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+  <app-page-header icon="shopping_bag" title="Pedidos online">
+    <div phChips class="contents">
+      <span *ngIf="!locked && settings.value.deliveryActive" class="ph-chip" [ngClass]="settings.value.deliveryPaused ? 'ph-chip--bad' : 'ph-chip--ok'">{{ settings.value.deliveryPaused ? 'Pedidos pausados' : 'Recibiendo pedidos' }}</span>
+    </div>
+    <div phActions class="contents">
+      <button *ngIf="!locked && settings.value.deliveryActive" type="button" (click)="pause(!settings.value.deliveryPaused)" class="ph-btn" [ngClass]="settings.value.deliveryPaused ? 'ph-btn--primary' : ''">
+        <mat-icon class="!h-5 !w-5 !text-xl" aria-hidden="true">{{ settings.value.deliveryPaused ? 'play_arrow' : 'pause' }}</mat-icon>
         {{ settings.value.deliveryPaused ? 'Volver a recibir pedidos' : 'Pausar pedidos' }}
       </button>
     </div>
-  </header>
+  </app-page-header>
 
   <div *ngIf="locked" class="px-4 py-6 sm:px-8 sm:py-8">
     <app-upgrade-wall feature="online_store" benefit="Tus clientes piden desde un link o un QR, para retirar o con envío, y el pedido te llega al instante."></app-upgrade-wall>

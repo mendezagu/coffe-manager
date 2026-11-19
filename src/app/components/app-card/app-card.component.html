@@ -1,17 +1,12 @@
 <!-- Inicio: resumen, filtros y mesas. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con
      !important y pisa a Tailwind; por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
 <div class="floor w-full min-h-screen bg-[var(--floor-bg)] font-inter">
-  <header class="page-header">
-    <div class="page-header__inner">
-      <div class="flex min-w-0 items-center gap-4">
-        <div class="page-header__icon"><mat-icon>table_restaurant</mat-icon></div>
-        <div class="min-w-0">
-          <h1 class="page-title">Mesas</h1>
-          <p class="page-sub">El salón en tiempo real: qué está libre, ocupado y por cobrar.</p>
-        </div>
-      </div>
+  <app-page-header icon="table_restaurant" title="Mesas">
+    <div phChips class="contents">
+      <span *ngIf="tablesLoaded" class="ph-chip"><b>{{ busyCount }}</b> de {{ tables.length }} ocupadas</span>
+      <span *ngIf="attentionTables.length" class="ph-chip ph-chip--warn"><b>{{ attentionTables.length }}</b> {{ attentionTables.length === 1 ? 'espera atención' : 'esperan atención' }}</span>
     </div>
-  </header>
+  </app-page-header>
 
   <div class="px-4 pb-[96px] pt-6 sm:px-8 sm:pt-8">
   <div class="max-w-7xl mx-auto flex flex-col gap-[16px]">
@@ -89,7 +84,7 @@
           </div>
           <div [ngClass]="shiftOpen ? '' : 'max-lg:hidden'" class="col-span-2 min-w-0 border-t border-[var(--floor-line)] p-[16px] sm:p-[20px] lg:col-span-1 lg:border-l lg:border-t-0">
             <p class="m-0 text-sm font-medium text-sage-600">Permanencia promedio</p>
-            <p class="m-0 mt-[2px] font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ stayText(live?.averageStayMinutes) }}</p>
+            <p class="m-0 mt-[2px] whitespace-nowrap font-inter text-[28px] font-bold leading-tight tabular-nums text-sage-900">{{ stayText(live?.averageStayMinutes) }}</p>
             <p class="m-0 mt-[2px] text-sm tabular-nums text-sage-600"><ng-container *ngIf="live && live.staysCount > 0">{{ live.staysCount }} {{ live.staysCount === 1 ? 'mesa cerrada' : 'mesas cerradas' }}</ng-container></p>
           </div>
         </ng-container>
@@ -214,9 +209,9 @@
 
       <div *ngIf="!planActive" class="grid grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-[10px] sm:gap-[12px]">
         <button *ngFor="let table of group.tables; trackBy: trackTable" type="button" (click)="tileClick(table)"
-          [attr.aria-label]="shortName(table, group.name) + ': ' + (tileTone(table) === 'alert' ? 'necesita atención, ' + tileReason(table) + (waitText(table) ? ', ' + waitText(table) : '') : isFree(table) ? 'libre' : 'ocupada') + (table.waiterId && table.waiterName?.trim() ? ', mozo ' + table.waiterName : '')"
+          [attr.aria-label]="shortName(table, group.name) + ': ' + (tileTone(table) === 'alert' ? 'necesita atención, ' + tileReason(table) + (waitText(table) ? ', ' + waitText(table) : '') : isFree(table) ? 'libre' : 'ocupada') + (table.waiterId && table.waiterName?.trim() ? ', mozo ' + table.waiterName : '') + (elapsedText(table) ? ', abierta hace ' + elapsedText(table) : '')"
           [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)" [class.floor-late]="waitingLate(table)"
-          class="relative flex min-h-[112px] min-w-0 flex-col justify-between rounded-2xl p-[14px] text-left transition duration-150 hover:-translate-y-[1px] hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transform-none"
+          class="relative flex min-h-[120px] min-w-0 flex-col justify-between rounded-2xl p-[14px] text-left transition duration-150 hover:-translate-y-[1px] hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transform-none"
           [ngClass]="tileStyles[tileTone(table)].tile">
           <ng-container *ngTemplateOutlet="tileBody; context: { $implicit: table, name: group.name }"></ng-container>
         </button>
@@ -331,17 +326,28 @@
 
 <!-- Contenido de una ficha de mesa (nombre, estado y mozo): lo usan la grilla y el plano -->
 <ng-template #tileBody let-table let-name="name">
-          <span class="block min-w-0 break-words font-inter font-bold leading-tight" [ngClass]="nameSizeClass(shortName(table, name))">{{ shortName(table, name) }}</span>
+          <span class="block min-w-0">
+            <span *ngIf="tileSector(table, name)" class="mb-[3px] block truncate text-[11px] font-semibold uppercase leading-none tracking-wider opacity-60">{{ tileSector(table, name) }}</span>
+            <span class="block min-w-0 break-words font-inter font-bold leading-tight" [ngClass]="nameSizeClass(tileTitle(table, name))">{{ tileTitle(table, name) }}</span>
+          </span>
           <span class="mt-[10px] block min-w-0">
             <span class="flex items-center gap-[8px] text-sm font-semibold">
               <span class="h-[10px] w-[10px] flex-none" [ngClass]="tileStyles[tileTone(table)].dot"></span>
-              <span class="min-w-0 flex-1 truncate">{{ tileTone(table) === 'alert' ? tileReason(table) : isFree(table) ? 'Libre' : 'Ocupada' }}</span>
-              <span *ngIf="table.orders && table.orders.length" class="flex h-[22px] min-w-[22px] flex-none items-center justify-center rounded-full px-[6px] text-xs font-bold tabular-nums" [ngClass]="tileStyles[tileTone(table)].count" [attr.title]="table.orders.length + ' órdenes'">{{ table.orders.length }}</span>
+              <span class="min-w-0 flex-1" [ngClass]="tileTone(table) === 'alert' ? 'line-clamp-2 leading-tight' : 'truncate'">{{ tileTone(table) === 'alert' ? tileReason(table) : isFree(table) ? 'Libre' : 'Ocupada' }}</span>
+              <span *ngIf="table.orders && table.orders.length" class="flex h-[22px] min-w-[22px] flex-none items-center justify-center rounded-full px-[6px] text-xs font-bold tabular-nums" [ngClass]="tileStyles[tileTone(table)].count" [attr.title]="table.orders.length + (table.orders.length === 1 ? ' orden' : ' órdenes')">{{ table.orders.length }}</span>
             </span>
             <span class="mt-[2px] block truncate text-sm" [ngClass]="tileStyles[tileTone(table)].sub">
               <ng-container *ngIf="tileTone(table) === 'alert'"><span [class.font-bold]="waitingLate(table)" class="tabular-nums">{{ waitText(table) || (table.waiterId && table.waiterName?.trim() ? table.waiterName : 'Sin mozo') }}</span></ng-container>
               <ng-container *ngIf="tileTone(table) !== 'alert' && readyCount(table) > 0"><span class="font-semibold text-[var(--floor-ready)]">✓ {{ readyCount(table) === 1 ? '1 plato listo' : readyCount(table) + ' platos listos' }}</span></ng-container>
-              <ng-container *ngIf="tileTone(table) !== 'alert' && !(readyCount(table) > 0)"><ng-container *ngIf="table.waiterId && table.waiterName?.trim(); else noWaiter">{{ table.waiterName }}</ng-container><ng-template #noWaiter>Sin mozo</ng-template></ng-container>
+              <!-- Ocupada: cuánto lleva abierta y quién la atiende. Libre: sólo se nombra al mozo si lo tiene (el "Sin mozo" repetido en cada mesa libre era ruido). -->
+              <ng-container *ngIf="tileTone(table) !== 'alert' && !(readyCount(table) > 0)">
+                <ng-container *ngIf="!isFree(table)">
+                  <span *ngIf="elapsedText(table)" class="tabular-nums" [class.font-bold]="elapsedLong(table)">{{ elapsedText(table) }}</span><span *ngIf="elapsedText(table)"> · </span>
+                  <ng-container *ngIf="table.waiterId && table.waiterName?.trim(); else sinMozoOcupada">{{ table.waiterName }}</ng-container>
+                  <ng-template #sinMozoOcupada><span class="font-semibold">Sin mozo</span></ng-template>
+                </ng-container>
+                <ng-container *ngIf="isFree(table) && table.waiterId && table.waiterName?.trim()">{{ table.waiterName }}</ng-container>
+              </ng-container>
             </span>
           </span>
 </ng-template>

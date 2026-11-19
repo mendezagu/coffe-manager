@@ -160,6 +160,8 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   stayText(minutes: number | null | undefined): string {
     if (minutes === null || minutes === undefined) return '—';
     if (minutes < 60) return `${minutes} min`;
+    // más de un día: "2 d 5 h" (en horas sueltas no se entiende, y suele ser una mesa que quedó abierta)
+    if (minutes >= 1440) return `${Math.floor(minutes / 1440)} d ${Math.floor((minutes % 1440) / 60)} h`;
     const m = minutes % 60;
     return m ? `${Math.floor(minutes / 60)} h ${m} min` : `${minutes / 60} h`;
   }
@@ -412,21 +414,54 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
     return name;
   }
 
+  // ---- Lectura rápida de la ficha ----
+
+  // Sector como etiqueta chica sobre el nombre (en la vista por sectores ya está en el título de la sección)
+  tileSector(table: Table, groupName?: string | null): string {
+    return groupName ? '' : String(table.sectorName ?? '').trim();
+  }
+
+  tileTitle(table: Table, groupName?: string | null): string {
+    return this.shortName(table, groupName || table.sectorName || '');
+  }
+
+  // Minutos que lleva abierta la mesa (desde el primer pedido); null si está libre o el servidor no lo informa
+  elapsedMinutes(table: Table): number | null {
+    const at = table.openedAt ? Date.parse(table.openedAt) : NaN;
+    if (this.isFree(table) || isNaN(at)) return null;
+    return Math.max(0, Math.floor((this.now - at) / 60000));
+  }
+
+  // "42 min", "1 h 05" o "2 d 5 h"
+  elapsedText(table: Table): string {
+    const m = this.elapsedMinutes(table);
+    if (m === null) return '';
+    if (m < 60) return m + ' min';
+    if (m >= 1440) return Math.floor(m / 1440) + ' d ' + Math.floor((m % 1440) / 60) + ' h';
+    return Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0');
+  }
+
+  // Más de una hora abierta: el tiempo se resalta para que se note qué mesa lleva mucho
+  elapsedLong(table: Table): boolean {
+    const m = this.elapsedMinutes(table);
+    return m !== null && m >= 60;
+  }
+
   readonly tileStyles = {
     free: {
-      tile: 'bg-[var(--floor-free-bg)] text-[var(--floor-free-ink)] shadow-soft',
+      tile: 'mt mt--free text-[var(--floor-free-ink)]',
       sub: 'text-[var(--floor-muted)]',
       dot: 'rounded-full border-2 border-[var(--floor-free-dot)]',
       count: 'bg-[var(--floor-line)] text-[var(--floor-free-ink)]',
     },
     busy: {
-      tile: 'bg-[var(--floor-busy-bg)] text-[var(--floor-busy-ink)]',
+      tile: 'mt mt--busy text-[var(--floor-busy-ink)]',
       sub: 'text-[var(--floor-busy-ink)]',
       dot: 'rounded-full bg-[var(--floor-busy-accent)]',
       count: 'bg-[var(--floor-busy-accent)] text-[#ffffff]',
     },
     alert: {
-      tile: 'bg-[var(--floor-alert-bg)] text-[#ffffff] shadow-soft',
+      tile: 'mt mt--alert text-[#ffffff]',
       sub: 'text-[#ffffffeb]',
       dot: 'rotate-45 rounded-[2px] bg-[#ffffff]',
       count: 'bg-[#ffffff] text-[#7c2d12]',

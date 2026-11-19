@@ -345,6 +345,13 @@ export class AppComponent {
     }
   }
 
+  /** Copia el código del local al portapapeles (para ingresar desde otro dispositivo) */
+  copyCode(code: string): void {
+    const done = () => this.snackBar.open('Código copiado', undefined, { duration: 1800 });
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(code).then(done, () => {});
+    else done();
+  }
+
   logout(){
     this.userService.logout();
     this.router.navigate(['/login']);
