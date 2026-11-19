@@ -48,20 +48,25 @@ export class OrderInfoDialogComponent implements OnInit {
 
   // Método para imprimir los valores de name y quantity dentro de las órdenes
   printMenuItems(): void {
+    this.gestionService.getMenu().subscribe(menuItems => this.applyMenu(menuItems));
+  }
+
+  // Pone nombre y precio a cada orden
+  private applyMenu(menuItems: MenuItem[]): void {
     this.orders.forEach(order => {
       if (order && order.menuItem && order.quantity !== undefined) {
-        this.gestionService.getMenu().subscribe(menuItems => {
-          const menuItem = menuItems.find(item => item._id === order.menuItem);
-          if (menuItem) {
-            order.name = menuItem.name; // Asignar el nombre directamente a la orden
-            // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
-            order.price = menuItem.price + modifiersTotal(order.modifiers);
-            // precio del plato solo (sin extras), para mostrarlo aparte de los extras
-            order.basePrice = menuItem.price;
-          } else {
-            order.name = 'No encontrado';
-          }
-        });
+        // menuItem llega como id, o como el plato completo según el endpoint
+        const id = typeof order.menuItem === 'object' ? order.menuItem._id : order.menuItem;
+        const menuItem = menuItems.find(item => item._id === id);
+        if (menuItem) {
+          order.name = menuItem.name; // Asignar el nombre directamente a la orden
+          // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
+          order.price = menuItem.price + modifiersTotal(order.modifiers);
+          // precio del plato solo (sin extras), para mostrarlo aparte de los extras
+          order.basePrice = menuItem.price;
+        } else {
+          order.name = 'No encontrado';
+        }
       }
     });
   }

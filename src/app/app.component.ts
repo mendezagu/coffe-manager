@@ -135,9 +135,10 @@ export class AppComponent {
     { mode: 'dark', icon: 'dark_mode', label: 'Oscuro' },
   ];
 
-  // El modo oscuro solo rige dentro del panel (con el menú lateral), no en pantallas de clientes ni en el ingreso
+  // El modo oscuro rige dentro del panel (con el menú lateral) y en el ingreso, no en pantallas de clientes
   private syncTheme() {
     this.theme.setShell(this.isLoggedIn && !this.publicPage);
+    this.theme.setLogin(!this.isLoggedIn && this.router.url.split('?')[0].split('#')[0].startsWith('/login'));
   }
 
   // "Agustín Méndez" -> "AM"

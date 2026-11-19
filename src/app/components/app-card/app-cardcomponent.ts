@@ -1125,24 +1125,37 @@ printTicket(tableId: string): void {
     return;
   }
 
-  // Imprimir dos copias de la comanda (plantilla única en TicketService)
-  this.tickets.printComanda(
-    {
-      tableName: table.name,
-      waiterName: table.waiterName,
-      lines: table.orders.map((order: any) => ({
-        // Buscar el nombre del producto en la lista de menú
-        name: this.menuItems.find(item => item._id === order.menuItem)?.name ?? 'Producto desconocido',
-        quantity: order.quantity,
-        modifiers: modifiersText(order.modifiers),
-        note: order.note,
-      })),
+  let win: Window | null = null;
+  const build = (menu: MenuItem[]) => {
+    const unknown: any[] = [];
+    const lines = table.orders.map((order: any) => {
+      // order.menuItem llega como id, o como el plato completo según el endpoint que armó la mesa
+      const id = order.menuItem && typeof order.menuItem === 'object' ? order.menuItem._id : order.menuItem;
+      const name = menu.find((item) => item._id === id)?.name ?? (typeof order.menuItem === 'object' ? order.menuItem?.name : undefined);
+      if (!name) unknown.push(order);
+      return { name: name ?? 'Producto desconocido', quantity: order.quantity, modifiers: modifiersText(order.modifiers), note: order.note };
+    });
+    return { lines, unknown };
+  };
+  const print = (lines: any[]) => {
+    // Imprimir dos copias de la comanda (plantilla única en TicketService)
+    this.tickets.printComanda({ tableName: table.name, waiterName: table.waiterName, lines }, win ? { copies: 2, win } : { copies: 2 });
+    // ✅ Guardar log de impresión
+    const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${table.name}</strong> atendida por <strong>${table.waiterName || 'Sin asignar'}</strong>`;
+    this.gestionService.saveLog(logMessage);
+  };
+
+  // Siempre se pide el menú actual al servidor antes de imprimir: así los nombres salen al día aunque la lista
+  // en pantalla esté vieja o no haya cargado. La ventana se abre ya, en el clic (si se abre después de esperar
+  // al servidor, el navegador la bloquea). Si el servidor no responde, se usa la lista que ya había.
+  win = this.tickets.preopen();
+  this.gestionService.refreshMenu().subscribe({
+    next: (menu) => {
+      this.menuItems = menu;
+      print(build(menu).lines);
     },
-    { copies: 2 }
-  );
-  // ✅ Guardar log de impresión
-  const logMessage = `Se imprimió <strong>la comanda</strong> de la mesa <strong>${table.name}</strong> atendida por <strong>${table.waiterName || 'Sin asignar'}</strong>`;
-  this.gestionService.saveLog(logMessage);
+    error: () => print(build(this.menuItems).lines),
+  });
 }
 
   // "Ordenar" se bloquea si la mesa está administrada por otra, o si tiene un pedido por QR esperando:

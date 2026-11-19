@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { GestionService } from 'src/app/services/gestionService';
+import { GestionService, MenuItem } from 'src/app/services/gestionService';
 import { SettingsService } from 'src/app/services/settings.service';
 import { UserService } from 'src/app/services/user.service';
 import { CashService } from 'src/app/services/cash.service';
@@ -95,38 +95,48 @@ export class TotalDialogComponent implements OnInit {
   }
 
   printMenuItems(): void {
-    let pricesAssignedCount = 0;
+    // Siempre se pide el menú actual al servidor: precios y nombres al día (un plato sin encontrar o con precio
+    // viejo haría que el total saliera mal). Si el servidor no responde, se usa la lista en memoria.
+    this.gestionService.refreshMenu().subscribe({
+      next: (menuItems) => {
+        this.applyMenu(menuItems);
+        this.calculateTotal();
+      },
+      error: () =>
+        this.gestionService.getMenu().subscribe((menuItems) => {
+          this.applyMenu(menuItems);
+          this.calculateTotal();
+        }),
+    });
+  }
 
+  // Pone nombre y precio a cada orden; devuelve cuántas no se encontraron en el menú
+  private applyMenu(menuItems: MenuItem[]): number {
+    let missing = 0;
     this.orders.forEach((order) => {
       if (order && order.menuItem && order.quantity !== undefined) {
-        this.gestionService.getMenu().subscribe((menuItems) => {
-          const menuItem = menuItems.find(
-            (item) => item._id === order.menuItem
-          );
-          if (menuItem) {
-            order.name = menuItem.name;
-            // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
-            order.price = menuItem.price + modifiersTotal(order.modifiers);
-            // precio del plato solo (sin extras): es lo que se muestra en su renglón
-            order.basePrice = menuItem.price;
-            order.isPromo = !!menuItem.isPromo;
-            // Los ítems en promo no admiten descuento (ni por ítem ni general)
-            order.discount = order.isPromo ? 0 : (order.discount ?? 0); // descuento por ítem (porcentaje)
-          } else {
-            order.name = 'No encontrado';
-            order.price = 0;
-            order.isPromo = false;
-            order.discount = order.discount ?? 0;
-          }
-
-          pricesAssignedCount++;
-
-          if (pricesAssignedCount === this.orders.length) {
-            this.calculateTotal();
-          }
-        });
+        // menuItem llega como id, o como el plato completo según el endpoint
+        const id = typeof order.menuItem === 'object' ? order.menuItem._id : order.menuItem;
+        const menuItem = menuItems.find((item) => item._id === id);
+        if (menuItem) {
+          order.name = menuItem.name;
+          // precio de una unidad: el del plato + lo que sumaron las opciones elegidas
+          order.price = menuItem.price + modifiersTotal(order.modifiers);
+          // precio del plato solo (sin extras): es lo que se muestra en su renglón
+          order.basePrice = menuItem.price;
+          order.isPromo = !!menuItem.isPromo;
+          // Los ítems en promo no admiten descuento (ni por ítem ni general)
+          order.discount = order.isPromo ? 0 : (order.discount ?? 0); // descuento por ítem (porcentaje)
+        } else {
+          order.name = 'No encontrado';
+          order.price = 0;
+          order.isPromo = false;
+          order.discount = order.discount ?? 0;
+          missing++;
+        }
       }
     });
+    return missing;
   }
 
   calculateTotal() {

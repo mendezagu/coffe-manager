@@ -7,8 +7,8 @@ export type ThemeMode = 'light' | 'dark' | 'auto';
 const KEY = 'theme_mode';
 
 // Claro / oscuro / automático (sigue al sistema). Se guarda en cada dispositivo.
-// El modo oscuro es solo del panel interno: las pantallas de clientes (carta QR, reservas, hotel) y el ingreso
-// quedan siempre claros, así cada restaurante controla cómo se ven con su color de marca.
+// El modo oscuro rige en el panel interno y en el ingreso: las pantallas de clientes (carta QR, reservas, hotel)
+// quedan siempre claras, así cada restaurante controla cómo se ven con su color de marca.
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly modeSubject = new BehaviorSubject<ThemeMode>(this.read());
@@ -16,6 +16,8 @@ export class ThemeService {
 
   // ¿Se está viendo el panel interno? (con el menú lateral)
   private inShell = false;
+  // ¿Se está viendo la pantalla de ingreso?
+  private inLogin = false;
   private readonly query = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
 
   constructor() {
@@ -44,8 +46,14 @@ export class ThemeService {
     this.apply();
   }
 
+  // El ingreso también sigue la apariencia elegida: la pantalla es del equipo del local, no de sus clientes
+  setLogin(on: boolean) {
+    this.inLogin = on;
+    this.apply();
+  }
+
   private apply() {
-    const dark = this.inShell && this.dark;
+    const dark = (this.inShell || this.inLogin) && this.dark;
     document.documentElement.classList.toggle('dark', dark);
     Chart.defaults.color = dark ? '#b4bcc8' : '#666666';
     Chart.defaults.borderColor = dark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
