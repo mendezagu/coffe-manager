@@ -21,164 +21,179 @@
 
 <!-- Precio, "Agotado" y "Con opciones" -->
 <ng-template #metaTpl let-item>
-  <span class="block font-extrabold text-[15px] tabular-nums text-forest leading-tight">{{ priceText(item) }}</span>
+  <span class="block font-extrabold text-[15px] tabular-nums text-ink leading-tight">{{ priceText(item) }}</span>
   <span *ngIf="item.soldOut" class="mt-[3px] inline-block px-[8px] py-[1px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Agotado</span>
   <span *ngIf="!item.soldOut && hasOptions(item)" class="mt-[2px] flex items-center gap-[2px] text-[11px] font-medium text-leaf">{{ browseOnly ? 'Ver opciones' : 'Con opciones' }}<mat-icon *ngIf="browseOnly" class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">chevron_right</mat-icon></span>
 </ng-template>
 
-<!-- Tarjeta en grilla (2 columnas): foto arriba -->
-<ng-template #gridCard let-item>
-  <article class="h-full rounded-[24px] bg-surface-lowest p-[8px] shadow-soft flex flex-col justify-between gap-[10px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
-    [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div>
-      <div class="relative w-full h-32 rounded-[18px] overflow-hidden mb-[10px]">
-        <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
-        <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
-      </div>
-      <div class="px-[6px]">
-        <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[15px] text-forest m-0 leading-tight line-clamp-2">{{ item.name }}</p>
-        <p *ngIf="item.description" class="text-xs text-ink-variant mt-[3px] mb-0 leading-snug line-clamp-1">{{ item.description }}</p>
-      </div>
+<!-- Tarjeta de un plato en horizontal: foto a la izquierda; nombre, descripción, precio y botón a la derecha. Al tocarla se abre la hoja con el detalle -->
+<ng-template #foodCard let-item>
+  <article class="relative flex items-stretch gap-[14px] overflow-hidden rounded-[24px] bg-surface-lowest p-[12px] shadow-soft cursor-pointer transition-transform active:scale-[0.99]"
+    [class.opacity-60]="item.soldOut" (click)="openFood(item)" role="button" tabindex="0" (keydown.enter)="openFood(item)" [attr.aria-label]="'Ver ' + item.name">
+    <div *ngIf="item.imageUrl" class="relative h-[92px] w-[124px] flex-none self-center">
+      <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="h-full w-full rounded-[16px] bg-surface-mid object-cover" [class.grayscale]="item.soldOut" />
+      <span *ngIf="item.badge" class="absolute left-[6px] top-[6px] rounded-full px-[9px] py-[3px] text-[11px] font-bold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
     </div>
-    <div class="flex items-center justify-between gap-[8px] px-[6px] pb-[2px]">
-      <p class="m-0 min-w-0"><ng-container *ngTemplateOutlet="metaTpl; context: { $implicit: item }"></ng-container></p>
-      <ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item, sm: true }"></ng-container>
-    </div>
-  </article>
-</ng-template>
-
-<!-- Tarjeta en lista: foto a la izquierda (o solo texto si no hay foto) -->
-<ng-template #listCard let-item>
-  <article class="rounded-[24px] bg-surface-lowest p-[10px] shadow-soft flex items-center gap-[14px]" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
-    [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div *ngIf="item.imageUrl" class="relative flex-none w-[112px] h-[112px] rounded-[18px] overflow-hidden">
-      <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" width="112" height="112" class="w-full h-full object-cover bg-surface-mid" [class.grayscale]="item.soldOut" />
-      <span *ngIf="item.badge" class="absolute left-[6px] top-[6px] px-[7px] py-[1px] rounded-full text-[10px] font-bold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
-    </div>
-    <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-[2px] pr-[4px]" [class.pl-[8px]]="!item.imageUrl">
-      <div>
-        <div class="flex items-start justify-between gap-[8px]">
-          <p role="heading" aria-level="3" class="!font-jakarta font-bold text-[16px] text-forest m-0 leading-tight">{{ item.name }}</p>
-          <span *ngIf="item.badge && !item.imageUrl" class="flex-none px-[8px] py-[1px] rounded-full text-[10px] font-bold" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
-        </div>
-        <p *ngIf="item.description" class="text-xs text-ink-variant mt-[3px] mb-0 leading-snug line-clamp-2">{{ item.description }}</p>
-      </div>
-      <div class="flex items-end justify-between gap-[8px] mt-[8px]">
-        <p class="m-0 min-w-0"><ng-container *ngTemplateOutlet="metaTpl; context: { $implicit: item }"></ng-container></p>
-        <ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item }"></ng-container>
-      </div>
-    </div>
-  </article>
-</ng-template>
-
-<!-- Tarjeta grande: foto a todo el ancho con el nombre y el precio encima -->
-<ng-template #heroCard let-item>
-  <article class="relative overflow-hidden rounded-[28px] bg-surface-high shadow-soft" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.99] transition-transform'"
-    [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <div class="relative h-[280px] w-full">
-      <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="w-full h-full object-cover" [class.grayscale]="item.soldOut" />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
-      <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
-      <div class="absolute inset-x-0 bottom-0 p-[16px] flex flex-col gap-[4px] text-white">
-        <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[24px] font-extrabold leading-[1.05] tracking-tight">{{ item.name }}</p>
-        <p *ngIf="item.description" class="m-0 text-xs text-white/80 leading-snug line-clamp-2">{{ item.description }}</p>
-        <div class="flex items-center justify-between gap-[8px] mt-[2px]">
-          <span class="text-[17px] font-bold text-tertiary-fixed">{{ priceText(item) }}<span *ngIf="item.soldOut" class="ml-[6px] px-[8px] py-[1px] rounded-full bg-cafe-red-50 text-cafe-red-700 text-[10px] font-bold">Agotado</span></span>
-          <button *ngIf="!browseOnly && !item.soldOut" type="button" (click)="hasOptions(item) ? openItem(item) : quickAdd(item, $event); $event.stopPropagation()"
-            class="flex items-center gap-[6px] h-11 px-[18px] rounded-full bg-[#ffffff] text-[#181d26] text-sm font-bold shadow-sm active:scale-95 transition-all">
-            {{ inCart(item) ? 'Agregado' : 'Pedir' }}<mat-icon class="!w-4 !h-4 !text-base !leading-4">{{ inCart(item) ? 'check' : 'arrow_forward' }}</mat-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-  </article>
-</ng-template>
-
-<!-- Tarjeta del carrusel de destacados -->
-<ng-template #featuredCard let-item>
-  <article class="relative h-[320px] overflow-hidden rounded-[28px] bg-forest shadow-soft" [ngClass]="browseOnly && !hasOptions(item) ? '' : 'cursor-pointer active:scale-[0.985] transition-transform'"
-    [class.opacity-55]="item.soldOut" (click)="browseOnly ? openDetail(item) : openItem(item)">
-    <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" loading="lazy" class="absolute inset-0 h-full w-full object-cover" [class.grayscale]="item.soldOut" />
-    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
-    <ng-container *ngTemplateOutlet="badgeTpl; context: { $implicit: item }"></ng-container>
-    <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-[10px] p-[16px] text-white">
+    <div class="flex min-w-0 flex-1 flex-col gap-[10px] py-[2px]" [ngClass]="item.description ? 'justify-between' : 'justify-center'">
       <div class="min-w-0">
-        <p role="heading" aria-level="3" class="!font-jakarta m-0 text-[22px] font-extrabold leading-[1.05] tracking-tight line-clamp-2">{{ item.name }}</p>
-        <p *ngIf="item.description" class="m-0 mt-[4px] text-xs text-white/80 leading-snug line-clamp-1">{{ item.description }}</p>
-        <p class="m-0 mt-[8px] inline-flex items-center rounded-full bg-[#ffffff] px-[12px] py-[4px] text-[14px] font-extrabold tabular-nums text-[#181d26]">{{ priceText(item) }}</p>
+        <span *ngIf="item.badge && !item.imageUrl" class="mb-[6px] inline-block rounded-full px-[10px] py-[3px] text-[11px] font-bold" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
+        <p role="heading" aria-level="3" class="!font-jakarta m-0 line-clamp-2 text-[17px] font-bold leading-[1.2] tracking-tight text-ink">{{ item.name }}</p>
+        <p *ngIf="item.description" class="m-0 mt-[4px] line-clamp-2 text-[12px] leading-snug text-ink-variant">{{ item.description }}</p>
       </div>
-      <ng-container *ngIf="!browseOnly && !item.soldOut"><ng-container *ngTemplateOutlet="addBtn; context: { $implicit: item }"></ng-container></ng-container>
+      <div class="flex items-center justify-between gap-[8px]">
+        <span class="min-w-0 whitespace-nowrap text-[15px] font-extrabold leading-tight tabular-nums text-ink">{{ priceText(item) }}</span>
+        <span *ngIf="item.soldOut" class="flex-none rounded-full bg-cafe-red-50 px-[10px] py-[5px] text-[11px] font-bold text-cafe-red-700">Agotado</span>
+        <span *ngIf="!item.soldOut && inCart(item)" class="inline-flex flex-none items-center gap-[3px] rounded-full bg-forest px-[11px] py-[6px] text-[12px] font-bold text-white">
+          <mat-icon class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">check</mat-icon>×{{ qtyInCart(item) }}
+        </span>
+        <span *ngIf="!item.soldOut && !inCart(item)" class="grid h-[30px] w-[30px] flex-none place-items-center rounded-full bg-surface-mid text-ink" [attr.aria-label]="hasOptions(item) ? 'Elegir opciones' : 'Ver plato'">
+          <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">chevron_right</mat-icon>
+        </span>
+      </div>
     </div>
   </article>
 </ng-template>
 
-<!-- Logo de Tavolapp al pie de la pantalla -->
-<!-- Pie de la carta: invitación discreta a otros comercios (colores fijos: se ve igual en claro, en oscuro y sobre cualquier fondo) -->
+<!-- Foto grande de un plato que se funde con la hoja (si no hay foto, solo el botón de cerrar) -->
+<ng-template #sheetHero let-item let-detail="detail">
+  <div class="relative" [ngClass]="item.imageUrl ? '' : 'h-[56px]'">
+    <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" class="block h-auto max-h-[52vh] w-full object-contain bg-surface-mid" [class.grayscale]="item.soldOut" />
+    <button type="button" (click)="detail ? closeDetail() : closeSheet()" aria-label="Cerrar"
+      class="absolute right-[14px] top-[14px] grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#181d26] shadow-floating transition-transform active:scale-95">
+      <mat-icon class="!w-5 !h-5 !text-xl !leading-5">close</mat-icon>
+    </button>
+    <span *ngIf="item.badge" class="absolute left-[14px] top-[14px] rounded-full px-[12px] py-[5px] text-[12px] font-bold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
+  </div>
+</ng-template>
+
+<!-- Tarjeta del carrusel de destacados: texto y precio a la izquierda, foto redonda que se sale por la derecha -->
+<ng-template #featuredCard let-item>
+  <article class="relative h-[250px] overflow-hidden rounded-[28px] bg-forest-soft p-[18px] cursor-pointer transition-transform active:scale-[0.985]"
+    [class.opacity-60]="item.soldOut" (click)="openFood(item)" role="button" tabindex="0" (keydown.enter)="openFood(item)" [attr.aria-label]="'Ver ' + item.name">
+    <img *ngIf="item.imageUrl" [src]="item.imageUrl" [alt]="item.name" loading="lazy"
+      class="absolute -right-[34px] top-[58px] h-[168px] w-[168px] rounded-full bg-surface-mid object-cover shadow-[0_14px_26px_-12px_rgba(0,0,0,0.45)]" [class.grayscale]="item.soldOut" />
+    <span *ngIf="item.badge" class="absolute right-[14px] top-[14px] rotate-[7deg] rounded-full px-[11px] py-[4px] text-[12px] font-extrabold shadow-sm" [ngClass]="badgeClass(item.badgeColor)">{{ item.badge }}</span>
+    <div class="relative flex h-full max-w-[56%] flex-col justify-between">
+      <div>
+        <p role="heading" aria-level="3" class="!font-jakarta m-0 line-clamp-2 text-[20px] font-extrabold leading-[1.12] tracking-tight text-ink">{{ item.name }}</p>
+        <p *ngIf="item.description" class="m-0 mt-[6px] line-clamp-2 text-[12px] leading-snug text-ink-variant">{{ item.description }}</p>
+      </div>
+      <div>
+        <p class="m-0 text-[12px] font-medium text-ink-variant">Precio</p>
+        <p class="m-0 text-[24px] font-extrabold leading-tight tabular-nums text-ink">{{ priceText(item) }}</p>
+        <span *ngIf="item.soldOut" class="mt-[8px] inline-flex h-[40px] items-center rounded-full bg-cafe-red-50 px-[18px] text-[13px] font-bold text-cafe-red-700">Agotado</span>
+        <span *ngIf="!item.soldOut" class="mt-[8px] inline-flex h-[40px] items-center rounded-full bg-ink px-[20px] text-[13px] font-bold text-surface-lowest">{{ browseOnly ? 'Ver' : inCart(item) ? 'Agregado ×' + qtyInCart(item) : 'Pedir' }}</span>
+      </div>
+    </div>
+  </article>
+</ng-template>
+
+<!-- Pie de la carta: invitación discreta a otros comercios (colores fijos: se ve igual en claro y en oscuro) -->
 <ng-template #poweredBy>
   <a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Quiero una tienda así para mi negocio (abre la página de Tavolapp)"
-    class="group inline-flex max-w-full items-center gap-[10px] rounded-full bg-[#2f3643]/95 py-[7px] pl-[14px] pr-[10px] no-underline ring-1 ring-white/10 transition-colors hover:bg-[#2f3643] active:scale-[0.98]">
-    <img src="assets/logo/tavolapp-menta.png" alt="Tavolapp" width="74" height="18" style="height:18px;width:auto;display:block">
-    <span class="min-w-0 text-[12px] font-medium leading-tight text-[#b9cfc2]">Quiero una tienda así para mi negocio</span>
-    <span class="grid h-[22px] w-[22px] flex-none place-items-center rounded-full bg-[#6fe3c6] text-[#2f3643] transition-transform group-hover:translate-x-[2px]">
-      <mat-icon class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px]">arrow_forward</mat-icon>
+    class="group flex flex-col items-center gap-[6px] px-[16px] py-[6px] text-center no-underline">
+    <img src="assets/logo/tavolapp-gris.png" alt="Tavolapp" width="74" height="18" style="height:16px;width:auto;display:block;opacity:.55">
+    <span class="inline-flex items-center gap-[2px] text-[12px] font-medium text-[#8a929e] transition-colors group-hover:text-[#4b5563]">
+      Quiero una tienda así para mi negocio
+      <mat-icon class="!h-[14px] !w-[14px] !text-[14px] !leading-[14px] transition-transform group-hover:translate-x-[2px]">arrow_forward</mat-icon>
     </span>
   </a>
 </ng-template>
 
-<!-- Encabezado del local: portada (si tiene), logo, nombre y estado -->
+<!-- Encabezado del local: portada (o la marca si no tiene), logo solapado, nombre, datos y, en la tienda, retiro o envío -->
 <ng-template #brandHeader>
-  <header class="relative isolate overflow-hidden rounded-b-[36px] text-white" [ngClass]="dark ? 'bg-surface-lowest' : 'bg-forest'">
-    <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10" [ngStyle]="coverStyle"></div>
-    <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10 bg-gradient-to-b from-black/0 via-black/25 to-black/70"></div>
-    <!-- Sin portada: anillos concéntricos, como el plato visto desde arriba -->
-    <svg *ngIf="!info?.business?.coverUrl" class="absolute -right-[70px] -top-[70px] -z-10 h-[280px] w-[280px]" [ngClass]="dark ? 'text-forest' : 'text-white'" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
-      <circle cx="50" cy="50" r="48" stroke-opacity=".14" stroke-width="1.2" /><circle cx="50" cy="50" r="36" stroke-opacity=".12" stroke-width="1.2" /><circle cx="50" cy="50" r="24" stroke-opacity=".1" stroke-width="1.2" />
-    </svg>
-    <div class="px-[20px] pb-[26px]" [ngClass]="info?.business?.coverUrl ? 'pt-[112px]' : 'pt-[32px]'">
-      <div class="flex items-center gap-[14px] min-w-0">
-        <div class="w-[68px] h-[68px] rounded-[22px] bg-[#ffffff] flex items-center justify-center shadow-floating flex-shrink-0 overflow-hidden text-[rgb(var(--brand-rgb,11_125_102))]">
-          <img *ngIf="info?.business?.logoUrl; else cupIcon" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="w-full h-full object-cover" />
-          <ng-template #cupIcon><mat-icon class="!w-8 !h-8 !text-[32px]">local_cafe</mat-icon></ng-template>
-        </div>
-        <div class="min-w-0">
-          <h1 class="!font-jakarta font-extrabold text-[28px] tracking-tight text-white leading-[1.05] m-0 break-words">{{ info?.business?.name }}</h1>
-        </div>
+  <header>
+    <div class="relative isolate h-[176px] overflow-hidden text-white" [ngClass]="dark ? 'bg-surface-lowest' : 'bg-forest'">
+      <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10" [ngStyle]="coverStyle"></div>
+      <div *ngIf="info?.business?.coverUrl" class="absolute inset-0 -z-10 bg-gradient-to-b from-black/35 via-black/0 to-black/25"></div>
+      <!-- Sin portada: anillos concéntricos, como el plato visto desde arriba -->
+      <svg *ngIf="!info?.business?.coverUrl" class="absolute -right-[70px] -top-[70px] -z-10 h-[280px] w-[280px]" [ngClass]="dark ? 'text-ink' : 'text-white'" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
+        <circle cx="50" cy="50" r="48" stroke-opacity=".14" stroke-width="1.2" /><circle cx="50" cy="50" r="36" stroke-opacity=".12" stroke-width="1.2" /><circle cx="50" cy="50" r="24" stroke-opacity=".1" stroke-width="1.2" />
+      </svg>
+      <div class="flex items-center justify-end gap-[8px] px-[16px] pt-[16px]">
+        <button *ngIf="phase === 'ready' && tab === 'menu' && !splash" type="button" (click)="openSearch()" aria-label="Buscar en la carta"
+          class="grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#181d26] shadow-floating transition-transform active:scale-95">
+          <mat-icon class="!w-5 !h-5 !text-xl !leading-5">search</mat-icon>
+        </button>
+        <button type="button" (click)="share()" aria-label="Compartir"
+          class="grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#181d26] shadow-floating transition-transform active:scale-95">
+          <mat-icon class="!w-5 !h-5 !text-xl !leading-5">ios_share</mat-icon>
+        </button>
       </div>
-      <div class="mt-[16px] flex flex-wrap items-center gap-[8px]">
-        <span class="inline-flex items-center gap-[6px] px-[12px] py-[5px] rounded-full bg-white/15 ring-1 ring-white/25 backdrop-blur-md text-white text-[12px] font-bold">
-          <mat-icon class="!w-4 !h-4 !text-base !leading-4">{{ storeMode ? 'storefront' : viewOnly ? 'menu_book' : 'table_restaurant' }}</mat-icon>
-          {{ storeMode ? 'Tienda online' : viewOnly ? 'Carta online' : 'Mesa ' + info?.table?.name }}
-        </span>
-        <span class="inline-flex items-center gap-[7px] px-[12px] py-[5px] rounded-full bg-black/25 backdrop-blur-md text-white text-[12px] font-semibold">
-          <span class="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" [ngClass]="storeMode && shop?.paused ? 'bg-[#ff8f78]' : 'bg-[#6fe3c6]'"></span>
-          <span *ngIf="storeMode">{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora · ~' + (shop?.prepMin ?? 30) + ' min' }}</span>
+    </div>
+
+    <div class="relative flex flex-col items-center bg-surface px-[20px] text-center">
+      <div class="-mt-[52px] grid h-[104px] w-[104px] flex-shrink-0 place-items-center overflow-hidden rounded-full bg-[#ffffff] text-[rgb(var(--brand-rgb,11_125_102))] shadow-floating ring-[5px] ring-surface">
+        <img *ngIf="info?.business?.logoUrl; else cupIcon" [src]="info!.business.logoUrl!" [alt]="info!.business.name" class="h-full w-full object-cover" />
+        <ng-template #cupIcon><mat-icon class="!w-10 !h-10 !text-[40px]">local_cafe</mat-icon></ng-template>
+      </div>
+      <h1 class="!font-jakarta m-0 mt-[12px] max-w-full break-words text-[26px] font-extrabold leading-[1.1] tracking-tight text-ink">{{ info?.business?.name }}</h1>
+      <div class="mt-[12px] flex flex-wrap items-center justify-center gap-[8px] text-[13px]">
+        <span class="inline-flex items-center gap-[7px] rounded-full px-[12px] py-[6px] font-semibold"
+          [ngClass]="storeMode && shop?.paused ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-mint-500/15 text-ink'">
+          <span class="h-[8px] w-[8px] flex-shrink-0 rounded-full" [ngClass]="storeMode && shop?.paused ? 'bg-cafe-red-500' : 'bg-cafe-mint-500'"></span>
+          <span *ngIf="storeMode">{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora' }}</span>
           <span *ngIf="!storeMode && !viewOnly">Pedí desde tu celular</span>
           <span *ngIf="viewOnly">Nuestra carta</span>
         </span>
+        <span class="inline-flex items-center gap-[6px] rounded-full bg-surface-mid px-[12px] py-[6px] font-semibold text-ink">
+          <mat-icon class="!h-[16px] !w-[16px] !text-[16px] !leading-[16px] text-ink">{{ storeMode ? 'storefront' : viewOnly ? 'menu_book' : 'table_restaurant' }}</mat-icon>
+          {{ storeMode ? 'Tienda online' : viewOnly ? 'Carta online' : (info?.table?.name ?? '').toLowerCase().startsWith('mesa') ? info?.table?.name : 'Mesa ' + info?.table?.name }}
+        </span>
       </div>
+      <p *ngIf="info?.business?.address" class="m-0 mt-[12px] inline-flex max-w-full items-center gap-[6px] text-[13px] text-ink-variant">
+        <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px] flex-shrink-0 text-ink">place</mat-icon><span class="truncate">{{ info?.business?.address }}</span>
+      </p>
     </div>
+
+    <!-- Tienda: cómo lo querés (retiro o envío), con costo y tiempo -->
+    <section *ngIf="storeMode && shop && (shop.pickup || shop.home) && phase === 'ready' && tab === 'menu' && !splash" class="bg-surface px-[16px] pb-[20px] pt-[24px]" aria-label="Forma de entrega">
+      <div class="relative rounded-[16px] bg-surface-lowest pb-[14px] pt-[30px] ring-1 ring-line-soft/70">
+        <div class="absolute left-1/2 top-0 flex -translate-x-1/2 -translate-y-1/2 gap-[2px] rounded-full bg-forest/15 p-[3px]">
+          <button *ngIf="shop.pickup" type="button" (click)="setMode('pickup')" [attr.aria-pressed]="checkout.mode === 'pickup'"
+            class="inline-flex min-h-[36px] items-center gap-[6px] rounded-full px-[16px] text-[13px] font-bold transition-colors"
+            [ngClass]="checkout.mode === 'pickup' ? 'bg-surface-lowest text-ink shadow-sm' : 'text-ink-variant'">
+            <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">storefront</mat-icon>Retiro
+          </button>
+          <button *ngIf="shop.home" type="button" (click)="setMode('delivery')" [attr.aria-pressed]="checkout.mode === 'delivery'"
+            class="inline-flex min-h-[36px] items-center gap-[6px] rounded-full px-[16px] text-[13px] font-bold transition-colors"
+            [ngClass]="checkout.mode === 'delivery' ? 'bg-surface-lowest text-ink shadow-sm' : 'text-ink-variant'">
+            <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">two_wheeler</mat-icon>Envío
+          </button>
+        </div>
+        <div class="grid grid-cols-2">
+          <div class="px-[8px] text-center">
+            <p class="m-0 text-[20px] font-extrabold leading-tight tabular-nums text-ink">{{ checkout.mode === 'delivery' ? (shop.fee ? money(shop.fee) : 'Sin cargo') : 'Sin costo' }}</p>
+            <p class="m-0 mt-[2px] text-[13px] text-ink-variant">{{ checkout.mode === 'delivery' ? 'Costo de envío' : 'Costo de retiro' }}</p>
+          </div>
+          <div class="border-l border-line-soft/70 px-[8px] text-center">
+            <p class="m-0 text-[20px] font-extrabold leading-tight tabular-nums text-ink">{{ shop.prepMin }} min</p>
+            <p class="m-0 mt-[2px] text-[13px] text-ink-variant">{{ checkout.mode === 'delivery' ? 'Tiempo de entrega' : 'Tiempo de preparación' }}</p>
+          </div>
+        </div>
+        <div class="mx-[16px] mt-[12px] flex items-center justify-center gap-[6px] border-t border-line-soft/70 pt-[10px] text-[13px] text-ink-variant">
+          <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">payments</mat-icon>{{ shop.payCash && shop.payTransfer ? 'Pagás en efectivo o por transferencia' : shop.payTransfer ? 'Pagás por transferencia' : 'Pagás en efectivo' }}
+        </div>
+      </div>
+    </section>
   </header>
 </ng-template>
 
-<!-- Pasos de un pedido: círculos unidos por una línea que avanza -->
+<!-- Pasos de un pedido: un tramo de barra por paso; se llenan hasta el actual -->
 <ng-template #stepper let-labels="labels" let-icons="icons" let-index="index">
-  <div class="relative flex items-start justify-between">
-    <div class="absolute left-[34px] right-[34px] top-[14px] h-1 rounded-full bg-surface-highest"></div>
-    <div class="absolute left-[34px] top-[14px] h-1 rounded-full bg-leaf transition-all duration-700"
-      [style.width]="'calc((100% - 68px) * ' + (labels.length > 1 ? (index > 0 ? index : 0) / (labels.length - 1) : 0) + ')'"></div>
-    <div *ngFor="let l of labels; let i = index" class="relative z-10 flex flex-col items-center gap-[4px] w-[68px]">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
-        [ngClass]="i < index ? 'bg-leaf text-white' : (i === index ? 'bg-forest text-leaf-dim ring-4 ring-leaf-container/40' : 'bg-surface-highest text-line')">
-        <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">{{ i < index ? 'check' : icons[i] }}</mat-icon>
-      </div>
-      <span class="text-[10px] leading-tight text-center" [ngClass]="i === index ? 'font-bold text-leaf' : (i < index ? 'font-semibold text-forest' : 'text-line')">{{ l }}</span>
-    </div>
-  </div>
+  <ol class="m-0 grid list-none gap-[6px] p-0" [style.grid-template-columns]="'repeat(' + labels.length + ', minmax(0, 1fr))'">
+    <li *ngFor="let l of labels; let i = index" class="flex flex-col gap-[7px]">
+      <span class="relative h-[5px] overflow-hidden rounded-full bg-surface-highest">
+        <span class="absolute inset-y-0 left-0 rounded-full bg-forest transition-all duration-700" [style.width]="i < index ? '100%' : i === index ? '55%' : '0%'" [class.animate-pulse]="i === index"></span>
+      </span>
+      <span class="text-[11px] leading-tight" [ngClass]="i === index ? 'font-bold text-ink' : i < index ? 'font-medium text-ink-variant' : 'text-line'" [attr.aria-current]="i === index ? 'step' : null">{{ l }}</span>
+    </li>
+  </ol>
 </ng-template>
 
 <div class="min-h-screen bg-surface-high text-ink font-inter flex justify-center selection:bg-forest selection:text-white" [class.qr-dark]="dark" [attr.style]="brandStyle">
   <div class="w-full max-w-md bg-surface min-h-screen flex flex-col shadow-2xl relative border-x-[1px] border-surface-highest/60"
-    [ngClass]="viewOnly ? 'pb-[32px]' : (cartUnits > 0 && !cartOpen ? 'pb-[180px]' : 'pb-[110px]')" [ngStyle]="pageStyle">
+    [ngClass]="viewOnly ? 'pb-[32px]' : 'pb-[130px]'" [ngStyle]="pageStyle">
 
     <!-- Cargando -->
     <app-loader *ngIf="phase === 'loading'" [splash]="true" label="Cargando la carta…"></app-loader>
@@ -186,14 +201,14 @@
     <!-- QR inválido o apagado -->
     <div *ngIf="phase === 'notFound'" class="flex flex-col items-center justify-center flex-1 px-[24px] text-center">
       <mat-icon class="!w-14 !h-14 !text-5xl text-forest/30 mb-[12px]">{{ storeMode ? 'storefront' : 'qr_code_2' }}</mat-icon>
-      <h1 class="!font-jakarta text-xl font-bold text-forest m-0 mb-[8px]">{{ storeMode ? 'Esta tienda no está disponible' : viewOnly ? 'Esta carta no está disponible' : 'Este QR no está disponible' }}</h1>
+      <h1 class="!font-jakarta text-xl font-bold text-ink m-0 mb-[8px]">{{ storeMode ? 'Esta tienda no está disponible' : viewOnly ? 'Esta carta no está disponible' : 'Este QR no está disponible' }}</h1>
       <p class="text-sm text-ink-variant m-0">{{ storeMode ? 'Comunicate con el local para hacer tu pedido.' : viewOnly ? 'Consultá la carta en el local, con gusto te atienden.' : 'Pedile la carta al mozo, que con gusto te atiende.' }}</p>
     </div>
 
     <!-- Error de conexión -->
     <div *ngIf="phase === 'error'" class="flex flex-col items-center justify-center flex-1 px-[24px] text-center">
       <mat-icon class="!w-14 !h-14 !text-5xl text-forest/30 mb-[12px]">wifi_off</mat-icon>
-      <h1 class="!font-jakarta text-xl font-bold text-forest m-0 mb-[8px]">No pudimos cargar la carta</h1>
+      <h1 class="!font-jakarta text-xl font-bold text-ink m-0 mb-[8px]">No pudimos cargar la carta</h1>
       <p class="text-sm text-ink-variant mb-[16px]">Revisá tu conexión e intentá de nuevo.</p>
       <button type="button" (click)="phase = 'loading'; load()" class="px-[20px] py-[10px] rounded-full bg-forest text-white font-bold text-sm">Reintentar</button>
     </div>
@@ -204,17 +219,17 @@
 
       <main class="px-[16px] pt-[20px] flex flex-col gap-[16px]">
         <section class="rounded-[28px] bg-surface-lowest p-[24px] shadow-soft text-center flex flex-col items-center">
-          <div class="mb-[12px] flex items-center justify-center w-16 h-16 rounded-full bg-forest-soft text-forest"><mat-icon class="!w-7 !h-7 !text-[28px]">lock</mat-icon></div>
+          <div class="mb-[12px] flex items-center justify-center w-16 h-16 rounded-full bg-forest-soft text-ink"><mat-icon class="!w-7 !h-7 !text-[28px]">lock</mat-icon></div>
           <span class="inline-flex items-center gap-[6px] px-[12px] py-[4px] rounded-full bg-surface-mid text-ink-variant text-xs font-semibold mb-[8px]">
-            <mat-icon class="!w-4 !h-4 !text-base text-forest">table_restaurant</mat-icon>{{ info.table.name }}
+            <mat-icon class="!w-4 !h-4 !text-base text-ink">table_restaurant</mat-icon>{{ info.table.name }}
           </span>
-          <h2 class="!font-jakarta text-lg font-bold text-forest tracking-tight m-0 mb-[4px]">Validar acceso a la mesa</h2>
+          <h2 class="!font-jakarta text-lg font-bold text-ink tracking-tight m-0 mb-[4px]">Validar acceso a la mesa</h2>
           <p class="text-sm text-ink-variant max-w-xs m-0 mb-[20px]">Ingresá el código de 4 dígitos de tu mesa, o pedíselo al mozo, para empezar tu pedido.</p>
 
           <!-- Un solo campo (transparente) recibe lo que se escribe; los casilleros solo lo muestran -->
           <div class="relative mb-[14px] w-full" (click)="focusPin()">
             <div class="grid grid-cols-4 gap-[10px]" aria-hidden="true">
-              <div *ngFor="let i of pinSlots" class="h-16 flex items-center justify-center text-3xl font-extrabold tabular-nums bg-surface-low text-forest rounded-[20px] border-[2px] transition-all"
+              <div *ngFor="let i of pinSlots" class="h-16 flex items-center justify-center text-3xl font-extrabold tabular-nums bg-surface-low text-ink rounded-[20px] border-[2px] transition-all"
                 [ngClass]="pinError ? 'border-cafe-red-300' : (pinValue[i] ? 'border-forest/40' : (i === pinValue.length ? 'border-forest bg-white' : 'border-transparent'))">{{ pinValue[i] }}</div>
             </div>
             <input id="pin-input" name="pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false"
@@ -237,7 +252,7 @@
           <div class="flex items-center gap-[12px] min-w-0">
             <div class="w-10 h-10 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon>support_agent</mat-icon></div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-forest m-0 truncate">¿No tenés el código?</p>
+              <p class="text-sm font-bold text-ink m-0 truncate">¿No tenés el código?</p>
               <p class="text-xs text-ink-variant m-0">El mozo te lo da en tu mesa</p>
             </div>
           </div>
@@ -286,7 +301,7 @@
             <span class="inline-flex items-center gap-[6px] px-[12px] py-[4px] rounded-full bg-leaf-container text-leaf-ink2 text-[11px] font-bold mb-[8px]">
               <span class="w-2 h-2 rounded-full bg-leaf animate-pulse"></span>Conexión en mesa verificada
             </span>
-            <h2 class="!font-jakarta text-2xl font-bold text-forest tracking-tight mt-[4px] mb-0">¡Tu pedido fue enviado!</h2>
+            <h2 class="!font-jakarta text-2xl font-bold text-ink tracking-tight mt-[4px] mb-0">¡Tu pedido fue enviado!</h2>
             <p class="text-sm text-ink-variant max-w-xs mx-auto mt-[6px] mb-0">
               <ng-container *ngIf="info.autoConfirm && kitchen">La comanda ya entró en la cocina y la barra de {{ info.business.name }}.</ng-container>
               <ng-container *ngIf="info.autoConfirm && !kitchen">Tu pedido ya quedó registrado en {{ info.business.name }}.</ng-container>
@@ -302,12 +317,12 @@
                 <mat-icon class="text-leaf flex-shrink-0">table_restaurant</mat-icon>
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-line uppercase m-0 truncate">Mesa {{ info.table.name }}</p>
-                  <p class="text-sm font-bold text-forest m-0">Pedido #{{ splashNumber }}</p>
+                  <p class="text-sm font-bold text-ink m-0">Pedido #{{ splashNumber }}</p>
                 </div>
               </div>
               <div class="text-right flex-shrink-0">
                 <p class="text-[11px] text-ink-variant m-0">{{ s.units }} {{ s.units === 1 ? 'ítem' : 'ítems' }}</p>
-                <p class="text-sm font-bold text-forest m-0">{{ money(s.total) }}</p>
+                <p class="text-sm font-bold text-ink m-0">{{ money(s.total) }}</p>
               </div>
             </div>
           </div>
@@ -316,10 +331,10 @@
           <div class="w-full mt-[24px] bg-surface-mid rounded-[20px] p-[12px]">
             <div class="flex items-center justify-between text-ink-variant mb-[6px]">
               <div class="flex items-center gap-[6px]">
-                <mat-icon class="!w-4 !h-4 !text-base text-forest animate-spin">refresh</mat-icon>
+                <mat-icon class="!w-4 !h-4 !text-base text-ink animate-spin">refresh</mat-icon>
                 <span class="text-xs font-semibold">Sincronizando estado en vivo…</span>
               </div>
-              <span class="text-[11px] text-forest font-bold">{{ splashSeconds > 0 ? splashSeconds + 's' : '¡Listo!' }}</span>
+              <span class="text-[11px] text-ink font-bold">{{ splashSeconds > 0 ? splashSeconds + 's' : '¡Listo!' }}</span>
             </div>
             <div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
               <div class="h-full bg-forest rounded-full ease-linear transition-[width]" [style.transition-duration.ms]="splashDurationMs" [style.width.%]="splashRunning ? 100 : 0"></div>
@@ -327,7 +342,7 @@
             <p class="text-xs text-ink-variant text-center mt-[8px] mb-0">Te llevamos al seguimiento de tu pedido automáticamente.</p>
           </div>
 
-          <button type="button" (click)="finishSplash()" class="mt-[16px] inline-flex items-center gap-[6px] py-[10px] px-[16px] rounded-full text-forest text-sm font-bold hover:bg-forest-soft transition-colors active:scale-95">
+          <button type="button" (click)="finishSplash()" class="mt-[16px] inline-flex items-center gap-[6px] py-[10px] px-[16px] rounded-full text-ink text-sm font-bold hover:bg-forest-soft transition-colors active:scale-95">
             <span>Ver seguimiento ahora</span><mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon>
           </button>
         </div>
@@ -336,78 +351,60 @@
       <!-- ===== CARTA ===== -->
       <ng-container *ngIf="!splash && tab === 'menu'">
 
-        <!-- Tienda: cómo lo querés (retiro o envío) -->
-        <section *ngIf="storeMode && shop && (shop.pickup || shop.home)" class="px-[16px] pb-[4px]" aria-label="Forma de entrega">
-          <div class="p-1 bg-surface-mid rounded-full flex gap-1">
-            <button *ngIf="shop.pickup" type="button" (click)="setMode('pickup')" [attr.aria-pressed]="checkout.mode === 'pickup'"
-              class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all duration-300"
-              [ngClass]="checkout.mode === 'pickup' ? 'bg-forest text-white shadow-floating' : 'text-ink-variant'">
-              <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px] flex-shrink-0">storefront</mat-icon>
-              <span class="flex flex-col text-left leading-none"><span class="text-xs font-bold">Retiro en local</span><span class="text-[10px] opacity-80 mt-[2px]">Sin costo · {{ shop.prepMin }} min</span></span>
-            </button>
-            <button *ngIf="shop.home" type="button" (click)="setMode('delivery')" [attr.aria-pressed]="checkout.mode === 'delivery'"
-              class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all duration-300"
-              [ngClass]="checkout.mode === 'delivery' ? 'bg-forest text-white shadow-floating' : 'text-ink-variant'">
-              <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px] flex-shrink-0">two_wheeler</mat-icon>
-              <span class="flex flex-col text-left leading-none"><span class="text-xs font-bold">Envío a casa</span><span class="text-[10px] opacity-80 mt-[2px]">{{ shop.fee ? money(shop.fee) : 'Sin cargo' }}</span></span>
-            </button>
-          </div>
-          <p class="m-0 mt-[8px] flex flex-wrap items-center gap-x-[12px] gap-y-[2px] px-[6px] text-[11px] text-ink-variant">
-            <span class="inline-flex items-center gap-[4px]"><mat-icon class="!w-[14px] !h-[14px] !text-[14px] !leading-[14px]">payments</mat-icon>{{ shop.payCash && shop.payTransfer ? 'Efectivo o transferencia' : shop.payTransfer ? 'Transferencia' : 'Efectivo' }}</span>
-            <span *ngIf="info.business.address" class="inline-flex items-center gap-[4px] min-w-0"><mat-icon class="!w-[14px] !h-[14px] !text-[14px] !leading-[14px] flex-shrink-0">place</mat-icon><span class="truncate">{{ info.business.address }}</span></span>
-          </p>
-        </section>
-
         <!-- Mesa: llamar al mozo / pedir la cuenta -->
-        <section *ngIf="!viewOnly && !storeMode" class="px-[16px] pt-[16px]">
+        <section *ngIf="!viewOnly && !storeMode" class="px-[16px] pb-[20px] pt-[16px]">
           <div class="grid grid-cols-2 gap-[10px]">
             <button type="button" (click)="call('WAITER')" [disabled]="orders.calls.waiter || callBusy"
-              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-forest text-[13px] font-bold transition-all disabled:opacity-60">
+              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-ink text-[13px] font-bold transition-all disabled:opacity-60">
               <mat-icon class="!w-5 !h-5 !text-xl text-leaf">campaign</mat-icon>
               <span>{{ orders.calls.waiter ? 'Mozo avisado' : 'Llamar al mozo' }}</span>
             </button>
             <button type="button" (click)="call('BILL')" [disabled]="orders.calls.bill || callBusy"
-              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-forest text-[13px] font-bold transition-all disabled:opacity-60">
+              class="flex min-h-[52px] items-center justify-center gap-[8px] px-[12px] rounded-full bg-surface-lowest ring-1 ring-line-soft/60 active:scale-[0.98] text-ink text-[13px] font-bold transition-all disabled:opacity-60">
               <mat-icon class="!w-5 !h-5 !text-xl text-leaf">receipt_long</mat-icon>
               <span>{{ orders.calls.bill ? 'Cuenta pedida' : 'Pedir la cuenta' }}</span>
             </button>
           </div>
         </section>
 
-        <section class="sticky top-0 z-20 px-[16px] pt-[12px] pb-[10px] bg-surface/95 backdrop-blur-xl">
-          <div class="relative mb-[10px]">
-            <mat-icon class="!w-5 !h-5 !text-xl text-line absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none">search</mat-icon>
-            <input type="search" [(ngModel)]="search" name="search" placeholder="Buscar en la carta" aria-label="Buscar en la carta"
-              class="w-full h-12 bg-surface-lowest rounded-full ring-1 ring-line-soft/70 pl-[44px] pr-[16px] text-[15px] text-ink placeholder-line focus:outline-none focus:ring-2 focus:ring-forest/50 transition-all" />
-          </div>
-
-          <nav *ngIf="categories.length > 1 && !search" appDragScroll aria-label="Categorías" class="flex items-center gap-[8px] overflow-x-auto py-[2px] -mx-[16px] px-[16px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <button type="button" (click)="categoryId = 'all'" class="whitespace-nowrap flex items-center gap-[6px] min-h-[40px] px-[16px] rounded-full text-[13px] transition-all"
-              [ngClass]="categoryId === 'all' ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-lowest ring-1 ring-line-soft/60 text-ink-variant hover:text-ink font-medium'"><mat-icon class="!w-4 !h-4 !text-base !leading-4">restaurant_menu</mat-icon>Todo</button>
-            <button *ngFor="let c of categories" type="button" (click)="categoryId = c.id" class="whitespace-nowrap min-h-[40px] px-[16px] rounded-full text-[13px] transition-all"
-              [ngClass]="categoryId === c.id ? 'bg-forest text-white font-bold shadow-sm' : 'bg-surface-lowest ring-1 ring-line-soft/60 text-ink-variant hover:text-ink font-medium'">{{ c.name }}</button>
-          </nav>
-        </section>
+        <!-- Categorías: círculos con la foto de un plato de cada sección -->
+        <nav *ngIf="categories.length > 1 && !search" appDragScroll aria-label="Categorías" class="flex items-start gap-[14px] overflow-x-auto px-[20px] pb-[8px] pt-[2px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <button type="button" (click)="categoryId = 'all'" [attr.aria-pressed]="categoryId === 'all'" class="group flex w-[72px] flex-shrink-0 flex-col items-center gap-[8px]">
+            <span class="grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full bg-surface-mid text-ink transition-shadow"
+              [ngClass]="categoryId === 'all' ? 'ring-[1.5px] ring-forest/45' : 'ring-1 ring-line-soft/60'">
+              <mat-icon class="!h-7 !w-7 !text-[28px] !leading-7">restaurant_menu</mat-icon>
+            </span>
+            <span class="max-w-full truncate text-[12px] leading-tight" [ngClass]="categoryId === 'all' ? 'font-bold text-ink' : 'font-medium text-ink-variant'">Todo</span>
+          </button>
+          <button *ngFor="let c of categories; trackBy: trackCategory" type="button" (click)="categoryId = c.id" [attr.aria-pressed]="categoryId === c.id" class="group flex w-[72px] flex-shrink-0 flex-col items-center gap-[8px]">
+            <span class="grid h-[68px] w-[68px] place-items-center overflow-hidden rounded-full bg-surface-mid text-ink-variant transition-shadow"
+              [ngClass]="categoryId === c.id ? 'ring-[1.5px] ring-forest/45' : 'ring-1 ring-line-soft/60'">
+              <img *ngIf="categoryImage(c.id) as src; else catIcon" [src]="src" alt="" loading="lazy" class="h-full w-full object-cover" />
+              <ng-template #catIcon><mat-icon class="!h-7 !w-7 !text-[28px] !leading-7">restaurant</mat-icon></ng-template>
+            </span>
+            <span class="max-w-full truncate text-[12px] leading-tight" [ngClass]="categoryId === c.id ? 'font-bold text-ink' : 'font-medium text-ink-variant'">{{ c.name }}</span>
+          </button>
+        </nav>
 
         <!-- Destacados -->
         <section *ngIf="featuredItems.length" class="pt-[6px]" aria-label="Destacados">
           <div class="flex items-center justify-between px-[20px] mb-[10px]">
-            <h2 class="!font-jakarta !text-[22px] !font-extrabold text-forest tracking-tight m-0 !leading-tight">Imperdibles</h2>
+            <h2 class="!font-jakarta !text-[22px] !font-extrabold text-ink tracking-tight m-0 !leading-tight">Imperdibles</h2>
             <span class="text-xs font-semibold text-ink-variant">Deslizá →</span>
           </div>
           <div class="relative">
             <ul appDragScroll #rail="dragScroll" class="list-none m-0 pt-0 flex gap-[12px] overflow-x-auto snap-x snap-mandatory scroll-px-[16px] pl-[16px] pr-[16px] pb-[10px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <li *ngFor="let item of featuredItems" class="snap-start flex-none w-[264px]">
+              <li *ngFor="let item of featuredItems" class="snap-start flex-none w-[300px]">
                 <ng-container *ngTemplateOutlet="featuredCard; context: { $implicit: item }"></ng-container>
               </li>
             </ul>
             <!-- Flechas: solo en pantallas con mouse; en el celular se desliza con el dedo -->
             <button type="button" (click)="rail.scrollPage(-1)" [hidden]="!rail.canPrev" aria-label="Ver los anteriores"
-              class="hidden [@media(hover:hover)]:grid absolute left-[6px] top-[38%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-forest shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
+              class="hidden [@media(hover:hover)]:grid absolute left-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
               <mat-icon class="!h-5 !w-5 !text-xl">chevron_left</mat-icon>
             </button>
             <button type="button" (click)="rail.scrollPage(1)" [hidden]="!rail.canNext" aria-label="Ver los siguientes"
-              class="hidden [@media(hover:hover)]:grid absolute right-[6px] top-[38%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-forest shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
+              class="hidden [@media(hover:hover)]:grid absolute right-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
               <mat-icon class="!h-5 !w-5 !text-xl">chevron_right</mat-icon>
             </button>
           </div>
@@ -420,21 +417,15 @@
             <!-- Título de la sección -->
             <div class="flex items-center justify-between gap-[12px]">
               <div class="min-w-0 flex items-center flex-wrap gap-x-[8px] gap-y-[2px]">
-                <h2 class="!font-jakarta !text-[22px] !font-extrabold text-forest tracking-tight m-0 !leading-tight">{{ g.name }}</h2>
+                <h2 class="!font-jakarta !text-[22px] !font-extrabold text-ink tracking-tight m-0 !leading-tight">{{ g.name }}</h2>
                 <span class="text-xs font-semibold tabular-nums text-ink-variant">{{ g.items.length }} {{ g.items.length === 1 ? 'opción' : 'opciones' }}</span>
               </div>
               <span *ngIf="g.tagline" class="flex-none text-[11px] font-semibold text-line text-right">{{ g.tagline }}</span>
             </div>
             <p *ngIf="g.subtitle" class="text-xs text-ink-variant m-0 -mt-[6px]">{{ g.subtitle }}</p>
 
-            <ul class="list-none p-0 m-0" [ngClass]="g.layout === 'grid' ? 'grid grid-cols-2 gap-[10px]' : 'flex flex-col gap-[10px]'">
-              <li *ngFor="let item of g.items" [class.col-span-2]="g.layout === 'grid' && cardStyle(g.layout, item) === 'list'">
-                <ng-container [ngSwitch]="cardStyle(g.layout, item)">
-                  <ng-container *ngSwitchCase="'grid'"><ng-container *ngTemplateOutlet="gridCard; context: { $implicit: item }"></ng-container></ng-container>
-                  <ng-container *ngSwitchCase="'hero'"><ng-container *ngTemplateOutlet="heroCard; context: { $implicit: item }"></ng-container></ng-container>
-                  <ng-container *ngSwitchDefault><ng-container *ngTemplateOutlet="listCard; context: { $implicit: item }"></ng-container></ng-container>
-                </ng-container>
-              </li>
+            <ul class="list-none p-0 m-0 flex flex-col gap-[14px]">
+              <li *ngFor="let item of g.items"><ng-container *ngTemplateOutlet="foodCard; context: { $implicit: item }"></ng-container></li>
             </ul>
           </section>
 
@@ -451,59 +442,59 @@
         </div>
 
         <!-- Aviso en vivo -->
-        <div *ngIf="liveRequests.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-[20px] flex items-center justify-between shadow-floating">
+        <div *ngIf="liveRequests.length > 0" class="flex items-center justify-between px-[4px]">
           <div class="flex items-center gap-[10px]">
-            <span class="relative flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-leaf-container animate-ping absolute opacity-75"></span><span class="w-2.5 h-2.5 rounded-full bg-leaf-container relative"></span></span>
-            <span class="text-[11px] tracking-wide text-forest-soft uppercase font-bold">{{ activeCount }} {{ activeCount === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
+            <span class="relative flex items-center justify-center"><span class="absolute h-[10px] w-[10px] animate-ping rounded-full bg-cafe-mint-500 opacity-75"></span><span class="relative h-[10px] w-[10px] rounded-full bg-cafe-mint-500"></span></span>
+            <span class="text-[13px] font-bold text-ink">{{ activeCount }} {{ activeCount === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
           </div>
-          <span class="text-xs font-semibold">En vivo</span>
+          <span class="text-[12px] text-ink-variant">En vivo</span>
         </div>
 
         <!-- Pedidos en marcha -->
-        <article *ngFor="let r of liveRequests" class="w-full bg-surface-lowest rounded-[20px] shadow-soft p-[16px] flex flex-col gap-[16px]">
+        <article *ngFor="let r of liveRequests" class="w-full bg-surface-lowest rounded-[24px] shadow-soft p-[20px] flex flex-col gap-[18px]">
           <div class="flex items-start justify-between gap-[8px]">
             <div class="min-w-0">
               <div class="flex items-center gap-[8px] flex-wrap">
-                <span class="!font-jakarta text-lg font-bold text-forest tracking-tight">Pedido #{{ requestNumber(r) }}</span>
-                <span class="bg-leaf-container text-leaf-ink2 text-[10px] px-[8px] py-[2px] rounded-full uppercase tracking-wider font-bold">En curso</span>
+                <span class="!font-jakarta text-[24px] font-extrabold leading-none tracking-tight text-ink">Pedido #{{ requestNumber(r) }}</span>
               </div>
               <p class="text-xs text-ink-variant mt-[2px] mb-0 flex items-center gap-[4px]"><mat-icon class="!w-[14px] !h-[14px] !text-[14px] !leading-[14px] text-leaf">table_restaurant</mat-icon>Mesa {{ info.table.name }} · {{ r.createdAt | date: 'HH:mm' }}<ng-container *ngIf="r.customerName"> · {{ r.customerName }}</ng-container></p>
             </div>
             <div class="text-right flex-shrink-0">
               <span class="text-[10px] uppercase text-line font-bold tracking-wider">Total</span>
-              <p class="!font-jakarta text-lg font-bold text-forest leading-none m-0">{{ money(r.total) }}</p>
+              <p class="!font-jakarta m-0 text-[24px] font-extrabold leading-none tracking-tight text-ink">{{ money(r.total) }}</p>
             </div>
           </div>
 
           <!-- Avance -->
-          <div class="bg-surface-low rounded-[20px] p-[14px] flex flex-col gap-[12px]">
-            <ng-container *ngTemplateOutlet="stepper; context: { labels: stepLabels, icons: stepIcons, index: stepIndex(r.step) }"></ng-container>
-            <p class="m-0 rounded-[14px] bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
-              <mat-icon class="!w-5 !h-5 !text-xl text-leaf flex-shrink-0">local_cafe</mat-icon>{{ statusText(r.step) }}
+          <div class="flex flex-col gap-[14px] border-t border-dashed border-line-soft pt-[16px]">
+            <p class="m-0 flex items-start gap-[8px] text-[15px] font-semibold leading-snug text-ink">
+              <mat-icon class="!h-[22px] !w-[22px] !text-[22px] !leading-[22px] flex-none text-ink">{{ r.step === 'RECEIVED' ? 'schedule' : 'local_cafe' }}</mat-icon>{{ statusText(r.step) }}
             </p>
+            <ng-container *ngTemplateOutlet="stepper; context: { labels: stepLabels, icons: stepIcons, index: stepIndex(r.step) }"></ng-container>
           </div>
 
           <!-- Detalle -->
-          <div class="flex flex-col gap-[6px]">
-            <span class="text-[10px] uppercase font-bold text-line tracking-wider">Detalle del pedido</span>
-            <div *ngFor="let l of r.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-[14px]">
-              <div class="min-w-0">
-                <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-xs font-bold text-leaf">{{ l.quantity }}×</span><span class="text-sm font-semibold text-ink truncate">{{ l.name }}</span></p>
+          <div class="flex flex-col gap-[2px] border-t border-dashed border-line-soft pt-[16px]">
+            <span class="mb-[4px] text-[12px] font-bold uppercase tracking-wide text-ink-variant">Tu pedido</span>
+            <div *ngFor="let l of r.items" class="flex items-center gap-[12px] border-b border-line-soft/60 py-[10px] last:border-b-0">
+              <span class="grid h-[46px] w-[46px] flex-none place-items-center overflow-hidden rounded-[10px] bg-surface-mid text-line">
+                <img *ngIf="lineImage(l) as src; else noLinePhoto" [src]="src" alt="" loading="lazy" class="h-full w-full object-cover" />
+                <ng-template #noLinePhoto><mat-icon>restaurant</mat-icon></ng-template>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-[13px] font-bold text-ink-variant">{{ l.quantity }}×</span><span class="text-[15px] font-semibold text-ink truncate">{{ l.name }}</span></p>
                 <p *ngIf="l.extras.length" class="text-xs text-ink-variant m-0 truncate">{{ l.extras.join(' · ') }}</p>
                 <p *ngIf="l.note" class="text-xs text-ink-variant m-0 truncate">"{{ l.note }}"</p>
               </div>
-              <span class="text-sm font-semibold text-forest flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
+              <span class="text-[15px] font-semibold tabular-nums text-ink flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
             </div>
           </div>
 
-          <div class="flex flex-col gap-[8px]">
-            <button type="button" (click)="tab = 'menu'" class="w-full bg-forest hover:bg-forest-hover text-white py-[11px] px-[12px] rounded-full text-xs font-bold shadow-floating flex items-center justify-center gap-[6px] active:scale-95 transition-transform">
-              <mat-icon class="!w-4 !h-4 !text-base">add_circle</mat-icon>Agregar más ítems
+          <div class="flex items-center justify-between gap-[12px] border-t border-dashed border-line-soft pt-[14px] text-[14px] font-semibold">
+            <button type="button" (click)="tab = 'menu'" class="inline-flex items-center gap-[4px] text-ink">
+              <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">add</mat-icon>Agregar más
             </button>
-            <button *ngIf="r.step === 'RECEIVED'" type="button" (click)="cancelRequest(r)"
-              class="w-full bg-surface-mid text-cafe-red-700 py-[9px] px-[12px] rounded-full text-[11px] font-semibold flex items-center justify-center gap-[4px] hover:bg-cafe-red-50 transition-colors">
-              <mat-icon class="!w-4 !h-4 !text-base">remove_circle_outline</mat-icon>Cancelar pedido (hasta que lo confirmen)
-            </button>
+            <button *ngIf="r.step === 'RECEIVED'" type="button" (click)="cancelRequest(r)" class="text-cafe-red-700">Cancelar pedido</button>
           </div>
         </article>
 
@@ -517,12 +508,12 @@
                   <mat-icon class="!w-5 !h-5 !text-xl">{{ isDone(r.step) ? 'check_circle' : (r.step === 'REJECTED' ? 'error_outline' : 'cancel') }}</mat-icon>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-xs font-bold text-forest leading-tight m-0">Pedido #{{ requestNumber(r) }} · {{ pastLabel(r.step) }}</p>
+                  <p class="text-xs font-bold text-ink leading-tight m-0">Pedido #{{ requestNumber(r) }} · {{ pastLabel(r.step) }}</p>
                   <p class="text-xs text-ink-variant m-0 truncate">{{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }} · {{ r.createdAt | date: 'HH:mm' }}</p>
                 </div>
               </div>
               <div class="flex items-center gap-[8px] flex-shrink-0">
-                <span class="text-xs font-bold text-forest">{{ money(r.total) }}</span>
+                <span class="text-xs font-bold text-ink">{{ money(r.total) }}</span>
                 <mat-icon class="text-line !w-5 !h-5 !text-xl">{{ openPast[r.id] ? 'expand_less' : 'expand_more' }}</mat-icon>
               </div>
             </button>
@@ -533,7 +524,7 @@
               </div>
               <div *ngFor="let l of r.items" class="flex justify-between items-center gap-[8px] text-xs text-ink-variant py-[6px]">
                 <span class="min-w-0 truncate">{{ l.quantity }}× {{ l.name }}<ng-container *ngIf="l.extras.length"> · {{ l.extras.join(', ') }}</ng-container></span>
-                <span class="font-bold text-forest flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
+                <span class="font-bold text-ink flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
               </div>
               <p *ngIf="!kitchen && r.step === 'CONFIRMED'" class="flex items-center gap-[4px] text-[11px] text-leaf font-medium m-0 pt-[6px]"><mat-icon class="!w-4 !h-4 !text-base">done_all</mat-icon>Confirmado por el mozo</p>
               <p *ngIf="r.step === 'READY'" class="flex items-center gap-[4px] text-[11px] text-leaf font-medium m-0 pt-[6px]"><mat-icon class="!w-4 !h-4 !text-base">done_all</mat-icon>Listo: el mozo ya lo lleva a tu mesa</p>
@@ -546,7 +537,7 @@
           <div class="flex items-center gap-[12px] min-w-0">
             <div class="w-10 h-10 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon class="!w-5 !h-5 !text-xl">room_service</mat-icon></div>
             <div class="min-w-0">
-              <p class="!font-jakarta text-sm font-bold text-forest m-0">¿Necesitás algo?</p>
+              <p class="!font-jakarta text-sm font-bold text-ink m-0">¿Necesitás algo?</p>
               <p class="text-xs text-ink-variant m-0">Panera, hielo, condimentos o la cuenta</p>
             </div>
           </div>
@@ -564,23 +555,23 @@
           <div class="flex items-start gap-[12px]">
             <div class="w-11 h-11 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0"><mat-icon>{{ sent.stored ? 'check' : 'chat' }}</mat-icon></div>
             <div class="min-w-0">
-              <h2 class="!font-jakarta m-0 text-lg font-bold text-forest leading-tight">{{ sent.stored ? '¡Pedido enviado!' : 'Último paso: mandalo por WhatsApp' }}</h2>
+              <h2 class="!font-jakarta m-0 text-lg font-bold text-ink leading-tight">{{ sent.stored ? '¡Pedido enviado!' : 'Último paso: mandalo por WhatsApp' }}</h2>
               <p class="m-0 mt-[2px] text-sm text-ink-variant leading-snug">
-                <ng-container *ngIf="sent.stored">{{ info.business.name }} lo va a revisar y te avisamos acá cuando lo acepte.<ng-container *ngIf="sent.order.number"> Tu número es el <strong class="text-forest">#{{ sent.order.number }}</strong>.</ng-container></ng-container>
+                <ng-container *ngIf="sent.stored">{{ info.business.name }} lo va a revisar y te avisamos acá cuando lo acepte.<ng-container *ngIf="sent.order.number"> Tu número es el <strong class="text-ink">#{{ sent.order.number }}</strong>.</ng-container></ng-container>
                 <ng-container *ngIf="!sent.stored">Tocá el botón para enviar tu pedido por WhatsApp: así llega al local.</ng-container>
               </p>
             </div>
           </div>
           <div *ngIf="sent.order.payMethod === 'transfer' && sent.order.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
             <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir {{ money(sent.order.total) }}</p>
-            <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ sent.order.bankInfo }}</p>
+            <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-ink break-words">{{ sent.order.bankInfo }}</p>
             <p class="m-0 mt-[6px] text-xs text-ink-variant">Hacé la transferencia y avisale al local.</p>
           </div>
           <a *ngIf="shop?.whatsapp" [href]="whatsappLink(sent.order)" target="_blank" rel="noopener"
             class="w-full h-12 rounded-full bg-leaf text-white no-underline font-bold text-sm flex items-center justify-center gap-[8px] shadow-floating active:scale-[0.98] transition-all">
             <mat-icon class="!w-5 !h-5 !text-xl">chat</mat-icon>{{ sent.stored ? 'Avisar también por WhatsApp' : 'Enviar por WhatsApp' }}
           </a>
-          <button type="button" (click)="sentOrder = null" class="text-xs font-semibold text-ink-variant hover:text-forest">Entendido</button>
+          <button type="button" (click)="sentOrder = null" class="text-xs font-semibold text-ink-variant hover:text-ink">Entendido</button>
         </section>
 
         <div *ngIf="myOrders.length === 0 && !sentOrder" class="text-center py-[40px] text-ink-variant">
@@ -590,64 +581,64 @@
         </div>
 
         <!-- Aviso en vivo -->
-        <div *ngIf="activeOrders.length > 0" class="bg-forest text-white px-[16px] py-[10px] rounded-[20px] flex items-center justify-between shadow-floating">
+        <div *ngIf="activeOrders.length > 0" class="flex items-center justify-between px-[4px]">
           <div class="flex items-center gap-[10px]">
-            <span class="relative flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-leaf-container animate-ping absolute opacity-75"></span><span class="w-2.5 h-2.5 rounded-full bg-leaf-container relative"></span></span>
-            <span class="text-[11px] tracking-wide text-forest-soft uppercase font-bold">{{ activeOrders.length }} {{ activeOrders.length === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
+            <span class="relative flex items-center justify-center"><span class="absolute h-[10px] w-[10px] animate-ping rounded-full bg-cafe-mint-500 opacity-75"></span><span class="relative h-[10px] w-[10px] rounded-full bg-cafe-mint-500"></span></span>
+            <span class="text-[13px] font-bold text-ink">{{ activeOrders.length }} {{ activeOrders.length === 1 ? 'pedido en curso' : 'pedidos en curso' }}</span>
           </div>
-          <span class="text-xs font-semibold">Se actualiza solo</span>
+          <span class="text-[12px] text-ink-variant">Se actualiza solo</span>
         </div>
 
         <!-- Pedidos en marcha -->
-        <article *ngFor="let o of activeOrders" class="w-full bg-surface-lowest rounded-[20px] shadow-soft p-[16px] flex flex-col gap-[16px]">
+        <article *ngFor="let o of activeOrders" class="w-full bg-surface-lowest rounded-[24px] shadow-soft p-[20px] flex flex-col gap-[18px]">
           <div class="flex items-start justify-between gap-[8px]">
             <div class="min-w-0">
               <div class="flex items-center gap-[8px] flex-wrap">
-                <span class="!font-jakarta text-lg font-bold text-forest tracking-tight">Pedido #{{ o.number }}</span>
-                <span class="bg-leaf-container text-leaf-ink2 text-[10px] px-[8px] py-[2px] rounded-full uppercase tracking-wider font-bold">En curso</span>
+                <span class="!font-jakarta text-[24px] font-extrabold leading-none tracking-tight text-ink">Pedido #{{ o.number }}</span>
               </div>
               <p class="text-xs text-ink-variant mt-[2px] mb-0 flex items-center gap-[4px]"><mat-icon class="!w-[14px] !h-[14px] !text-[14px] !leading-[14px] text-leaf">{{ o.mode === 'delivery' ? 'two_wheeler' : 'storefront' }}</mat-icon>{{ o.mode === 'delivery' ? 'Envío a domicilio' : 'Retiro en local' }} · {{ o.createdAt | date: 'HH:mm' }}</p>
             </div>
             <div class="text-right flex-shrink-0">
               <span class="text-[10px] uppercase text-line font-bold tracking-wider">Total</span>
-              <p class="!font-jakarta text-lg font-bold text-forest leading-none m-0">{{ money(o.total) }}</p>
+              <p class="!font-jakarta m-0 text-[24px] font-extrabold leading-none tracking-tight text-ink">{{ money(o.total) }}</p>
             </div>
           </div>
 
-          <div class="bg-surface-low rounded-[20px] p-[14px] flex flex-col gap-[12px]">
-            <ng-container *ngTemplateOutlet="stepper; context: { labels: storeLabels(o), icons: storeIcons(o), index: storeStepIndex(o) }"></ng-container>
-            <p class="m-0 rounded-[14px] bg-surface-mid p-[10px] text-xs text-ink-variant leading-snug flex items-center gap-[10px]">
-              <mat-icon class="!w-5 !h-5 !text-xl text-leaf flex-shrink-0">{{ o.mode === 'delivery' ? 'two_wheeler' : 'local_cafe' }}</mat-icon>{{ storeStatusText(o) }}
+          <div class="flex flex-col gap-[14px] border-t border-dashed border-line-soft pt-[16px]">
+            <p class="m-0 flex items-start gap-[8px] text-[15px] font-semibold leading-snug text-ink">
+              <mat-icon class="!h-[22px] !w-[22px] !text-[22px] !leading-[22px] flex-none text-ink">{{ o.status === 'PENDING' ? 'schedule' : o.status === 'ACCEPTED' ? 'skillet' : o.mode === 'delivery' ? 'two_wheeler' : 'shopping_bag' }}</mat-icon>{{ storeStatusText(o) }}
             </p>
+            <ng-container *ngTemplateOutlet="stepper; context: { labels: storeLabels(o), icons: storeIcons(o), index: storeStepIndex(o) }"></ng-container>
           </div>
 
           <div *ngIf="o.payMethod === 'transfer' && o.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
             <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir</p>
-            <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ o.bankInfo }}</p>
+            <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-ink break-words">{{ o.bankInfo }}</p>
           </div>
 
-          <div class="flex flex-col gap-[6px]">
-            <span class="text-[10px] uppercase font-bold text-line tracking-wider">Detalle del pedido</span>
-            <div *ngFor="let l of o.items" class="flex items-center justify-between gap-[12px] bg-surface-low p-[10px] rounded-[14px]">
-              <div class="min-w-0">
-                <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-xs font-bold text-leaf">{{ l.quantity }}×</span><span class="text-sm font-semibold text-ink truncate">{{ l.name }}</span></p>
+          <div class="flex flex-col gap-[2px] border-t border-dashed border-line-soft pt-[16px]">
+            <span class="mb-[4px] text-[12px] font-bold uppercase tracking-wide text-ink-variant">Tu pedido</span>
+            <div *ngFor="let l of o.items" class="flex items-center gap-[12px] border-b border-line-soft/60 py-[10px] last:border-b-0">
+              <span class="grid h-[46px] w-[46px] flex-none place-items-center overflow-hidden rounded-[10px] bg-surface-mid text-line">
+                <img *ngIf="lineImage(l) as src; else noLinePhoto" [src]="src" alt="" loading="lazy" class="h-full w-full object-cover" />
+                <ng-template #noLinePhoto><mat-icon>restaurant</mat-icon></ng-template>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="m-0 flex items-center gap-[6px] min-w-0"><span class="text-[13px] font-bold text-ink-variant">{{ l.quantity }}×</span><span class="text-[15px] font-semibold text-ink truncate">{{ l.name }}</span></p>
                 <p *ngIf="l.extras.length" class="text-xs text-ink-variant m-0 truncate">{{ l.extras.join(' · ') }}</p>
                 <p *ngIf="l.note" class="text-xs text-ink-variant m-0 truncate">"{{ l.note }}"</p>
               </div>
-              <span class="text-sm font-semibold text-forest flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
+              <span class="text-[15px] font-semibold tabular-nums text-ink flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
             </div>
-            <div *ngIf="o.deliveryFee > 0" class="flex items-center justify-between px-[10px] text-xs text-ink-variant"><span>Envío a domicilio</span><span class="font-semibold text-forest">{{ money(o.deliveryFee) }}</span></div>
+            <div *ngIf="o.deliveryFee > 0" class="flex items-center justify-between px-[10px] text-xs text-ink-variant"><span>Envío a domicilio</span><span class="font-semibold text-ink">{{ money(o.deliveryFee) }}</span></div>
             <p *ngIf="o.mode === 'delivery'" class="m-0 px-[10px] text-xs text-ink-variant break-words">Entrega en: <span class="font-semibold text-ink">{{ o.address }}</span></p>
           </div>
 
-          <div class="grid gap-[8px]" [ngClass]="info.business.phone ? 'grid-cols-2' : 'grid-cols-1'">
-            <a *ngIf="info.business.phone" [href]="'tel:' + info.business.phone" class="flex items-center justify-center gap-[8px] py-[10px] px-[12px] rounded-[14px] bg-leaf-container text-leaf-ink2 text-xs font-bold no-underline active:scale-[0.98] transition-transform">
-              <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">call</mat-icon>Llamar al local
+          <div *ngIf="info.business.phone || o.status === 'PENDING'" class="flex items-center justify-between gap-[12px] border-t border-dashed border-line-soft pt-[14px] text-[14px] font-semibold">
+            <a *ngIf="info.business.phone" [href]="'tel:' + info.business.phone" class="inline-flex items-center gap-[6px] text-ink no-underline">
+              <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">call</mat-icon>Llamar al local
             </a>
-            <button *ngIf="o.status === 'PENDING'" type="button" (click)="cancelStoreOrder(o)"
-              class="flex items-center justify-center gap-[6px] py-[10px] px-[12px] rounded-[14px] bg-surface-mid text-cafe-red-700 text-xs font-bold hover:bg-cafe-red-50 transition-colors">
-              <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">remove_circle_outline</mat-icon>Cancelar pedido
-            </button>
+            <button *ngIf="o.status === 'PENDING'" type="button" (click)="cancelStoreOrder(o)" class="text-cafe-red-700">Cancelar pedido</button>
           </div>
         </article>
 
@@ -660,12 +651,12 @@
                   <mat-icon class="!w-5 !h-5 !text-xl">{{ o.status === 'COMPLETED' ? 'check_circle' : (o.status === 'REJECTED' ? 'error_outline' : 'cancel') }}</mat-icon>
                 </div>
                 <div class="min-w-0">
-                  <p class="text-xs font-bold text-forest leading-tight m-0">Pedido #{{ o.number }} · {{ storePastLabel(o.status) }}</p>
+                  <p class="text-xs font-bold text-ink leading-tight m-0">Pedido #{{ o.number }} · {{ storePastLabel(o.status) }}</p>
                   <p class="text-xs text-ink-variant m-0 truncate">{{ o.items.length }} {{ o.items.length === 1 ? 'ítem' : 'ítems' }} · {{ o.createdAt | date: 'dd/MM HH:mm' }}</p>
                 </div>
               </div>
               <div class="flex items-center gap-[8px] flex-shrink-0">
-                <span class="text-xs font-bold text-forest">{{ money(o.total) }}</span>
+                <span class="text-xs font-bold text-ink">{{ money(o.total) }}</span>
                 <mat-icon class="text-line !w-5 !h-5 !text-xl">{{ openPast[o.token ?? ''] ? 'expand_less' : 'expand_more' }}</mat-icon>
               </div>
             </button>
@@ -676,103 +667,123 @@
               </div>
               <div *ngFor="let l of o.items" class="flex justify-between items-center gap-[8px] text-xs text-ink-variant py-[6px]">
                 <span class="min-w-0 truncate">{{ l.quantity }}× {{ l.name }}<ng-container *ngIf="l.extras.length"> · {{ l.extras.join(', ') }}</ng-container></span>
-                <span class="font-bold text-forest flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
+                <span class="font-bold text-ink flex-shrink-0">{{ money(l.unitPrice * l.quantity) }}</span>
               </div>
             </div>
           </div>
         </ng-container>
 
-        <button *ngIf="myOrders.length" type="button" (click)="tab = 'menu'" class="w-full bg-forest hover:bg-forest-hover text-white py-[12px] px-[12px] rounded-full text-sm font-bold shadow-floating flex items-center justify-center gap-[6px] active:scale-95 transition-transform">
-          <mat-icon class="!w-4 !h-4 !text-base">add_circle</mat-icon>Hacer otro pedido
+        <button *ngIf="myOrders.length" type="button" (click)="tab = 'menu'" class="flex h-[52px] w-full items-center justify-center gap-[6px] rounded-full text-[15px] font-semibold text-ink ring-1 ring-forest/30 transition-all hover:bg-forest/5 active:scale-[0.98]">
+          <mat-icon class="!h-[20px] !w-[20px] !text-[20px] !leading-[20px]">add</mat-icon>Hacer otro pedido
         </button>
       </main>
 
-      <!-- ===== Barra flotante del pedido ===== -->
-      <aside *ngIf="cartUnits > 0 && !cartOpen && !viewOnly" class="fixed bottom-[96px] inset-x-0 mx-auto max-w-md px-[16px] z-30" data-purpose="cart-floating-bar">
-        <button type="button" (click)="cartOpen = true" aria-label="Ver pedido"
-          class="w-full bg-forest text-white rounded-full p-[8px] pl-[10px] shadow-[0_14px_34px_-10px_rgba(0,0,0,0.5)] flex items-center justify-between gap-[12px] active:scale-[0.98] transition-transform text-left">
-          <span class="flex items-center gap-[12px] min-w-0">
-            <span class="grid h-12 w-12 flex-none place-items-center rounded-full bg-[#ffffff] text-[18px] font-extrabold tabular-nums text-[rgb(var(--brand-rgb,11_125_102))]">{{ cartUnits }}</span>
-            <span class="min-w-0 leading-tight">
-              <span class="block text-[11px] font-bold uppercase tracking-wider text-white/75">Tu bolsa</span>
-              <span class="block text-[18px] font-extrabold tabular-nums tracking-tight">{{ money(cartTotal) }}</span>
-            </span>
-          </span>
-          <span class="flex h-12 flex-none items-center gap-[6px] rounded-full bg-[#ffffff] px-[18px] text-sm font-bold text-[#181d26]">Ver pedido<mat-icon class="!w-5 !h-5 !text-xl">arrow_forward</mat-icon></span>
-        </button>
-      </aside>
-
-      <!-- ===== Navegación inferior: dock flotante ===== -->
-      <nav *ngIf="!viewOnly" class="fixed bottom-0 inset-x-0 mx-auto max-w-md z-30 px-[16px] pb-[max(12px,env(safe-area-inset-bottom,0px))] pointer-events-none" aria-label="Secciones">
-        <div class="pointer-events-auto flex items-center gap-[4px] rounded-full bg-surface-lowest/90 p-[6px] ring-1 ring-line-soft/60 backdrop-blur-xl shadow-[0_12px_32px_-10px_rgba(0,0,0,0.4)]">
-          <button type="button" (click)="tab = 'menu'" [attr.aria-current]="tab === 'menu' ? 'page' : null" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all" [ngClass]="tab === 'menu' ? 'bg-forest text-white shadow-sm' : 'text-ink-variant'">
-            <mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">menu_book</mat-icon><span>Carta</span>
-          </button>
-          <button type="button" (click)="tab = 'orders'" [attr.aria-current]="tab === 'orders' ? 'page' : null" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all" [ngClass]="tab === 'orders' ? 'bg-forest text-white shadow-sm' : 'text-ink-variant'">
-            <span class="relative"><mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">receipt_long</mat-icon>
-              <span *ngIf="activeCount > 0" class="absolute -top-[6px] -right-[8px] min-w-[16px] h-4 px-[4px] rounded-full bg-[#c2410c] text-white text-[10px] leading-4 text-center font-bold">{{ activeCount }}</span></span>
-            <span>Pedidos</span>
-          </button>
-          <button type="button" (click)="cartUnits > 0 ? cartOpen = true : tab = 'menu'" class="flex h-[52px] flex-1 items-center justify-center gap-[8px] rounded-full text-[13px] font-bold transition-all text-ink-variant">
-            <span class="relative"><mat-icon class="!w-[22px] !h-[22px] !text-[22px] !leading-[22px]">shopping_bag</mat-icon>
-              <span *ngIf="cartUnits > 0" class="absolute -top-[6px] -right-[8px] min-w-[16px] h-4 px-[4px] rounded-full bg-[#c2410c] text-white text-[10px] leading-4 text-center font-bold">{{ cartUnits }}</span></span>
-            <span>Bolsa</span>
+      <!-- ===== Navegación inferior: barra con la bolsa al centro, en un botón que sobresale ===== -->
+      <nav *ngIf="!viewOnly" class="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md" aria-label="Secciones">
+        <div class="relative [filter:drop-shadow(0_-6px_14px_rgba(0,0,0,0.14))]">
+          <div class="pointer-events-auto grid grid-cols-[1fr_92px_1fr] items-end rounded-t-[28px] bg-surface-lowest px-[10px] pt-[10px] pb-[max(10px,env(safe-area-inset-bottom,0px))]"
+            style="-webkit-mask-image: radial-gradient(circle at 50% 0, transparent 42px, #000 43px); mask-image: radial-gradient(circle at 50% 0, transparent 42px, #000 43px)">
+            <button type="button" (click)="tab = 'menu'" [attr.aria-current]="tab === 'menu' ? 'page' : null"
+              class="flex h-[54px] flex-col items-center justify-center gap-[3px] rounded-[18px] text-[11px] transition-colors"
+              [ngClass]="tab === 'menu' ? 'font-bold text-ink' : 'font-medium text-ink-variant'">
+              <mat-icon class="!h-[24px] !w-[24px] !text-[24px] !leading-[24px]">menu_book</mat-icon><span>Carta</span>
+            </button>
+            <span class="pb-[6px] text-center text-[11px] font-bold leading-none text-ink-variant" aria-hidden="true">Bolsa</span>
+            <button type="button" (click)="tab = 'orders'" [attr.aria-current]="tab === 'orders' ? 'page' : null"
+              class="flex h-[54px] flex-col items-center justify-center gap-[3px] rounded-[18px] text-[11px] transition-colors"
+              [ngClass]="tab === 'orders' ? 'font-bold text-ink' : 'font-medium text-ink-variant'">
+              <span class="relative"><mat-icon class="!h-[24px] !w-[24px] !text-[24px] !leading-[24px]">receipt_long</mat-icon>
+                <span *ngIf="activeCount > 0" class="absolute -right-[9px] -top-[5px] h-4 min-w-[16px] rounded-full bg-[#c2410c] px-[4px] text-center text-[10px] font-bold leading-4 text-white">{{ activeCount }}</span></span>
+              <span>Pedidos</span>
+            </button>
+          </div>
+          <button type="button" (click)="cartUnits > 0 ? cartOpen = true : tab = 'menu'" [attr.aria-label]="cartUnits > 0 ? 'Ver la bolsa (' + cartUnits + ')' : 'Bolsa vacía, volver a la carta'"
+            class="pointer-events-auto absolute left-1/2 top-[-30px] grid h-[64px] w-[64px] -translate-x-1/2 place-items-center rounded-full bg-forest text-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.55)] transition-transform active:scale-90">
+            <mat-icon class="!h-[28px] !w-[28px] !text-[28px] !leading-[28px]">shopping_bag</mat-icon>
+            <span *ngIf="cartUnits > 0" class="absolute -right-[2px] -top-[2px] grid h-[22px] min-w-[22px] place-items-center rounded-full bg-[#c2410c] px-[5px] text-[11px] font-bold leading-none text-white ring-2 ring-surface-lowest">{{ cartUnits }}</span>
           </button>
         </div>
       </nav>
 
-      <!-- ===== Ficha: opciones y precios de un plato (solo lectura) ===== -->
-      <div *ngIf="detailItem as d" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeDetail()">
-        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="d.name" (click)="$event.stopPropagation()">
-          <div class="w-11 h-1.5 rounded-full bg-surface-highest mx-auto mb-[14px]"></div>
-          <img *ngIf="d.imageUrl" [src]="d.imageUrl" [alt]="d.name" class="w-full aspect-[16/9] object-cover rounded-[20px] mb-[12px] bg-surface-mid" />
-          <div class="flex items-start justify-between gap-[12px]">
-            <div class="min-w-0">
-              <p role="heading" aria-level="2" class="!font-jakarta m-0 text-xl font-bold text-forest leading-tight">{{ d.name }}</p>
-              <p *ngIf="d.description" class="m-0 mt-[4px] text-sm text-ink-variant leading-snug">{{ d.description }}</p>
-            </div>
-            <p class="m-0 flex-none text-lg font-bold text-forest">{{ priceText(d) }}</p>
+      <!-- ===== Buscador de la carta: pantalla completa con resultados mientras se escribe ===== -->
+      <div *ngIf="searchOpen" class="fixed inset-0 z-50 mx-auto flex max-w-md flex-col bg-surface font-inter" role="dialog" aria-modal="true" aria-label="Buscar en la carta">
+        <div class="flex items-center gap-[10px] px-[16px] pb-[10px] pt-[max(14px,env(safe-area-inset-top,0px))]">
+          <div class="relative min-w-0 flex-1">
+            <mat-icon class="!w-5 !h-5 !text-xl text-line absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none">search</mat-icon>
+            <input id="menu-search" type="search" [(ngModel)]="searchQuery" name="menuSearch" placeholder="Buscar en la carta" aria-label="Buscar en la carta" autocomplete="off" enterkeyhint="search"
+              class="h-12 w-full rounded-full bg-surface-lowest pl-[44px] pr-[16px] text-[16px] text-ink ring-1 ring-line-soft/70 placeholder-line transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </div>
+          <button type="button" (click)="closeSearch()" class="h-12 flex-none rounded-full px-[14px] text-sm font-bold text-ink active:scale-95">Cerrar</button>
+        </div>
 
-          <div class="mt-[16px] flex flex-col gap-[12px]">
-            <section *ngFor="let g of d.groups" class="rounded-[20px] bg-surface-lowest p-[14px] shadow-soft">
-              <div class="flex items-center justify-between gap-[8px] mb-[8px]">
-                <p role="heading" aria-level="3" class="m-0 text-sm font-bold text-forest">{{ g.name }}</p>
-                <span class="text-[11px] font-bold px-[8px] py-[2px] rounded-full" [ngClass]="g.required ? 'bg-tertiary-fixed text-tertiary-ink' : 'bg-surface-mid text-ink-variant'">
-                  {{ g.required ? (g.selection === 'SINGLE' ? 'Elegís una' : 'Obligatorio') : (g.selection === 'SINGLE' ? 'Opcional · una' : 'Opcional · varias') }}
+        <div class="min-h-0 flex-1 overflow-y-auto px-[16px] pb-[24px]">
+          <p *ngIf="!searchQuery.trim()" class="m-0 px-[4px] pt-[24px] text-center text-sm text-ink-variant">Escribí el nombre de un plato o de una bebida.</p>
+          <p *ngIf="searchQuery.trim() && searchResults.length === 0" class="m-0 px-[4px] pt-[24px] text-center text-sm text-ink-variant" role="status">No encontramos nada con ese nombre.</p>
+          <p *ngIf="searchResults.length" class="m-0 px-[4px] pb-[8px] pt-[8px] text-xs font-semibold text-ink-variant" role="status">{{ searchResults.length }} {{ searchResults.length === 1 ? 'resultado' : 'resultados' }}</p>
+          <ul class="m-0 flex list-none flex-col gap-[8px] p-0">
+            <li *ngFor="let item of searchResults; trackBy: trackItem">
+              <button type="button" (click)="pickFromSearch(item)" class="flex w-full items-center gap-[12px] rounded-[20px] bg-surface-lowest p-[8px] pr-[14px] text-left shadow-soft active:scale-[0.99]" [class.opacity-60]="item.soldOut">
+                <span class="grid h-[60px] w-[60px] flex-none place-items-center overflow-hidden rounded-[14px] bg-surface-mid text-line">
+                  <img *ngIf="item.imageUrl" [src]="item.imageUrl" alt="" loading="lazy" class="h-full w-full object-cover" [class.grayscale]="item.soldOut" />
+                  <mat-icon *ngIf="!item.imageUrl">restaurant</mat-icon>
                 </span>
-              </div>
-              <ul class="list-none p-0 m-0 divide-y divide-surface-mid">
-                <li *ngFor="let o of g.options" class="flex items-center justify-between gap-[12px] py-[9px] text-sm">
-                  <span class="text-ink">{{ o.name }}</span>
-                  <span class="flex-none font-bold" [ngClass]="groupSetsPrice(g) ? 'text-forest' : (o.priceDelta ? 'text-leaf' : 'text-line')">{{ optionLabel(d, g, o) }}</span>
-                </li>
-              </ul>
-            </section>
-          </div>
-
-          <p class="m-0 mt-[14px] text-center text-xs text-ink-variant">{{ storeMode ? 'Ahora no estamos recibiendo pedidos.' : 'Consultá en el local para pedir.' }}</p>
-          <button type="button" (click)="closeDetail()" class="mt-[12px] w-full py-[13px] rounded-full bg-forest text-white text-sm font-bold active:scale-[0.98] transition-transform">Cerrar</button>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-[15px] font-bold text-ink">{{ item.name }}</span>
+                  <span class="block truncate text-xs text-ink-variant">{{ categoryName(item) }}</span>
+                </span>
+                <span class="flex-none text-right">
+                  <span class="block text-[15px] font-extrabold tabular-nums text-ink">{{ priceText(item) }}</span>
+                  <span *ngIf="item.soldOut" class="block text-[11px] font-bold text-cafe-red-700">Agotado</span>
+                </span>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <!-- ===== Hoja: armar un plato ===== -->
-      <div *ngIf="sheetItem" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeSheet()">
-        <div class="w-full max-w-md max-h-[88vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl p-[20px] font-inter" role="dialog" aria-modal="true" [attr.aria-label]="sheetItem.name" (click)="$event.stopPropagation()">
-          <div class="w-11 h-1.5 rounded-full bg-surface-highest mx-auto mb-[14px]"></div>
-          <img *ngIf="sheetItem.imageUrl" [src]="sheetItem.imageUrl" [alt]="sheetItem.name" class="w-full aspect-[16/9] object-cover rounded-[20px] mb-[12px] bg-surface-mid" />
-          <div class="flex items-start justify-between gap-[12px] mb-[14px]">
-            <div>
-              <h2 class="!font-jakarta text-lg font-bold text-forest m-0">{{ sheetItem.name }}</h2>
-              <p class="text-sm text-leaf font-bold m-0">{{ money(sheetItem.price) }}</p>
+      <!-- ===== Ficha de un plato (solo lectura): foto, descripción, precio y opciones ===== -->
+      <div *ngIf="detailItem as d" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeDetail()">
+        <div class="w-full max-w-md max-h-[92vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl font-inter" role="dialog" aria-modal="true" [attr.aria-label]="d.name" (click)="$event.stopPropagation()">
+          <ng-container *ngTemplateOutlet="sheetHero; context: { $implicit: d, detail: true }"></ng-container>
+          <div class="px-[20px] pb-[20px]" [ngClass]="d.imageUrl ? 'pt-[16px]' : ''">
+            <p role="heading" aria-level="2" class="!font-jakarta m-0 text-center text-[24px] font-extrabold leading-tight tracking-tight text-ink">{{ d.name }}</p>
+            <p class="m-0 mt-[6px] text-center text-[20px] font-extrabold tabular-nums text-ink">{{ priceText(d) }}</p>
+            <p *ngIf="d.description" class="mx-auto m-0 mt-[8px] max-w-[300px] text-center text-sm leading-relaxed text-ink-variant">{{ d.description }}</p>
+
+            <div *ngIf="d.groups.length" class="mt-[18px] flex flex-col gap-[12px]">
+              <section *ngFor="let g of d.groups" class="rounded-[20px] bg-surface-lowest p-[14px] shadow-soft">
+                <div class="flex items-center justify-between gap-[8px] mb-[8px]">
+                  <p role="heading" aria-level="3" class="m-0 text-sm font-bold text-ink">{{ g.name }}</p>
+                  <span class="text-[11px] font-bold px-[8px] py-[2px] rounded-full" [ngClass]="g.required ? 'bg-tertiary-fixed text-tertiary-ink' : 'bg-surface-mid text-ink-variant'">
+                    {{ g.required ? (g.selection === 'SINGLE' ? 'Elegís una' : 'Obligatorio') : (g.selection === 'SINGLE' ? 'Opcional · una' : 'Opcional · varias') }}
+                  </span>
+                </div>
+                <ul class="list-none p-0 m-0 divide-y divide-surface-mid">
+                  <li *ngFor="let o of g.options" class="flex items-center justify-between gap-[12px] py-[9px] text-sm">
+                    <span class="text-ink">{{ o.name }}</span>
+                    <span class="flex-none font-bold" [ngClass]="groupSetsPrice(g) ? 'text-ink' : (o.priceDelta ? 'text-leaf' : 'text-line')">{{ optionLabel(d, g, o) }}</span>
+                  </li>
+                </ul>
+              </section>
             </div>
-            <button type="button" (click)="closeSheet()" aria-label="Cerrar" class="w-8 h-8 rounded-full bg-surface-mid hover:bg-surface-high flex items-center justify-center flex-shrink-0 text-ink-variant">
-              <mat-icon class="!w-4 !h-4 !text-base">close</mat-icon>
-            </button>
+
+            <p class="m-0 mt-[16px] text-center text-xs text-ink-variant">{{ d.soldOut ? 'Este plato está agotado por ahora.' : storeMode ? 'Ahora no estamos recibiendo pedidos.' : 'Consultá en el local para pedir.' }}</p>
           </div>
+        </div>
+      </div>
+
+      <!-- ===== Hoja: armar un plato (foto, descripción, opciones y botón de agregar) ===== -->
+      <div *ngIf="sheetItem" class="fixed inset-0 z-40 flex items-end justify-center bg-forest/40 backdrop-blur-[2px]" (click)="closeSheet()">
+        <div class="w-full max-w-md max-h-[92vh] overflow-y-auto bg-surface rounded-t-[32px] shadow-2xl font-inter" role="dialog" aria-modal="true" [attr.aria-label]="sheetItem.name" (click)="$event.stopPropagation()">
+          <ng-container *ngTemplateOutlet="sheetHero; context: { $implicit: sheetItem, detail: false }"></ng-container>
+          <div class="px-[20px] pb-[8px]" [ngClass]="sheetItem.imageUrl ? 'pt-[16px]' : ''">
+            <h2 class="!font-jakarta m-0 text-center text-[24px] font-extrabold leading-tight tracking-tight text-ink">{{ sheetItem.name }}</h2>
+            <p class="m-0 mt-[6px] text-center text-[20px] font-extrabold tabular-nums text-ink">{{ money(sheetItem.price) }}</p>
+            <p *ngIf="sheetItem.description" class="mx-auto m-0 mt-[8px] mb-[16px] max-w-[300px] text-center text-sm leading-relaxed text-ink-variant">{{ sheetItem.description }}</p>
+            <div *ngIf="!sheetItem.description" class="h-[16px]"></div>
 
           <fieldset *ngFor="let g of sheetItem.groups" class="border-0 p-0 m-0 mb-[14px]">
-            <legend class="text-sm font-bold text-forest p-0 mb-[6px]">
+            <legend class="text-sm font-bold text-ink p-0 mb-[6px]">
               {{ g.name }}
               <span class="text-xs font-medium ml-[6px]" [ngClass]="g.required ? 'text-cafe-red-700' : 'text-ink-variant'">{{ g.required ? 'Obligatorio' : (g.selection === 'MULTIPLE' ? 'Podés elegir varias' : 'Opcional') }}</span>
             </legend>
@@ -790,17 +801,19 @@
             </button>
           </fieldset>
 
-          <label class="block text-sm font-bold text-forest mb-[6px]" for="note">Aclaración <span class="text-xs font-medium text-ink-variant">(opcional)</span></label>
+          <label class="block text-sm font-bold text-ink mb-[6px]" for="note">Aclaración <span class="text-xs font-medium text-ink-variant">(opcional)</span></label>
           <input id="note" name="note" [(ngModel)]="sheetNote" maxlength="140" placeholder="Ej: sin cebolla"
             class="w-full px-[12px] py-[11px] rounded-[20px] bg-surface-low text-sm mb-[14px] focus:outline-none focus:ring-2 focus:ring-forest/30" />
 
           <p *ngIf="sheetError" class="text-cafe-red-700 text-sm font-medium m-0 mb-[10px]" role="alert">{{ sheetError }}</p>
 
-          <div class="flex items-center gap-[12px]">
+          </div>
+
+          <div class="sticky bottom-0 flex items-center gap-[12px] bg-surface/95 px-[20px] pb-[16px] pt-[12px] backdrop-blur-xl">
             <div class="flex items-center bg-surface-lowest rounded-full p-[4px] shadow-soft">
-              <button type="button" (click)="sheetQty = sheetQty > 1 ? sheetQty - 1 : 1" aria-label="Menos" class="w-9 h-9 flex items-center justify-center text-forest"><mat-icon>remove</mat-icon></button>
-              <span class="w-7 text-center font-bold text-forest">{{ sheetQty }}</span>
-              <button type="button" (click)="sheetQty = sheetQty < 30 ? sheetQty + 1 : 30" aria-label="Más" class="w-9 h-9 flex items-center justify-center text-forest"><mat-icon>add</mat-icon></button>
+              <button type="button" (click)="sheetQty = sheetQty > 1 ? sheetQty - 1 : 1" aria-label="Menos" class="w-9 h-9 flex items-center justify-center text-ink"><mat-icon>remove</mat-icon></button>
+              <span class="w-7 text-center font-bold text-ink">{{ sheetQty }}</span>
+              <button type="button" (click)="sheetQty = sheetQty < 30 ? sheetQty + 1 : 30" aria-label="Más" class="w-9 h-9 flex items-center justify-center text-ink"><mat-icon>add</mat-icon></button>
             </div>
             <button type="button" (click)="addFromSheet()" class="flex-1 h-12 rounded-full bg-forest hover:bg-forest-hover text-white font-bold text-sm shadow-floating active:scale-[0.98] transition-all">Agregar · {{ money(sheetUnit * sheetQty) }}</button>
           </div>
@@ -813,7 +826,7 @@
           <div class="w-full flex justify-center pt-[12px] pb-[4px]"><div class="w-11 h-1.5 rounded-full bg-surface-highest"></div></div>
           <div class="px-[20px] pt-[8px] pb-[14px] flex items-center justify-between">
             <div class="flex items-center gap-[8px]">
-              <h2 class="!font-jakarta text-lg font-bold text-forest tracking-tight m-0">{{ storeMode ? 'Tu bolsa' : 'Mi pedido' }}</h2>
+              <h2 class="!font-jakarta text-lg font-bold text-ink tracking-tight m-0">{{ storeMode ? 'Tu bolsa' : 'Mi pedido' }}</h2>
               <span class="text-[11px] bg-leaf-container text-leaf-ink2 px-[10px] py-[2px] rounded-full font-bold">{{ cartUnits }} {{ cartUnits === 1 ? 'ítem' : 'ítems' }}</span>
             </div>
             <button type="button" (click)="cartOpen = false" aria-label="Cerrar pedido" class="w-8 h-8 rounded-full bg-surface-mid hover:bg-surface-high active:scale-90 transition-all flex items-center justify-center text-ink-variant">
@@ -823,14 +836,18 @@
 
           <div class="px-[20px] flex flex-col gap-[16px] overflow-y-auto pb-[20px]">
             <div *ngIf="!storeMode" class="flex items-center justify-between px-[14px] py-[8px] rounded-[20px] bg-surface-mid">
-              <span class="flex items-center gap-[8px] text-xs font-bold text-forest"><mat-icon class="!w-4 !h-4 !text-base text-leaf">table_restaurant</mat-icon>Mesa {{ info.table.name }}</span>
+              <span class="flex items-center gap-[8px] text-xs font-bold text-ink"><mat-icon class="!w-4 !h-4 !text-base text-leaf">table_restaurant</mat-icon>Mesa {{ info.table.name }}</span>
             </div>
 
             <ul class="list-none p-0 m-0 flex flex-col gap-[10px]">
               <li *ngFor="let l of cart" class="bg-surface-lowest rounded-[20px] p-[14px] shadow-soft flex flex-col gap-[10px]">
-                <div class="flex items-start justify-between gap-[8px]">
+                <div class="flex items-start gap-[12px]">
+                  <span class="grid h-[64px] w-[64px] flex-none place-items-center overflow-hidden rounded-[16px] bg-surface-mid text-line">
+                    <img *ngIf="cartImage(l) as src; else noPhoto" [src]="src" alt="" loading="lazy" class="h-full w-full object-cover" />
+                    <ng-template #noPhoto><mat-icon>restaurant</mat-icon></ng-template>
+                  </span>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-forest m-0 truncate">{{ l.name }}</p>
+                    <p class="text-sm font-bold text-ink m-0 truncate">{{ l.name }}</p>
                     <p *ngIf="l.extras.length" class="text-xs text-ink-variant m-0 mt-[2px] truncate">{{ l.extras.join(', ') }}</p>
                     <p class="text-sm font-bold text-leaf m-0 mt-[4px]">{{ money(l.unitPrice * l.quantity) }}</p>
                   </div>
@@ -839,8 +856,8 @@
                       class="w-7 h-7 flex items-center justify-center rounded-full active:scale-95 transition-colors" [ngClass]="l.quantity === 1 ? 'text-cafe-red-700 hover:bg-cafe-red-50' : 'text-ink-variant hover:bg-surface-high'">
                       <mat-icon class="!w-4 !h-4 !text-base">{{ l.quantity === 1 ? 'delete_outline' : 'remove' }}</mat-icon>
                     </button>
-                    <span class="w-6 text-center text-sm font-bold text-forest">{{ l.quantity }}</span>
-                    <button type="button" (click)="changeQty(l, 1)" [attr.aria-label]="'Más ' + l.name" class="w-7 h-7 flex items-center justify-center rounded-full text-forest hover:bg-surface-high active:scale-95 transition-colors">
+                    <span class="w-6 text-center text-sm font-bold text-ink">{{ l.quantity }}</span>
+                    <button type="button" (click)="changeQty(l, 1)" [attr.aria-label]="'Más ' + l.name" class="w-7 h-7 flex items-center justify-center rounded-full text-ink hover:bg-surface-high active:scale-95 transition-colors">
                       <mat-icon class="!w-4 !h-4 !text-base">add</mat-icon>
                     </button>
                   </div>
@@ -857,15 +874,15 @@
             <!-- Tienda online: cómo lo recibe y quién es -->
             <ng-container *ngIf="storeMode && shop">
               <div class="flex flex-col gap-[8px]">
-                <span class="text-xs font-bold text-forest">¿Cómo lo querés?</span>
-                <div class="p-1 bg-surface-mid rounded-full flex gap-1">
+                <span class="text-xs font-bold text-ink">¿Cómo lo querés?</span>
+                <div class="flex gap-1 rounded-full bg-forest/15 p-1">
                   <button *ngIf="shop.pickup" type="button" (click)="setMode('pickup')" [attr.aria-pressed]="checkout.mode === 'pickup'"
-                    class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all" [ngClass]="checkout.mode === 'pickup' ? 'bg-forest text-white shadow-floating' : 'text-ink-variant'">
+                    class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all" [ngClass]="checkout.mode === 'pickup' ? 'bg-surface-lowest text-ink shadow-sm' : 'text-ink-variant'">
                     <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">storefront</mat-icon>
                     <span class="flex flex-col text-left leading-none"><span class="text-xs font-bold">Retiro en local</span><span class="text-[10px] opacity-80 mt-[2px]">Sin costo</span></span>
                   </button>
                   <button *ngIf="shop.home" type="button" (click)="setMode('delivery')" [attr.aria-pressed]="checkout.mode === 'delivery'"
-                    class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all" [ngClass]="checkout.mode === 'delivery' ? 'bg-forest text-white shadow-floating' : 'text-ink-variant'">
+                    class="flex-1 flex items-center justify-center gap-[6px] py-[10px] px-[10px] rounded-full transition-all" [ngClass]="checkout.mode === 'delivery' ? 'bg-surface-lowest text-ink shadow-sm' : 'text-ink-variant'">
                     <mat-icon class="!w-[18px] !h-[18px] !text-[18px] !leading-[18px]">two_wheeler</mat-icon>
                     <span class="flex flex-col text-left leading-none"><span class="text-xs font-bold">Envío a casa</span><span class="text-[10px] opacity-80 mt-[2px]">{{ shop.fee ? '+ ' + money(shop.fee) : 'Sin cargo' }}</span></span>
                   </button>
@@ -874,55 +891,65 @@
               </div>
 
               <div class="flex flex-col gap-[6px]">
-                <label class="text-xs font-bold text-forest" for="st-name">Tu nombre</label>
+                <label class="text-[15px] font-bold text-ink" for="st-name">Tu nombre</label>
                 <input id="st-name" name="stName" [(ngModel)]="checkout.name" maxlength="60" autocomplete="name" placeholder="Ej: Lucas Pérez"
-                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink placeholder:text-line ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
               </div>
-              <div class="flex flex-col gap-[6px]">
-                <label class="text-xs font-bold text-forest" for="st-phone">Teléfono <span class="font-normal text-ink-variant">(para avisarte de tu pedido)</span></label>
+              <div class="flex flex-col gap-[8px]">
+                <label class="text-[15px] font-bold text-ink" for="st-phone">Teléfono <span class="text-[13px] font-normal text-ink-variant">(para avisarte de tu pedido)</span></label>
                 <input id="st-phone" name="stPhone" type="tel" inputmode="tel" [(ngModel)]="checkout.phone" maxlength="25" autocomplete="tel" placeholder="Ej: 11 5555 1234"
-                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink placeholder:text-line ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
               </div>
-              <div *ngIf="checkout.mode === 'delivery'" class="flex flex-col gap-[6px]">
-                <label class="text-xs font-bold text-forest" for="st-address">Dirección de entrega</label>
+              <div *ngIf="checkout.mode === 'delivery'" class="flex flex-col gap-[8px]">
+                <label class="text-[15px] font-bold text-ink" for="st-address">Dirección de entrega</label>
                 <input id="st-address" name="stAddress" [(ngModel)]="checkout.address" maxlength="160" autocomplete="street-address" placeholder="Calle, número, piso y referencias"
-                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink placeholder:text-line ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
               </div>
-              <div class="flex flex-col gap-[6px]">
-                <label class="text-xs font-bold text-forest" for="st-note">Aclaración para el pedido <span class="font-normal text-ink-variant">(opcional)</span></label>
+              <div class="flex flex-col gap-[8px]">
+                <label class="text-[15px] font-bold text-ink" for="st-note">Aclaración para el pedido <span class="text-[13px] font-normal text-ink-variant">(opcional)</span></label>
                 <input id="st-note" name="stNote" [(ngModel)]="checkout.note" maxlength="300" placeholder="Ej: tocar timbre 2B"
-                  class="w-full bg-surface-lowest rounded-[20px] px-[14px] py-[11px] text-sm text-ink placeholder:text-line shadow-soft focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                  class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink placeholder:text-line ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
               </div>
 
               <div class="flex flex-col gap-[8px]">
-                <span class="text-xs font-bold text-forest">¿Cómo pagás?</span>
-                <div class="grid gap-[8px]" [ngClass]="shop.payCash && shop.payTransfer ? 'grid-cols-2' : 'grid-cols-1'">
-                  <button *ngIf="shop.payCash" type="button" (click)="checkout.pay = 'cash'" [attr.aria-pressed]="checkout.pay === 'cash'"
-                    class="rounded-[20px] border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'cash' ? 'border-forest' : 'border-transparent shadow-soft'">
-                    <mat-icon class="!w-5 !h-5 !text-xl text-leaf">payments</mat-icon>
-                    <span class="block text-sm font-bold text-forest">Efectivo</span>
-                    <span class="block text-xs text-ink-variant">{{ checkout.mode === 'delivery' ? 'Al recibirlo' : 'Al retirar' }}</span>
+                <span class="text-[15px] font-bold text-ink" id="pay-label">¿Cómo pagás?</span>
+                <div class="flex flex-col gap-[10px]" role="radiogroup" aria-labelledby="pay-label">
+                  <button *ngIf="shop.payCash" type="button" role="radio" (click)="checkout.pay = 'cash'" [attr.aria-checked]="checkout.pay === 'cash'"
+                    class="flex w-full items-center gap-[14px] rounded-[20px] bg-surface-lowest p-[12px] pr-[16px] text-left shadow-soft ring-1 transition-shadow" [ngClass]="checkout.pay === 'cash' ? 'ring-forest/35' : 'ring-transparent'">
+                    <span class="grid h-[52px] w-[52px] flex-none place-items-center rounded-[14px] bg-surface-mid text-ink"><mat-icon>payments</mat-icon></span>
+                    <span class="min-w-0 flex-1">
+                      <span class="block text-[15px] font-bold text-ink">Efectivo</span>
+                      <span class="block text-[13px] text-ink-variant">{{ checkout.mode === 'delivery' ? 'Al recibirlo' : 'Al retirar' }}</span>
+                    </span>
+                    <span class="grid h-[24px] w-[24px] flex-none place-items-center rounded-[8px] border-2 transition-colors" [ngClass]="checkout.pay === 'cash' ? 'border-forest bg-forest text-white' : 'border-line-soft text-transparent'">
+                      <mat-icon class="!h-[16px] !w-[16px] !text-[16px] !leading-[16px]">check</mat-icon>
+                    </span>
                   </button>
-                  <button *ngIf="shop.payTransfer" type="button" (click)="checkout.pay = 'transfer'" [attr.aria-pressed]="checkout.pay === 'transfer'"
-                    class="rounded-[20px] border-[2px] p-[12px] text-left transition-colors bg-surface-lowest" [ngClass]="checkout.pay === 'transfer' ? 'border-forest' : 'border-transparent shadow-soft'">
-                    <mat-icon class="!w-5 !h-5 !text-xl text-leaf">account_balance</mat-icon>
-                    <span class="block text-sm font-bold text-forest">Transferencia</span>
-                    <span class="block text-xs text-ink-variant">Te damos los datos</span>
+                  <button *ngIf="shop.payTransfer" type="button" role="radio" (click)="checkout.pay = 'transfer'" [attr.aria-checked]="checkout.pay === 'transfer'"
+                    class="flex w-full items-center gap-[14px] rounded-[20px] bg-surface-lowest p-[12px] pr-[16px] text-left shadow-soft ring-1 transition-shadow" [ngClass]="checkout.pay === 'transfer' ? 'ring-forest/35' : 'ring-transparent'">
+                    <span class="grid h-[52px] w-[52px] flex-none place-items-center rounded-[14px] bg-surface-mid text-ink"><mat-icon>account_balance</mat-icon></span>
+                    <span class="min-w-0 flex-1">
+                      <span class="block text-[15px] font-bold text-ink">Transferencia</span>
+                      <span class="block text-[13px] text-ink-variant">Te damos los datos</span>
+                    </span>
+                    <span class="grid h-[24px] w-[24px] flex-none place-items-center rounded-[8px] border-2 transition-colors" [ngClass]="checkout.pay === 'transfer' ? 'border-forest bg-forest text-white' : 'border-line-soft text-transparent'">
+                      <mat-icon class="!h-[16px] !w-[16px] !text-[16px] !leading-[16px]">check</mat-icon>
+                    </span>
                   </button>
                 </div>
                 <div *ngIf="checkout.pay === 'transfer' && shop.bankInfo" class="rounded-[20px] bg-surface-low p-[12px]">
                   <p class="m-0 text-[11px] font-bold uppercase tracking-wider text-line">Datos para transferir</p>
-                  <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-forest break-words">{{ shop.bankInfo }}</p>
+                  <p class="m-0 mt-[4px] whitespace-pre-line text-sm font-semibold text-ink break-words">{{ shop.bankInfo }}</p>
                 </div>
               </div>
             </ng-container>
 
-            <div *ngIf="!storeMode" class="flex flex-col gap-[6px]">
-              <label class="text-xs font-bold text-forest flex items-center justify-between" for="name"><span>Tu nombre o apodo</span><span class="font-normal text-ink-variant">Opcional</span></label>
+            <div *ngIf="!storeMode" class="flex flex-col gap-[8px]">
+              <label class="text-[15px] font-bold text-ink" for="name">Tu nombre o apodo <span class="text-[13px] font-normal text-ink-variant">(opcional, para que el mozo sepa quién pidió)</span></label>
               <div class="relative flex items-center">
-                <mat-icon class="!w-4 !h-4 !text-base absolute left-[14px] text-line pointer-events-none">person</mat-icon>
-                <input id="name" name="customerName" [(ngModel)]="customerName" maxlength="40" autocomplete="given-name" placeholder="Ej: Lucas (para que el mozo sepa quién pidió)"
-                  class="w-full bg-surface-lowest shadow-soft rounded-[20px] pl-[40px] pr-[16px] py-[11px] text-xs text-ink placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all" />
+                <mat-icon class="!w-5 !h-5 !text-xl absolute left-[18px] text-line pointer-events-none">person</mat-icon>
+                <input id="name" name="customerName" [(ngModel)]="customerName" maxlength="40" autocomplete="given-name" placeholder="Ej: Lucas"
+                  class="h-[52px] w-full rounded-full bg-surface-lowest pl-[46px] pr-[20px] text-[16px] text-ink placeholder:text-line ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
               </div>
             </div>
 
@@ -931,39 +958,33 @@
               <div class="flex items-center justify-between text-xs text-ink-variant"><span>Subtotal</span><span class="font-medium text-ink">{{ money(cartTotal) }}</span></div>
               <div *ngIf="checkout.mode === 'delivery'" class="flex items-center justify-between text-xs text-ink-variant"><span>Envío a domicilio</span><span class="font-medium text-ink">{{ deliveryFee ? money(deliveryFee) : 'Sin cargo' }}</span></div>
               <div class="h-px bg-surface-highest my-[2px]"></div>
-              <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-forest">Total</span><span class="!font-jakarta text-xl font-bold text-forest tracking-tight">{{ money(orderTotal) }}</span></div>
+              <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-ink">Total</span><span class="!font-jakarta text-xl font-bold text-ink tracking-tight">{{ money(orderTotal) }}</span></div>
               <p class="text-[11px] text-ink-variant m-0">{{ checkout.pay === 'cash' ? (checkout.mode === 'delivery' ? 'Pagás en efectivo cuando te lo entregan.' : 'Pagás en efectivo cuando retirás.') : 'Pagás por transferencia.' }}</p>
             </div>
 
             <div *ngIf="!storeMode" class="bg-surface-mid rounded-[20px] p-[16px] flex flex-col gap-[8px]">
               <div class="flex items-center justify-between text-xs text-ink-variant"><span>Subtotal pedido</span><span class="font-medium text-ink">{{ money(cartTotal) }}</span></div>
               <div class="h-px bg-surface-highest my-[2px]"></div>
-              <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-forest">Total del pedido</span><span class="!font-jakarta text-xl font-bold text-forest tracking-tight">{{ money(cartTotal) }}</span></div>
+              <div class="flex items-baseline justify-between"><span class="text-sm font-bold text-ink">Total del pedido</span><span class="!font-jakarta text-xl font-bold text-ink tracking-tight">{{ money(cartTotal) }}</span></div>
               <p class="text-[11px] text-ink-variant m-0">El precio final lo confirma el local al cobrar.</p>
             </div>
 
             <div *ngIf="!storeMode" class="flex items-start gap-[10px] px-[4px] text-ink-variant">
               <mat-icon class="!w-5 !h-5 !text-xl text-leaf flex-shrink-0 mt-[1px]">verified_user</mat-icon>
               <p class="text-xs leading-snug m-0">
-                <ng-container *ngIf="!info.autoConfirm">El mozo va a <strong class="text-forest">confirmar tu pedido</strong> en la mesa<ng-container *ngIf="kitchen"> antes de mandarlo a cocina o barra</ng-container>.</ng-container>
-                <ng-container *ngIf="info.autoConfirm && kitchen">Tu pedido se envía <strong class="text-forest">directo a cocina o barra</strong>.</ng-container>
-                <ng-container *ngIf="info.autoConfirm && !kitchen">Tu pedido se <strong class="text-forest">registra al instante</strong>.</ng-container>
+                <ng-container *ngIf="!info.autoConfirm">El mozo va a <strong class="text-ink">confirmar tu pedido</strong> en la mesa<ng-container *ngIf="kitchen"> antes de mandarlo a cocina o barra</ng-container>.</ng-container>
+                <ng-container *ngIf="info.autoConfirm && kitchen">Tu pedido se envía <strong class="text-ink">directo a cocina o barra</strong>.</ng-container>
+                <ng-container *ngIf="info.autoConfirm && !kitchen">Tu pedido se <strong class="text-ink">registra al instante</strong>.</ng-container>
               </p>
             </div>
 
             <p *ngIf="storeMode && checkoutError" class="text-cafe-red-700 text-sm font-medium m-0" role="alert">{{ checkoutError }}</p>
             <button *ngIf="storeMode" type="button" (click)="sendStore()" [disabled]="sending"
-              class="w-full py-[16px] px-[16px] bg-forest hover:bg-forest-hover text-white rounded-full font-bold text-sm flex items-center justify-center gap-[10px] shadow-floating active:scale-[0.98] transition-all disabled:opacity-50">
-              <mat-icon class="!w-5 !h-5 !text-xl" [ngClass]="sending ? 'animate-spin' : ''">{{ sending ? 'progress_activity' : 'send' }}</mat-icon>
-              <span>{{ sending ? 'Enviando pedido…' : (shop?.whatsappOnly ? 'Continuar' : 'Confirmar y enviar pedido') }} · {{ money(orderTotal) }}</span>
-            </button>
+              class="h-[56px] min-h-[56px] w-full flex-shrink-0 rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:cursor-wait disabled:opacity-60">{{ sending ? 'Enviando…' : 'Confirmar' }}</button>
             <button *ngIf="!storeMode" type="button" (click)="send()" [disabled]="sending"
-              class="w-full py-[16px] px-[16px] bg-forest hover:bg-forest-hover text-white rounded-full font-bold text-sm flex items-center justify-center gap-[10px] shadow-floating active:scale-[0.98] transition-all disabled:opacity-50">
-              <mat-icon class="!w-5 !h-5 !text-xl" [ngClass]="sending ? 'animate-spin' : ''">{{ sending ? 'progress_activity' : 'send' }}</mat-icon>
-              <span>{{ sending ? 'Enviando pedido…' : 'Confirmar y enviar pedido' }}</span>
-            </button>
+              class="h-[56px] min-h-[56px] w-full flex-shrink-0 rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:cursor-wait disabled:opacity-60">{{ sending ? 'Enviando…' : 'Confirmar' }}</button>
             <div class="text-center pb-[4px]">
-              <button type="button" (click)="cartOpen = false" class="text-xs text-ink-variant hover:text-forest transition-colors">Continuar mirando la carta</button>
+              <button type="button" (click)="cartOpen = false" class="text-xs text-ink-variant hover:text-ink transition-colors">Continuar mirando la carta</button>
             </div>
           </div>
         </div>

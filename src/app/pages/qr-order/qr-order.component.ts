@@ -1,5 +1,5 @@
 import { backgroundVeil, coverVeil } from 'src/app/utils/brand-intensity';
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -234,7 +234,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   private helpTimer?: ReturnType<typeof setTimeout>;
   private formatter?: Intl.NumberFormat;
 
-  constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService, private delivery: DeliveryPublicService) {}
+  constructor(private route: ActivatedRoute, private api: QrPublicService, private realtime: RealtimeService, private delivery: DeliveryPublicService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -436,6 +436,31 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     return menu.items.some((i) => !i.categoryId) ? [...list, { id: '', name: 'Otros' }] : list;
   }
 
+  // Foto de cada categoría: la de su primer plato con imagen (se prefiere un destacado). Se calcula una vez por carta cargada
+  private thumbsFor: unknown = null;
+  private thumbs = new Map<string, string>();
+
+  categoryImage(categoryId: string): string | null {
+    const items = this.info?.menu?.items;
+    if (!items) return null;
+    if (this.thumbsFor !== items) {
+      this.thumbsFor = items;
+      this.thumbs = new Map();
+      const featuredDone = new Set<string>();
+      for (const i of items) {
+        if (!i.imageUrl) continue;
+        const key = i.categoryId ?? '';
+        if (!this.thumbs.has(key) || (i.featured && !featuredDone.has(key))) this.thumbs.set(key, i.imageUrl);
+        if (i.featured) featuredDone.add(key);
+      }
+    }
+    return this.thumbs.get(categoryId) ?? null;
+  }
+
+  trackCategory(_index: number, c: { id: string }): string {
+    return c.id;
+  }
+
   get visibleItems(): PublicItem[] {
     const items = this.info?.menu?.items ?? [];
     const q = normalize(this.search);
@@ -497,7 +522,13 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   detailItem: PublicItem | null = null;
 
   openDetail(item: PublicItem) {
-    if (this.hasOptions(item)) this.detailItem = item;
+    this.detailItem = item;
+  }
+
+  // Tocar un plato: si se puede pedir abre la hoja para armarlo (con el botón de agregar); si no (carta de solo lectura o agotado), la ficha
+  openFood(item: PublicItem) {
+    if (this.browseOnly || item.soldOut) this.openDetail(item);
+    else this.openItem(item);
   }
 
   closeDetail() {
@@ -505,7 +536,8 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('document:keydown.escape') onEscape() {
-    this.detailItem = null;
+    if (this.searchOpen) this.searchOpen = false;
+    else this.detailItem = null;
   }
 
   // Precio más bajo con el que se puede pedir: el base más lo mínimo de cada opción obligatoria
@@ -642,6 +674,17 @@ export class QrOrderComponent implements OnInit, OnDestroy {
 
   // Platos que ya están en el pedido (con cualquier combinación de opciones): el botón "+" pasa a ser un check
   justAdded = '';
+
+  // Foto de un plato del pedido (la de la carta)
+  cartImage(line: { itemId: string }): string | null {
+    return this.info?.menu?.items.find((i) => i.id === line.itemId)?.imageUrl ?? null;
+  }
+
+  // Foto de una línea de un pedido ya enviado: el servidor no manda el id del plato, así que se busca por nombre en la carta
+  lineImage(line: { name: string }): string | null {
+    const n = normalize(line.name);
+    return this.info?.menu?.items.find((i) => normalize(i.name) === n)?.imageUrl ?? null;
+  }
 
   inCart(item: PublicItem): boolean {
     return this.cart.some((l) => l.itemId === item.id);
@@ -1083,6 +1126,59 @@ export class QrOrderComponent implements OnInit, OnDestroy {
     lines.push(`Nombre: ${o.customerName}`, `Teléfono: ${o.phone}`);
     if (o.note) lines.push(`Aclaración: ${o.note}`);
     return `https://wa.me/${this.shop?.whatsapp ?? ''}?text=${encodeURIComponent(lines.join('\n'))}`;
+  }
+
+  // ---------- buscador (la lupa del encabezado) ----------
+
+  searchOpen = false;
+  searchQuery = '';
+
+  // El campo se enfoca en el mismo toque que abre el buscador: así el celular muestra el teclado enseguida
+  openSearch() {
+    this.searchQuery = '';
+    this.searchOpen = true;
+    this.cdr.detectChanges();
+    (document.getElementById('menu-search') as HTMLInputElement | null)?.focus();
+  }
+
+  closeSearch() {
+    this.searchOpen = false;
+  }
+
+  get searchResults(): PublicItem[] {
+    const q = normalize(this.searchQuery);
+    if (!q) return [];
+    return (this.info?.menu?.items ?? []).filter((i) => normalize(i.name).includes(q)).slice(0, 40);
+  }
+
+  categoryName(item: PublicItem): string {
+    return this.info?.menu?.categories.find((c) => c.id === item.categoryId)?.name ?? 'Otros';
+  }
+
+  trackItem(_index: number, item: PublicItem): string {
+    return item.id;
+  }
+
+  // Elegir un resultado: cierra el buscador y abre el plato (para pedirlo, o la ficha si es solo lectura)
+  pickFromSearch(item: PublicItem) {
+    this.searchOpen = false;
+    this.openFood(item);
+  }
+
+  // Compartir el enlace de la carta (menú del celular) o copiarlo si el navegador no puede compartir
+  async share() {
+    const url = location.href;
+    const title = this.info?.business?.name ?? 'Carta';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      this.say('ok', 'Enlace copiado');
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') this.say('error', 'No se pudo compartir el enlace');
+    }
   }
 
   // ---------- utilidades ----------
