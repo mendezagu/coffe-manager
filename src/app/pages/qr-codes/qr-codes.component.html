@@ -42,7 +42,7 @@
 
     <!-- Todavía no se generaron los QR -->
     <div *ngIf="view.tables.length > 0 && cards.length === 0" class="p-[24px] sm:p-[32px] rounded-2xl border-[1px] border-dashed border-sage-300 text-center">
-      <div class="w-14 h-14 mx-auto mb-[12px] rounded-xl bg-cafe-green-50 text-cafe-green-700 flex items-center justify-center"><mat-icon class="!w-8 !h-8 !text-[32px]">qr_code_2</mat-icon></div>
+      <div class="w-14 h-14 mx-auto mb-[12px] rounded-xl bg-cafe-mint-500 text-cafe-green-900 flex items-center justify-center"><mat-icon class="!w-8 !h-8 !text-[32px]">qr_code_2</mat-icon></div>
       <p class="font-bold text-sage-900 m-0 mb-[4px]">Todavía no generaste los QR de tus mesas</p>
       <p class="text-sm text-sage-600 m-0 mb-[16px]">
         Se crea un código único y secreto para cada una de tus {{ view.tables.length }} {{ view.tables.length === 1 ? 'mesa' : 'mesas' }}.

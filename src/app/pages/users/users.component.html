@@ -53,7 +53,7 @@
         <span class="block text-sm font-medium text-sage-700 mb-1.5">Rol</span>
         <select name="role" [(ngModel)]="form.role"
           class="w-full px-4 py-2.5 rounded-xl border border-sage-300 text-sm text-sage-900 bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700">
-          <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+          <option *ngFor="let r of roles; trackBy: trackRole" [value]="r.value">{{ r.label }}</option>
         </select>
       </label>
 
@@ -83,7 +83,7 @@
 
           <select [ngModel]="u.role" (ngModelChange)="changeRole(u, $event)" [attr.aria-label]="'Rol de ' + u.name"
             class="px-3 py-2 rounded-xl border border-sage-300 text-sm bg-white">
-            <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+            <option *ngFor="let r of roles; trackBy: trackRole" [value]="r.value">{{ r.label }}</option>
           </select>
 
           <div class="flex gap-2">

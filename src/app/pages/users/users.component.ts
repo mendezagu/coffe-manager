@@ -20,6 +20,8 @@ export class UsersComponent implements OnInit {
       .filter((value) => kitchen || (value !== 'kitchen' && value !== 'bar'))
       .map((value) => ({ value, label: ROLE_LABELS[value] }));
   }
+  // Sin esto el listado de roles (que se arma de nuevo en cada revisión) recrea las opciones y el select vuelve siempre a la primera: "Administrador"
+  trackRole = (_: number, r: { value: AppRole }) => r.value;
   roleLabel = (role: AppRole) => ROLE_LABELS[role];
 
   form = { name: '', email: '', password: '', role: 'waiter' as AppRole };

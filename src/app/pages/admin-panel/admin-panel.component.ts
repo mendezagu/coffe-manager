@@ -5,7 +5,7 @@ import { CategoriesComponent } from '../categories/categories.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Observable } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { SettingsService } from 'src/app/services/settings.service';
 import { MenuItem } from 'src/app/models/coffe.models';
 import { GestionService } from 'src/app/services/gestionService';
@@ -120,6 +120,15 @@ export class AdminPanelComponent {
   newItemPrice: number = 0;
   newItemIsPromo: boolean = false;
   newItemCategoryId: string = '';
+  // "+ Nueva categoría" en el select: se crea junto con el plato
+  // Carga de planilla con precios por tamaño: oculta por ahora (poner en true para volver a mostrarla)
+  readonly sizeImportEnabled = false;
+  readonly NEW_CATEGORY = '__new__';
+  newCategoryName = '';
+  // Foto elegida antes de crear el plato (se sube cuando el plato ya existe)
+  newItemFile: File | null = null;
+  newItemPreview: string | null = null;
+  addingItem = false;
   categories: Category[] = [];
   modifierGroups: ModifierGroup[] = [];
   editItemId?: string;
@@ -462,19 +471,67 @@ export class AdminPanelComponent {
     });
   }
 
+  async onNewImagePicked(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    const ready = await this.cropper.crop(file, { title: 'Foto del plato', aspects: DISH_ASPECTS });
+    if (!ready) return;
+    this.clearNewImage();
+    this.newItemFile = ready;
+    this.newItemPreview = URL.createObjectURL(ready);
+  }
+
+  clearNewImage() {
+    if (this.newItemPreview) URL.revokeObjectURL(this.newItemPreview);
+    this.newItemFile = null;
+    this.newItemPreview = null;
+  }
+
   addMenuItem() {
-    if (this.newItemName.trim() && this.newItemPrice > 0) {
-      this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice, this.newItemIsPromo, this.newItemCategoryId || null).subscribe(() => {
-        this.gestionService.refreshMenu().subscribe((menuItems) => {
-          this.menuItems = menuItems;
-        });
-        this.newItemName = '';
-        this.newItemPrice = 0;
-        this.newItemIsPromo = false;
-        this.newItemCategoryId = '';
-        this.categoriesPanel?.load();
-      });
+    if (this.addingItem || !this.newItemName.trim() || !(this.newItemPrice > 0)) return;
+    const isNewCategory = this.newItemCategoryId === this.NEW_CATEGORY;
+    const categoryName = this.newCategoryName.trim();
+    if (isNewCategory && !categoryName) {
+      this.snackBar.open('Escribí el nombre de la nueva categoría', 'Cerrar', { duration: 3000 });
+      return;
     }
+    this.addingItem = true;
+    const photo = this.newItemFile;
+    const category$: Observable<Category | null> = isNewCategory ? this.gestionService.addCategory(categoryName) : of(null);
+    category$
+      .pipe(
+        switchMap((cat) =>
+          this.gestionService.addMenuItem(this.newItemName.trim(), this.newItemPrice, this.newItemIsPromo, isNewCategory ? cat!._id : this.newItemCategoryId || null),
+        ),
+      )
+      .subscribe({
+        next: async (created) => {
+          this.newItemName = '';
+          this.newItemPrice = 0;
+          this.newItemIsPromo = false;
+          this.newItemCategoryId = '';
+          this.newCategoryName = '';
+          this.clearNewImage();
+          if (photo) {
+            try {
+              await this.menuImages.upload(created._id, photo);
+            } catch (e: any) {
+              const msg = e?.error?.message ?? e?.message;
+              this.snackBar.open('El plato se creó, pero la foto no se pudo subir. ' + (Array.isArray(msg) ? msg.join('. ') : msg || 'Probá de nuevo desde el plato.'), 'Cerrar', { duration: 6000 });
+            }
+          }
+          this.addingItem = false;
+          this.loadCategories();
+          this.gestionService.refreshMenu().subscribe((menuItems) => (this.menuItems = menuItems));
+          this.categoriesPanel?.load();
+        },
+        error: () => {
+          this.addingItem = false;
+          this.snackBar.open('No se pudo crear el plato. Probá de nuevo.', 'Cerrar', { duration: 4000 });
+        },
+      });
   }
 
   // ¿Se ve en la carta online y en el pedido por QR? (los platos de antes no tienen el dato: se ven)

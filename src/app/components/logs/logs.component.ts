@@ -23,7 +23,7 @@ interface DayGroup {
 
 // Cómo se ve cada tipo de acción (ícono y colores del sistema)
 export const KIND_STYLE: Record<Kind, { label: string; icon: string; chip: string }> = {
-  sale: { label: 'Cobros', icon: 'payments', chip: 'bg-cafe-green-50 text-cafe-green-700' },
+  sale: { label: 'Cobros', icon: 'payments', chip: 'bg-cafe-mint-500 text-cafe-green-900' },
   order: { label: 'Pedidos', icon: 'receipt_long', chip: 'bg-cafe-amber-50 text-cafe-amber-700' },
   removal: { label: 'Eliminaciones', icon: 'delete_outline', chip: 'bg-cafe-red-50 text-cafe-red-700' },
   print: { label: 'Impresiones', icon: 'print', chip: 'bg-sage-100 text-sage-600' },

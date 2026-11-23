@@ -301,6 +301,9 @@ export class TotalDialogComponent implements OnInit {
     return this.partial && !this.partialIsFull ? 'Cobrar esta parte' : 'Liberar Mesa';
   }
 
+  // Pantalla de confirmación (check animado) que se muestra un momento antes de cerrar el diálogo
+  done: { title: string; sub: string } | null = null;
+
   liberarMesa() {
     if (this.isProcessing || !this.canCharge || !this.payment) return;
     if (!this.data.tableId) {
@@ -338,6 +341,10 @@ export class TotalDialogComponent implements OnInit {
             : `Se liberó la mesa <strong>${tableName}</strong> atendida por <strong>${waiterName}</strong> con un total de <strong>${this.settings.format(sale.totalAmount)}</strong>`;
           this.gestionService.saveLog(logMessage);
 
+          this.done = isPartPayment
+            ? { title: 'Cobro registrado', sub: `${tableName} sigue abierta con el resto de la cuenta` }
+            : { title: '¡Mesa liberada!', sub: `${tableName} quedó lista para el próximo cliente` };
+
           setTimeout(() => {
             this.dialogRef.close({
               status: isPartPayment ? 'parte_cobrada' : 'mesa_liberada',
@@ -345,7 +352,7 @@ export class TotalDialogComponent implements OnInit {
             });
             // La pantalla de mesas se actualiza al cerrarse el diálogo (y por el aviso en vivo del servidor)
             this.isProcessing = false;
-          }, 1500); // Espera 1.5 segundos para mostrar el spinner y el texto
+          }, 1900); // Se ve la confirmación un momento y se cierra
         },
         error: (error) => {
           console.error('Error al cobrar la mesa:', error);

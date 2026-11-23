@@ -377,7 +377,7 @@
         <div *ngIf="local" class="mb-5 flex items-center gap-3 rounded-xl border border-sage-300 bg-sage-50 p-3">
           <img *ngIf="local.logoUrl; else noLogo" [src]="local.logoUrl" [alt]="local.name" class="h-12 w-12 flex-none rounded-full object-cover ring-2 ring-sage-100" />
           <ng-template #noLogo>
-            <span class="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-cafe-green-50 text-cafe-green-700"><mat-icon>storefront</mat-icon></span>
+            <span class="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-cafe-mint-500 text-cafe-green-900"><mat-icon>storefront</mat-icon></span>
           </ng-template>
           <div class="min-w-0 flex-1">
             <p class="m-0 truncate text-base font-bold text-sage-900">{{ local.name }}</p>

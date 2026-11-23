@@ -1,4 +1,16 @@
-<div class="relative flex h-full w-full flex-col overflow-hidden bg-white sm:h-auto sm:rounded-dialog sm:shadow-dialog">
+<div class="relative flex h-full w-full flex-col overflow-hidden bg-white sm:h-auto sm:rounded-dialog sm:shadow-dialog" [style.min-height.px]="done ? 360 : null">
+
+  <!-- Confirmación: check animado que cubre el diálogo -->
+  <div *ngIf="done" role="status" aria-live="polite" class="done-overlay absolute inset-0 z-30 flex flex-col items-center justify-center gap-[6px] bg-white px-6 text-center">
+    <div class="done-badge grid h-[112px] w-[112px] place-items-center rounded-full bg-cafe-green-50 ring-[10px] ring-cafe-green-50/60">
+      <svg viewBox="0 0 52 52" class="h-[64px] w-[64px]" fill="none" stroke="#084440" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle class="done-circle" cx="26" cy="26" r="22" />
+        <path class="done-tick" d="M15 27l8 8 15-17" />
+      </svg>
+    </div>
+    <div class="done-text mt-[18px] font-jakarta text-[26px] font-extrabold leading-tight tracking-tight text-sage-900">{{ done.title }}</div>
+    <p class="done-text m-0 max-w-[280px] text-[15px] text-sage-600">{{ done.sub }}</p>
+  </div>
 
   <!-- Título -->
   <div class="relative flex-shrink-0 bg-white px-5 pb-2 pr-14 pt-5 sm:px-6 sm:pt-6">
