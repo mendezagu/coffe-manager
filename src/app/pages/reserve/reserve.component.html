@@ -1,223 +1,262 @@
-<div class="flex min-h-screen justify-center bg-sage-100" [attr.style]="brandStyle">
-<div class="flex min-h-screen w-full max-w-md flex-col bg-white shadow-2xl">
-  <!-- Cabecera única: marca de Tavolapp y datos del local sobre el mismo fondo oscuro -->
-  <div class="bg-forest px-5 pb-14 pt-4 text-white">
-    <div class="mx-auto w-full max-w-lg">
-      <div class="flex justify-start"><a href="https://tavolapp.app" target="_blank" rel="noopener" aria-label="Powered by Tavolapp (abre la página de Tavolapp)" class="inline-flex items-baseline gap-[6px] text-white no-underline opacity-90 hover:opacity-100"><span class="text-xs font-medium uppercase tracking-[0.08em] text-white/70">Powered by</span><span class="inline-flex items-baseline whitespace-nowrap font-bold" role="img" aria-label="Tavolapp" style="font-size: 17px; line-height: 1; letter-spacing: -0.035em; color: #eef0f3">
-      <span>Tav</span>
-      <svg viewBox="0 0 100 100" aria-hidden="true" style="width: 0.6em; height: 0.6em; margin: 0 0.035em; transform: translateY(0.015em); flex: none">
-        <circle cx="50" cy="50" r="48" stroke-width="4" fill="#363f4e" stroke="#2ed0ab" />
-        <circle cx="50" cy="50" r="38.5" fill="none" stroke-width="6" stroke="#2ed0ab" />
-        <circle cx="50" cy="50" r="29" stroke-width="2.5" fill="#363f4e" stroke="#2ed0ab" stroke-opacity=".35" />
-        <path d="M70 66 A24 24 0 0 1 36 74" fill="none" stroke-width="4" stroke-linecap="round" stroke="#2ed0ab" opacity=".18" />
-        <g fill="none" stroke="#2ed0ab" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M34 31 V44 M39 31 V44 M44 31 V44" stroke-width="2.6" />
-          <path d="M34 44 Q39 52 44 44" stroke-width="2.6" />
-          <path d="M39 50 V69" stroke-width="3.6" />
-        </g>
-        <path d="M58.5 31 C66.5 36 67 49 62.5 56 H58.5 Z" fill="#d9786a" />
-        <rect x="58.5" y="55" width="4" height="14" rx="2" fill="#d9786a" />
-      </svg>
-      <span>lapp</span>
-    </span></a></div>
-      <div *ngIf="info" class="mt-5 flex items-center gap-3">
-        <img *ngIf="info.logoUrl" [src]="info.logoUrl" alt="" class="h-14 w-14 flex-none rounded-2xl bg-white object-contain p-1 ring-2 ring-white/30" />
-        <span *ngIf="!info.logoUrl" class="grid h-14 w-14 flex-none place-items-center rounded-2xl bg-white/15 text-white"><mat-icon>restaurant</mat-icon></span>
-        <div class="min-w-0">
-          <h1 class="m-0 break-words font-jakarta text-xl font-bold leading-tight">{{ info.name }}</h1>
-          <p class="m-0 flex items-start gap-1 text-sm leading-snug text-white/80"><mat-icon class="!h-4 !w-4 !text-base mt-[1px] shrink-0">place</mat-icon><span class="min-w-0">{{ info.address }}<ng-container *ngIf="info.address && info.city">, </ng-container>{{ info.city }}</span></p>
-        </div>
-      </div>
+<div class="flex min-h-screen justify-center bg-surface-high font-inter text-ink selection:bg-forest selection:text-white" [class.qr-dark]="dark" [attr.style]="brandStyle">
+<div class="relative flex min-h-screen w-full max-w-md flex-col border-x-[1px] border-surface-highest/60 bg-surface shadow-2xl">
+
+  <!-- Encabezado: portada con la marca del local, logo solapado, nombre y dirección (igual que la carta y la tienda) -->
+  <!-- Encabezado: la portada del local a lo ancho, con el nombre grande encima (tipografía de revista) -->
+  <header class="relative isolate flex h-[360px] flex-col justify-between overflow-hidden bg-forest text-white">
+    <div *ngIf="info?.coverUrl" class="absolute inset-0 -z-20" [ngStyle]="coverStyle"></div>
+    <svg *ngIf="!info?.coverUrl" class="absolute -right-[90px] -top-[90px] -z-20 h-[360px] w-[360px] text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
+      <circle cx="50" cy="50" r="48" stroke-opacity=".14" stroke-width="1" /><circle cx="50" cy="50" r="36" stroke-opacity=".12" stroke-width="1" /><circle cx="50" cy="50" r="24" stroke-opacity=".1" stroke-width="1" />
+    </svg>
+    <!-- velo para que el texto se lea sobre cualquier foto -->
+    <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/20 to-black/35"></div>
+
+    <div class="flex items-start justify-between px-[20px] pt-[20px]">
+      <span class="grid h-[48px] w-[48px] place-items-center overflow-hidden rounded-full bg-white text-[rgb(var(--brand-rgb,11_125_102))] ring-2 ring-white/70">
+        <img *ngIf="info?.logoUrl; else cupIcon" [src]="info!.logoUrl!" [alt]="info!.name" class="h-full w-full object-cover" />
+        <ng-template #cupIcon><mat-icon>restaurant</mat-icon></ng-template>
+      </span>
+      <a *ngIf="info?.showPhone && info?.phone" [href]="'https://wa.me/' + whatsappDigits" target="_blank" rel="noopener" [attr.aria-label]="'Escribir por WhatsApp al ' + info!.phone"
+        class="grid h-[44px] w-[44px] place-items-center rounded-full bg-black/30 ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/45 active:scale-95">
+        <svg viewBox="0 0 24 24" class="h-[22px] w-[22px]" fill="#ffffff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+      </a>
     </div>
-  </div>
 
-<div class="flex flex-1 flex-col pb-6">
-  <div class="mx-auto flex w-full max-w-lg flex-1 flex-col">
+    <div *ngIf="info" class="px-[20px] pb-[24px]">
+      <div class="inline-flex items-center gap-[10px] rounded-[14px] bg-black/35 px-[14px] py-[10px] text-[13px] leading-tight ring-1 ring-white/15 backdrop-blur-md">
+        <mat-icon class="!h-[20px] !w-[20px] !text-[20px] !leading-[20px] text-white/90">schedule</mat-icon>
+        <span>
+          <span class="block text-white/70">Reservas online</span>
+          <span class="block font-semibold">Todos los días de {{ info.open }} a {{ info.close }}</span>
+        </span>
+      </div>
+      <h1 class="m-0 mt-[18px] break-words text-[46px] font-medium leading-[0.98] tracking-[-0.02em] text-white [font-family:'Playfair_Display',Georgia,serif]">{{ info.name }}</h1>
+      <p *ngIf="info.city" class="m-0 mt-[6px] text-[26px] italic leading-tight text-white/90 [font-family:'Playfair_Display',Georgia,serif]">{{ info.city }}</p>
+      <p *ngIf="info.address" class="mb-0 mt-[12px] flex items-center gap-[6px] text-[13px] text-white/80">
+        <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px] flex-shrink-0">place</mat-icon><span class="truncate">{{ info.address }}</span>
+      </p>
+    </div>
+  </header>
 
-    <p *ngIf="loading" class="mt-6 text-center text-sm text-sage-600">Cargando…</p>
+  <div class="flex flex-1 flex-col pb-[24px]">
 
-    <div *ngIf="notFound" class="mt-6 rounded-dialog bg-white p-8 text-center shadow-soft">
-      <h1 class="m-0 mt-3 font-jakarta text-lg font-bold text-sage-900">Este restaurante no recibe reservas</h1>
-      <p class="m-0 mt-1 text-sm text-sage-600">Puede que el enlace esté mal o que las reservas estén pausadas.</p>
+    <p *ngIf="loading" class="mt-[24px] text-center text-sm text-ink-variant">Cargando…</p>
+
+    <div *ngIf="notFound" class="mx-[16px] mt-[24px] rounded-[24px] bg-surface-lowest p-[32px] text-center shadow-soft">
+      <h1 class="!font-jakarta m-0 text-lg font-bold text-ink">Este restaurante no recibe reservas</h1>
+      <p class="mb-[0px] mt-[4px] text-sm text-ink-variant">Puede que el enlace esté mal o que las reservas estén pausadas.</p>
     </div>
 
     <ng-container *ngIf="info">
-      <!-- Encabezado del restaurante -->
-      <main class="relative -mt-9 rounded-t-3xl bg-white px-5 pb-2 pt-6">
+      <main class="px-[16px] pb-[8px] pt-[24px]">
 
         <!-- 1. Cuándo -->
         <section *ngIf="step === 'when'" aria-label="Elegir día y horario">
-          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 m-0">Reservá tu mesa</div>
-          <p class="m-0 mb-5 mt-1 text-sm text-sage-600">Elegí cuántos son, el día y la hora. Se confirma al instante.</p>
-
-          <p class="m-0 mb-2 text-sm font-medium text-sage-700">¿Cuántos son?</p>
-          <div class="mb-5 flex items-center justify-between rounded-xl border border-sage-300 p-2">
-            <button type="button" (click)="setParty(party - 1)" [disabled]="party <= 1" aria-label="Menos personas"
-              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-800 disabled:opacity-30"><mat-icon>remove</mat-icon></button>
-            <span class="text-lg font-bold text-sage-900" aria-live="polite">{{ party }} {{ party === 1 ? 'persona' : 'personas' }}</span>
-            <button type="button" (click)="setParty(party + 1)" [disabled]="party >= info.maxParty" aria-label="Más personas"
-              class="grid h-11 w-11 place-items-center rounded-lg bg-sage-100 text-sage-800 disabled:opacity-30"><mat-icon>add</mat-icon></button>
+          <!-- Reservas hechas desde este dispositivo -->
+          <div *ngIf="saved.length" class="mb-[32px]">
+            <p class="mb-[12px] mt-[0px] text-[15px] font-bold text-ink">Tus reservas</p>
+            <ul class="m-0 flex list-none flex-col gap-[10px] p-0">
+              <li *ngFor="let r of saved">
+                <button type="button" (click)="openSaved(r)" class="flex w-full items-center gap-[14px] rounded-[22px] bg-surface-lowest p-[14px] text-left shadow-soft ring-1 ring-line-soft/60 transition-transform active:scale-[0.99]">
+                  <span class="grid h-[48px] w-[48px] flex-none place-items-center rounded-[16px] bg-forest/10 text-ink"><mat-icon>event_available</mat-icon></span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-[15px] font-bold text-ink">{{ label(r.date) }}</span>
+                    <span class="block text-[13px] text-ink-variant">{{ r.time }} · {{ r.partySize }} {{ r.partySize === 1 ? 'persona' : 'personas' }} · Código {{ r.code }}</span>
+                  </span>
+                  <mat-icon class="flex-none text-line">chevron_right</mat-icon>
+                </button>
+              </li>
+            </ul>
           </div>
-          <p *ngIf="party >= info.maxParty" class="m-0 -mt-3 mb-4 text-xs text-sage-500">Para grupos más grandes, llamanos{{ info.phone ? ' al ' + info.phone : '' }}.</p>
+          <div role="heading" aria-level="2" class="!font-jakarta m-0 text-[22px] font-extrabold tracking-tight text-ink">Reservá tu mesa</div>
+          <p class="mb-[24px] mt-[4px] text-[14px] text-ink-variant">Elegí cuántos son, el día y la hora. Se confirma al instante.</p>
 
-          <p class="m-0 mb-2 text-sm font-medium text-sage-700">¿Qué día?</p>
-          <div class="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="listbox" aria-label="Días">
+          <p class="mt-[0px] mb-[10px] text-[15px] font-bold text-ink">¿Cuántos son?</p>
+          <div class="flex h-[60px] items-center justify-between rounded-full bg-surface-lowest p-[8px] ring-1 ring-line-soft/70">
+            <button type="button" (click)="setParty(party - 1)" [disabled]="party <= 1" aria-label="Menos personas"
+              class="grid h-[44px] w-[44px] place-items-center rounded-full bg-surface-mid text-ink transition-transform active:scale-95 disabled:opacity-30"><mat-icon>remove</mat-icon></button>
+            <span class="text-[17px] font-bold text-ink" aria-live="polite">{{ party }} {{ party === 1 ? 'persona' : 'personas' }}</span>
+            <button type="button" (click)="setParty(party + 1)" [disabled]="party >= info.maxParty" aria-label="Más personas"
+              class="grid h-[44px] w-[44px] place-items-center rounded-full bg-surface-mid text-ink transition-transform active:scale-95 disabled:opacity-30"><mat-icon>add</mat-icon></button>
+          </div>
+          <p *ngIf="party >= info.maxParty" class="mb-[0px] mt-[8px] text-[12px] text-ink-variant">Para grupos más grandes, llamanos{{ info.phone ? ' al ' + info.phone : '' }}.</p>
+
+          <p class="mb-[14px] mt-[40px] text-[15px] font-bold text-ink">¿Qué día?</p>
+          <div class="-mx-[16px] flex gap-[8px] overflow-x-auto px-[16px] pb-[4px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="listbox" aria-label="Días">
             <button *ngFor="let d of days" type="button" role="option" [attr.aria-selected]="d.value === date" [disabled]="d.closed" (click)="pickDate(d.value)"
-              class="flex h-[74px] w-16 flex-none flex-col items-center justify-center rounded-xl border text-center transition-colors disabled:cursor-not-allowed disabled:opacity-35"
-              [ngClass]="d.value === date ? 'border-forest bg-forest text-white' : 'border-sage-200 bg-white text-sage-800 hover:bg-sage-50'">
-              <span class="text-xs font-medium">{{ d.weekday }}</span>
-              <span class="text-xl font-bold leading-tight">{{ d.num }}</span>
-              <span class="text-xs opacity-80">{{ d.month }}</span>
+              class="flex h-[84px] w-[64px] flex-none flex-col items-center justify-center rounded-[22px] text-center transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+              [ngClass]="d.value === date ? 'bg-forest text-white shadow-soft' : 'bg-surface-lowest text-ink ring-1 ring-line-soft/70 hover:bg-surface-low'">
+              <span class="text-[12px] font-medium">{{ d.weekday }}</span>
+              <span class="text-[22px] font-extrabold leading-tight">{{ d.num }}</span>
+              <span class="text-[12px] opacity-80">{{ d.month }}</span>
             </button>
           </div>
 
-          <p class="m-0 mb-2 text-sm font-medium text-sage-700">¿A qué hora?</p>
-          <p *ngIf="loadingSlots" class="m-0 text-sm text-sage-500">Buscando lugar…</p>
-          <p *ngIf="!loadingSlots && closedText" class="m-0 rounded-lg bg-sage-50 px-3 py-3 text-sm text-sage-700">{{ closedText }}</p>
+          <p class="mb-[14px] mt-[40px] text-[15px] font-bold text-ink">¿A qué hora?</p>
+          <p *ngIf="loadingSlots" class="m-0 text-sm text-ink-variant">Buscando lugar…</p>
+          <p *ngIf="!loadingSlots && closedText" class="m-0 rounded-[20px] bg-surface-mid px-[16px] py-[14px] text-sm text-ink">{{ closedText }}</p>
 
           <div *ngIf="!loadingSlots && avail && !avail.closed">
-            <p *ngIf="tooLate" class="m-0 rounded-lg bg-sage-50 px-3 py-3 text-sm text-sage-700">Ya no quedan horarios para reservar hoy. Probá con otro día{{ info.phone ? ' o llamanos al ' + info.phone : '' }}.</p>
-            <div *ngFor="let g of slotGroups" class="mb-4 last:mb-0">
-              <p class="m-0 mb-2 flex items-center gap-1.5 text-sm font-bold text-sage-700"><mat-icon class="!h-4 !w-4 !text-base text-sage-400">{{ g.icon }}</mat-icon>{{ g.label }}</p>
-              <div class="grid grid-cols-4 gap-2" role="listbox" [attr.aria-label]="'Horarios de ' + g.label">
-                <button *ngFor="let s of g.slots" type="button" role="option" [attr.aria-selected]="s.time === time" [disabled]="!s.available" (click)="pickSlot(s)"
-                  class="h-11 rounded-xl border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:border-transparent disabled:bg-sage-50 disabled:text-sage-300 disabled:line-through"
-                  [ngClass]="s.time === time ? 'border-forest bg-forest text-white shadow-soft' : 'border-sage-200 bg-white text-sage-800 hover:border-forest hover:bg-forest-soft'">{{ s.time }}</button>
-              </div>
+            <p *ngIf="tooLate" class="m-0 rounded-[20px] bg-surface-mid px-[16px] py-[14px] text-sm text-ink">Ya no quedan horarios para reservar hoy. Probá con otro día{{ info.phone ? ' o llamanos al ' + info.phone : '' }}.</p>
+            <!-- Un solo momento del día a la vez: así se ven 8 horarios en vez de 20 -->
+            <div *ngIf="slotGroups.length > 1" class="mb-[16px] flex gap-[4px] rounded-full bg-forest/15 p-[4px]" role="tablist" aria-label="Momento del día">
+              <button *ngFor="let g of slotGroups" type="button" role="tab" [attr.aria-selected]="g.label === activeGroup?.label" (click)="pickPeriod(g.label)"
+                class="inline-flex min-h-[40px] flex-1 items-center justify-center gap-[6px] rounded-full px-[8px] text-[13px] font-bold transition-colors"
+                [ngClass]="g.label === activeGroup?.label ? 'bg-surface-lowest text-ink shadow-sm' : 'text-ink-variant'">
+                <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">{{ g.icon }}</mat-icon>{{ g.label }}
+                <span class="text-[11px] font-semibold opacity-60">{{ availableIn(g) }}</span>
+              </button>
             </div>
-            <p *ngIf="!tooLate" class="m-0 mt-3 text-xs text-sage-500">Los horarios tachados ya no tienen lugar.</p>
+            <div *ngIf="activeGroup as g" class="grid grid-cols-4 gap-[10px]" role="listbox" [attr.aria-label]="'Horarios de ' + g.label">
+              <button *ngFor="let s of g.slots" type="button" role="option" [attr.aria-selected]="s.time === time" [disabled]="!s.available" (click)="pickSlot(s)"
+                class="h-[42px] rounded-full text-[14px] font-bold transition-colors disabled:cursor-not-allowed disabled:bg-surface-low disabled:text-line disabled:line-through"
+                [ngClass]="s.time === time ? 'bg-forest text-white shadow-soft' : 'bg-surface-lowest text-ink ring-1 ring-line-soft/70 hover:bg-forest/10'">{{ s.time }}</button>
+            </div>
 
-            <div *ngIf="avail.full" class="mt-4 rounded-xl bg-cafe-amber-50 p-4 text-sm text-cafe-amber-900">
+            <div *ngIf="avail.full" class="mt-[16px] rounded-[24px] bg-cafe-amber-50 p-[16px] text-sm text-cafe-amber-900">
               <p class="m-0 font-bold">Ese día está completo.</p>
-              <p class="m-0 mt-1">Anotate en la lista de espera y, si se libera un lugar, el restaurante te avisa.</p>
-              <button type="button" (click)="openWaitlist()" class="mt-3 h-11 rounded-xl border border-cafe-amber-500 bg-white px-4 text-sm font-bold text-cafe-amber-900 hover:bg-cafe-amber-100">Anotarme en la lista de espera</button>
+              <p class="mb-[0px] mt-[4px]">Anotate en la lista de espera y, si se libera un lugar, el restaurante te avisa.</p>
+              <button type="button" (click)="openWaitlist()" class="mt-[12px] h-[44px] rounded-full bg-surface-lowest px-[20px] text-sm font-bold text-cafe-amber-900 ring-1 ring-cafe-amber-500 hover:bg-cafe-amber-100">Anotarme en la lista de espera</button>
             </div>
           </div>
 
-          <p *ngIf="error" role="alert" class="m-0 mt-4 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+          <p *ngIf="error" role="alert" class="mb-[0px] mt-[16px] rounded-[16px] bg-cafe-red-50 px-[14px] py-[10px] text-sm font-medium text-cafe-red-700">{{ error }}</p>
 
           <button type="button" (click)="next()" [disabled]="!time"
-            class="mt-5 h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 ">
+            class="mt-[40px] h-[56px] w-full rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
             Continuar
           </button>
-          <button type="button" (click)="openCancel()" class="mt-3 w-full text-center text-sm font-medium text-sage-500 underline">Ya reservé y quiero cancelar</button>
+          <button type="button" (click)="openCancel()" class="mt-[20px] w-full text-center text-[14px] font-medium text-ink-variant underline">Ya reservé y quiero cancelar</button>
         </section>
 
         <!-- 2. Datos -->
         <form *ngIf="step === 'details'" (ngSubmit)="book()" autocomplete="on" aria-label="Tus datos">
-          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Cambiar</button>
-          <div class="mb-5 rounded-xl bg-forest-soft p-3 text-sm font-bold text-forest">
+          <button type="button" (click)="back()" class="mb-[14px] inline-flex items-center gap-[4px] text-[14px] font-bold text-ink-variant"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Cambiar</button>
+          <div class="mb-[24px] flex items-center gap-[10px] rounded-[20px] bg-forest/10 px-[16px] py-[14px] text-[14px] font-bold text-ink">
+            <mat-icon class="!h-[20px] !w-[20px] !text-[20px] !leading-[20px] text-ink">event_available</mat-icon>
             {{ dateLabel }} · {{ time }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}
           </div>
-          <label class="mb-3 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">Tu nombre</span>
-            <input name="name" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[16px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">Tu nombre</span>
+            <input name="name" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <label class="mb-3 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">Teléfono (WhatsApp)</span>
-            <input name="phone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[16px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">Teléfono (WhatsApp)</span>
+            <input name="phone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <label class="mb-3 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">Email (opcional)</span>
-            <input name="email" type="email" autocomplete="email" [(ngModel)]="email" maxlength="120" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[16px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">Email <span class="text-[13px] font-normal text-ink-variant">(opcional)</span></span>
+            <input name="email" type="email" autocomplete="email" [(ngModel)]="email" maxlength="120" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <label class="mb-4 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">¿Algo que debamos saber? (opcional)</span>
-            <input name="notes" type="text" [(ngModel)]="notes" maxlength="300" placeholder="Cumpleaños, silla de bebé, alergias…" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[20px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">¿Algo que debamos saber? <span class="text-[13px] font-normal text-ink-variant">(opcional)</span></span>
+            <input name="notes" type="text" [(ngModel)]="notes" maxlength="300" placeholder="Cumpleaños, silla de bebé, alergias…" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+          <p *ngIf="error" role="alert" class="mt-[0px] mb-[12px] rounded-[16px] bg-cafe-red-50 px-[14px] py-[10px] text-sm font-medium text-cafe-red-700">{{ error }}</p>
           <button type="submit" [disabled]="!detailsValid || sending"
-            class="h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 ">
+            class="h-[56px] w-full rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
             {{ sending ? 'Reservando…' : 'Confirmar reserva' }}
           </button>
         </form>
 
         <!-- 3. Listo -->
         <section *ngIf="step === 'done' && done" class="text-center" aria-live="polite">
-          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 m-0 mt-3">¡Reserva confirmada!</div>
-          <p class="m-0 mt-1 text-sm text-sage-600">Te esperamos, {{ done.guestName }}.</p>
-          <dl class="mx-auto mt-5 max-w-xs space-y-2 rounded-xl bg-sage-50 p-4 text-left text-sm">
-            <div class="flex justify-between gap-3"><dt class="text-sage-500">Día</dt><dd class="m-0 text-right font-bold text-sage-900">{{ label(done.date) }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-sage-500">Hora</dt><dd class="m-0 font-bold text-sage-900">{{ done.time }}</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-sage-500">Personas</dt><dd class="m-0 font-bold text-sage-900">{{ done.partySize }}</dd></div>
-            <div *ngIf="done.address" class="flex justify-between gap-3"><dt class="text-sage-500">Dirección</dt><dd class="m-0 text-right font-bold text-sage-900">{{ done.address }}</dd></div>
+          <div class="mx-auto mt-[8px] grid h-[84px] w-[84px] place-items-center rounded-full bg-cafe-mint-500 text-cafe-green-900">
+            <mat-icon class="!h-[44px] !w-[44px] !text-[44px] !leading-[44px]">check</mat-icon>
+          </div>
+          <div role="heading" aria-level="2" class="!font-jakarta mb-[0px] mt-[16px] text-[24px] font-extrabold tracking-tight text-ink">¡Reserva confirmada!</div>
+          <p class="mb-[0px] mt-[4px] text-[14px] text-ink-variant">Te esperamos, {{ done.guestName }}.</p>
+          <dl class="mx-auto mt-[24px] max-w-xs space-y-[12px] rounded-[24px] bg-surface-lowest p-[20px] text-left text-[14px] shadow-soft ring-1 ring-line-soft/60">
+            <div class="flex justify-between gap-3"><dt class="text-ink-variant">Día</dt><dd class="m-0 text-right font-bold text-ink">{{ label(done.date) }}</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-ink-variant">Hora</dt><dd class="m-0 font-bold text-ink">{{ done.time }}</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-ink-variant">Personas</dt><dd class="m-0 font-bold text-ink">{{ done.partySize }}</dd></div>
+            <div *ngIf="done.address" class="flex justify-between gap-3"><dt class="text-ink-variant">Dirección</dt><dd class="m-0 text-right font-bold text-ink">{{ done.address }}</dd></div>
           </dl>
-          <p class="m-0 mt-5 text-sm font-medium text-sage-700">Tu código</p>
-          <p class="m-0 mt-1 font-mono text-3xl font-bold tracking-[0.2em] text-sage-900">{{ done.code }}</p>
-          <p class="m-0 mt-2 text-xs text-sage-500">Guardalo: lo necesitás para cancelar. Si no podés venir, avisanos.</p>
-          <button type="button" (click)="reset()" class="mt-6 h-11 rounded-xl border border-sage-300 px-5 text-sm font-bold text-sage-700 hover:bg-sage-50">Hacer otra reserva</button>
+          <p class="mb-[0px] mt-[24px] text-[14px] font-medium text-ink-variant">Tu código</p>
+          <p class="mb-[0px] mt-[4px] font-mono text-[32px] font-bold tracking-[0.2em] text-ink">{{ done.code }}</p>
+          <p class="mb-[0px] mt-[8px] text-[12px] text-ink-variant">Guardalo: lo necesitás para cancelar. Si no podés venir, avisanos.</p>
+          <div class="mt-[24px] flex flex-col items-center gap-[12px]">
+            <button type="button" (click)="downloadTicket()" [disabled]="downloading"
+              class="inline-flex h-[56px] w-full items-center justify-center gap-[8px] rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:opacity-60">
+              <mat-icon class="!h-[22px] !w-[22px] !text-[22px] !leading-[22px]">download</mat-icon>{{ downloading ? 'Preparando…' : 'Descargar mi reserva' }}
+            </button>
+            <button type="button" (click)="reset()" class="h-[52px] w-full rounded-full bg-surface-lowest px-[28px] text-[15px] font-semibold text-ink ring-1 ring-forest/30 transition-all hover:bg-forest/5 active:scale-[0.98]">{{ saved.length > 1 ? 'Volver a mis reservas' : 'Hacer otra reserva' }}</button>
+            <button type="button" (click)="cancelThis(done.code)" class="text-[14px] font-medium text-ink-variant underline">Cancelar esta reserva</button>
+          </div>
         </section>
 
         <!-- Lista de espera -->
         <form *ngIf="step === 'waitlist'" (ngSubmit)="joinWaitlist()" aria-label="Lista de espera">
-          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
-          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 m-0">Lista de espera</div>
-          <p class="m-0 mb-4 mt-1 text-sm text-sage-600">{{ dateLabel }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}. Te escribimos por WhatsApp si se libera un lugar.</p>
-          <div class="mb-3 grid grid-cols-2 gap-3">
+          <button type="button" (click)="back()" class="mb-[14px] inline-flex items-center gap-[4px] text-[14px] font-bold text-ink-variant"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
+          <div role="heading" aria-level="2" class="!font-jakarta m-0 text-[22px] font-extrabold tracking-tight text-ink">Lista de espera</div>
+          <p class="mb-[20px] mt-[4px] text-[14px] text-ink-variant">{{ dateLabel }} · {{ party }} {{ party === 1 ? 'persona' : 'personas' }}. Te escribimos por WhatsApp si se libera un lugar.</p>
+          <div class="mb-[16px] grid grid-cols-2 gap-[12px]">
             <label class="block">
-              <span class="mb-1.5 block text-sm font-medium text-sage-700">Desde</span>
-              <select name="from" [(ngModel)]="waitFrom" class="h-12 w-full rounded-xl border border-sage-300 bg-white px-3 text-base"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
+              <span class="mb-[8px] block text-[15px] font-bold text-ink">Desde</span>
+              <select name="from" [(ngModel)]="waitFrom" class="h-[52px] w-full rounded-full bg-surface-lowest px-[16px] text-[16px] text-ink ring-1 ring-line-soft/70 focus:outline-none focus:ring-2 focus:ring-forest/50"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
             </label>
             <label class="block">
-              <span class="mb-1.5 block text-sm font-medium text-sage-700">Hasta</span>
-              <select name="to" [(ngModel)]="waitTo" class="h-12 w-full rounded-xl border border-sage-300 bg-white px-3 text-base"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
+              <span class="mb-[8px] block text-[15px] font-bold text-ink">Hasta</span>
+              <select name="to" [(ngModel)]="waitTo" class="h-[52px] w-full rounded-full bg-surface-lowest px-[16px] text-[16px] text-ink ring-1 ring-line-soft/70 focus:outline-none focus:ring-2 focus:ring-forest/50"><option *ngFor="let t of waitOptions" [value]="t">{{ t }}</option></select>
             </label>
           </div>
-          <label class="mb-3 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">Tu nombre</span>
-            <input name="wname" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[16px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">Tu nombre</span>
+            <input name="wname" type="text" autocomplete="name" [(ngModel)]="name" required maxlength="60" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <label class="mb-4 block">
-            <span class="mb-1.5 block text-sm font-medium text-sage-700">Teléfono (WhatsApp)</span>
-            <input name="wphone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+          <label class="mb-[20px] block">
+            <span class="mb-[8px] block text-[15px] font-bold text-ink">Teléfono (WhatsApp)</span>
+            <input name="wphone" type="tel" inputmode="tel" autocomplete="tel" [(ngModel)]="phone" required placeholder="Con código de área" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all placeholder:text-line focus:outline-none focus:ring-2 focus:ring-forest/50" />
           </label>
-          <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+          <p *ngIf="error" role="alert" class="mt-[0px] mb-[12px] rounded-[16px] bg-cafe-red-50 px-[14px] py-[10px] text-sm font-medium text-cafe-red-700">{{ error }}</p>
           <button type="submit" [disabled]="!waitValid || sending"
-            class="h-12 w-full rounded-xl bg-forest text-base font-bold text-white shadow-soft hover:bg-forest-hover disabled:cursor-not-allowed disabled:opacity-40 ">
+            class="h-[56px] w-full rounded-full bg-forest text-[17px] font-medium text-white transition-all hover:bg-forest-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
             {{ sending ? 'Anotando…' : 'Anotarme' }}
           </button>
         </form>
 
         <section *ngIf="step === 'waitlisted'" class="text-center" aria-live="polite">
-          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 m-0 mt-3">Estás en la lista</div>
-          <p class="m-0 mt-1 text-sm text-sage-600">Si se libera un lugar, el restaurante te escribe al {{ phone }}. Esto no es una reserva confirmada.</p>
-          <button type="button" (click)="reset()" class="mt-6 h-11 rounded-xl border border-sage-300 px-5 text-sm font-bold text-sage-700 hover:bg-sage-50">Volver al inicio</button>
+          <div class="mx-auto mt-[8px] grid h-[84px] w-[84px] place-items-center rounded-full bg-cafe-mint-500 text-cafe-green-900">
+            <mat-icon class="!h-[44px] !w-[44px] !text-[44px] !leading-[44px]">hourglass_top</mat-icon>
+          </div>
+          <div role="heading" aria-level="2" class="!font-jakarta mb-[0px] mt-[16px] text-[24px] font-extrabold tracking-tight text-ink">Estás en la lista</div>
+          <p class="mb-[0px] mt-[4px] text-[14px] text-ink-variant">Si se libera un lugar, el restaurante te escribe al {{ phone }}. Esto no es una reserva confirmada.</p>
+          <button type="button" (click)="reset()" class="mt-[24px] h-[52px] rounded-full bg-surface-lowest px-[28px] text-[15px] font-semibold text-ink ring-1 ring-forest/30 transition-all hover:bg-forest/5 active:scale-[0.98]">Volver al inicio</button>
         </section>
 
         <!-- Cancelar -->
         <form *ngIf="step === 'cancel'" (ngSubmit)="cancel()" aria-label="Cancelar reserva">
-          <button type="button" (click)="back()" class="mb-3 inline-flex items-center gap-1 text-sm font-bold text-sage-600"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
-          <div role="heading" aria-level="2" class="font-jakarta text-xl font-bold text-sage-900 m-0">Cancelar mi reserva</div>
-          <p class="m-0 mb-4 mt-1 text-sm text-sage-600">Ingresá el código que te dimos y tu teléfono.</p>
+          <button type="button" (click)="back()" class="mb-[14px] inline-flex items-center gap-[4px] text-[14px] font-bold text-ink-variant"><mat-icon class="!h-5 !w-5 !text-xl">arrow_back</mat-icon> Volver</button>
+          <div role="heading" aria-level="2" class="!font-jakarta m-0 text-[22px] font-extrabold tracking-tight text-ink">Cancelar mi reserva</div>
+          <p class="mb-[20px] mt-[4px] text-[14px] text-ink-variant">Ingresá el código que te dimos y tu teléfono.</p>
           <ng-container *ngIf="!cancelMsg">
-            <label class="mb-3 block">
-              <span class="mb-1.5 block text-sm font-medium text-sage-700">Código</span>
-              <input name="ccode" type="text" autocapitalize="characters" [(ngModel)]="cancelCode" maxlength="6" class="h-12 w-full rounded-xl border border-sage-300 px-3 font-mono text-base uppercase tracking-widest" />
+            <label class="mb-[16px] block">
+              <span class="mb-[8px] block text-[15px] font-bold text-ink">Código</span>
+              <input name="ccode" type="text" autocapitalize="characters" [(ngModel)]="cancelCode" maxlength="6" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] font-mono text-[16px] uppercase tracking-widest text-ink ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
             </label>
-            <label class="mb-4 block">
-              <span class="mb-1.5 block text-sm font-medium text-sage-700">Teléfono</span>
-              <input name="cphone" type="tel" inputmode="tel" [(ngModel)]="cancelPhone" class="h-12 w-full rounded-xl border border-sage-300 px-3 text-base" />
+            <label class="mb-[20px] block">
+              <span class="mb-[8px] block text-[15px] font-bold text-ink">Teléfono</span>
+              <input name="cphone" type="tel" inputmode="tel" [(ngModel)]="cancelPhone" class="h-[52px] w-full rounded-full bg-surface-lowest px-[20px] text-[16px] text-ink ring-1 ring-line-soft/70 transition-all focus:outline-none focus:ring-2 focus:ring-forest/50" />
             </label>
-            <p *ngIf="error" role="alert" class="m-0 mb-3 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+            <p *ngIf="error" role="alert" class="mt-[0px] mb-[12px] rounded-[16px] bg-cafe-red-50 px-[14px] py-[10px] text-sm font-medium text-cafe-red-700">{{ error }}</p>
             <button type="submit" [disabled]="sending || !cancelCode.trim() || cancelPhone.replace('+', '').length < 6"
-              class="h-12 w-full rounded-xl bg-cafe-red-700 text-base font-bold text-white hover:bg-cafe-red-800 disabled:cursor-not-allowed disabled:opacity-40">
+              class="h-[56px] w-full rounded-full bg-cafe-red-700 text-[17px] font-medium text-white transition-all hover:bg-cafe-red-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
               {{ sending ? 'Cancelando…' : 'Cancelar reserva' }}
             </button>
           </ng-container>
-          <p *ngIf="cancelMsg" role="status" class="m-0 rounded-lg bg-forest-soft px-3 py-3 text-sm font-bold text-forest">{{ cancelMsg }}</p>
+          <p *ngIf="cancelMsg" role="status" class="m-0 rounded-[20px] bg-forest/10 px-[16px] py-[14px] text-sm font-bold text-ink">{{ cancelMsg }}</p>
         </form>
       </main>
 
-      <p *ngIf="info.phone" class="m-0 mt-4 text-center text-xs text-sage-500">¿Dudas? Llamanos al {{ info.phone }}.</p>
+      <p *ngIf="info.phone" class="mb-[0px] mt-[16px] text-center text-[12px] text-ink-variant">¿Dudas? Llamanos al {{ info.phone }}.</p>
     </ng-container>
 
-    <footer class="mt-auto pt-8 text-center">
-      <p class="m-0 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-xs text-sage-600">
-        <mat-icon class="!h-4 !w-4 !text-base text-forest">restaurant_menu</mat-icon>
-        Reservas con <strong class="text-sage-800">Tavolapp</strong>
-      </p>
+    <footer class="mt-auto pt-[32px] text-center">
+      <a href="https://tavolapp.app" target="_blank" rel="noopener" class="group flex flex-col items-center gap-[6px] px-[16px] py-[6px] text-center no-underline">
+        <img src="assets/logo/tavolapp-gris.png" alt="Tavolapp" width="74" height="18" style="height:16px;width:auto;display:block;opacity:.55">
+        <span class="text-[12px] font-medium text-[#8a929e]">Reservas con Tavolapp</span>
+      </a>
     </footer>
   </div>
-</div>
 </div>
 </div>

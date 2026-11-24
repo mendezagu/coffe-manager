@@ -34,6 +34,8 @@ interface AdminSectionInfo {
 interface SectionCard extends AdminSectionInfo {
   count: number;
   hint: string;
+  // tope del plan para esta sección (undefined = sin límite)
+  limit?: number;
 }
 
 const SECTIONS: AdminSectionInfo[] = [
@@ -178,7 +180,10 @@ export class AdminPanelComponent {
     const uncategorized = this.categories.length > 0 ? this.menuItems.filter((m) => !m.categoryId).length : 0;
     return SECTIONS.filter((s) => this.plans.showTables || !['tables', 'sectors', 'waiters', 'qr'].includes(s.key)).map((s) => {
       const count = { tables: this.tables.length, sectors: this.sectors.length, menu: this.menuItems.length, categories: this.categories.length, modifiers: this.modifierGroups.length, waiters: this.waiters.length, users: this.users.length, qr: this.tables.length }[s.key];
-      return { ...s, count, hint: s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : s.key === 'qr' && !this.settings.value.qrActive ? 'Desactivado' : '' };
+      const limit = { tables: this.plans.limit('tables'), menu: this.plans.limit('menuItems'), users: this.plans.limit('users'), waiters: this.plans.limit('waiters'), qr: this.plans.limit('tables') }[s.key as string];
+      const atLimit = limit !== undefined && count >= limit;
+      const hint = atLimit ? 'Llegaste al límite del plan' : s.key === 'menu' && uncategorized > 0 ? `${uncategorized} sin categoría` : s.key === 'qr' && !this.settings.value.qrActive ? 'Desactivado' : '';
+      return { ...s, count, limit, hint };
     });
   }
 
@@ -208,7 +213,7 @@ export class AdminPanelComponent {
     private gestionService: GestionService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private settings: SettingsService,
+    public settings: SettingsService,
     public plans: PlanService,
     private menuImages: MenuImageService,
     private cropper: ImageCropService,
@@ -251,11 +256,20 @@ export class AdminPanelComponent {
   }
 
 
+  // Mensaje que manda el servidor (por ejemplo "Llegaste al límite de tu plan…") o el de reserva
+  private serverMessage(e: any, fallback: string): string {
+    const msg = e?.error?.message;
+    return (Array.isArray(msg) ? msg.join('. ') : msg) || fallback;
+  }
+
   addTable() {
     if (this.newTableName.trim()) {
-      this.gestionService.addTable(this.newTableName.trim(), this.newTableSectorId || null).subscribe(() => {
-        this.loadTables();
-        this.newTableName = '';
+      this.gestionService.addTable(this.newTableName.trim(), this.newTableSectorId || null).subscribe({
+        next: () => {
+          this.loadTables();
+          this.newTableName = '';
+        },
+        error: (e) => this.snackBar.open(this.serverMessage(e, 'No se pudo agregar la mesa'), 'Cerrar', { duration: 6000 }),
       });
     }
   }
@@ -527,9 +541,9 @@ export class AdminPanelComponent {
           this.gestionService.refreshMenu().subscribe((menuItems) => (this.menuItems = menuItems));
           this.categoriesPanel?.load();
         },
-        error: () => {
+        error: (e) => {
           this.addingItem = false;
-          this.snackBar.open('No se pudo crear el plato. Probá de nuevo.', 'Cerrar', { duration: 4000 });
+          this.snackBar.open(this.serverMessage(e, 'No se pudo crear el plato. Probá de nuevo.'), 'Cerrar', { duration: 6000 });
         },
       });
   }
@@ -687,11 +701,20 @@ export class AdminPanelComponent {
     });
   }
 
+  // ¿Ya se cargaron todos los mozos que permite el plan?
+  get waitersFull(): boolean {
+    const max = this.plans.limit('waiters');
+    return max !== undefined && this.waiters.length >= max;
+  }
+
   addWaiter() {
     if (this.newWaiterName.trim()) {
-      this.gestionService.addWaiter(this.newWaiterName.trim()).subscribe(() => {
-        this.loadWaiters();
-        this.newWaiterName = '';
+      this.gestionService.addWaiter(this.newWaiterName.trim()).subscribe({
+        next: () => {
+          this.loadWaiters();
+          this.newWaiterName = '';
+        },
+        error: (e) => this.snackBar.open(this.serverMessage(e, 'No se pudo agregar al mozo'), 'Cerrar', { duration: 6000 }),
       });
     }
   }

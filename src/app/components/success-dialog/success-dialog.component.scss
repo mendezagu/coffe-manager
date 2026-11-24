@@ -1,0 +1,13 @@
+// Check de confirmación: el círculo y la tilde se dibujan, la insignia rebota y el texto sube
+.done-overlay { animation: done-fade .2s ease-out both; }
+.done-badge { animation: done-pop .5s cubic-bezier(.2, 1.4, .4, 1) .05s both; }
+.done-circle { stroke-dasharray: 140; stroke-dashoffset: 140; animation: done-draw .55s ease-out .15s forwards; }
+.done-tick { stroke-dasharray: 40; stroke-dashoffset: 40; animation: done-draw .35s ease-out .6s forwards; }
+.done-text { opacity: 0; animation: done-rise .4s ease-out .7s forwards; }
+@keyframes done-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes done-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes done-draw { to { stroke-dashoffset: 0; } }
+@keyframes done-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .done-overlay, .done-badge, .done-circle, .done-tick, .done-text { animation-duration: .01s; animation-delay: 0s; }
+}

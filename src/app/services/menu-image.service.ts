@@ -87,7 +87,9 @@ export class MenuImageService {
 
   // ---- Portada (banda de arriba) y fondo de la carta: mismo camino que las fotos de los platos
   async uploadBrand(kind: BrandKind, file: File): Promise<BrandImages> {
-    const blob = await this.shrink(file, kind === 'cover' ? 1600 : 1400, 450 * 1024);
+    // Un GIF animado se sube tal cual: achicarlo con un canvas lo dejaría quieto
+    const isGif = file.type === 'image/gif' && kind === 'cover';
+    const blob: Blob = isGif ? file : await this.shrink(file, kind === 'cover' ? 1600 : 1400, 450 * 1024);
     const base = `${environment.apiUrl}/settings/brand-image`;
     const slot = await firstValueFrom(this.http.post<UploadSlot>(`${base}/upload-url`, { kind, contentType: blob.type }));
     if (blob.size > slot.maxBytes) throw new Error('La imagen pesa demasiado. Probá con otra.');

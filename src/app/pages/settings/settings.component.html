@@ -110,7 +110,7 @@
 
           <!-- En pantallas anchas cada columna comparte las filas (título, ayuda, vista previa, botones, intensidad): así las dos vistas previas quedan alineadas aunque la ayuda tenga distinto largo -->
           <div *ngIf="imagesAvailable" class="grid gap-6 pt-1 sm:grid-cols-2 sm:gap-y-0">
-            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba. Va mejor una foto horizontal.', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de los platos. Se aclara para que se lea bien.', url: form.backgroundImageUrl }]"
+            <div *ngFor="let b of [{ kind: 'cover', title: 'Portada', hint: 'La banda de arriba. Va mejor una foto horizontal. También podés subir un GIF animado (hasta 2,5 MB).', url: form.coverImageUrl }, { kind: 'background', title: 'Fondo', hint: 'Detrás de los platos. Se aclara para que se lea bien.', url: form.backgroundImageUrl }]"
               class="min-w-0 sm:row-span-5 sm:grid sm:[grid-template-rows:subgrid]">
               <p class="m-0 text-sm font-semibold text-sage-900">{{ b.title }}</p>
               <p class="m-0 mt-0.5 text-sm text-sage-600">{{ b.hint }}</p>
@@ -123,7 +123,7 @@
               <div class="mt-2.5 flex flex-wrap items-center gap-2">
                 <label class="inline-flex h-11 cursor-pointer items-center rounded-xl border border-sage-300 bg-white px-4 text-sm font-semibold text-sage-800 transition-colors hover:bg-sage-50 focus-within:ring-2 focus-within:ring-cafe-green-700">
                   {{ b.url ? 'Cambiar' : 'Subir imagen' }}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="brandBusy === b.kind" (change)="onBrandPicked($any(b.kind), $event)" [attr.aria-label]="b.title" />
+                  <input type="file" [attr.accept]="b.kind === 'cover' ? 'image/jpeg,image/png,image/webp,image/gif' : 'image/jpeg,image/png,image/webp'" class="sr-only" [disabled]="brandBusy === b.kind" (change)="onBrandPicked($any(b.kind), $event)" [attr.aria-label]="b.title" />
                 </label>
                 <button *ngIf="b.url" type="button" (click)="removeBrand($any(b.kind))" [disabled]="brandBusy === b.kind" class="min-h-[44px] rounded px-2 text-sm font-medium text-cafe-red-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-red-700">Quitar</button>
               </div>
@@ -194,6 +194,14 @@
             <span class="block text-sm font-medium text-sage-700 mb-1.5">Teléfono</span>
             <input name="phone" [(ngModel)]="form.phone" maxlength="40"
               class="w-full rounded-xl border border-sage-300 bg-white h-11 px-4 text-sm text-sage-900 focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700" />
+          </label>
+
+          <label class="flex min-h-[52px] cursor-pointer select-none items-center justify-between gap-4 rounded-xl bg-sage-50 px-4 py-2 sm:col-span-2">
+            <span class="min-w-0">
+              <span class="block text-sm font-bold text-sage-900">Mostrar el teléfono en las reservas</span>
+              <span class="block text-sm text-sage-600">Aparece en el encabezado de tu página de reservas, para que te llamen con un toque.</span>
+            </span>
+            <span class="sw"><input type="checkbox" class="sw__in" name="showPhonePublic" [(ngModel)]="form.showPhonePublic" [disabled]="!form.phone.trim()" /><span class="sw__ui" aria-hidden="true"></span></span>
           </label>
 
           <label class="block sm:col-span-2">

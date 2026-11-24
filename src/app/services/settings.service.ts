@@ -35,6 +35,8 @@ export interface TenantSettings {
   // plan más bajo que incluye cada función, y el nombre de cada plan (para las etiquetas)
   featurePlans?: Record<string, 'basic' | 'pro' | 'benefits'>;
   planLabels?: Record<string, string>;
+  // topes de cantidad del plan (vacío = sin límites): tables, menuItems, users, counterSalesPerMonth, onlineOrdersPerMonth, historyDays
+  limits?: Record<string, number>;
   kitchenEnabled: boolean; // el negocio usa la pantalla de cocina (opcional, apagada por defecto)
   splitKitchenBar: boolean; // lo que el negocio eligió
   splitActive: boolean; // lo que rige (elegido y permitido por el plan)
@@ -55,6 +57,7 @@ export interface TenantSettings {
   menuTheme?: string; // estilo de la carta del cliente: 'light' | 'dark'
   imagesAvailable?: boolean; // el servidor tiene configurado el almacenamiento de fotos
   menuPublicEnabled?: boolean; // carta online (para ver el menú, sin pedir)
+  showPhonePublic?: boolean; // mostrar el teléfono del local en la carta, la tienda y las reservas
   salesMode?: 'both' | 'counter' | 'tables'; // cómo vende el negocio: define qué partes de la app se muestran
   addons?: string[]; // funciones sueltas sumadas al plan
   menuSlug?: string | null;

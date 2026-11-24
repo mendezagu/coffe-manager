@@ -2,12 +2,22 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { SettingsService } from './settings.service';
 
-export type PlanKey = 'takeaway' | 'basic' | 'pro' | 'benefits';
+export type PlanKey = 'free' | 'free_takeaway' | 'takeaway' | 'basic' | 'pro' | 'benefits';
 // Planes con salón, de menor a mayor. Takeaway va aparte: es para negocios que venden solo en mostrador.
 export const PLAN_ORDER: PlanKey[] = ['basic', 'pro', 'benefits'];
 
 // Qué incluye cada plan (la lista que se le muestra al dueño del local)
 export const PLAN_INFO: Record<PlanKey, { label: string; resume: string; includes: string[] }> = {
+  free: {
+    label: 'Gratis',
+    resume: 'Para empezar sin costo',
+    includes: ['Hasta 5 mesas', 'Hasta 30 platos en el menú', 'Pedido por QR en la mesa', 'Carta QR para ver el menú', 'Mostrador: hasta 20 ventas por mes', 'Hasta 3 mozos', 'Hasta 2 usuarios'],
+  },
+  free_takeaway: {
+    label: 'Gratis Takeaway',
+    resume: 'Para empezar a vender en mostrador, sin costo',
+    includes: ['Mostrador: hasta 50 ventas por mes', 'Tienda online: hasta 20 pedidos por mes', 'Hasta 30 platos en el menú', 'Carta QR para ver el menú', 'Hasta 2 usuarios'],
+  },
   takeaway: {
     label: 'Takeaway',
     resume: 'Para vender en mostrador, sin mesas',
@@ -72,11 +82,16 @@ export class PlanService {
 
   get current(): PlanKey {
     const plan = this.settings.value.plan as PlanKey;
-    return plan === 'takeaway' || PLAN_ORDER.includes(plan) ? plan : 'pro';
+    return plan === 'free' || plan === 'free_takeaway' || plan === 'takeaway' || PLAN_ORDER.includes(plan) ? plan : 'pro';
   }
 
   get currentLabel(): string {
     return PLAN_INFO[this.current].label;
+  }
+
+  // Tope de cantidad del plan (undefined = sin límite): tables, menuItems, users, counterSalesPerMonth, onlineOrdersPerMonth
+  limit(kind: string): number | undefined {
+    return this.settings.value.limits?.[kind];
   }
 
   has(feature: string): boolean {

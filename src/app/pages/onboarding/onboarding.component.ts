@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Category, GestionService, MenuItem, Waiter } from 'src/app/services/gestionService';
-import { OnboardingService, OnboardingStatus, OnboardingTemplate, isSetupPending } from 'src/app/services/onboarding.service';
+import { OnboardingService, OnboardingStatus, OnboardingTemplate, isBasicsPending, isSetupPending } from 'src/app/services/onboarding.service';
+import { UserService } from 'src/app/services/user.service';
 import { SettingsService } from 'src/app/services/settings.service';
 import { REGIONS, Region } from 'src/app/pages/settings/settings.component';
 import { shrinkImage } from 'src/app/utils/shrink-image';
@@ -63,17 +64,22 @@ export class OnboardingComponent implements OnInit {
 
   // Paso 3: mesas
   tableCount = 10;
-  readonly quickCounts = [4, 8, 12, 20];
+  readonly allQuickCounts = [4, 8, 12, 20];
+  // Sin los números que pasan el tope del plan
+  get quickCounts(): number[] {
+    return this.allQuickCounts.filter((n) => n <= this.maxTables);
+  }
 
   constructor(
     private gestion: GestionService,
     private onboarding: OnboardingService,
-    private settings: SettingsService,
+    public settings: SettingsService,
     private router: Router,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
     private menuImages: MenuImageService,
     private cropper: ImageCropService,
+    private users: UserService,
   ) {}
 
   ngOnInit() {
@@ -101,11 +107,15 @@ export class OnboardingComponent implements OnInit {
         if (first && s.done && !isSetupPending(s.counts, this.counterOnly)) return void this.router.navigate([this.homeUrl]);
         if (first) {
           if (s.counts.tables > 0) this.tableCount = 0;
+          this.setTables(this.tableCount); // el número que arranca (10) no puede pasar el tope del plan
           // Arranca en lo primero que falta (o en el paso que se tocó en la lista de primeros pasos)
           const wanted = Number(this.route.snapshot.queryParamMap.get('step'));
           const c = s.counts;
           const auto = this.counterOnly ? (c.menuItems === 0 ? 0 : 4) : c.menuItems === 0 ? (c.tables > 0 ? 1 : 0) : c.tables === 0 ? 2 : c.waiters === 0 ? 3 : 4;
-          this.step = Number.isInteger(wanted) && wanted >= 0 && wanted < STEPS.length && this.route.snapshot.queryParamMap.has('step') ? wanted : auto;
+          // Los pasos van en orden: no se puede abrir uno si falta algo de los anteriores (el del menú siempre está disponible)
+          const reachable = Math.max(auto, 1);
+          const asked = Number.isInteger(wanted) && wanted >= 0 && wanted < STEPS.length && this.route.snapshot.queryParamMap.has('step');
+          this.step = asked ? Math.min(wanted, reachable) : auto;
         }
         this.loading = false;
         this.loadMenu();
@@ -200,8 +210,18 @@ export class OnboardingComponent implements OnInit {
   }
 
   // "Saltar por ahora": entra a la app; lo que falte queda en el checklist del inicio
+  // Sin menú, mesas y mozo no hay nada para usar: en ese caso no se puede saltar el asistente, solo salir de la cuenta
+  get basicsPending(): boolean {
+    return !!this.status && isBasicsPending(this.status.counts, this.counterOnly);
+  }
+
   skip() {
     if (this.busy) return;
+    if (this.basicsPending) {
+      this.users.logout();
+      this.router.navigate(['/login']);
+      return;
+    }
     this.finish();
   }
 
@@ -495,8 +515,32 @@ export class OnboardingComponent implements OnInit {
     return this.status?.counts.tables ?? 0;
   }
 
+  // Cuántas mesas se pueden crear todavía: el tope del plan (gratis: 5) menos las que ya hay
+  get maxTables(): number {
+    const planMax = this.settings.value.limits?.['tables'];
+    return planMax === undefined ? MAX_TABLES : Math.max(0, Math.min(MAX_TABLES, planMax - this.existingTables));
+  }
+
+  // ¿Ya se llegó al tope de mesas del plan? (no hay nada más para crear)
+  get tablesFull(): boolean {
+    const planMax = this.settings.value.limits?.['tables'];
+    return planMax !== undefined && planMax > 0 && this.existingTables >= planMax;
+  }
+
+  // ¿Ya se cargaron todos los mozos que permite el plan?
+  get waitersFull(): boolean {
+    const planMax = this.settings.value.limits?.['waiters'];
+    return planMax !== undefined && this.waiters.length >= planMax;
+  }
+
+  // Aviso cuando el plan limita las mesas
+  get tablesLimitNote(): string {
+    const planMax = this.settings.value.limits?.['tables'];
+    return planMax === undefined ? '' : `Tu plan ${this.settings.value.planLabel ?? ''} permite hasta ${planMax} ${planMax === 1 ? 'mesa' : 'mesas'}. Podés sumar más pasando a un plan pago.`;
+  }
+
   setTables(n: number) {
-    this.tableCount = Math.min(MAX_TABLES, Math.max(0, Math.round(Number(n) || 0)));
+    this.tableCount = Math.min(this.maxTables, Math.max(0, Math.round(Number(n) || 0)));
   }
 
   get tablePreview(): number[] {
@@ -509,6 +553,7 @@ export class OnboardingComponent implements OnInit {
   }
 
   private saveTables() {
+    this.setTables(this.tableCount);
     if (this.tableCount === 0) return this.goTo(3);
     this.busy = true;
     this.onboarding.createTables(this.tableCount).subscribe({
@@ -528,7 +573,7 @@ export class OnboardingComponent implements OnInit {
 
   addWaiter() {
     const name = this.newWaiter.trim();
-    if (!name || this.busy) return;
+    if (!name || this.busy || this.waitersFull) return;
     this.busy = true;
     this.error = '';
     this.gestion.addWaiter(name).subscribe({

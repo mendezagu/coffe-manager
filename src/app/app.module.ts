@@ -72,6 +72,8 @@ import { HotelPartnershipsComponent } from './components/hotel-partnerships/hote
 import { OnboardingComponent } from './pages/onboarding/onboarding.component';
 import { GettingStartedComponent } from './components/getting-started/getting-started.component';
 import { SetupGateComponent } from './components/setup-gate/setup-gate.component';
+import { CookSceneComponent } from './components/cook-scene/cook-scene.component';
+import { SuccessDialogComponent } from './components/success-dialog/success-dialog.component';
 import { GuideHintComponent } from './components/guide-hint/guide-hint.component';
 import { PasswordToggleDirective } from './directives/password-toggle.directive';
 import { CustomSelectDirective } from './directives/custom-select.directive';
@@ -135,6 +137,8 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     OnboardingComponent,
     GettingStartedComponent,
     SetupGateComponent,
+    CookSceneComponent,
+    SuccessDialogComponent,
     GuideHintComponent,
     PasswordToggleDirective,
     CustomSelectDirective,

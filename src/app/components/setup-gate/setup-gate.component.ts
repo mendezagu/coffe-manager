@@ -33,6 +33,21 @@ export class SetupGateComponent {
     return this.tasks.filter((t) => t.done).length;
   }
 
+  get progress(): number {
+    return this.tasks.length ? (this.doneCount / this.tasks.length) * 100 : 0;
+  }
+
+  // El primer paso que falta: se resalta como el siguiente a hacer
+  get nextIndex(): number {
+    return this.tasks.findIndex((t) => !t.done);
+  }
+
+  // Los pasos van en orden: solo se puede abrir el siguiente a hacer (o uno ya hecho para revisarlo)
+  isLocked(i: number): boolean {
+    const next = this.nextIndex;
+    return next !== -1 && i > next;
+  }
+
   trackTitle(_i: number, t: GateTask) {
     return t.title;
   }

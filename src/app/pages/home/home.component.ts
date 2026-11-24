@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MenuItem } from 'src/app/models/coffe.models';
 import { GestionService, Table } from 'src/app/services/gestionService';
 import { PrintService } from 'src/app/services/printService';
@@ -23,7 +24,8 @@ export class HomeComponent implements OnInit{
     private gestionService: GestionService,
     private printService: PrintService,
     private onboarding: OnboardingService,
-    private users: UserService
+    private users: UserService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -35,7 +37,12 @@ export class HomeComponent implements OnInit{
     this.onboarding.status().subscribe({
       next: (s) => {
         this.setupStatus = s;
-        this.gate = isBasicsPending(s.counts, this.onboarding.counterOnly) ? 'blocked' : 'free';
+        // Mientras falte lo básico (menú, mesas, mozo) se trabaja siempre en el asistente, sin menú lateral: acá no hay nada para hacer
+        if (isBasicsPending(s.counts, this.onboarding.counterOnly)) {
+          this.router.navigate(['/bienvenida'], { replaceUrl: true });
+          return;
+        }
+        this.gate = 'free';
       },
       // sin el estado no se puede saber qué falta: nunca se bloquea el uso de la app
       error: () => (this.gate = 'free'),

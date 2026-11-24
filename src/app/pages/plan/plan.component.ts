@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { PLAN_INFO, PLAN_ORDER, PlanKey, PlanService } from 'src/app/services/plan.service';
 
 // Ícono y tono de cada plan (el tono se usa en las clases de la plantilla)
-const PLAN_ICON: Record<PlanKey, string> = { takeaway: 'takeout_dining', basic: 'storefront', pro: 'rocket_launch', benefits: 'diamond' };
+const PLAN_ICON: Record<PlanKey, string> = { free: 'redeem', free_takeaway: 'redeem', takeaway: 'takeout_dining', basic: 'storefront', pro: 'rocket_launch', benefits: 'diamond' };
 
 // "Tu plan": los tres planes lado a lado, con el actual marcado y el pedido de cambio por WhatsApp
 @Component({
@@ -27,7 +27,10 @@ export class PlanPageComponent {
 
   // Un negocio takeaway ve su plan y, aparte, los planes con salón (por si suma mesas); uno con salón ve solo los suyos
   get order(): PlanKey[] {
-    return this.plans.current === 'takeaway' ? ['takeaway', ...PLAN_ORDER] : PLAN_ORDER;
+    const c = this.plans.current;
+    if (c === 'free') return ['free', ...PLAN_ORDER];
+    if (c === 'free_takeaway') return ['free_takeaway', 'takeaway', ...PLAN_ORDER];
+    return c === 'takeaway' ? ['takeaway', ...PLAN_ORDER] : PLAN_ORDER;
   }
 
   get current(): PlanKey {
@@ -41,6 +44,7 @@ export class PlanPageComponent {
   }
 
   isAbove(plan: PlanKey): boolean {
+    if (this.plans.current === 'free' || this.plans.current === 'free_takeaway') return plan !== this.plans.current;
     if (this.plans.current === 'takeaway') return plan !== 'takeaway';
     return PLAN_ORDER.indexOf(plan) > PLAN_ORDER.indexOf(this.plans.current);
   }

@@ -63,8 +63,12 @@ export interface ReserveInfo {
   address: string;
   city: string;
   phone: string;
+  showPhone?: boolean;
   logoUrl: string | null;
   brandColor?: string;
+  coverUrl?: string | null;
+  coverIntensity?: number | null;
+  menuTheme?: string; // light | dark
   slotMin: number;
   durationMin: number;
   maxParty: number;

@@ -1,4 +1,7 @@
-<div class="min-h-screen flex flex-col">
+<div class="relative min-h-screen flex flex-col overflow-hidden">
+
+  <!-- Cocina animada a los costados (solo pantallas anchas) -->
+  <app-cook-scene></app-cook-scene>
 
   <!-- Barra superior: marca y salida -->
   <header class="flex items-center justify-between gap-3 px-3 sm:px-8 py-4">
@@ -6,7 +9,7 @@
     <img src="assets/logo/tavolapp-gris.png" alt="Tavolapp" width="123" height="30" style="height:30px;width:auto;display:block">
     <button type="button" (click)="skip()" [disabled]="busy || loading"
       class="px-3 py-2 rounded-lg text-sm font-medium text-sage-500 hover:text-sage-800 hover:bg-sage-100 transition-colors disabled:opacity-50">
-      Saltar por ahora
+      {{ basicsPending ? 'Cerrar sesión' : 'Saltar por ahora' }}
     </button>
   </header>
 
@@ -257,27 +260,30 @@
 
             <p *ngIf="existingTables > 0" class="m-0 flex items-start gap-2 rounded-xl bg-sage-50 border border-sage-200 p-3.5 text-sm text-sage-700">
               <mat-icon class="!w-5 !h-5 !text-xl flex-none text-cafe-green-700">check_circle</mat-icon>
-              Ya tenés {{ existingTables }} {{ existingTables === 1 ? 'mesa' : 'mesas' }}. Podés sumar más o seguir.
+              <ng-container *ngIf="!tablesFull">Ya tenés {{ existingTables }} {{ existingTables === 1 ? 'mesa' : 'mesas' }}. Podés sumar más o seguir.</ng-container>
+              <ng-container *ngIf="tablesFull">Ya tenés tus {{ existingTables }} mesas, el máximo de tu plan {{ settings.value.planLabel }}. Seguí con el próximo paso.</ng-container>
             </p>
 
-            <div class="flex items-center justify-center gap-4">
+            <div *ngIf="!tablesFull" class="flex items-center justify-center gap-4">
               <button type="button" (click)="setTables(tableCount - 1)" [disabled]="tableCount <= 0" aria-label="Una mesa menos"
                 class="grid h-14 w-14 place-items-center rounded-full border border-sage-200 bg-white text-sage-700 hover:bg-sage-50 active:scale-95 transition disabled:opacity-40">
                 <mat-icon>remove</mat-icon>
               </button>
               <div class="text-center">
                 <label for="table-count" class="sr-only">Cantidad de mesas</label>
-                <input id="table-count" type="number" inputmode="numeric" min="0" max="100" [ngModel]="tableCount" (ngModelChange)="setTables($event)"
+                <input id="table-count" type="number" inputmode="numeric" min="0" [attr.max]="maxTables" [ngModel]="tableCount" (ngModelChange)="setTables($event)"
                   class="no-spin w-24 text-center text-5xl font-bold tracking-tight text-sage-900 bg-transparent focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 rounded-lg" />
-                <p class="m-0 text-sm font-medium text-sage-700">{{ tableCount === 1 ? 'mesa' : 'mesas' }}</p>
+                <p class="m-0 text-sm font-medium text-sage-700">{{ existingTables > 0 ? (tableCount === 1 ? 'mesa más' : 'mesas más') : (tableCount === 1 ? 'mesa' : 'mesas') }}</p>
               </div>
-              <button type="button" (click)="setTables(tableCount + 1)" [disabled]="tableCount >= 100" aria-label="Una mesa más"
+              <button type="button" (click)="setTables(tableCount + 1)" [disabled]="tableCount >= maxTables" aria-label="Una mesa más"
                 class="grid h-14 w-14 place-items-center rounded-full bg-cafe-green-700 text-white hover:bg-cafe-green-800 active:scale-95 transition disabled:opacity-40">
                 <mat-icon>add</mat-icon>
               </button>
             </div>
 
-            <div class="flex flex-wrap justify-center gap-2" role="group" aria-label="Cantidades frecuentes">
+            <p *ngIf="tablesLimitNote" class="m-0 text-center text-sm text-sage-600">{{ tablesLimitNote }}</p>
+
+            <div *ngIf="!tablesFull" class="flex flex-wrap justify-center gap-2" role="group" aria-label="Cantidades frecuentes">
               <button *ngFor="let n of quickCounts" type="button" (click)="setTables(n)"
                 class="h-9 px-4 rounded-full text-sm font-bold transition-colors"
                 [ngClass]="tableCount === n ? 'bg-cafe-green-700 text-white' : 'bg-sage-100 text-sage-700 hover:bg-sage-200'">{{ n }}</button>
@@ -295,7 +301,7 @@
 
           <!-- ============ Paso 4: mozos ============ -->
           <div *ngSwitchCase="3" class="flex flex-col gap-5">
-            <form (ngSubmit)="addWaiter()" class="flex flex-col gap-3 sm:flex-row">
+            <form *ngIf="!waitersFull" (ngSubmit)="addWaiter()" class="flex flex-col gap-3 sm:flex-row">
               <div class="flex-1">
                 <label for="waiter-name" class="sr-only">Nombre del mozo</label>
                 <input id="waiter-name" name="waiterName" type="text" [(ngModel)]="newWaiter" maxlength="60" autocomplete="off" placeholder="Nombre (ej: Lucía)"
@@ -306,6 +312,11 @@
                 <mat-icon class="!w-5 !h-5 !text-xl">add</mat-icon> Agregar
               </button>
             </form>
+
+            <p *ngIf="waitersFull" class="m-0 flex items-start gap-2 rounded-xl border border-sage-200 bg-sage-50 p-3.5 text-sm text-sage-700">
+              <mat-icon class="!h-5 !w-5 flex-none !text-xl text-cafe-green-700">check_circle</mat-icon>
+              Ya cargaste los {{ waiters.length }} mozos que incluye tu plan {{ settings.value.planLabel }}. Podés sumar más pasando a un plan pago.
+            </p>
 
             <ul *ngIf="waiters.length" class="m-0 flex list-none flex-wrap gap-2 p-0" aria-label="Mozos cargados">
               <li *ngFor="let w of waiters" class="pop-in flex items-center gap-1 rounded-full bg-cafe-green-50 py-1 pl-3.5 pr-1 text-sm font-bold text-cafe-green-800">

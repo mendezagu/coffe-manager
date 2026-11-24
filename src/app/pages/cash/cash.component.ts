@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { SuccessDialogComponent } from 'src/app/components/success-dialog/success-dialog.component';
+import { OnboardingService, OnboardingStatus } from 'src/app/services/onboarding.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CashHistoryRow, CashRegisterSummary, CashService, CashState } from 'src/app/services/cash.service';
 import { UserService } from 'src/app/services/user.service';
@@ -56,7 +61,7 @@ export class CashComponent implements OnInit {
   history: CashHistoryRow[] = [];
   expanded: Record<string, CashRegisterSummary | 'loading'> = {};
 
-  constructor(private cash: CashService, private users: UserService, private snackBar: MatSnackBar) {}
+  constructor(private cash: CashService, private users: UserService, private snackBar: MatSnackBar, private onboarding: OnboardingService, private router: Router, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.isAdmin = this.users.currentRole() === 'admin';
@@ -141,9 +146,35 @@ export class CashComponent implements OnInit {
         this.busy = false;
         this.openingAmount = null;
         this.closedSummary = null;
-        this.reload('Caja abierta');
+        this.reload();
+        this.guideToFirstSale();
       },
       error: (err) => this.fail(err, 'No se pudo abrir la caja'),
+    });
+  }
+
+  // Confirma con un check animado y, si todavía falta la primera venta (negocio nuevo), después lo lleva solo a venderla
+  private guideToFirstSale() {
+    const admin = this.users.currentRole() === 'admin';
+    if (admin) this.onboarding.invalidate();
+    const firstSale$: Observable<OnboardingStatus | null> = admin ? this.onboarding.status() : of(null);
+    firstSale$.subscribe({
+      next: (s) => {
+        const toSell = !!s && s.counts.sales === 0;
+        const counter = this.onboarding.counterOnly;
+        const ref = this.dialog.open(SuccessDialogComponent, {
+          width: '380px',
+          maxWidth: '92vw',
+          panelClass: ['custom-dialog-container'],
+          data: {
+            title: '¡Caja abierta!',
+            sub: toSell ? (counter ? 'Ahora hacé tu primera venta en el Mostrador' : 'Ahora hacé tu primera venta: tocá una mesa') : 'Ya podés cobrar',
+            duration: toSell ? 2200 : 1700,
+          },
+        });
+        if (toSell) ref.afterClosed().subscribe(() => this.router.navigate([counter ? '/counter' : '/home']));
+      },
+      error: () => this.dialog.open(SuccessDialogComponent, { width: '380px', maxWidth: '92vw', panelClass: ['custom-dialog-container'], data: { title: '¡Caja abierta!', sub: 'Ya podés cobrar' } }),
     });
   }
 

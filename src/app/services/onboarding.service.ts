@@ -101,6 +101,11 @@ export class OnboardingService {
   // Las acciones que cambian lo que falta (plantilla, mesas) la descartan.
   private cache?: { at: number; value: OnboardingStatus };
 
+  // Descarta la última respuesta guardada: sirve cuando se hizo algo que cambia lo que falta (por ejemplo, abrir la caja)
+  invalidate(): void {
+    this.cache = undefined;
+  }
+
   status(): Observable<OnboardingStatus> {
     if (this.cache && Date.now() - this.cache.at < 2000) return of(this.cache.value);
     if (this.inflight) return this.inflight;

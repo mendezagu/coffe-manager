@@ -210,9 +210,10 @@
       <div *ngIf="!planActive" class="grid grid-cols-[repeat(auto-fill,minmax(148px,1fr))] gap-[10px] sm:gap-[12px]">
         <button *ngFor="let table of group.tables; trackBy: trackTable" type="button" (click)="tileClick(table)"
           [attr.aria-label]="shortName(table, group.name) + ': ' + (tileTone(table) === 'alert' ? 'necesita atención, ' + tileReason(table) + (waitText(table) ? ', ' + waitText(table) : '') : isFree(table) ? 'libre' : 'ocupada') + (table.waiterId && table.waiterName?.trim() ? ', mozo ' + table.waiterName : '') + (elapsedText(table) ? ', abierta hace ' + elapsedText(table) : '')"
-          [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)" [class.floor-late]="waitingLate(table)"
+          [class.guide-pulse]="isGuide(table) && !(table.orders && table.orders.length)" [attr.data-guide-table]="isGuide(table) && !(table.orders && table.orders.length) ? '1' : null" [class.floor-late]="waitingLate(table)"
           class="relative flex min-h-[120px] min-w-0 flex-col justify-between rounded-2xl p-[14px] text-left transition duration-150 hover:-translate-y-[1px] hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transform-none"
           [ngClass]="tileStyles[tileTone(table)].tile">
+          <span *ngIf="isGuide(table) && !(table.orders && table.orders.length)" class="pointer-events-none absolute right-0 top-0 z-10 rounded-bl-xl rounded-tr-2xl bg-[#e6834a] px-[10px] py-[3px] text-[11px] font-extrabold uppercase tracking-wide text-[#3b1a08]">Empezá acá</span>
           <ng-container *ngTemplateOutlet="tileBody; context: { $implicit: table, name: group.name }"></ng-container>
         </button>
       </div>
@@ -232,9 +233,11 @@
             (keydown)="planKey($event, it.table)"
             [attr.aria-label]="shortName(it.table, group.name) + ': ' + (tileTone(it.table) === 'alert' ? 'necesita atención' : isFree(it.table) ? 'libre' : 'ocupada') + (editingPlan ? '. Con las flechas se mueve de lugar' : '')"
             [class.floor-late]="!editingPlan && waitingLate(it.table)"
+            [class.guide-pulse]="!editingPlan && isGuide(it.table) && !(it.table.orders && it.table.orders.length)" [attr.data-guide-table]="!editingPlan && isGuide(it.table) && !(it.table.orders && it.table.orders.length) ? '1' : null"
             [style.left.%]="it.x" [style.top.%]="it.y" [style.width.px]="planTileW" [style.height.px]="planTileH"
             class="absolute flex min-w-0 -translate-x-1/2 -translate-y-1/2 flex-col justify-between overflow-hidden rounded-2xl p-[10px] text-left transition-shadow duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2"
             [ngClass]="[tileStyles[tileTone(it.table)].tile, editingPlan ? 'cursor-grab touch-none select-none active:cursor-grabbing' : 'hover:shadow-soft-lg motion-safe:active:scale-[0.98]']">
+            <span *ngIf="isGuide(it.table) && !(it.table.orders && it.table.orders.length)" class="pointer-events-none absolute right-0 top-0 z-10 rounded-bl-xl rounded-tr-2xl bg-[#e6834a] px-[10px] py-[3px] text-[11px] font-extrabold uppercase tracking-wide text-[#3b1a08]">Empezá acá</span>
             <ng-container *ngTemplateOutlet="tileBody; context: { $implicit: it.table, name: group.name }"></ng-container>
           </button>
         </div>
@@ -276,30 +279,31 @@
         </button>
 
         <div class="mt-[20px] flex flex-col gap-[8px]">
-          <app-guide-hint *ngIf="isGuide(t) && !(t.orders && t.orders.length)" [step]="1" title="Ordená" text="Tocá Ordenar para abrir el pedido de esta mesa. Después te va a pedir el mozo y los platos."></app-guide-hint>
+          <app-guide-hint class="order-0" *ngIf="isGuide(t) && !(t.orders && t.orders.length)" [step]="1" title="Ordená" text="Tocá Ordenar para abrir el pedido de esta mesa. Después te va a pedir el mozo y los platos."></app-guide-hint>
           <button *ngIf="(role$ | async) !== 'kitchen'" type="button" (click)="panelAction('order', t)" [disabled]="orderBlocked(t)"
             [attr.title]="qrRequestsOf(t) > 0 ? 'Primero aceptá o rechazá el pedido por QR' : null"
-            class="flex min-h-[56px] w-full items-center justify-center gap-[8px] rounded-xl bg-[var(--floor-action)] px-[16px] text-base font-semibold text-[#084440] transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            class="order-2 flex w-full items-center justify-center gap-[8px] rounded-xl px-[16px] text-base font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            [ngClass]="chargeFirst(t) ? 'min-h-[52px] border-2 border-[var(--floor-action)] bg-[var(--floor-free-bg)] hover:brightness-95' : 'min-h-[56px] bg-[var(--floor-action)] text-[#084440] hover:brightness-110'">
             <mat-icon>restaurant_menu</mat-icon>{{ t.orders && t.orders.length ? 'Agregar al pedido' : 'Ordenar' }}
           </button>
-          <p *ngIf="qrRequestsOf(t) > 0 && !t.controlledBy" class="m-0 text-sm text-[var(--floor-muted)]">Aceptá o rechazá el pedido por QR para poder ordenar.</p>
+          <p *ngIf="qrRequestsOf(t) > 0 && !t.controlledBy" class="order-2 m-0 text-sm text-[var(--floor-muted)]">Aceptá o rechazá el pedido por QR para poder ordenar.</p>
 
-          <app-guide-hint *ngIf="isGuide(t) && t.orders && t.orders.length" [step]="4" title="La cuenta" text="Cuando el cliente la pida, tocá Total. Órdenes muestra el detalle del pedido y la impresora vuelve a sacar la comanda."></app-guide-hint>
+          <app-guide-hint class="order-0" *ngIf="isGuide(t) && t.orders && t.orders.length" [step]="4" title="La cuenta" text="Cuando el cliente la pida, tocá Total. Órdenes muestra el detalle del pedido y la impresora vuelve a sacar la comanda."></app-guide-hint>
 
           <ng-container *ngIf="t.orders && t.orders.length > 0">
             <button type="button" (click)="panelAction('orders', t)" [disabled]="t.controlledBy"
-              class="flex min-h-[52px] w-full items-center justify-between gap-[8px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] disabled:cursor-not-allowed disabled:opacity-40">
+              class="order-3 flex min-h-[52px] w-full items-center justify-between gap-[8px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] disabled:cursor-not-allowed disabled:opacity-40">
               <span class="flex items-center gap-[10px]"><mat-icon fontSet="material-icons-outlined">receipt_long</mat-icon>Órdenes</span>
               <span class="text-sm tabular-nums text-[var(--floor-muted)]">{{ t.orders.length }}<ng-container *ngIf="settings.value.kitchenEnabled && readyCount(t) > 0"> · {{ readyCount(t) }} {{ readyCount(t) === 1 ? 'listo' : 'listos' }}</ng-container></span>
             </button>
 
             <button *ngIf="(role$ | async) === 'admin' || (role$ | async) === 'cashier'" type="button" (click)="panelAction('total', t)" [disabled]="t.controlledBy" [class.guide-pulse]="isGuide(t)"
-              class="flex min-h-[52px] w-full items-center gap-[10px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] disabled:cursor-not-allowed disabled:opacity-40">
+              class="order-1 flex min-h-[60px] w-full items-center justify-center gap-[10px] rounded-xl bg-[var(--floor-action)] px-[16px] text-lg font-bold text-[#084440] shadow-soft transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40">
               <mat-icon fontSet="material-icons-outlined">payments</mat-icon>Cobrar la cuenta
             </button>
 
             <button type="button" (click)="panelAction('print', t)"
-              class="flex min-h-[52px] w-full items-center gap-[10px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]">
+              class="order-4 flex min-h-[52px] w-full items-center gap-[10px] rounded-xl border border-[var(--floor-line)] bg-[var(--floor-free-bg)] px-[16px] text-left text-base font-medium transition-colors hover:border-[var(--floor-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--floor-action)]">
               <mat-icon fontSet="material-icons-outlined">print</mat-icon>Imprimir comanda
             </button>
           </ng-container>

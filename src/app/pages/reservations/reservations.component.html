@@ -115,8 +115,8 @@
         </div>
       </section>
 
-      <p *ngIf="error" role="alert" class="m-0 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
-      <p *ngIf="loading" class="m-0 text-sm text-sage-600">Cargando…</p>
+      <p *ngIf="error" role="alert" class="mb-0 rounded-lg bg-cafe-red-50 px-3 py-2 text-sm font-medium text-cafe-red-700">{{ error }}</p>
+      <p *ngIf="loading" class="mb-0 text-sm text-sage-600">Cargando…</p>
 
       <ng-container *ngIf="data && !loading">
 
@@ -165,7 +165,7 @@
         </div>
 
         <!-- Reservas -->
-        <ul *ngIf="live.length" class="m-0 list-none space-y-3 p-0" aria-label="Reservas del día">
+        <ul *ngIf="live.length" class="mb-0 list-none space-y-3 p-0" aria-label="Reservas del día">
           <li *ngFor="let r of live; trackBy: trackId" class="rounded-2xl bg-white p-3 shadow-soft sm:p-4">
             <div class="flex items-start gap-3">
               <div class="grid h-14 w-16 flex-none place-items-center rounded-xl bg-sage-50 text-lg font-bold text-sage-900">{{ r.time }}</div>

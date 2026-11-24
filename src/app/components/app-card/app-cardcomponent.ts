@@ -499,6 +499,11 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Mesas ocupadas de un grupo (para el título de cada sector)
   // La guía se muestra en una sola mesa: la primera que ya tiene pedido y, si no hay, la primera de todas
+  // Con pedidos y permiso para cobrar, "Cobrar la cuenta" es la acción principal y "Agregar al pedido" pasa a segunda
+  chargeFirst(table: Table): boolean {
+    return !!(table.orders && table.orders.length) && (this.roleValue === 'admin' || this.roleValue === 'cashier');
+  }
+
   isGuide(table: Table): boolean {
     if (!this.guideOn || this.tables.length === 0) return false;
     const target = this.tables.find((t) => t.orders?.length) ?? this.tables[0];

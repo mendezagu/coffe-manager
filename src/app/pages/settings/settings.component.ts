@@ -211,7 +211,13 @@ export class SettingsComponent implements OnInit {
     const file = input.files?.[0];
     input.value = '';
     if (!file) return;
-    const ready = await this.cropper.crop(file, {
+    const isGif = file.type === 'image/gif' && kind === 'cover';
+    if (isGif && file.size > 2.5 * 1024 * 1024) {
+      this.notify('El GIF pesa demasiado: tiene que ser de hasta 2,5 MB. Probá achicarlo o acortarlo.');
+      return;
+    }
+    // el GIF animado no se recorta (el recorte lo dejaría quieto)
+    const ready = isGif ? file : await this.cropper.crop(file, {
       title: kind === 'cover' ? 'Portada' : 'Fondo',
       aspects: kind === 'cover' ? COVER_ASPECTS : BACKGROUND_ASPECTS,
     });
