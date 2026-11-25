@@ -5,6 +5,8 @@ import { SettingsService } from './settings.service';
 export type PlanKey = 'free' | 'free_takeaway' | 'takeaway' | 'basic' | 'pro' | 'benefits';
 // Planes con salón, de menor a mayor. Takeaway va aparte: es para negocios que venden solo en mostrador.
 export const PLAN_ORDER: PlanKey[] = ['basic', 'pro', 'benefits'];
+// Los planes que hoy se ofrecen a los clientes: Gratis (el que ya tienen) y Pro. Los demás siguen existiendo para quien ya los tenga.
+export const OFFERED_PLANS: PlanKey[] = ['pro'];
 
 // Qué incluye cada plan (la lista que se le muestra al dueño del local)
 export const PLAN_INFO: Record<PlanKey, { label: string; resume: string; includes: string[] }> = {
@@ -31,7 +33,7 @@ export const PLAN_INFO: Record<PlanKey, { label: string; resume: string; include
   pro: {
     label: 'Pro',
     resume: 'Ordená tu negocio y ahorrá plata',
-    includes: ['Todo lo de Esencial', 'Mostrador (venta sin mesa)', 'Separar cocina y barra', 'Pedido desde la mesa por QR', 'Inventario, recetas y ganancia', 'Modificadores y extras', 'Reportes completos', 'Comisión de mozos', 'Reservas de mesa', 'Historial de acciones (Logs)'],
+    includes: ['Mesas, pedidos y cobro sin límites (dividir y cobro parcial)', 'Caja con turnos', 'Pantalla de cocina', 'Carta QR para ver el menú', 'Balance y reportes', 'Mostrador (venta sin mesa)', 'Separar cocina y barra', 'Pedido desde la mesa por QR', 'Inventario, recetas y ganancia', 'Modificadores y extras', 'Reportes completos', 'Comisión de mozos', 'Reservas de mesa', 'Historial de acciones (Logs)'],
   },
   benefits: {
     label: 'Beneficios',
@@ -121,16 +123,15 @@ export class PlanService {
 
   // Plan mínimo que incluye la función
   needed(feature: string): PlanKey {
-    return (this.settings.value.featurePlans?.[feature] as PlanKey) ?? 'pro';
+    // Esencial no se ofrece: lo que antes venía desde Esencial se pide con Pro
+    const plan = (this.settings.value.featurePlans?.[feature] as PlanKey) ?? 'pro';
+    return plan === 'basic' ? 'pro' : plan;
   }
 
   // A qué plan conviene pasarse: el siguiente al actual, o el que pide la función si está más arriba
-  target(feature?: string): PlanKey | null {
-    const next = PLAN_ORDER[PLAN_ORDER.indexOf(this.current) + 1];
-    if (!next) return null; // ya tiene el más completo
-    if (!feature) return next;
-    const needed = this.needed(feature);
-    return PLAN_ORDER.indexOf(needed) > PLAN_ORDER.indexOf(next) ? needed : next;
+  target(_feature?: string): PlanKey | null {
+    // Hoy se ofrece solo Pro: quien ya lo tiene (o algo superior) no tiene a qué pasarse
+    return this.current === 'pro' || this.current === 'benefits' ? null : 'pro';
   }
 
   // Link de WhatsApp al número de Tavolapp con el pedido ya escrito. null si todavía no se cargó el número.

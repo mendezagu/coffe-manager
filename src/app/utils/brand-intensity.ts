@@ -27,6 +27,6 @@ export function coverVeil(value: number | null | undefined): string {
 export function backgroundVeil(value: number | null | undefined, dark = false): string {
   const v = backgroundIntensityOf(value);
   const alpha = v <= 90 ? 0.97 - 0.007 * v : (0.34 * (100 - v)) / 10;
-  const c = dark ? '30,31,34' : '250,248,245';
+  const c = dark ? '18,19,26' : '250,248,245';
   return `linear-gradient(rgba(${c},${alpha.toFixed(2)}), rgba(${c},${alpha.toFixed(2)}))`;
 }

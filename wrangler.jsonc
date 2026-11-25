@@ -11,5 +11,18 @@
   },
   "routes": [
     { "pattern": "app.tavolapp.app", "custom_domain": true }
-  ]
+  ],
+  // Ambiente de pruebas: "npm run deploy:app:dev" -> https://app-dev.tavolapp.app
+  "env": {
+    "dev": {
+      "name": "tavolapp-app-dev",
+      "assets": {
+        "directory": "./dist/tavolapp-app-dev",
+        "not_found_handling": "single-page-application"
+      },
+      "routes": [
+        { "pattern": "app-dev.tavolapp.app", "custom_domain": true }
+      ]
+    }
+  }
 }

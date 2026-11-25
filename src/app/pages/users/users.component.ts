@@ -1,3 +1,5 @@
+import { MatDialog } from '@angular/material/dialog';
+import { PlanLimitDialogComponent, isPlanLimitError } from 'src/app/components/plan-limit-dialog/plan-limit-dialog.component';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppRole, AppUser, ROLE_LABELS, UserService } from 'src/app/services/user.service';
@@ -29,7 +31,7 @@ export class UsersComponent implements OnInit {
   // Avisa al panel de administración que cambió la lista (para actualizar el contador de la tarjeta)
   @Output() changed = new EventEmitter<void>();
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar, public settings: SettingsService) {}
+  constructor(private userService: UserService, private snackBar: MatSnackBar, public settings: SettingsService, private dialog: MatDialog) {}
 
   // ---- Código del local ----
   editingCode = false;
@@ -106,6 +108,10 @@ export class UsersComponent implements OnInit {
       },
       error: (err) => {
         this.saving = false;
+        if (isPlanLimitError(err)) {
+          PlanLimitDialogComponent.open(this.dialog, 'users');
+          return;
+        }
         this.notify(this.errorMessage(err, 'No se pudo crear el usuario'));
       },
     });

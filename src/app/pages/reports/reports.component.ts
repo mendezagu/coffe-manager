@@ -14,7 +14,7 @@ const GREEN_HOVER = '#22b592';
 // Texto y líneas de los ejes: en el modo oscuro del panel se usan grises suaves (si no, las líneas claras se ven blancas)
 const isDark = () => document.documentElement.classList.contains('dark');
 const inkColor = () => (isDark() ? '#b4bcc8' : '#4f5a6b'); // sage-600
-const gridColor = () => (isDark() ? '#35373c' : '#e1e5ea'); // sage-200
+const gridColor = () => (isDark() ? '#2a2b37' : '#e1e5ea'); // sage-200
 
 // Colores de las porciones de la torta: la gama de la marca y algunos tonos de apoyo bien distinguibles
 const PIE_COLORS = ['#2ed0ab', '#c98f3a', '#0b7d66', '#8a2a1c', '#7bd9c0', '#e2b66b', '#c9695a', '#4f5a6b', '#b9efe0', '#a7b0bd'];
@@ -356,7 +356,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
         type: 'doughnut',
         data: {
           labels,
-          datasets: [{ data, backgroundColor: PIE_COLORS, borderColor: isDark() ? '#252b36' : '#ffffff', borderWidth: 2 }],
+          datasets: [{ data, backgroundColor: PIE_COLORS, borderColor: isDark() ? '#1c1c25' : '#ffffff', borderWidth: 2 }],
         },
         options: {
           responsive: true,

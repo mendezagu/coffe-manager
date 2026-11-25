@@ -74,6 +74,7 @@ import { GettingStartedComponent } from './components/getting-started/getting-st
 import { SetupGateComponent } from './components/setup-gate/setup-gate.component';
 import { CookSceneComponent } from './components/cook-scene/cook-scene.component';
 import { SuccessDialogComponent } from './components/success-dialog/success-dialog.component';
+import { PlanLimitDialogComponent } from './components/plan-limit-dialog/plan-limit-dialog.component';
 import { GuideHintComponent } from './components/guide-hint/guide-hint.component';
 import { PasswordToggleDirective } from './directives/password-toggle.directive';
 import { CustomSelectDirective } from './directives/custom-select.directive';
@@ -139,6 +140,7 @@ import { ChangePasswordFormComponent } from './components/change-password-form/c
     SetupGateComponent,
     CookSceneComponent,
     SuccessDialogComponent,
+    PlanLimitDialogComponent,
     GuideHintComponent,
     PasswordToggleDirective,
     CustomSelectDirective,

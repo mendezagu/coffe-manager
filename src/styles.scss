@@ -130,8 +130,8 @@ mat-icon {
 }
 
 html.dark .mat-mdc-snack-bar-container .mdc-snackbar__surface {
-  background: #252b36 !important;
-  border-color: #3a3d43;
+  background: #1c1c25 !important;
+  border-color: #2a2b37;
   border-left-color: #3f9d70;
   box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6) !important;
 }
@@ -298,14 +298,14 @@ mat-drawer-content,
 
 html.dark {
   color-scheme: dark;
-  background: #2b323e;
-  --mdc-dialog-container-color: #252b36;
+  background: #12131a;
+  --mdc-dialog-container-color: #1c1c25;
   --mdc-dialog-subhead-color: #f2f4f7;
   --mdc-dialog-supporting-text-color: #dde1e8;
 }
 
 html.dark body {
-  background: #2b323e;
+  background: #12131a;
   color: #dde1e8;
 }
 
@@ -314,20 +314,20 @@ html.dark .mat-drawer-container,
 html.dark .mat-drawer-content,
 html.dark mat-drawer-container,
 html.dark mat-drawer-content {
-  background-color: #2b323e !important;
+  background-color: #12131a !important;
   color: #dde1e8;
 }
 
 html.dark mat-drawer,
 html.dark .mat-drawer {
-  background-color: #252b36 !important;
+  background-color: #1c1c25 !important;
   color: #dde1e8;
-  border-right-color: #1b2029 !important;
+  border-right-color: #26272f !important;
 }
 
 html.dark .page-header {
-  background-color: #252b36;
-  border-bottom-color: #1b2029;
+  background-color: #1c1c25;
+  border-bottom-color: #26272f;
 }
 
 html.dark .page-header__icon {
@@ -345,16 +345,16 @@ html.dark .page-sub {
 
 html.dark .custom-toolbar,
 html.dark .mat-toolbar {
-  background-color: #252b36 !important;
+  background-color: #1c1c25 !important;
   color: #dde1e8;
-  border-bottom-color: #1b2029 !important;
+  border-bottom-color: #26272f !important;
 }
 
 html.dark .mat-mdc-dialog-surface,
 html.dark .mat-mdc-select-panel,
 html.dark .mat-mdc-menu-panel,
 html.dark .mat-mdc-autocomplete-panel {
-  background-color: #252b36 !important;
+  background-color: #1c1c25 !important;
   color: #dde1e8;
 }
 
@@ -365,35 +365,53 @@ html.dark .mat-mdc-menu-item {
 
 html.dark .mat-mdc-option:hover:not(.mdc-list-item--disabled),
 html.dark .mat-mdc-menu-item:hover:not([disabled]) {
-  background-color: #35373c !important;
+  background-color: #272833 !important;
 }
 
 html.dark input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
 html.dark select,
 html.dark textarea {
-  background-color: #1b2029;
+  background-color: #15161e;
   color: #dde1e8;
-  border-color: #3a4252;
+  border-color: #2a2b37;
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #8a94a4;
+  color: #7f8293;
 }
 
 html.dark select option {
-  background-color: #252b36;
+  background-color: #1c1c25;
   color: #dde1e8;
 }
 
 /* Las tarjetas con la clase "border" de Bootstrap y borde transparente (por ejemplo, Administrar) muestran su gris claro:
    en oscuro, uno suave. Solo las que llevan ambas clases: el resto de los bordes transparentes (como las filas del menú) siguen invisibles. */
 html.dark .border.border-transparent {
-  border-color: #3a3d43 !important;
+  border-color: #2a2b37 !important;
 }
 
 html.dark hr {
-  border-color: #3a4252;
+  border-color: #2a2b37;
+}
+
+/* Menú lateral en modo oscuro: mismos tonos que el resto (en claro queda como estaba) */
+html.dark mat-drawer.example-sidenav.mat-drawer {
+  background-color: #181920 !important;
+  border-right-color: #26272f !important;
+}
+html.dark mat-drawer.example-sidenav.mat-drawer .\!bg-cafe-green-50,
+html.dark mat-drawer.example-sidenav.mat-drawer .hover\:bg-sage-200:hover,
+html.dark mat-drawer.example-sidenav.mat-drawer .bg-white {
+  background-color: #2a2b37 !important;
+}
+html.dark mat-drawer.example-sidenav.mat-drawer .bg-sage-100,
+html.dark mat-drawer.example-sidenav.mat-drawer .bg-cafe-green-50 {
+  background-color: #23242f !important;
+}
+html.dark mat-drawer.example-sidenav.mat-drawer img.rounded-full {
+  box-shadow: 0 0 0 2px #181920, 0 0 0 5px #2a2b37 !important;
 }
 
 /* ---- Etiquetas de plan (Pro / Beneficios): colores fijos con brillo para que se noten, en claro y en oscuro ---- */
@@ -543,13 +561,13 @@ html.dark * {
   --floor-ink-block: #363f4e;
 }
 html.dark .floor {
-  /* Oscuro: pizarra de la paleta nueva; los únicos colores son el rojo tenue, el naranja de atención y el verde agua de marca */
-  --floor-bg: #2b323e;
-  --floor-panel: #252b36;
+  /* Oscuro: casi negro azulado; los únicos colores son el rojo tenue, el naranja de atención y el verde agua de marca */
+  --floor-bg: #12131a;
+  --floor-panel: #1c1c25;
   --floor-ink: #dde1e8;
   --floor-muted: #9ba5b4;
-  --floor-line: #3a4252;
-  --floor-free-bg: #252b36;
+  --floor-line: #2a2b37;
+  --floor-free-bg: #1c1c25;
   --floor-free-ink: #dde1e8;
   --floor-free-dot: #2ed0ab;
   --floor-busy-bg: #3b2824;
@@ -557,8 +575,8 @@ html.dark .floor {
   --floor-busy-accent: #c0513f;
   --floor-alert-bg: #c2410c;
   --floor-chip-on: #dde1e8;
-  --floor-chip-on-ink: #1b2029;
-  --floor-ink-block: #2f3643;
+  --floor-chip-on-ink: #12131a;
+  --floor-ink-block: #23242f;
   --floor-action: #2ed0ab;
   --floor-action-text: #6fe3c6;
   --floor-ready: #6fe3c6;

@@ -432,7 +432,10 @@
               <mat-icon class="!w-6 !h-6 !text-2xl text-sage-600">add_circle</mat-icon>
               Agregar Nuevo Mesero
             </div>
-            <p *ngIf="waitersFull" class="m-0 text-sm text-sage-600">Ya cargaste los {{ waiters.length }} mozos que incluye tu plan {{ settings.value.planLabel }}. Podés sumar más pasando a un plan pago.</p>
+            <div *ngIf="waitersFull" class="flex flex-wrap items-center justify-between gap-3">
+              <p class="m-0 text-sm text-sage-600">Ya cargaste los {{ waiters.length }} mozos que incluye tu plan {{ settings.value.planLabel }}.</p>
+              <button type="button" (click)="showPlans('waiters')" class="inline-flex h-11 items-center gap-1.5 rounded-full bg-cafe-mint-500 px-5 text-sm font-bold text-cafe-green-900 hover:bg-cafe-mint-400"><mat-icon class="!h-5 !w-5 !text-xl">rocket_launch</mat-icon>Mejorar mi plan</button>
+            </div>
             <div *ngIf="!waitersFull" class="flex flex-col sm:flex-row gap-3">
               <input class="flex-1 px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-cafe-green-700/25 focus:border-cafe-green-700 transition-all text-sage-800 font-semibold" [(ngModel)]="newWaiterName" placeholder="Nombre del mesero (ej: Juan Pérez)" />
               <button class="px-6 py-3 bg-cafe-green-700 hover:bg-cafe-green-800 text-white font-semibold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2" (click)="addWaiter()">

@@ -1,4 +1,4 @@
-// Genera src/_dark-theme.generated.scss: el modo oscuro del panel interno (pizarra de la paleta nueva).
+// Genera src/_dark-theme.generated.scss: el modo oscuro del panel interno (casi negro azulado).
 //
 // En vez de tocar cada pantalla, se recorren los templates y los .ts buscando las clases de color de Tailwind que se
 // usan (bg-white, bg-sage-100, text-cafe-green-700, hover:bg-cafe-red-50…) y por cada una se escribe, bajo `html.dark`,
@@ -14,11 +14,11 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', 'src');
 const OUT = path.join(ROOT, '_dark-theme.generated.scss');
 
-// ---- paleta oscura (pizarra) ----
-const SURFACE = '#252b36'; // lo que en claro es "bg-white" (tarjetas, paneles)
-const SAGE_BG = { 50: '#2f3744', 100: '#2b323e', 200: '#3a4252', 300: '#454e5f' };
-const SAGE_BORDER = { 50: '#3a4252', 100: '#3a4252', 200: '#3a4252', 300: '#454e5f', 400: '#5a6478' };
-const SAGE_TEXT = { 400: '#8a94a4', 500: '#9ba5b4', 600: '#b4bcc8', 700: '#c6ccd6', 800: '#dde1e8', 900: '#f2f4f7' };
+// ---- paleta oscura (casi negro azulado) ----
+const SURFACE = '#1c1c25'; // lo que en claro es "bg-white" (tarjetas, paneles)
+const SAGE_BG = { 50: '#23242f', 100: '#15161e', 200: '#2a2b37', 300: '#363848' };
+const SAGE_BORDER = { 50: '#26272f', 100: '#26272f', 200: '#2a2b37', 300: '#383a49', 400: '#555868' };
+const SAGE_TEXT = { 400: '#7f8293', 500: '#979bab', 600: '#b3b6c4', 700: '#c9ccd8', 800: '#e0e2ea', 900: '#f4f5f8' };
 
 // Color base de cada tono, para armar sus tintes oscuros y sus textos claros
 const HUES = {

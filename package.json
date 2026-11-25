@@ -11,7 +11,10 @@
     "prebuild:app": "node scripts/write-build-info.js",
     "build:app": "ng build --configuration=production --base-href=/ --output-path=dist/tavolapp-app",
     "deploy:app": "node scripts/require-main.js && npm run build:app && npx wrangler deploy",
-    "gen:dark": "node tools/gen-dark-theme.js"
+    "gen:dark": "node tools/gen-dark-theme.js",
+    "prebuild:app:dev": "node scripts/write-build-info.js",
+    "build:app:dev": "ng build --configuration=dev --base-href=/ --output-path=dist/tavolapp-app-dev && node scripts/mark-dev.js dist/tavolapp-app-dev",
+    "deploy:app:dev": "node scripts/require-dev.js && npm run build:app:dev && npx wrangler deploy --env dev"
   },
   "private": true,
   "dependencies": {

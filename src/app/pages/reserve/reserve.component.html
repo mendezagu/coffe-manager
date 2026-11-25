@@ -30,8 +30,8 @@
           <span class="block font-semibold">Todos los días de {{ info.open }} a {{ info.close }}</span>
         </span>
       </div>
-      <h1 class="m-0 mt-[18px] break-words text-[46px] font-medium leading-[0.98] tracking-[-0.02em] text-white [font-family:'Playfair_Display',Georgia,serif]">{{ info.name }}</h1>
-      <p *ngIf="info.city" class="m-0 mt-[6px] text-[26px] italic leading-tight text-white/90 [font-family:'Playfair_Display',Georgia,serif]">{{ info.city }}</p>
+      <h1 class="!mb-0 !mt-[18px] break-words !text-[34px] !font-semibold !leading-[1.1] !tracking-[-0.01em] text-white ![font-family:'Playfair_Display',Georgia,serif]">{{ info.name }}</h1>
+      <p *ngIf="info.city" class="mb-0 mt-[6px] text-[17px] italic leading-tight text-white/85 [font-family:'Playfair_Display',Georgia,serif]">{{ info.city }}</p>
       <p *ngIf="info.address" class="mb-0 mt-[12px] flex items-center gap-[6px] text-[13px] text-white/80">
         <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px] flex-shrink-0">place</mat-icon><span class="truncate">{{ info.address }}</span>
       </p>

@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { PLAN_INFO, PLAN_ORDER, PlanKey, PlanService } from 'src/app/services/plan.service';
+import { OFFERED_PLANS, PLAN_INFO, PlanKey, PlanService } from 'src/app/services/plan.service';
 
 // Ícono y tono de cada plan (el tono se usa en las clases de la plantilla)
 const PLAN_ICON: Record<PlanKey, string> = { free: 'redeem', free_takeaway: 'redeem', takeaway: 'takeout_dining', basic: 'storefront', pro: 'rocket_launch', benefits: 'diamond' };
 
-// "Tu plan": los tres planes lado a lado, con el actual marcado y el pedido de cambio por WhatsApp
+// "Tu plan": el plan actual y Pro lado a lado, con el pedido de cambio por WhatsApp
 @Component({
   selector: 'app-plan-page',
   templateUrl: './plan.component.html',
@@ -25,28 +25,48 @@ export class PlanPageComponent {
     return this.plans.current === plan;
   }
 
-  // Un negocio takeaway ve su plan y, aparte, los planes con salón (por si suma mesas); uno con salón ve solo los suyos
-  get order(): PlanKey[] {
-    const c = this.plans.current;
-    if (c === 'free') return ['free', ...PLAN_ORDER];
-    if (c === 'free_takeaway') return ['free_takeaway', 'takeaway', ...PLAN_ORDER];
-    return c === 'takeaway' ? ['takeaway', ...PLAN_ORDER] : PLAN_ORDER;
-  }
-
   get current(): PlanKey {
     return this.plans.current;
   }
 
-  // Los planes a los que puede pasarse (los de arriba; un negocio takeaway ve los de salón)
-  get others(): PlanKey[] {
-    // Beneficios (hoteles y vouchers) todavía no se ofrece: queda oculto hasta habilitar todo lo de hoteles
-    return this.order.filter((p) => this.isAbove(p) && p !== 'benefits');
+  // Dos tarjetas: la del plan que tiene hoy (Gratis) y Pro. Quien ya es Pro ve Gratis y Pro; Beneficios, Pro y Beneficios
+  get cards(): PlanKey[] {
+    const c = this.plans.current;
+    if (c === 'pro') return ['free', 'pro'];
+    if (c === 'benefits') return ['pro', 'benefits'];
+    return [c, 'pro'];
   }
 
-  isAbove(plan: PlanKey): boolean {
-    if (this.plans.current === 'free' || this.plans.current === 'free_takeaway') return plan !== this.plans.current;
-    if (this.plans.current === 'takeaway') return plan !== 'takeaway';
-    return PLAN_ORDER.indexOf(plan) > PLAN_ORDER.indexOf(this.plans.current);
+  // La tarjeta con marco destacado: Pro (o el plan actual si es superior a Pro)
+  featured(plan: PlanKey): boolean {
+    return this.plans.current === 'benefits' ? plan === 'benefits' : plan === 'pro';
+  }
+
+  // Solo se ofrece pasar a Pro, y no a quien ya tiene algo igual o superior
+  canSwitchTo(plan: PlanKey): boolean {
+    const c = this.plans.current;
+    return OFFERED_PLANS.includes(plan) && c !== 'pro' && c !== 'benefits';
+  }
+
+  // Los gratis cuestan $0; el precio de los pagos todavía no está publicado
+  price(plan: PlanKey): { amount: string; per: string } {
+    return plan === 'free' || plan === 'free_takeaway' ? { amount: '$0', per: '/mes' } : { amount: 'A consultar', per: '' };
+  }
+
+  // Cuántos puntos se ven antes de tocar "+" (así todas las tarjetas quedan de la misma altura)
+  readonly shownCount = 6;
+  expanded = false;
+
+  long(plan: PlanKey): boolean {
+    return this.items(plan).length > this.shownCount + 1;
+  }
+
+  visibleItems(plan: PlanKey): string[] {
+    return this.long(plan) && !this.expanded ? this.items(plan).slice(0, this.shownCount) : this.items(plan);
+  }
+
+  trackPlan(_i: number, plan: PlanKey) {
+    return plan;
   }
 
   // "Todo lo de Esencial" no se muestra como un ítem más: va como subtítulo de la lista

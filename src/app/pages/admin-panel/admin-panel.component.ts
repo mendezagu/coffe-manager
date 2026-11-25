@@ -15,6 +15,7 @@ import { Table } from 'src/app/services/gestionService';
 import { Sector } from 'src/app/services/gestionService';
 import { Category, ModifierGroup } from 'src/app/services/gestionService';
 import { PlanService } from 'src/app/services/plan.service';
+import { LimitKind, PlanLimitDialogComponent, isPlanLimitError } from 'src/app/components/plan-limit-dialog/plan-limit-dialog.component';
 import { MenuImageService } from 'src/app/services/menu-image.service';
 import { DISH_ASPECTS, ImageCropService } from 'src/app/components/image-crop-dialog/image-crop-dialog.component';
 
@@ -151,7 +152,7 @@ export class AdminPanelComponent {
     { key: 'red', label: 'Rojo', swatch: 'bg-[#d62f2f]' },
     { key: 'blue', label: 'Azul', swatch: 'bg-[#2f6fd6]' },
     { key: 'amber', label: 'Ámbar', swatch: 'bg-[#d98a14]' },
-    { key: 'dark', label: 'Oscuro', swatch: 'bg-[#363f4e]' },
+    { key: 'dark', label: 'Oscuro', swatch: 'bg-[#1c1c25]' },
   ];
   editItemName: string = '';
   editItemPrice: number = 0;
@@ -258,18 +259,37 @@ export class AdminPanelComponent {
 
   // Mensaje que manda el servidor (por ejemplo "Llegaste al límite de tu plan…") o el de reserva
   private serverMessage(e: any, fallback: string): string {
-    const msg = e?.error?.message;
+    const msg = e?.error?.message ?? e?.message;
     return (Array.isArray(msg) ? msg.join('. ') : msg) || fallback;
+  }
+
+  // ¿Ya está en el tope del plan? Muestra el cartel de planes y devuelve true (así no se intenta crear nada)
+  private blockedByPlan(kind: LimitKind, used: number): boolean {
+    const max = this.plans.limit(kind);
+    if (max === undefined || used < max) return false;
+    PlanLimitDialogComponent.open(this.dialog, kind);
+    return true;
+  }
+
+  // Error al crear algo: si fue por el tope del plan, el cartel de planes; si no, el mensaje
+  private createFailed(e: any, kind: LimitKind, fallback: string) {
+    if (isPlanLimitError(e)) PlanLimitDialogComponent.open(this.dialog, kind);
+    else this.snackBar.open(this.serverMessage(e, fallback), 'Cerrar', { duration: 6000 });
+  }
+
+  showPlans(kind: LimitKind) {
+    PlanLimitDialogComponent.open(this.dialog, kind);
   }
 
   addTable() {
     if (this.newTableName.trim()) {
+      if (this.blockedByPlan('tables', this.tables.length)) return;
       this.gestionService.addTable(this.newTableName.trim(), this.newTableSectorId || null).subscribe({
         next: () => {
           this.loadTables();
           this.newTableName = '';
         },
-        error: (e) => this.snackBar.open(this.serverMessage(e, 'No se pudo agregar la mesa'), 'Cerrar', { duration: 6000 }),
+        error: (e) => this.createFailed(e, 'tables', 'No se pudo agregar la mesa'),
       });
     }
   }
@@ -505,6 +525,7 @@ export class AdminPanelComponent {
 
   addMenuItem() {
     if (this.addingItem || !this.newItemName.trim() || !(this.newItemPrice > 0)) return;
+    if (this.blockedByPlan('menuItems', this.menuItems.length)) return;
     const isNewCategory = this.newItemCategoryId === this.NEW_CATEGORY;
     const categoryName = this.newCategoryName.trim();
     if (isNewCategory && !categoryName) {
@@ -543,7 +564,7 @@ export class AdminPanelComponent {
         },
         error: (e) => {
           this.addingItem = false;
-          this.snackBar.open(this.serverMessage(e, 'No se pudo crear el plato. Probá de nuevo.'), 'Cerrar', { duration: 6000 });
+          this.createFailed(e, 'menuItems', 'No se pudo crear el plato. Probá de nuevo.');
         },
       });
   }
@@ -714,7 +735,7 @@ export class AdminPanelComponent {
           this.loadWaiters();
           this.newWaiterName = '';
         },
-        error: (e) => this.snackBar.open(this.serverMessage(e, 'No se pudo agregar al mozo'), 'Cerrar', { duration: 6000 }),
+        error: (e) => this.createFailed(e, 'waiters', 'No se pudo agregar al mozo'),
       });
     }
   }

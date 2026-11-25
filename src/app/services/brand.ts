@@ -61,7 +61,7 @@ export function brandStyle(hex: string | null | undefined, dark = false): string
       `--brand-rgb: ${triple(base)}`,
       `--brand-hover-rgb: ${triple(mix(base, BLACK, 0.18))}`,
       `--brand-light-rgb: ${triple(mix(base, WHITE, 0.1))}`,
-      `--brand-soft-rgb: ${triple(mix(base, [43, 50, 62], 0.78))}`,
+      `--brand-soft-rgb: ${triple(mix(base, [28, 28, 37], 0.78))}`,
     ].join('; ');
   }
   return [

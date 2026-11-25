@@ -86,16 +86,16 @@ const SPLASH_SECONDS = 7;
       /* Carta oscura (se elige en Ajustes): las superficies y la tinta salen de variables; el color de marca se aclara en brandStyle */
       .qr-dark {
         color-scheme: dark;
-        --q-surface: 43 50 62;
-        --q-surface-low: 47 55 68;
-        --q-surface-mid: 47 55 68;
-        --q-surface-high: 27 32 41;
-        --q-surface-highest: 58 66 82;
-        --q-surface-lowest: 37 43 54;
-        --q-ink: 221 225 232;
-        --q-ink-variant: 180 188 200;
-        --q-line: 138 148 164;
-        --q-line-soft: 69 78 95;
+        --q-surface: 18 19 26;
+        --q-surface-low: 28 28 37;
+        --q-surface-mid: 36 37 48;
+        --q-surface-high: 10 11 15;
+        --q-surface-highest: 48 50 64;
+        --q-surface-lowest: 28 28 37;
+        --q-ink: 224 226 234;
+        --q-ink-variant: 170 173 188;
+        --q-line: 125 128 145;
+        --q-line-soft: 46 48 61;
         --q-leaf: 43 181 152;
         --q-leaf-container: 22 66 62;
         --q-leaf-dim: 111 227 198;
