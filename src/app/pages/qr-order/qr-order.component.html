@@ -112,11 +112,11 @@
       </svg>
       <div class="flex items-center justify-end gap-[8px] px-[16px] pt-[16px]">
         <button *ngIf="phase === 'ready' && tab === 'menu' && !splash" type="button" (click)="openSearch()" aria-label="Buscar en la carta"
-          class="grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#181d26] shadow-floating transition-transform active:scale-95">
+          class="grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/45 active:scale-95">
           <mat-icon class="!w-5 !h-5 !text-xl !leading-5">search</mat-icon>
         </button>
         <button type="button" (click)="share()" aria-label="Compartir"
-          class="grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] text-[#181d26] shadow-floating transition-transform active:scale-95">
+          class="grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/45 active:scale-95">
           <mat-icon class="!w-5 !h-5 !text-xl !leading-5">ios_share</mat-icon>
         </button>
       </div>
@@ -128,20 +128,16 @@
         <ng-template #cupIcon><mat-icon class="!w-10 !h-10 !text-[40px]">local_cafe</mat-icon></ng-template>
       </div>
       <h1 class="!font-jakarta m-0 mt-[12px] max-w-full break-words text-[26px] font-extrabold leading-[1.1] tracking-tight text-ink">{{ info?.business?.name }}</h1>
-      <div class="mt-[12px] flex flex-wrap items-center justify-center gap-[8px] text-[13px]">
-        <span class="inline-flex items-center gap-[7px] rounded-full px-[12px] py-[6px] font-semibold"
-          [ngClass]="storeMode && shop?.paused ? 'bg-cafe-red-50 text-cafe-red-700' : 'bg-cafe-mint-500/15 text-ink'">
-          <span class="h-[8px] w-[8px] flex-shrink-0 rounded-full" [ngClass]="storeMode && shop?.paused ? 'bg-cafe-red-500' : 'bg-cafe-mint-500'"></span>
-          <span *ngIf="storeMode">{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora' }}</span>
-          <span *ngIf="!storeMode && !viewOnly">Pedí desde tu celular</span>
-          <span *ngIf="viewOnly">Nuestra carta</span>
-        </span>
-        <span class="inline-flex items-center gap-[6px] rounded-full bg-surface-mid px-[12px] py-[6px] font-semibold text-ink">
-          <mat-icon class="!h-[16px] !w-[16px] !text-[16px] !leading-[16px] text-ink">{{ storeMode ? 'storefront' : viewOnly ? 'menu_book' : 'table_restaurant' }}</mat-icon>
-          {{ storeMode ? 'Tienda online' : viewOnly ? 'Carta online' : (info?.table?.name ?? '').toLowerCase().startsWith('mesa') ? info?.table?.name : 'Mesa ' + info?.table?.name }}
-        </span>
+      <!-- Mesa y carta: un rótulo sobrio entre dos filetes, como un cartel de mesa. Tienda: solo el estado, que es lo que informa -->
+      <div *ngIf="!storeMode" class="mt-[10px] flex w-full max-w-[280px] items-center gap-[14px]">
+        <span class="h-px flex-1 bg-line-soft" aria-hidden="true"></span>
+        <span class="whitespace-nowrap text-[12px] font-bold uppercase tracking-[0.22em] text-ink">{{ viewOnly ? 'La carta' : (info?.table?.name ?? '').toLowerCase().startsWith('mesa') ? info?.table?.name : 'Mesa ' + info?.table?.name }}</span>
+        <span class="h-px flex-1 bg-line-soft" aria-hidden="true"></span>
       </div>
-      <p *ngIf="info?.business?.address" class="m-0 mt-[12px] inline-flex max-w-full items-center gap-[6px] text-[13px] text-ink-variant">
+      <p *ngIf="storeMode" class="mb-[0px] mt-[10px] flex items-center justify-center gap-[7px] text-[13px] font-semibold" [ngClass]="shop?.paused ? 'text-cafe-red-700' : 'text-ink'">
+        <span class="h-[8px] w-[8px] flex-shrink-0 rounded-full" [ngClass]="shop?.paused ? 'bg-cafe-red-500' : 'bg-cafe-mint-500'" aria-hidden="true"></span>{{ shop?.paused ? 'Pausado por ahora' : 'Abierto ahora' }}
+      </p>
+      <p *ngIf="info?.business?.address" class="mb-[0px] mt-[10px] inline-flex max-w-full items-center gap-[6px] text-[13px] text-ink-variant">
         <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px] flex-shrink-0 text-ink">place</mat-icon><span class="truncate">{{ info?.business?.address }}</span>
       </p>
     </div>
@@ -223,14 +219,14 @@
           <span class="inline-flex items-center gap-[6px] px-[12px] py-[4px] rounded-full bg-surface-mid text-ink-variant text-xs font-semibold mb-[8px]">
             <mat-icon class="!w-4 !h-4 !text-base text-ink">table_restaurant</mat-icon>{{ info.table.name }}
           </span>
-          <h2 class="!font-jakarta text-lg font-bold text-ink tracking-tight m-0 mb-[4px]">Validar acceso a la mesa</h2>
-          <p class="text-sm text-ink-variant max-w-xs m-0 mb-[20px]">Ingresá el código de 4 dígitos de tu mesa, o pedíselo al mozo, para empezar tu pedido.</p>
+          <h2 class="!font-jakarta text-lg font-bold text-ink tracking-tight mt-0 mb-[8px]">Validar acceso a la mesa</h2>
+          <p class="text-sm text-ink-variant max-w-xs mt-0 mb-[28px]">Ingresá el código de 4 dígitos de tu mesa, o pedíselo al mozo, para empezar tu pedido.</p>
 
           <!-- Un solo campo (transparente) recibe lo que se escribe; los casilleros solo lo muestran -->
-          <div class="relative mb-[14px] w-full" (click)="focusPin()">
+          <div class="relative mb-[18px] w-full" (click)="focusPin()">
             <div class="grid grid-cols-4 gap-[10px]" aria-hidden="true">
-              <div *ngFor="let i of pinSlots" class="h-16 flex items-center justify-center text-3xl font-extrabold tabular-nums bg-surface-low text-ink rounded-[20px] border-[2px] transition-all"
-                [ngClass]="pinError ? 'border-cafe-red-300' : (pinValue[i] ? 'border-forest/40' : (i === pinValue.length ? 'border-forest bg-white' : 'border-transparent'))">{{ pinValue[i] }}</div>
+              <div *ngFor="let i of pinSlots" class="h-16 flex items-center justify-center text-3xl font-extrabold tabular-nums bg-surface-mid text-ink rounded-[20px] border-[2px] transition-all"
+                [ngClass]="pinError ? 'border-cafe-red-300' : (pinValue[i] ? 'border-forest/60' : (i === pinValue.length ? 'border-cafe-mint-500 ring-4 ring-cafe-mint-500/25' : 'border-line/50'))">{{ pinValue[i] }}</div>
             </div>
             <input id="pin-input" name="pin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false"
               [value]="pinValue" (input)="onPinInput($event)" aria-label="Código de mesa de 4 dígitos"
@@ -336,7 +332,7 @@
               </div>
               <span class="text-[11px] text-ink font-bold">{{ splashSeconds > 0 ? splashSeconds + 's' : '¡Listo!' }}</span>
             </div>
-            <div class="w-full h-1.5 bg-white rounded-full overflow-hidden">
+            <div class="w-full h-1.5 bg-surface-highest rounded-full overflow-hidden">
               <div class="h-full bg-forest rounded-full ease-linear transition-[width]" [style.transition-duration.ms]="splashDurationMs" [style.width.%]="splashRunning ? 100 : 0"></div>
             </div>
             <p class="text-xs text-ink-variant text-center mt-[8px] mb-0">Te llevamos al seguimiento de tu pedido automáticamente.</p>
@@ -400,11 +396,11 @@
             </ul>
             <!-- Flechas: solo en pantallas con mouse; en el celular se desliza con el dedo -->
             <button type="button" (click)="rail.scrollPage(-1)" [hidden]="!rail.canPrev" aria-label="Ver los anteriores"
-              class="hidden [@media(hover:hover)]:grid absolute left-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
+              class="hidden [@media(hover:hover)]:grid absolute left-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-surface-lowest text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
               <mat-icon class="!h-5 !w-5 !text-xl">chevron_left</mat-icon>
             </button>
             <button type="button" (click)="rail.scrollPage(1)" [hidden]="!rail.canNext" aria-label="Ver los siguientes"
-              class="hidden [@media(hover:hover)]:grid absolute right-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-white text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
+              class="hidden [@media(hover:hover)]:grid absolute right-[6px] top-[42%] z-10 h-9 w-9 place-items-center rounded-full bg-surface-lowest text-ink shadow-md ring-1 ring-black/10 hover:bg-surface-low active:scale-95">
               <mat-icon class="!h-5 !w-5 !text-xl">chevron_right</mat-icon>
             </button>
           </div>

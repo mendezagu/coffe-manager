@@ -1,43 +1,65 @@
-<div class="relative mx-auto max-w-3xl overflow-hidden rounded-[24px] border border-sage-200 bg-white shadow-soft">
-  <!-- Franja de color arriba -->
-  <div class="h-2 w-full bg-[#2ed0ab]"></div>
+<div class="relative isolate mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white px-[16px] py-[28px] shadow-soft sm:px-[32px] sm:py-[40px]">
 
-  <div class="grid gap-8 px-6 py-10 sm:px-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-center">
+  <!-- Fondo: cruces suaves y un resplandor menta (el mismo de "Tu plan") -->
+  <svg class="pointer-events-none absolute inset-0 -z-10 h-full w-full text-sage-300 opacity-50" aria-hidden="true">
+    <defs>
+      <pattern id="wall-cross" width="108" height="108" patternUnits="userSpaceOnUse">
+        <path d="M54 46 V62 M46 54 H62" stroke="currentColor" stroke-width="1" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#wall-cross)" />
+  </svg>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-b from-transparent to-cafe-mint-500/20" aria-hidden="true"></div>
+
+  <div class="grid items-center gap-[28px] md:grid-cols-2">
 
     <!-- Qué es y por qué está bloqueado -->
-    <div class="text-center md:text-left">
-      <div class="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-cafe-green-700 text-white shadow-soft md:mx-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
-        <mat-icon class="!h-9 !w-9 !text-4xl">lock</mat-icon>
-      </div>
-      <p class="m-0 mb-3"><app-plan-badge [feature]="feature"></app-plan-badge></p>
-      <div role="heading" aria-level="2" class="font-jakarta text-base font-bold text-sage-900 m-0">{{ title }}</div>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-sage-600">
-        <ng-container *ngIf="benefit">{{ benefit }} </ng-container>
-      </p>
-      <p class="m-0 mt-3 text-sm text-sage-600">
+    <div class="flex flex-col items-center text-center md:items-start md:text-left">
+      <span class="grid h-[64px] w-[64px] place-items-center rounded-[20px] bg-cafe-mint-500 text-[#084440] ring-[10px] ring-cafe-mint-500/20">
+        <mat-icon class="!h-[32px] !w-[32px] !text-[32px] !leading-[32px]">lock</mat-icon>
+      </span>
+      <div role="heading" aria-level="2" class="font-jakarta mt-[24px] text-[28px] font-extrabold leading-tight tracking-tight text-sage-900">{{ title }}</div>
+      <p *ngIf="benefit" class="mb-0 mt-[10px] max-w-[340px] text-[15px] leading-relaxed text-sage-600">{{ benefit }}</p>
+      <p class="mb-0 mt-[14px] text-[14px] text-sage-600">
         Está en el plan <strong class="text-sage-900">{{ neededLabel }}</strong>. Hoy tenés el plan <strong class="text-sage-900">{{ plans.currentLabel }}</strong>.
       </p>
-
-      <div class="mt-6 flex flex-col items-center gap-3 md:items-start">
-        <app-upgrade-button [feature]="feature"></app-upgrade-button>
-        <p class="m-0 text-xs text-sage-500">Te lo activamos en el momento.</p>
-        <a routerLink="/plan" class="text-sm font-bold text-cafe-green-700 underline">Ver todos los planes</a>
-      </div>
+      <a routerLink="/plan" class="mt-[18px] text-sm font-bold text-cafe-green-700 underline">Ver todos los planes</a>
     </div>
 
-    <!-- Lo que suma pasarse de plan: lo que pidió va primero y resaltado -->
-    <div *ngIf="gains.length" class="rounded-2xl bg-sage-50 p-[20px] text-left">
-      <p class="m-0 mb-3 text-xs font-bold uppercase tracking-wide text-sage-500">Con el plan {{ targetLabel }} sumás</p>
-      <ul class="m-0 grid list-none gap-2 p-0 text-sm text-sage-800">
-        <li *ngFor="let g of gains"
-          class="flex items-start gap-2.5 rounded-xl px-3 py-2"
-          [ngClass]="g === featured ? 'bg-cafe-green-50 font-bold text-cafe-green-800 ring-1 ring-cafe-green-700/30' : ''">
-          <span class="mt-px grid h-5 w-5 flex-none place-items-center rounded-full bg-cafe-green-700 text-white">
-            <mat-icon class="!h-[14px] !w-[14px] !text-[14px]">check</mat-icon>
-          </span>
-          {{ g }}
-        </li>
-      </ul>
+    <!-- El plan que lo desbloquea, con el mismo marco menta que en "Tu plan" -->
+    <div *ngIf="gains.length" class="flex flex-col rounded-[28px] bg-cafe-mint-500 p-[6px] shadow-soft-lg">
+      <p class="mb-0 mt-0 py-[7px] text-center text-[13px] font-bold text-[#084440]">Desbloquealo con {{ targetLabel }}</p>
+
+      <article class="relative isolate flex flex-col overflow-hidden rounded-[22px] bg-white p-[22px] text-left" [attr.aria-label]="'Plan ' + targetLabel">
+        <mat-icon class="pointer-events-none !absolute -right-4 -top-3 -z-10 !h-[120px] !w-[120px] !text-[120px] !leading-[120px] text-cafe-green-700 opacity-10" aria-hidden="true">rocket_launch</mat-icon>
+        <div role="heading" aria-level="3" class="font-jakarta text-xl font-extrabold text-sage-900">{{ targetLabel }}</div>
+        <p class="mb-0 mt-[2px] text-[13px] text-sage-600">{{ targetResume }}</p>
+
+        <div class="my-[14px] h-px bg-sage-200"></div>
+        <p class="mb-[10px] mt-0 text-[13px] font-bold text-sage-900">Qué sumás:</p>
+
+        <!-- Lo que pidió va primero y resaltado; con "+" se ve el resto y se recorre con scroll -->
+        <ul id="wall-list" class="m-0 flex list-none flex-col gap-[8px] p-0" [ngClass]="expanded ? 'max-h-[210px] overflow-y-auto pr-[8px] [scrollbar-width:thin]' : ''" [attr.tabindex]="expanded ? 0 : null">
+          <li *ngFor="let g of visibleGains" class="flex items-start gap-2 text-[13px] leading-snug"
+            [ngClass]="g === featured ? 'rounded-xl bg-cafe-mint-500/15 px-[10px] py-[8px] font-bold text-sage-900' : 'text-sage-700'">
+            <mat-icon class="!h-4 !w-4 flex-none !text-base !leading-4 text-cafe-green-700">check</mat-icon>{{ g }}
+          </li>
+        </ul>
+        <button *ngIf="gains.length > shownCount + 1" type="button" (click)="expanded = !expanded" [attr.aria-expanded]="expanded" aria-controls="wall-list"
+          class="mt-[12px] inline-flex h-[40px] items-center gap-[8px] self-start rounded-full pr-[10px] text-[13px] font-bold text-cafe-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700">
+          <span class="grid h-[28px] w-[28px] place-items-center rounded-full bg-cafe-mint-500 text-[#084440]"><mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-[18px]">{{ expanded ? 'remove' : 'add' }}</mat-icon></span>
+          {{ expanded ? 'Ver menos' : 'Ver ' + (gains.length - shownCount) + ' más' }}
+        </button>
+
+        <div class="mt-[18px]">
+          <a *ngIf="contactUrl as link; else noPhone" [href]="link" target="_blank" rel="noopener noreferrer"
+            class="flex h-12 items-center justify-center gap-2 rounded-xl bg-cafe-mint-500 px-3 text-sm font-bold text-[#084440] no-underline shadow-soft transition hover:brightness-105 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700 focus-visible:ring-offset-2">
+            <mat-icon class="!h-5 !w-5 flex-none !text-xl">chat</mat-icon>Quiero pasarme a {{ targetLabel }}
+          </a>
+          <ng-template #noPhone><p class="mb-0 text-center text-xs text-sage-600">Pedile a tu contacto de Tavolapp pasarte a {{ targetLabel }}.</p></ng-template>
+          <p class="mb-0 mt-[10px] text-center text-[12px] text-sage-500">Te lo activamos en el momento.</p>
+        </div>
+      </article>
     </div>
   </div>
 </div>

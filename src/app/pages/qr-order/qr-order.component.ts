@@ -551,7 +551,23 @@ export class QrOrderComponent implements OnInit, OnDestroy {
   }
 
   priceText(item: PublicItem): string {
-    return (this.priceVaries(item) ? 'Desde ' : '') + this.money(this.priceFrom(item));
+    return (this.priceVaries(item) ? 'Desde ' : '') + this.shortMoney(this.priceFrom(item));
+  }
+
+  // Precio de un plato sin centavos cuando es un número redondo ($20,500 en vez de $20,500.00); si tiene centavos, se muestran
+  private shortMoney(n: number): string {
+    if (!Number.isInteger(n)) return this.money(n);
+    this.money(0); // arma el formato del local
+    const { locale, currency } = this.formatter!.resolvedOptions();
+    return this.withDots(new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }), n);
+  }
+
+  // Miles con punto y decimales con coma ($20.500,50), como se escribe acá, respetando el símbolo y su lugar
+  private withDots(formatter: Intl.NumberFormat, n: number): string {
+    return formatter
+      .formatToParts(n)
+      .map((p) => (p.type === 'group' ? '.' : p.type === 'decimal' ? ',' : p.value))
+      .join('');
   }
 
   // Lo que suma o resta una opción
@@ -591,7 +607,7 @@ export class QrOrderComponent implements OnInit, OnDestroy {
         this.formatter = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
       }
     }
-    return this.formatter.format(n);
+    return this.withDots(this.formatter, n);
   }
 
   // ---------- armar un plato ----------

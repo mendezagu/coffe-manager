@@ -37,6 +37,25 @@ export class UpgradeWallComponent {
     return [...list].sort((a, b) => Number(b === this.featured) - Number(a === this.featured));
   }
 
+  // Cuántos puntos se ven antes de tocar "+"
+  readonly shownCount = 6;
+  expanded = false;
+
+  get visibleGains(): string[] {
+    return this.expanded || this.gains.length <= this.shownCount + 1 ? this.gains : this.gains.slice(0, this.shownCount);
+  }
+
+  get targetResume(): string {
+    const target = this.plans.target(this.feature);
+    return target ? PLAN_INFO[target].resume : '';
+  }
+
+  // WhatsApp de Tavolapp con el pedido ya escrito (incluye qué función se quiso usar)
+  get contactUrl(): string | null {
+    const target = this.plans.target(this.feature);
+    return target ? this.plans.whatsappUrl(target, this.feature) : null;
+  }
+
   get targetLabel(): string {
     const target = this.plans.target(this.feature);
     return target ? PLAN_INFO[target].label : '';
