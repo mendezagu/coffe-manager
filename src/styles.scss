@@ -200,6 +200,13 @@ html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
   }
 }
 
+/* Panel del pedido (mostrador): fuera del celular entra deslizándose desde la derecha */
+@media (min-width: 640px) {
+  .order-drawer { animation: order-drawer-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1); }
+}
+@keyframes order-drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .order-drawer { animation: none; } }
+
 /* Guía de la primera venta: el botón que hay que tocar late con un anillo ámbar (tarjeta de mesa) */
 .guide-pulse {
   animation: guide-pulse 1.8s ease-in-out infinite;

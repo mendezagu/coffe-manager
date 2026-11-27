@@ -32,10 +32,12 @@
       <div *ngFor="let row of rows; let i = index">
         <div class="flex flex-wrap items-end gap-2">
           <span *ngIf="splitN > 1" class="text-xs font-bold text-sage-500 w-full sm:w-auto">Persona {{ i + 1 }}</span>
-          <div class="grid w-full grid-cols-4 gap-[4px] rounded-xl bg-sage-100 p-[3px]" role="radiogroup" [attr.aria-label]="'Método de pago ' + (i + 1)">
+          <div class="grid w-full grid-cols-4" [ngClass]="variant === 'pos' ? 'gap-[8px]' : 'gap-[4px] rounded-xl bg-sage-100 p-[3px]'" role="radiogroup" [attr.aria-label]="'Método de pago ' + (i + 1)">
             <button *ngFor="let m of methods" type="button" role="radio" [attr.aria-checked]="row.method === m.value" (click)="row.method = m.value; onMethodChange(row)"
-              class="flex flex-col items-center justify-center gap-[4px] rounded-[10px] px-[4px] py-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
-              [ngClass]="row.method === m.value ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-white hover:text-sage-900'">
+              [class.!py-[8px]]="variant === 'pos'" class="flex flex-col items-center justify-center gap-[4px] rounded-[10px] px-[4px] py-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cafe-green-700"
+              [ngClass]="variant === 'pos'
+                ? (row.method === m.value ? 'border-[1px] border-solid border-[#2ed0ab] bg-cafe-green-50 text-cafe-green-700' : 'border-[1px] border-solid border-sage-200 bg-white text-sage-600 hover:border-sage-300')
+                : (row.method === m.value ? 'bg-cafe-green-700 text-white' : 'text-sage-600 hover:bg-white hover:text-sage-900')">
               <mat-icon class="!h-[22px] !w-[22px] !text-[22px]">{{ m.icon }}</mat-icon>
               <span class="text-xs font-semibold">{{ m.short }}</span>
             </button>
