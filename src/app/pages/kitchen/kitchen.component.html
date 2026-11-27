@@ -1,5 +1,5 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="soup_kitchen" [title]="title">
+  <app-page-header icon="soup_kitchen" [title]="title" subtitle="Pedidos en preparación y listos para servir.">
     <div phChips class="contents">
       <span *ngIf="offline" role="alert" class="ph-chip ph-chip--bad">Sin conexión · reintentando…</span>
       <span *ngIf="!offline && loaded" class="ph-chip ph-chip--ok">En vivo</span>

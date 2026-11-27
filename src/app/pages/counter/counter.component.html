@@ -1,7 +1,7 @@
 <!-- Mostrador. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a Tailwind;
      por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="local_cafe" title="Mostrador">
+  <app-page-header icon="local_cafe" title="Mostrador" subtitle="Ventas sin mesa.">
     <!-- Estado de la caja: a un toque de abrirla o revisarla -->
     <div phChips class="contents">
       <a *ngIf="cashChip as c" routerLink="/cash" title="Ir a Caja" class="ph-chip ph-chip--link" [ngClass]="c.tone === 'ok' ? 'ph-chip--ok' : c.tone === 'bad' ? 'ph-chip--bad' : ''">

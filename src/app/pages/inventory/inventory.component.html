@@ -1,5 +1,5 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="inventory_2" title="Inventario">
+  <app-page-header icon="inventory_2" title="Inventario" subtitle="Stock, recetas y costos.">
     <div phChips class="contents">
       <ng-container *ngIf="enabled && stockSummary">
         <span *ngIf="stockSummary.lowCount" class="ph-chip ph-chip--warn"><b>{{ stockSummary.lowCount }}</b> con poco stock</span>

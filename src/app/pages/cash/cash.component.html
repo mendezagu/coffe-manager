@@ -1,7 +1,7 @@
 <!-- Caja. Nota: Bootstrap (global) define p-3/4/5, gap-3/4/5, mb-3/4, border, etc. con !important y pisa a Tailwind;
      por eso en este template se usan valores explícitos ([14px]) en esas escalas. -->
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="point_of_sale" title="Caja">
+  <app-page-header icon="point_of_sale" title="Caja" subtitle="Apertura, movimientos y cierre de caja.">
     <div phChips class="contents">
       <ng-container *ngIf="state">
         <span class="ph-chip" [ngClass]="state.open ? 'ph-chip--ok' : 'ph-chip--bad'">{{ state.open ? 'Abierta' : 'Cerrada' }}<ng-container *ngIf="state.open && register"> desde las {{ register.openedAt | date: 'HH:mm' }}</ng-container></span>

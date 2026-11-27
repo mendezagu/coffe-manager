@@ -1,5 +1,5 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="shopping_bag" title="Pedidos online">
+  <app-page-header icon="shopping_bag" title="Pedidos online" subtitle="Los pedidos que llegan desde tu tienda online.">
     <div phChips class="contents">
       <span *ngIf="!locked && settings.value.deliveryActive" class="ph-chip" [ngClass]="settings.value.deliveryPaused ? 'ph-chip--bad' : 'ph-chip--ok'">{{ settings.value.deliveryPaused ? 'Pedidos pausados' : 'Recibiendo pedidos' }}</span>
     </div>

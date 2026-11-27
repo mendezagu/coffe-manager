@@ -170,34 +170,33 @@ html.dark .mat-mdc-snack-bar-container .mat-mdc-snack-bar-action:hover {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* Header de página: banda blanca con línea fina, igual en todas las pantallas */
+/* Header de página: título y descripción sobre una banda blanca con línea fina, igual en todas las pantallas */
 @layer components {
   .page-header {
     @apply bg-white border-b border-sage-200;
   }
   .page-header__inner {
-    @apply mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-8 sm:py-4;
-  }
-  .page-header__icon {
-    @apply grid h-11 w-11 flex-none place-items-center rounded-xl bg-cafe-mint-500 text-cafe-green-900;
+    @apply mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:px-8 sm:py-6;
+    max-width: 84rem; /* 80rem del contenido + sus 32px a cada lado: el título queda alineado con las tarjetas */
   }
   /* Material le pisa el peso y el tamaño a los h1: por eso van con !important */
   .page-title {
-    @apply tracking-tight text-sage-900;
+    @apply text-sage-900;
     margin: 0 !important;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 22px !important;
-    line-height: 1.2 !important;
+    font-family: Inter, system-ui, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 20px !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.25 !important;
   }
   @media (min-width: 640px) {
     .page-title {
-      font-size: 24px !important;
+      font-size: 22px !important;
     }
   }
   .page-sub {
-    @apply text-[13px] leading-snug text-sage-500;
-    margin: 2px 0 0 !important;
+    @apply font-inter text-sm leading-snug text-sage-600;
+    margin: 5px 0 0 !important;
   }
 }
 
@@ -328,11 +327,6 @@ html.dark .mat-drawer {
 html.dark .page-header {
   background-color: #1c1c25;
   border-bottom-color: #26272f;
-}
-
-html.dark .page-header__icon {
-  background-color: #2ed0ab;
-  color: #084440;
 }
 
 html.dark .page-title {
@@ -661,6 +655,12 @@ html.dark .sw__in:checked + .sw__ui { background: #2ed0ab; }
   mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Ccircle%20cx%3D%2732%27%20cy%3D%2732%27%20r%3D%2714%27%2F%3E%3Crect%20x%3D%2729%27%20y%3D%2744%27%20width%3D%276%27%20height%3D%2714%27%20rx%3D%273%27%2F%3E%3Crect%20x%3D%272%27%20y%3D%2726%27%20width%3D%279%27%20height%3D%2712%27%20rx%3D%274%27%2F%3E%3Crect%20x%3D%2753%27%20y%3D%2726%27%20width%3D%279%27%20height%3D%2712%27%20rx%3D%274%27%2F%3E%3Crect%20x%3D%2726%27%20y%3D%273%27%20width%3D%2712%27%20height%3D%279%27%20rx%3D%274%27%2F%3E%3C%2Fsvg%3E") no-repeat center / contain;
 }
 .floor .mt > * { position: relative; z-index: 1; }
+/* lo que va encima de la ficha en una esquina (etiqueta "Empezá acá", botón "+") sigue siendo absoluto */
+.floor .mt > .absolute { position: absolute; z-index: 10; }
+.floor .mt > .mt-add { position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(46, 208, 171, 0.16); color: var(--floor-action-text); transition: background-color 0.15s, color 0.15s; }
+.floor .mt-add .mat-icon { width: 20px; height: 20px; font-size: 20px; line-height: 20px; }
+.floor button.mt:hover > .mt-add { background: #2ed0ab; color: #084440; }
+.floor .mt-meta.mat-icon { width: 14px; height: 14px; margin-right: 4px; font-size: 14px; line-height: 14px; vertical-align: -2px; }
 
 .floor .mt--free {
   background: #ffffff;
@@ -720,7 +720,7 @@ html.dark .floor .mt--free:hover, html.dark .floor .mt--busy:hover { box-shadow:
   .ph-actions { order: 3; margin-left: 0; }
   .ph-chips:empty + .ph-actions { margin-left: auto; }
 }
-.ph-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 80rem; margin: 0 auto; padding: 0 16px 12px; }
+.ph-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 84rem; margin: 0 auto; padding: 0 16px 12px; }
 @media (min-width: 640px) { .ph-tools { padding: 0 32px 16px; } }
 
 .ph-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid transparent; background: #f1f3f6; color: #2b3340; font-size: 13px; font-weight: 500; line-height: 1; white-space: nowrap; text-decoration: none; }

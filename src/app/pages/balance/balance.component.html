@@ -1,5 +1,5 @@
 <div class="w-full min-h-screen bg-sage-100">
-  <app-page-header icon="account_balance_wallet" [title]="activeView === 'takeaway' ? 'Balance de ventas' : 'Balance de mesas'">
+  <app-page-header icon="account_balance_wallet" [title]="activeView === 'takeaway' ? 'Balance de ventas' : 'Balance de mesas'" subtitle="Lo cobrado en tu negocio.">
     <div phChips class="contents">
       <span *ngIf="shiftStart" class="ph-chip">Turno desde las <b>{{ shiftStart | date: 'HH:mm' }}</b></span>
       <span class="ph-chip"><b>{{ totalRevenue | money:true }}</b> recaudado</span>

@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
 //     <a phBack …>Volver</a>
 //   </app-page-header>
 //
-// - Ícono y título: siempre. El subtítulo (`subtitle`) sólo en pantallas de menú u orientación.
+// - Título y subtítulo (una frase que dice qué hay en la pantalla), sin ícono. `icon` se acepta pero no se dibuja.
 // - phChips: información de sólo lectura (estado, conteos). En celular bajan a una segunda fila.
 // - phActions: a la derecha; una sola principal (.ph-btn--primary), el resto secundarias o destructivas.
 // - phTools: fila opcional debajo (filtros, períodos).
@@ -21,7 +21,6 @@ import { Component, Input } from '@angular/core';
       <div class="page-header__inner">
         <div class="ph-back"><ng-content select="[phBack]"></ng-content></div>
         <div class="ph-main">
-          <div class="page-header__icon"><mat-icon aria-hidden="true">{{ icon }}</mat-icon></div>
           <div class="min-w-0">
             <h1 class="page-title">{{ title }}</h1>
             <p *ngIf="subtitle" class="page-sub">{{ subtitle }}</p>

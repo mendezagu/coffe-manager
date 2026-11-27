@@ -281,10 +281,27 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (this.panelTableId) this.closePanel();
   }
 
-  // Filtro por estado: un botón con menú desplegable (ocupa poco y no se encima en pantallas chicas)
+  // Botón "Filtros": despliega estado y vista. Queda abierto para elegir varias cosas; se cierra tocando afuera
   filterOpen = false;
-  get activeStatus() { return this.statusOptions.find((o) => o.key === this.statusFilter); }
-  pickStatus(key: 'all' | 'free' | 'busy' | 'qr'): void { this.statusFilter = key; this.filterOpen = false; }
+  pickStatus(key: 'all' | 'free' | 'busy' | 'qr'): void { this.statusFilter = key; }
+  // El estado que está filtrando (se muestra al lado del botón, con una X para quitarlo)
+  get activeStatus() { return this.statusFilter === 'all' ? undefined : this.statusOptions.find((o) => o.key === this.statusFilter); }
+  get filterCount(): number { return this.activeStatus ? 1 : 0; }
+
+  // Sectores a la vista. En escritorio, con muchos se muestran los primeros y el resto bajo "+N más";
+  // en celular y tablet van todos en una fila que se arrastra
+  sectorsExpanded = false;
+  readonly sectorLimit = 7;
+  get sectorChips(): TableGroup[] {
+    const groups = this.tableGroups;
+    // si solo sobraría uno, se muestra: un "+1 más" ocupa lo mismo
+    if (!this.isDesktop || this.sectorsExpanded || groups.length <= this.sectorLimit + 1) return groups;
+    const first = groups.slice(0, this.sectorLimit);
+    // el sector elegido nunca queda escondido
+    const active = groups.slice(this.sectorLimit).find((g) => g.key === this.activeGroupKey);
+    return active ? [...first, active] : first;
+  }
+  get hiddenSectors(): number { return this.tableGroups.length - this.sectorChips.length; }
 
   // Cierra el panel y ejecuta la acción (los diálogos se abren encima de la pantalla, no del panel)
   panelAction(kind: 'order' | 'orders' | 'total' | 'print' | 'qr', table: Table): void {
@@ -494,6 +511,25 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   get cookingTotal(): number {
     return this.tables.reduce((n, t) => n + ((t.orders || []) as any[]).filter(o => o.status !== 'READY').length, 0);
   }
+  // Anillos del resumen: libres y ocupadas sobre el total de mesas; con cocina activa, platos listos y en preparación
+  get salonRings(): { key: string; label: string; value: number; pct: number; icon: string; color: string }[] {
+    const share = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
+    const total = this.tables.length;
+    const rings = [
+      { key: 'free', label: 'Libres', value: this.freeCount, pct: share(this.freeCount, total), icon: 'event_seat', color: 'var(--floor-free-dot)' },
+      { key: 'busy', label: 'Ocupadas', value: this.busyCount, pct: share(this.busyCount, total), icon: 'groups', color: 'var(--floor-busy-accent)' },
+    ];
+    if (this.settings.value.kitchenEnabled) {
+      const ready = this.readyTotal;
+      const cooking = this.cookingTotal;
+      rings.push(
+        { key: 'ready', label: 'Listos', value: ready, pct: share(ready, ready + cooking), icon: 'room_service', color: 'var(--floor-ready)' },
+        { key: 'cooking', label: 'En cocina', value: cooking, pct: share(cooking, ready + cooking), icon: 'soup_kitchen', color: 'var(--floor-muted)' },
+      );
+    }
+    return rings;
+  }
+
   // Pedidos y avisos de clientes esperando al personal
   get qrPendingTotal(): number { return this.qrInbox.requests.length + this.qrInbox.calls.length; }
 
@@ -628,8 +664,23 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   // así el salón se ve idéntico (mismas distancias y proporciones) en un monitor chico y en uno grande.
   readonly planDesignW = 1200;
   readonly planDesignH = 675;
-  readonly planTileW = 144;
-  readonly planTileH = 96;
+  // Mismo tamaño que las fichas de la grilla, para que se vean iguales
+  readonly planBaseW = 196;
+  readonly planBaseH = 128;
+
+  // Con más de 16 mesas en un sector no entran a tamaño completo: se achican enteras (mismo diseño), todas por igual
+  get planFit(): number {
+    const perSector = new Map<string, number>();
+    for (const t of this.tables) {
+      const key = String(t.sectorName ?? '');
+      perSector.set(key, (perSector.get(key) ?? 0) + 1);
+    }
+    let most = 0;
+    perSector.forEach((n) => (most = Math.max(most, n)));
+    return most <= 16 ? 1 : Math.max(144 / this.planBaseW, Math.sqrt(16 / most));
+  }
+  get planTileW(): number { return this.planBaseW * this.planFit; }
+  get planTileH(): number { return this.planBaseH * this.planFit; }
   planScale = 1;
   @ViewChildren('planHost') planHosts?: QueryList<ElementRef<HTMLElement>>;
   private planObserver?: ResizeObserver;
@@ -695,11 +746,46 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   planItems(group: TableGroup): { table: Table; x: number; y: number }[] {
     const hasPlace = (t: Table) => (this.editingPlan ? !!this.planDraft[t.id] : t.layoutX != null && t.layoutY != null);
     const auto = this.gridPositions(group.tables.filter((t) => !hasPlace(t)));
-    return group.tables.map((t) => {
+    const items = group.tables.map((t) => {
       const p = this.editingPlan && this.planDraft[t.id] ? this.planDraft[t.id] : hasPlace(t) ? { x: t.layoutX as number, y: t.layoutY as number } : auto.get(t.id)!;
       const c = this.keepInside(p.x, p.y);
       return { table: t, x: c.x, y: c.y };
     });
+    // Mientras se edita, cada mesa queda donde se la arrastra
+    if (!this.editingPlan) this.separate([...items.filter((it) => hasPlace(it.table)), ...items.filter((it) => !hasPlace(it.table))]);
+    return items;
+  }
+
+  // Un plano guardado con fichas más chicas puede quedar con mesas encimadas: la que pisa a otra se corre al hueco
+  // libre más cercano. Las que no se pisan no se mueven.
+  private separate(items: { x: number; y: number }[]): void {
+    const W = this.planTileW;
+    const H = this.planTileH;
+    const gap = this.stepPx;
+    const placed: { px: number; py: number }[] = [];
+    const free = (px: number, py: number) => placed.every((o) => Math.abs(o.px - px) >= W - 1 || Math.abs(o.py - py) >= H - 1);
+    const inside = (px: number, py: number) => px >= W / 2 && px <= this.planDesignW - W / 2 && py >= H / 2 && py <= this.planDesignH - H / 2;
+    for (const item of items) {
+      let px = (item.x / 100) * this.planDesignW;
+      let py = (item.y / 100) * this.planDesignH;
+      if (!free(px, py)) {
+        const xs = [px, ...placed.flatMap((o) => [o.px - W - gap, o.px + W + gap])];
+        const ys = [py, ...placed.flatMap((o) => [o.py - H - gap, o.py + H + gap])];
+        let best: { px: number; py: number; far: number } | null = null;
+        for (const cx of xs) {
+          for (const cy of ys) {
+            const far = (cx - px) ** 2 + (cy - py) ** 2;
+            if ((!best || far < best.far) && inside(cx, cy) && free(cx, cy)) best = { px: cx, py: cy, far };
+          }
+        }
+        if (best) {
+          ({ px, py } = best);
+          item.x = (px / this.planDesignW) * 100;
+          item.y = (py / this.planDesignH) * 100;
+        }
+      }
+      placed.push({ px, py });
+    }
   }
 
   trackPlanItem = (_: number, it: { table: Table }) => it.table.id;
@@ -709,6 +795,7 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
     // Se editan todas las mesas: sin búsqueda ni filtros que escondan alguna
     this.searchText = '';
     this.statusFilter = 'all';
+    this.filterOpen = false;
     const draft: Record<string, { x: number; y: number }> = {};
     for (const group of this.tableGroups) for (const it of this.planItems(group)) draft[it.table.id] = { x: it.x, y: it.y };
     this.planDraft = draft;
@@ -780,7 +867,7 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.planDraft = { ...this.planDraft, [table.id]: this.snap(cur.x + ((dx * step) / this.planDesignW) * 100, cur.y + ((dy * step) / this.planDesignH) * 100) };
   }
 
-  // Arrastrar las pestañas de sector con el mouse (con el dedo ya se desplazan solas).
+  // Arrastrar la fila de sectores con el mouse (con el dedo ya se desplaza sola).
   // Los escuchas se enganchan solo mientras se arrastra y fuera de Angular: si no, cada movimiento del mouse
   // dispararía una actualización de la pantalla y los botones se recrearían antes de poder hacer clic.
   private dragMoved = false;
@@ -788,9 +875,10 @@ export class CardComponent implements OnInit, AfterViewInit, OnDestroy {
   private dragEndHandler?: () => void;
 
   dragStart(event: MouseEvent, el: HTMLElement): void {
-    if (event.button !== 0) return;
-    this.dragEnd();
     this.dragMoved = false;
+    // si no hay nada para desplazar (escritorio), un clic con el mouse movido sigue siendo un clic
+    if (event.button !== 0 || el.scrollWidth <= el.clientWidth) return;
+    this.dragEnd();
     const startX = event.pageX;
     const startScroll = el.scrollLeft;
     this.zone.runOutsideAngular(() => {
